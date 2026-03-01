@@ -71,6 +71,16 @@
 - Backward compatible: existing `lessons` field preserved
 - Deployed to production: GitHub Pages + Supabase remote DB
 
+### Phase 11 — Supabase Storage & Resource Links (2026-03-01)
+- Created public `teaching-files` Supabase Storage bucket with anon RLS policies
+- New `storageService.ts`: `uploadFile()` uploads to `teaching-files/{timestamp}_{filename}`, returns public URL
+- SubUnitForm: replaced 4 plain URL inputs with `UrlWithUpload` component (text input + paperclip upload button)
+- Supports both pasting external links and direct PDF/doc upload to Supabase Storage
+- Upload shows loading spinner, auto-fills URL on success, alerts on failure
+- Accepts `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`
+- Added `vocab_practice_url` field to `SubUnit` type and form (核心词汇练习链接)
+- Resource links now: Worksheet, Online Practice, Kahoot, Homework, Vocab Practice (5 total)
+
 ---
 
 ## Current Architecture
@@ -99,6 +109,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Login gate with password authentication
 - [ ] Protect all routes behind auth check
 
+
 ### Phase 12 — Missing Views
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
@@ -111,7 +122,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Drag-and-drop timetable editing
 - [ ] Responsive mobile layout
 - [ ] Dark mode toggle
-- [ ] File storage: OneDrive integration for PDF sharing (internal use, paste share links into sub-unit resource fields). Future option: Supabase Storage (free 1GB) for in-app upload if needed.
+- [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11). External link pasting also supported.
 
 ### Phase 14 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
@@ -128,6 +139,6 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 ### Phase 16 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
-- [ ] File attachments (Supabase Storage)
+- [x] File attachments (Supabase Storage — done in Phase 11)
 - [ ] PWA support (offline mode + install)
 - [ ] Custom domain setup
