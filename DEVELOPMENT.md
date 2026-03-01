@@ -111,6 +111,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Drag-and-drop timetable editing
 - [ ] Responsive mobile layout
 - [ ] Dark mode toggle
+- [ ] File storage: OneDrive integration for PDF sharing (internal use, paste share links into sub-unit resource fields). Future option: Supabase Storage (free 1GB) for in-app upload if needed.
 
 ### Phase 14 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
