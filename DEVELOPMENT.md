@@ -67,8 +67,9 @@
 - New `SubUnitForm` modal component with dynamic lists, RichTextEditor, URL inputs, date picker
 - Updated TeachingView: sub-unit card grid in unit detail, full sub-unit detail view (2/3 + 1/3 layout)
 - Sub-unit CRUD operates on parent unit's `sub_units` JSONB array
-- Supabase migration: `sub_units` JSONB column on `teaching_units` table
+- Supabase migration: `sub_units` JSONB column on `teaching_units` table (deployed via `supabase db push`)
 - Backward compatible: existing `lessons` field preserved
+- Deployed to production: GitHub Pages + Supabase remote DB
 
 ---
 
