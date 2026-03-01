@@ -8,6 +8,8 @@ export interface Student {
   class_name: string;
   tutor_group?: string;
   house?: string;
+  tutor_1?: string;
+  tutor_2?: string;
   parent_email?: string;
   dfm_username?: string;
   dfm_password?: string;
@@ -15,9 +17,19 @@ export interface Student {
   house_points: number;
   notes: string;
   weaknesses?: StudentWeakness[];
+  exam_records?: ExamRecord[];
   attendance_status?: 'present' | 'absent' | 'late';
   status_records?: StudentStatusRecord[];
   requests?: StudentRequest[];
+}
+
+export interface ExamRecord {
+  id: string;
+  exam_name: string;
+  date: string;
+  score: number;
+  total_score: number;
+  weaknesses: string;
 }
 
 export interface StudentStatusRecord {

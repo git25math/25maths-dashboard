@@ -1,0 +1,3 @@
+ALTER TABLE students ADD COLUMN IF NOT EXISTS tutor_1 text DEFAULT '';
+ALTER TABLE students ADD COLUMN IF NOT EXISTS tutor_2 text DEFAULT '';
+ALTER TABLE students ADD COLUMN IF NOT EXISTS exam_records jsonb DEFAULT '[]';

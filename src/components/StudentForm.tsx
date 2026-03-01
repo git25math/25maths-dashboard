@@ -18,6 +18,8 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
     class_name: '',
     tutor_group: '',
     house: '',
+    tutor_1: '',
+    tutor_2: '',
     parent_email: '',
     dfm_username: '',
     dfm_password: '',
@@ -117,6 +119,26 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
                 type="text" value={formData.house || ''}
                 onChange={e => set('house', e.target.value)}
                 className={inputClass} placeholder="e.g. Phoenix"
+              />
+            </div>
+          </div>
+
+          {/* Tutors */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tutor 1 导师1</label>
+              <input
+                type="text" value={formData.tutor_1 || ''}
+                onChange={e => set('tutor_1', e.target.value)}
+                className={inputClass} placeholder="e.g. Mr. Zhang"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tutor 2 导师2</label>
+              <input
+                type="text" value={formData.tutor_2 || ''}
+                onChange={e => set('tutor_2', e.target.value)}
+                className={inputClass} placeholder="e.g. Ms. Li"
               />
             </div>
           </div>

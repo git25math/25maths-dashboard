@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, Idea, SOP, WorkLog, Goal, SchoolEvent } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -126,6 +126,20 @@ export function useAppData() {
       await saveStudent({
         ...student,
         requests: [...(student.requests || []), newRequest],
+      });
+    }
+  }, [students, saveStudent]);
+
+  const addExamRecord = useCallback(async (studentId: string, record: Omit<ExamRecord, 'id'>) => {
+    const newRecord: ExamRecord = {
+      id: Math.random().toString(36).substr(2, 9),
+      ...record,
+    };
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        exam_records: [...(student.exam_records || []), newRecord],
       });
     }
   }, [students, saveStudent]);
@@ -430,7 +444,7 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, addStudentRequest,
+    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, addExamRecord,
 
     // Teaching
     saveTeachingUnit, deleteTeachingUnit,

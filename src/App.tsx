@@ -174,6 +174,7 @@ export default function App() {
             onDeleteClass={data.deleteClass}
             onAddStatusRecord={openStatusRecordForm}
             onAddRequest={openRequestForm}
+            onAddExamRecord={data.addExamRecord}
           />
         );
       case 'teaching':
