@@ -3,6 +3,7 @@ import { X, Save } from 'lucide-react';
 import { Student } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
+import { YEAR_GROUPS } from '../shared/constants';
 
 interface StudentFormProps {
   student?: Student | null;
@@ -72,7 +73,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
                 onChange={e => setFormData({ ...formData, year_group: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               >
-                {['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12'].map(y => (
+                {YEAR_GROUPS.map(y => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </select>

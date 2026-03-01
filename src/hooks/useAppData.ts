@@ -5,6 +5,12 @@ import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecor
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
+import { ideaService } from '../services/ideaService';
+import { sopService } from '../services/sopService';
+import { workLogService } from '../services/workLogService';
+import { goalService } from '../services/goalService';
+import { schoolEventService } from '../services/schoolEventService';
+import { timetableService } from '../services/timetableService';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast, Toast } from './useToast';
 
@@ -18,8 +24,8 @@ export function useAppData() {
   const [classes, setClasses] = useLocalStorage<ClassProfile[]>('dashboard-classes', MOCK_CLASSES);
   const [ideas, setIdeas] = useLocalStorage<Idea[]>('dashboard-ideas', MOCK_IDEAS);
   const [sops, setSops] = useLocalStorage<SOP[]>('dashboard-sops', MOCK_SOPS);
-  const [goals] = useLocalStorage<Goal[]>('dashboard-goals', MOCK_GOALS);
-  const [schoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', MOCK_SCHOOL_EVENTS);
+  const [goals, setGoals] = useLocalStorage<Goal[]>('dashboard-goals', MOCK_GOALS);
+  const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', MOCK_SCHOOL_EVENTS);
   const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', MOCK_WORK_LOGS);
 
   // --- Data Fetching ---
@@ -41,6 +47,42 @@ export function useAppData() {
       try {
         const data = await classService.getAllClasses();
         if (data.length > 0) setClasses(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await ideaService.getAll();
+        if (data.length > 0) setIdeas(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await sopService.getAll();
+        if (data.length > 0) setSops(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await workLogService.getAll();
+        if (data.length > 0) setWorkLogs(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await goalService.getAll();
+        if (data.length > 0) setGoals(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await schoolEventService.getAll();
+        if (data.length > 0) setSchoolEvents(data);
+      } catch (error) {
+        // fallback to localStorage data
+      }
+      try {
+        const data = await timetableService.getAll();
+        if (data.length > 0) setTimetable(data);
       } catch (error) {
         // fallback to localStorage data
       }
@@ -178,85 +220,204 @@ export function useAppData() {
 
   // --- Timetable ---
 
-  const updateTimetableEntry = useCallback((updatedEntry: TimetableEntry) => {
-    setTimetable(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
-  }, [setTimetable]);
+  const updateTimetableEntry = useCallback(async (updatedEntry: TimetableEntry) => {
+    try {
+      await timetableService.update(updatedEntry.id, updatedEntry);
+      setTimetable(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
+    } catch (error) {
+      toast.error('Failed to update timetable entry');
+    }
+  }, [setTimetable, toast]);
 
-  const addTimetableEntry = useCallback((newEntry: TimetableEntry) => {
-    setTimetable(prev => [...prev, newEntry]);
-    toast.success('Entry added to schedule');
+  const addTimetableEntry = useCallback(async (newEntry: TimetableEntry) => {
+    try {
+      const created = await timetableService.create(newEntry);
+      setTimetable(prev => [...prev, created]);
+      toast.success('Entry added to schedule');
+    } catch (error) {
+      toast.error('Failed to add timetable entry');
+    }
   }, [setTimetable, toast]);
 
   // --- Ideas ---
 
-  const addIdea = useCallback((data: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => {
-    const newIdea: Idea = {
-      id: `idea-${Date.now()}`,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-      ...data,
-    };
-    setIdeas(prev => [...prev, newIdea]);
-    toast.success('Idea saved');
+  const addIdea = useCallback(async (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => {
+    try {
+      const created = await ideaService.create({
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        ...data,
+      });
+      setIdeas(prev => [...prev, created]);
+      toast.success('Idea saved');
+    } catch (error) {
+      toast.error('Failed to save idea');
+    }
   }, [setIdeas, toast]);
 
-  const updateIdea = useCallback((id: string, updates: Partial<Idea>) => {
-    setIdeas(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
-    toast.success('Idea updated');
+  const updateIdea = useCallback(async (id: string, updates: Partial<Idea>) => {
+    try {
+      const updated = await ideaService.update(id, updates);
+      setIdeas(prev => prev.map(i => i.id === id ? { ...i, ...updated } : i));
+      toast.success('Idea updated');
+    } catch (error) {
+      toast.error('Failed to update idea');
+    }
   }, [setIdeas, toast]);
 
-  const deleteIdea = useCallback((id: string) => {
-    setIdeas(prev => prev.filter(i => i.id !== id));
-    toast.success('Idea deleted');
+  const deleteIdea = useCallback(async (id: string) => {
+    try {
+      await ideaService.delete(id);
+      setIdeas(prev => prev.filter(i => i.id !== id));
+      toast.success('Idea deleted');
+    } catch (error) {
+      toast.error('Failed to delete idea');
+    }
   }, [setIdeas, toast]);
 
-  const toggleIdeaStatus = useCallback((id: string) => {
-    setIdeas(prev => prev.map(i => i.id === id ? { ...i, status: i.status === 'pending' ? 'processed' : 'pending' } : i));
-    toast.success('Idea status updated');
-  }, [setIdeas, toast]);
+  const toggleIdeaStatus = useCallback(async (id: string) => {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    const newStatus = idea.status === 'pending' ? 'processed' : 'pending';
+    try {
+      await ideaService.update(id, { status: newStatus });
+      setIdeas(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
+      toast.success('Idea status updated');
+    } catch (error) {
+      toast.error('Failed to update idea status');
+    }
+  }, [ideas, setIdeas, toast]);
 
   // --- SOPs ---
 
-  const addSOP = useCallback((data: { title: string; category: string; content: string }) => {
-    const newSOP: SOP = {
-      id: `sop-${Date.now()}`,
-      ...data,
-    };
-    setSops(prev => [...prev, newSOP]);
-    toast.success('SOP added');
+  const addSOP = useCallback(async (data: { title: string; category: string; content: string }) => {
+    try {
+      const created = await sopService.create(data);
+      setSops(prev => [...prev, created]);
+      toast.success('SOP added');
+    } catch (error) {
+      toast.error('Failed to add SOP');
+    }
   }, [setSops, toast]);
 
-  const updateSOP = useCallback((id: string, updates: Partial<SOP>) => {
-    setSops(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-    toast.success('SOP updated');
+  const updateSOP = useCallback(async (id: string, updates: Partial<SOP>) => {
+    try {
+      const updated = await sopService.update(id, updates);
+      setSops(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+      toast.success('SOP updated');
+    } catch (error) {
+      toast.error('Failed to update SOP');
+    }
   }, [setSops, toast]);
 
-  const deleteSOP = useCallback((id: string) => {
-    setSops(prev => prev.filter(s => s.id !== id));
-    toast.success('SOP deleted');
+  const deleteSOP = useCallback(async (id: string) => {
+    try {
+      await sopService.delete(id);
+      setSops(prev => prev.filter(s => s.id !== id));
+      toast.success('SOP deleted');
+    } catch (error) {
+      toast.error('Failed to delete SOP');
+    }
   }, [setSops, toast]);
 
   // --- Work Logs ---
 
-  const addWorkLog = useCallback((data: { content: string; category: WorkLog['category']; tags?: string[] }) => {
-    const newLog: WorkLog = {
-      id: `wl-${Date.now()}`,
-      timestamp: format(new Date(), 'yyyy-MM-dd HH:mm'),
-      ...data,
-    };
-    setWorkLogs(prev => [newLog, ...prev]);
-    toast.success('Work log added');
+  const addWorkLog = useCallback(async (data: { content: string; category: WorkLog['category']; tags?: string[] }) => {
+    try {
+      const created = await workLogService.create({
+        timestamp: format(new Date(), 'yyyy-MM-dd HH:mm'),
+        ...data,
+      });
+      setWorkLogs(prev => [created, ...prev]);
+      toast.success('Work log added');
+    } catch (error) {
+      toast.error('Failed to add work log');
+    }
   }, [setWorkLogs, toast]);
 
-  const updateWorkLog = useCallback((id: string, updates: Partial<WorkLog>) => {
-    setWorkLogs(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
-    toast.success('Work log updated');
+  const updateWorkLog = useCallback(async (id: string, updates: Partial<WorkLog>) => {
+    try {
+      const updated = await workLogService.update(id, updates);
+      setWorkLogs(prev => prev.map(l => l.id === id ? { ...l, ...updated } : l));
+      toast.success('Work log updated');
+    } catch (error) {
+      toast.error('Failed to update work log');
+    }
   }, [setWorkLogs, toast]);
 
-  const deleteWorkLog = useCallback((id: string) => {
-    setWorkLogs(prev => prev.filter(l => l.id !== id));
-    toast.success('Work log deleted');
+  const deleteWorkLog = useCallback(async (id: string) => {
+    try {
+      await workLogService.delete(id);
+      setWorkLogs(prev => prev.filter(l => l.id !== id));
+      toast.success('Work log deleted');
+    } catch (error) {
+      toast.error('Failed to delete work log');
+    }
   }, [setWorkLogs, toast]);
+
+  // --- Goals ---
+
+  const addGoal = useCallback(async (data: Omit<Goal, 'id'>) => {
+    try {
+      const created = await goalService.create(data);
+      setGoals(prev => [...prev, created]);
+      toast.success('Goal added');
+    } catch (error) {
+      toast.error('Failed to add goal');
+    }
+  }, [setGoals, toast]);
+
+  const updateGoal = useCallback(async (id: string, updates: Partial<Goal>) => {
+    try {
+      const updated = await goalService.update(id, updates);
+      setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updated } : g));
+      toast.success('Goal updated');
+    } catch (error) {
+      toast.error('Failed to update goal');
+    }
+  }, [setGoals, toast]);
+
+  const deleteGoal = useCallback(async (id: string) => {
+    try {
+      await goalService.delete(id);
+      setGoals(prev => prev.filter(g => g.id !== id));
+      toast.success('Goal deleted');
+    } catch (error) {
+      toast.error('Failed to delete goal');
+    }
+  }, [setGoals, toast]);
+
+  // --- School Events ---
+
+  const addSchoolEvent = useCallback(async (data: Omit<SchoolEvent, 'id'>) => {
+    try {
+      const created = await schoolEventService.create(data);
+      setSchoolEvents(prev => [...prev, created]);
+      toast.success('Event added');
+    } catch (error) {
+      toast.error('Failed to add event');
+    }
+  }, [setSchoolEvents, toast]);
+
+  const updateSchoolEvent = useCallback(async (id: string, updates: Partial<SchoolEvent>) => {
+    try {
+      const updated = await schoolEventService.update(id, updates);
+      setSchoolEvents(prev => prev.map(e => e.id === id ? { ...e, ...updated } : e));
+      toast.success('Event updated');
+    } catch (error) {
+      toast.error('Failed to update event');
+    }
+  }, [setSchoolEvents, toast]);
+
+  const deleteSchoolEvent = useCallback(async (id: string) => {
+    try {
+      await schoolEventService.delete(id);
+      setSchoolEvents(prev => prev.filter(e => e.id !== id));
+      toast.success('Event deleted');
+    } catch (error) {
+      toast.error('Failed to delete event');
+    }
+  }, [setSchoolEvents, toast]);
 
   // --- QuickCapture ---
 
@@ -290,6 +451,12 @@ export function useAppData() {
     addIdea, updateIdea, deleteIdea, toggleIdeaStatus,
     addSOP, updateSOP, deleteSOP,
     addWorkLog, updateWorkLog, deleteWorkLog,
+
+    // Goals
+    addGoal, updateGoal, deleteGoal,
+
+    // School Events
+    addSchoolEvent, updateSchoolEvent, deleteSchoolEvent,
 
     // QuickCapture
     quickCapture,
