@@ -3,8 +3,14 @@ export type Role = 'teacher' | 'tutor' | 'entrepreneur';
 export interface Student {
   id: string;
   name: string;
+  chinese_name?: string;
   year_group: string;
   class_name: string;
+  tutor_group?: string;
+  house?: string;
+  parent_email?: string;
+  dfm_username?: string;
+  dfm_password?: string;
   is_tutor_group: boolean;
   house_points: number;
   notes: string;

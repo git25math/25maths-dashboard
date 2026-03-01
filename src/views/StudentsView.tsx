@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users } from 'lucide-react';
+import { Plus, ChevronRight, AlertCircle, Users, Mail, Key } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
@@ -83,13 +83,36 @@ export const StudentsView = ({
                     {selectedStudent.name.charAt(0)}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900">{selectedStudent.name}</h2>
-                    <p className="text-slate-500">{selectedStudent.year_group} • {selectedStudent.class_name}</p>
+                    <h2 className="text-3xl font-bold text-slate-900">
+                      {selectedStudent.name}
+                      {selectedStudent.chinese_name && <span className="text-xl text-slate-400 ml-2">{selectedStudent.chinese_name}</span>}
+                    </h2>
+                    <p className="text-slate-500">
+                      {selectedStudent.year_group} • {selectedStudent.class_name}
+                      {selectedStudent.tutor_group && <> • Tutor: {selectedStudent.tutor_group}</>}
+                      {selectedStudent.house && <> • {selectedStudent.house}</>}
+                    </p>
                   </div>
                 </div>
                 <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-bold border border-emerald-100">
-                  {selectedStudent.house_points} House Points
+                  {selectedStudent.house_points} HP
                 </div>
+              </div>
+
+              {/* Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {selectedStudent.parent_email && (
+                  <a href={`mailto:${selectedStudent.parent_email}`} className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors">
+                    <Mail size={14} className="text-blue-500" />
+                    <span className="text-xs text-blue-700 truncate">{selectedStudent.parent_email}</span>
+                  </a>
+                )}
+                {selectedStudent.dfm_username && (
+                  <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border border-purple-100">
+                    <Key size={14} className="text-purple-500" />
+                    <span className="text-xs text-purple-700">DFM: {selectedStudent.dfm_username} / {selectedStudent.dfm_password || '—'}</span>
+                  </div>
+                )}
               </div>
 
               <section className="space-y-4">
@@ -328,8 +351,11 @@ export const StudentsView = ({
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</h3>
-                  <p className="text-sm text-slate-500">{student.year_group} • {student.class_name}</p>
+                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    {student.name}
+                    {student.chinese_name && <span className="text-sm text-slate-400 ml-1.5 font-normal">{student.chinese_name}</span>}
+                  </h3>
+                  <p className="text-sm text-slate-500">{student.year_group} • {student.class_name}{student.house && ` • ${student.house}`}</p>
                 </div>
                 <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100">
                   {student.house_points} HP
