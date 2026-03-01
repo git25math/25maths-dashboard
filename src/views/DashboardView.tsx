@@ -118,6 +118,8 @@ export const DashboardView = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {classes.slice(0, 4).map(cls => {
               const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
+              const totalSubUnits = currentUnit?.sub_units?.length || currentUnit?.lessons.length || 1;
+              const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / totalSubUnits) * 100) : 0;
               return (
                 <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                   <div>
@@ -125,13 +127,28 @@ export const DashboardView = ({
                     <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
                       Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
                     </p>
+                    {currentUnit && (
+                      <div className="mt-2 space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                          <span>PROGRESS</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    onClick={() => currentUnit && onSelectUnit(currentUnit.id)}
-                    className="mt-3 text-[10px] font-bold text-indigo-600 hover:underline text-left"
-                  >
-                    View Module →
-                  </button>
+                  {currentUnit ? (
+                    <button
+                      onClick={() => onSelectUnit(currentUnit.id)}
+                      className="mt-3 text-[10px] font-bold text-indigo-600 hover:underline text-left"
+                    >
+                      View Module →
+                    </button>
+                  ) : (
+                    <p className="mt-3 text-[10px] text-slate-400 italic">No unit assigned</p>
+                  )}
                 </div>
               );
             })}
