@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Clock, BookOpen, CheckCircle2, ExternalLink, Sparkles } from 'lucide-react';
+import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles } from 'lucide-react';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonPlanItem } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
@@ -188,9 +188,6 @@ export const TimetableEntryForm = ({
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button type="button" className="p-1 hover:bg-slate-100 rounded text-slate-400">
-                            <ExternalLink size={14} />
-                          </button>
                         </div>
                       </div>
                     );

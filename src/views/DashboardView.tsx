@@ -1,0 +1,218 @@
+import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '../lib/utils';
+import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog } from '../types';
+import { MarkdownRenderer } from '../components/RichTextEditor';
+import { USER_CONFIG } from '../shared/constants';
+
+interface DashboardViewProps {
+  currentEvent: TimetableEntry | undefined;
+  nextEvent: TimetableEntry | undefined;
+  onSelectUnit: (id: string) => void;
+  classes: ClassProfile[];
+  teachingUnits: TeachingUnit[];
+  goals: Goal[];
+  schoolEvents: SchoolEvent[];
+  workLogs: WorkLog[];
+  onNavigate: (tab: string) => void;
+}
+
+export const DashboardView = ({
+  currentEvent,
+  nextEvent,
+  onSelectUnit,
+  classes,
+  teachingUnits,
+  goals,
+  schoolEvents,
+  workLogs,
+  onNavigate,
+}: DashboardViewProps) => {
+  return (
+    <div className="space-y-8">
+      {/* Header & Current Context */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900">Hello, {USER_CONFIG.name}!</h2>
+          <p className="text-slate-500 mt-1">It's {format(new Date(), 'EEEE, MMMM do, HH:mm')}</p>
+        </div>
+
+        <div className="flex gap-3">
+          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="p-3 bg-white border border-slate-200 rounded-xl text-indigo-600 hover:bg-slate-50 transition-colors shadow-sm">
+            <ExternalLink size={20} />
+          </a>
+          <button
+            onClick={() => onNavigate('worklogs')}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus size={18} />
+            <span>New Record</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Context Card */}
+      <section className="glass-card p-6 border-l-4 border-l-indigo-600">
+        <div className="flex items-start justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-widest">
+              <Clock size={16} />
+              <span>Current Context</span>
+            </div>
+
+            {currentEvent ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
+                  {currentEvent.type === 'lesson' && (
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                      currentEvent.is_prepared ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                    )}>
+                      {currentEvent.is_prepared ? '已备课' : '未备课'}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-slate-500">
+                  <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
+                  <span className="flex items-center gap-1"><Calendar size={16} /> Room {currentEvent.room}</span>
+                  {currentEvent.topic && (
+                    <span className="flex items-center gap-1 text-indigo-600 font-medium">
+                      <BookOpen size={16} /> {currentEvent.topic}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">Free Time / Planning</h3>
+                <p className="text-slate-500 mt-1">Perfect time to review your startup ideas or prep for next class.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="hidden sm:block text-right">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Event</p>
+            {nextEvent ? (
+              <div className="mt-1">
+                <p className="font-bold text-slate-900">{nextEvent.subject}</p>
+                <p className="text-xs text-slate-500">
+                  {nextEvent.start_time} · {nextEvent.class_name} · Room {nextEvent.room}
+                </p>
+              </div>
+            ) : (
+              <p className="font-semibold text-slate-400 mt-1 italic">No more events today</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Class Progress Tracking */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900">Class Progress Tracking</h4>
+            <button onClick={() => onNavigate('teaching')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {classes.slice(0, 4).map(cls => {
+              const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
+              return (
+                <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">{cls.name}</p>
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
+                      Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => currentUnit && onSelectUnit(currentUnit.id)}
+                    className="mt-3 text-[10px] font-bold text-indigo-600 hover:underline text-left"
+                  >
+                    View Module →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Goals / OKRs */}
+        <div className="glass-card p-6 space-y-4">
+          <h4 className="font-bold text-slate-900">Active Goals</h4>
+          <div className="space-y-3">
+            {goals.filter(g => g.status === 'in-progress').slice(0, 2).map(goal => (
+              <div key={goal.id} className="space-y-2">
+                <div className="flex justify-between text-[10px] font-bold">
+                  <span className="text-slate-600">{goal.title}</span>
+                  <span className="text-indigo-600">{goal.progress}%</span>
+                </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-600 transition-all" style={{ width: `${goal.progress}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Emergency Support */}
+        <div className="glass-card p-6 bg-red-50 border-red-100 space-y-4">
+          <h4 className="font-bold text-red-900">Emergency Support</h4>
+          <div className="space-y-2">
+            <button
+              onClick={() => window.location.href = `mailto:${USER_CONFIG.email}?subject=Emergency Support Needed in ${USER_CONFIG.room}`}
+              className="w-full py-2 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <AlertCircle size={14} /> Upper On-Call
+            </button>
+            <button disabled className="w-full py-2 bg-white text-red-400 border border-red-200 text-xs font-bold rounded-lg cursor-not-allowed" title="Coming Soon">
+              Medical Alert
+            </button>
+          </div>
+        </div>
+
+        {/* School Events */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-slate-900">Recent Events</h4>
+            <button onClick={() => onNavigate('timetable')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
+          <div className="space-y-3">
+            {schoolEvents.slice(0, 3).map(event => (
+              <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-start">
+                  <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
+                  <span className="text-[9px] text-slate-400">{event.date}</span>
+                </div>
+                <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 mt-1 line-clamp-1" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Work Logs */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900">Recent Work Logs</h4>
+            <button onClick={() => onNavigate('worklogs')} className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
+          </div>
+          <div className="space-y-3">
+            {workLogs.slice(0, 3).map(log => (
+              <div key={log.id} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className={cn(
+                  "w-1 h-auto rounded-full",
+                  log.category === 'tutor' ? "bg-indigo-500" : "bg-emerald-500"
+                )} />
+                <div>
+                  <MarkdownRenderer content={log.content} className="text-xs font-bold text-slate-900" />
+                  <p className="text-[10px] text-slate-400 mt-0.5">{log.timestamp}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

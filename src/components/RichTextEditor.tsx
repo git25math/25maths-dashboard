@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -25,9 +25,10 @@ interface RichTextEditorProps {
 
 export const RichTextEditor = ({ value, onChange, placeholder, className, label }: RichTextEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const insertText = (before: string, after: string = '') => {
-    const textarea = document.getElementById(`editor-${label}`) as HTMLTextAreaElement;
+    const textarea = textareaRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
@@ -99,7 +100,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
               ))}
             </div>
             <textarea
-              id={`editor-${label}`}
+              ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder={placeholder}
