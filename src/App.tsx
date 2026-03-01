@@ -17,6 +17,7 @@ import { TimetableEntryForm } from './components/TimetableEntryForm';
 import { WorkLogForm } from './components/WorkLogForm';
 import { SOPForm } from './components/SOPForm';
 import { IdeaForm } from './components/IdeaForm';
+import { LoginGate } from './components/LoginGate';
 import { DashboardView } from './views/DashboardView';
 import { TimetableView } from './views/TimetableView';
 import { StudentsView } from './views/StudentsView';
@@ -237,6 +238,7 @@ export default function App() {
   };
 
   return (
+    <LoginGate>
     <div className="min-h-screen flex bg-slate-50">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-8">
@@ -385,5 +387,6 @@ export default function App() {
         />
       )}
     </div>
+    </LoginGate>
   );
 }
