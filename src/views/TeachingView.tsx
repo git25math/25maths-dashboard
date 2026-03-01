@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, CheckCircle2, Clock, BookOpen, ExternalLink, Lightbulb, Settings } from 'lucide-react';
+import { Plus, ChevronRight, CheckCircle2, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { TeachingUnit, ClassProfile, LessonPlanItem } from '../types';
+import { TeachingUnit, ClassProfile, SubUnit } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
+import { SubUnitForm } from '../components/SubUnitForm';
 import { YEAR_GROUPS } from '../shared/constants';
 
 interface TeachingViewProps {
@@ -13,6 +14,7 @@ interface TeachingViewProps {
   onAddUnit: () => void;
   onUpdateUnit: (id: string) => void;
   onDeleteUnit: (id: string) => void;
+  onSaveUnit: (unit: TeachingUnit) => void;
   classes: ClassProfile[];
   onUpdateClassProgress: (classId: string, lessonId: string, completed: boolean) => void;
   onUpdateClass: (id: string) => void;
@@ -27,6 +29,7 @@ export const TeachingView = ({
   onAddUnit,
   onUpdateUnit,
   onDeleteUnit,
+  onSaveUnit,
   classes,
   onUpdateClassProgress,
   onUpdateClass,
@@ -34,7 +37,17 @@ export const TeachingView = ({
 }: TeachingViewProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
-  const [selectedLesson, setSelectedLesson] = useState<LessonPlanItem | null>(null);
+  const [selectedSubUnit, setSelectedSubUnit] = useState<SubUnit | null>(null);
+  const [isSubUnitFormOpen, setIsSubUnitFormOpen] = useState(false);
+  const [editingSubUnit, setEditingSubUnit] = useState<SubUnit | null>(null);
+
+  // Keep selectedUnit in sync with teachingUnits changes
+  useEffect(() => {
+    if (selectedUnit) {
+      const updated = teachingUnits.find(u => u.id === selectedUnit.id);
+      if (updated) setSelectedUnit(updated);
+    }
+  }, [teachingUnits]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (initialUnitId) {
@@ -53,80 +66,267 @@ export const TeachingView = ({
     });
   };
 
-  if (selectedLesson && selectedUnit) {
+  // --- Sub-Unit CRUD ---
+  const handleSaveSubUnit = (subUnit: SubUnit) => {
+    if (!selectedUnit) return;
+    const existing = selectedUnit.sub_units || [];
+    const idx = existing.findIndex(s => s.id === subUnit.id);
+    const newSubUnits = idx >= 0
+      ? existing.map(s => s.id === subUnit.id ? subUnit : s)
+      : [...existing, subUnit];
+    onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+    setIsSubUnitFormOpen(false);
+    setEditingSubUnit(null);
+  };
+
+  const handleDeleteSubUnit = (subUnitId: string) => {
+    if (!selectedUnit) return;
+    if (!confirm('Delete this sub-unit?')) return;
+    const newSubUnits = (selectedUnit.sub_units || []).filter(s => s.id !== subUnitId);
+    onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+    setSelectedSubUnit(null);
+  };
+
+  // ===== Sub-Unit Detail View =====
+  if (selectedSubUnit && selectedUnit) {
     return (
       <div className="space-y-6">
         <button
-          onClick={() => setSelectedLesson(null)}
+          onClick={() => setSelectedSubUnit(null)}
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
         >
           <ChevronRight size={20} className="rotate-180" /> Back to {selectedUnit.title}
         </button>
 
-        <div className="glass-card p-8 space-y-8">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-slate-900">{selectedLesson.title}</h2>
-            <p className="text-slate-500">Lesson Plan & Resources</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="glass-card p-8 space-y-8">
+              {/* Header */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded">
+                    小单元
+                  </span>
+                  <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedSubUnit.title}</h2>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setEditingSubUnit(selectedSubUnit); setIsSubUnitFormOpen(true); }}
+                    className="btn-secondary text-xs flex items-center gap-1"
+                  >
+                    <Edit3 size={14} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSubUnit(selectedSubUnit.id)}
+                    className="px-3 py-2 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              {/* Objectives */}
+              {selectedSubUnit.objectives.length > 0 && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <CheckCircle2 size={20} className="text-emerald-500" />
+                    教学目标 Objectives
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedSubUnit.objectives.map((obj, i) => (
+                      <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                        <MarkdownRenderer content={obj} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* Periods */}
+              <section className="flex items-center gap-3">
+                <Clock size={18} className="text-indigo-500" />
+                <span className="font-bold text-sm text-slate-700">课时安排</span>
+                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-full">
+                  {selectedSubUnit.periods} 课时
+                </span>
+              </section>
+
+              {/* Vocabulary */}
+              {selectedSubUnit.vocabulary.length > 0 && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <BookOpen size={20} className="text-amber-500" />
+                    双语核心词汇 Vocabulary
+                  </h3>
+                  <div className="overflow-hidden rounded-xl border border-slate-200">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-slate-50">
+                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">English</th>
+                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">中文</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedSubUnit.vocabulary.map((v, i) => (
+                          <tr key={i} className="border-t border-slate-100">
+                            <td className="px-4 py-2 text-sm text-slate-700">{v.english}</td>
+                            <td className="px-4 py-2 text-sm text-slate-700">{v.chinese}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+
+              {/* Classroom Exercises */}
+              {selectedSubUnit.classroom_exercises && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <Edit3 size={20} className="text-indigo-500" />
+                    课堂讲练 Classroom Exercises
+                  </h3>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <MarkdownRenderer content={selectedSubUnit.classroom_exercises} className="text-sm text-slate-700" />
+                  </div>
+                </section>
+              )}
+
+              {/* Homework */}
+              {(selectedSubUnit.homework_content || selectedSubUnit.homework_url) && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <CheckCircle2 size={20} className="text-violet-500" />
+                    课后作业 Homework
+                  </h3>
+                  {selectedSubUnit.homework_content && (
+                    <div className="p-4 bg-violet-50/50 rounded-xl border border-violet-100">
+                      <MarkdownRenderer content={selectedSubUnit.homework_content} className="text-sm text-slate-700" />
+                    </div>
+                  )}
+                  {selectedSubUnit.homework_url && (
+                    <a
+                      href={selectedSubUnit.homework_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-indigo-600 font-medium hover:underline"
+                    >
+                      <ExternalLink size={14} /> Open Homework Link
+                    </a>
+                  )}
+                </section>
+              )}
+
+              {/* Teaching Reflection */}
+              {selectedSubUnit.reflection && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <MessageSquare size={20} className="text-rose-500" />
+                    教学总结及反思 Teaching Reflection
+                  </h3>
+                  <div className="p-6 bg-rose-50/50 rounded-xl border border-rose-100 space-y-4">
+                    {selectedSubUnit.reflection.lesson_date && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar size={14} className="text-rose-400" />
+                        <span className="font-bold text-slate-600">上课时间:</span>
+                        <span className="text-slate-700">{selectedSubUnit.reflection.lesson_date}</span>
+                      </div>
+                    )}
+                    {selectedSubUnit.reflection.student_reception && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">学生接受状态</p>
+                        <p className="text-sm text-slate-700">{selectedSubUnit.reflection.student_reception}</p>
+                      </div>
+                    )}
+                    {selectedSubUnit.reflection.planned_content && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">计划讲解</p>
+                        <MarkdownRenderer content={selectedSubUnit.reflection.planned_content} className="text-sm text-slate-700" />
+                      </div>
+                    )}
+                    {selectedSubUnit.reflection.actual_content && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">实际讲解</p>
+                        <MarkdownRenderer content={selectedSubUnit.reflection.actual_content} className="text-sm text-slate-700" />
+                      </div>
+                    )}
+                    {selectedSubUnit.reflection.improvements && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">下次改进方向</p>
+                        <MarkdownRenderer content={selectedSubUnit.reflection.improvements} className="text-sm text-slate-700" />
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {/* AI Summary */}
+              {selectedSubUnit.ai_summary && (
+                <section className="space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <Lightbulb size={20} className="text-amber-500" />
+                    AI总结 AI Summary
+                  </h3>
+                  <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                    <MarkdownRenderer content={selectedSubUnit.ai_summary} className="text-sm text-slate-700" />
+                  </div>
+                </section>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                  <CheckCircle2 size={20} className="text-emerald-500" />
-                  Lesson Objectives
-                </h3>
-                <ul className="space-y-2">
-                  {selectedLesson.objectives.map((obj, i) => (
-                    <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
-                      <MarkdownRenderer content={obj} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                  <Clock size={20} className="text-indigo-500" />
-                  Activities
-                </h3>
-                <div className="space-y-3">
-                  {selectedLesson.activities.map((act, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                      <MarkdownRenderer content={act} className="text-sm text-slate-700" />
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">资源链接 Resources</h3>
+              <div className="space-y-2">
+                {[
+                  { label: '练习单 Worksheet', url: selectedSubUnit.worksheet_url, icon: BookOpen },
+                  { label: '线上练习 Online Practice', url: selectedSubUnit.online_practice_url, icon: ExternalLink },
+                  { label: 'Kahoot 练习', url: selectedSubUnit.kahoot_url, icon: Lightbulb },
+                  { label: '课后作业 Homework', url: selectedSubUnit.homework_url, icon: CheckCircle2 },
+                ].map((res, i) => (
+                  <a
+                    key={i}
+                    href={res.url || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-xl border transition-all",
+                      res.url
+                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm"
+                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={res.url ? undefined : (e) => e.preventDefault()}
+                  >
+                    <div className="flex items-center gap-3">
+                      <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
+                      <span className="text-sm font-medium">{res.label}</span>
                     </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            <div className="space-y-6">
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                  <BookOpen size={20} className="text-amber-500" />
-                  Resources
-                </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {selectedLesson.resources?.map((res, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl text-sm">
-                      <span className="text-slate-700">{res}</span>
-                      <ExternalLink size={14} className="text-slate-400" />
-                    </div>
-                  ))}
-                  {(!selectedLesson.resources || selectedLesson.resources.length === 0) && (
-                    <p className="text-sm text-slate-400 italic">No specific resources listed for this lesson.</p>
-                  )}
-                </div>
-              </section>
+                    {res.url && <ExternalLink size={14} className="text-slate-400" />}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+
+        {isSubUnitFormOpen && (
+          <SubUnitForm
+            subUnit={editingSubUnit}
+            onSave={handleSaveSubUnit}
+            onCancel={() => { setIsSubUnitFormOpen(false); setEditingSubUnit(null); }}
+          />
+        )}
       </div>
     );
   }
 
+  // ===== Unit Detail View =====
   if (selectedUnit) {
+    const subUnits = selectedUnit.sub_units || [];
     return (
       <div className="space-y-6">
         <button
@@ -179,50 +379,58 @@ export const TeachingView = ({
                 </ul>
               </section>
 
+              {/* Sub-Units Section */}
               <section className="space-y-4">
-                <h3 className="font-bold text-lg">课时拆分 (Lesson Breakdown)</h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {selectedUnit.lessons.map((lesson, i) => {
-                    const unitClasses = classes.filter(c => c.current_unit_id === selectedUnit.id);
-                    return (
-                      <div key={lesson.id} className="space-y-2">
-                        <button
-                          onClick={() => setSelectedLesson(lesson)}
-                          className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all text-left group"
-                        >
-                          <div>
-                            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Lesson {i + 1}</p>
-                            <p className="font-bold text-slate-900">{lesson.title}</p>
-                          </div>
-                          <ChevronRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
-                        </button>
-
-                        {unitClasses.length > 0 && (
-                          <div className="flex flex-wrap gap-2 px-2">
-                            {unitClasses.map(cls => {
-                              const isCompleted = cls.completed_lesson_ids?.includes(lesson.id);
-                              return (
-                                <button
-                                  key={cls.id}
-                                  onClick={() => onUpdateClassProgress(cls.id, lesson.id, !isCompleted)}
-                                  className={cn(
-                                    "px-2 py-0.5 rounded-full text-[9px] font-bold border transition-all flex items-center gap-1",
-                                    isCompleted
-                                      ? "bg-indigo-600 border-indigo-600 text-white"
-                                      : "bg-white border-slate-200 text-slate-400"
-                                  )}
-                                >
-                                  {isCompleted && <CheckCircle2 size={8} />}
-                                  {cls.name}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-lg">小单元模块 (Sub-Units)</h3>
+                  <button
+                    onClick={() => { setEditingSubUnit(null); setIsSubUnitFormOpen(true); }}
+                    className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline"
+                  >
+                    <Plus size={14} /> Add Sub-Unit
+                  </button>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {subUnits.map(su => (
+                    <div
+                      key={su.id}
+                      onClick={() => setSelectedSubUnit(su)}
+                      className="p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all cursor-pointer group"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1 flex-1">
+                          <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{su.title}</p>
+                          <div className="flex items-center gap-3 text-xs text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <Clock size={12} /> {su.periods} 课时
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <CheckCircle2 size={12} /> {su.objectives.length} objectives
+                            </span>
+                          </div>
+                          <div className="flex gap-1 mt-2">
+                            {su.worksheet_url && <span className="w-2 h-2 rounded-full bg-blue-400" title="Worksheet" />}
+                            {su.online_practice_url && <span className="w-2 h-2 rounded-full bg-green-400" title="Online Practice" />}
+                            {su.kahoot_url && <span className="w-2 h-2 rounded-full bg-purple-400" title="Kahoot" />}
+                            {su.homework_url && <span className="w-2 h-2 rounded-full bg-amber-400" title="Homework" />}
+                          </div>
+                        </div>
+                        <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1 shrink-0 mt-1" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {subUnits.length === 0 && (
+                  <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <p className="text-sm text-slate-400">No sub-units yet.</p>
+                    <button
+                      onClick={() => { setEditingSubUnit(null); setIsSubUnitFormOpen(true); }}
+                      className="mt-2 text-indigo-600 text-sm font-bold hover:underline"
+                    >
+                      Add First Sub-Unit
+                    </button>
+                  </div>
+                )}
               </section>
 
               <section className="space-y-4">
@@ -305,10 +513,19 @@ export const TeachingView = ({
             </div>
           </div>
         </div>
+
+        {isSubUnitFormOpen && (
+          <SubUnitForm
+            subUnit={editingSubUnit}
+            onSave={handleSaveSubUnit}
+            onCancel={() => { setIsSubUnitFormOpen(false); setEditingSubUnit(null); }}
+          />
+        )}
       </div>
     );
   }
 
+  // ===== Year Group Units List =====
   if (selectedYear) {
     const yearUnits = teachingUnits.filter(u => u.year_group === selectedYear);
     return (
@@ -345,7 +562,7 @@ export const TeachingView = ({
               </div>
               <div className="mt-6 flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  {unit.lessons.length} Lessons
+                  {(unit.sub_units || []).length} Sub-Units
                 </span>
                 <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
               </div>
@@ -363,6 +580,7 @@ export const TeachingView = ({
     );
   }
 
+  // ===== Year Groups Overview =====
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -397,7 +615,8 @@ export const TeachingView = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {classes.map(cls => {
             const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
-            const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / currentUnit.lessons.length) * 100) : 0;
+            const totalSubUnits = currentUnit?.sub_units?.length || currentUnit?.lessons.length || 1;
+            const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / totalSubUnits) * 100) : 0;
             return (
               <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                 <div>

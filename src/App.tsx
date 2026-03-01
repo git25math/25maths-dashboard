@@ -190,6 +190,7 @@ export default function App() {
               if (u) { setEditingTeachingUnit(u); setIsTeachingUnitFormOpen(true); }
             }}
             onDeleteUnit={data.deleteTeachingUnit}
+            onSaveUnit={(unit) => data.saveTeachingUnit(unit)}
             classes={data.classes}
             onUpdateClassProgress={data.updateClassProgress}
             onUpdateClass={(id) => {

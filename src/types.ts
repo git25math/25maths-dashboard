@@ -116,12 +116,42 @@ export interface Goal {
   image_url?: string;
 }
 
+export interface VocabularyItem {
+  english: string;
+  chinese: string;
+}
+
+export interface TeachingReflection {
+  lesson_date?: string;
+  student_reception?: string;
+  planned_content?: string;
+  actual_content?: string;
+  improvements?: string;
+}
+
+export interface SubUnit {
+  id: string;
+  title: string;
+  objectives: string[];
+  periods: number;
+  vocabulary: VocabularyItem[];
+  classroom_exercises: string;
+  worksheet_url?: string;
+  online_practice_url?: string;
+  kahoot_url?: string;
+  homework_url?: string;
+  homework_content?: string;
+  reflection?: TeachingReflection;
+  ai_summary?: string;
+}
+
 export interface TeachingUnit {
   id: string;
   year_group: string;
   title: string;
   learning_objectives: string[];
   lessons: LessonPlanItem[];
+  sub_units?: SubUnit[];
   typical_examples: { question: string; solution: string }[];
   worksheet_url?: string;
   homework_url?: string;
