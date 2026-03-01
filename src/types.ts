@@ -10,6 +10,22 @@ export interface Student {
   notes: string;
   weaknesses?: StudentWeakness[];
   attendance_status?: 'present' | 'absent' | 'late';
+  status_records?: StudentStatusRecord[];
+  requests?: StudentRequest[];
+}
+
+export interface StudentStatusRecord {
+  id: string;
+  date: string;
+  content: string;
+  category: 'academic' | 'behavior' | 'personal' | 'report-material';
+}
+
+export interface StudentRequest {
+  id: string;
+  date: string;
+  content: string;
+  status: 'pending' | 'resolved';
 }
 
 export interface StudentWeakness {
@@ -73,6 +89,7 @@ export interface Goal {
   title: string;
   category: 'dream' | 'work' | 'startup';
   progress: number;
+  status: 'in-progress' | 'completed' | 'on-hold';
   deadline?: string;
   image_url?: string;
 }
@@ -81,13 +98,35 @@ export interface TeachingUnit {
   id: string;
   year_group: string;
   title: string;
-  teaching_plan: string;
-  worksheet_url: string;
-  homework_url: string;
-  core_vocabulary: string[];
+  learning_objectives: string[];
+  lessons: LessonPlanItem[];
   typical_examples: { question: string; solution: string }[];
+  worksheet_url?: string;
+  homework_url?: string;
+  online_practice_url?: string;
+  kahoot_url?: string;
+  vocab_practice_url?: string;
+  core_vocabulary: string[];
   prep_material_template: string;
   ai_prompt_template: string;
+  teaching_summary?: string;
+}
+
+export interface LessonPlanItem {
+  id: string;
+  title: string;
+  objectives: string[];
+  activities: string[];
+  resources?: string[];
+}
+
+export interface ClassProfile {
+  id: string;
+  name: string;
+  year_group: string;
+  description: string;
+  current_unit_id?: string;
+  student_ids: string[];
 }
 
 export interface WorkLog {

@@ -20,8 +20,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { format, isWithinInterval, parse } from 'date-fns';
 import { cn } from './lib/utils';
-import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, SYLLABUS } from './constants';
-import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent, Goal, WorkLog } from './types';
+import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, SYLLABUS, MOCK_CLASSES } from './constants';
+import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonPlanItem } from './types';
 
 // --- Components ---
 
@@ -198,192 +198,544 @@ const TimetableView = () => {
   );
 };
 
-const StudentsView = () => {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Student Database</h2>
-        <button className="btn-primary text-sm flex items-center gap-2">
-          <Plus size={18} /> Add Student
+const StudentsView = ({ 
+  selectedStudentId, 
+  onSelectStudent, 
+  selectedClassId, 
+  onSelectClass 
+}: { 
+  selectedStudentId: string | null; 
+  onSelectStudent: (id: string | null) => void;
+  selectedClassId: string | null;
+  onSelectClass: (id: string | null) => void;
+}) => {
+  const [activeSubTab, setActiveSubTab] = useState<'classes' | 'students'>('classes');
+
+  const selectedStudent = MOCK_STUDENTS.find(s => s.id === selectedStudentId);
+  const selectedClass = MOCK_CLASSES.find(c => c.id === selectedClassId);
+
+  if (selectedStudent) {
+    return (
+      <div className="space-y-6">
+        <button 
+          onClick={() => onSelectStudent(null)}
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+        >
+          <ChevronRight size={20} className="rotate-180" /> Back to List
         </button>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MOCK_STUDENTS.map(student => (
-          <div key={student.id} className="glass-card p-5 hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</h3>
-                <p className="text-sm text-slate-500">{student.year_group} • {student.class_name}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="glass-card p-8 space-y-8">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
+                    {selectedStudent.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-slate-900">{selectedStudent.name}</h2>
+                    <p className="text-slate-500">{selectedStudent.year_group} • {selectedStudent.class_name}</p>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-bold border border-emerald-100">
+                  {selectedStudent.house_points} House Points
+                </div>
               </div>
-              <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100">
-                {student.house_points} HP
-              </div>
-            </div>
-            <p className="text-sm text-slate-600 mt-4 line-clamp-2 italic">"{student.notes}"</p>
-            
-            <div className="flex items-center gap-2 mt-4">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = `mailto:upperoncall@harrowhaikou.cn?subject=Missing ${student.name} from A219`;
-                }}
-                className="flex-1 py-2 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
-              >
-                <AlertCircle size={12} /> Report Missing
-              </button>
-              <button className="flex-1 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded-lg hover:bg-indigo-100 transition-colors">
-                View Profile
-              </button>
-            </div>
 
-            {student.weaknesses && student.weaknesses.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Weakness Analysis</p>
-                <div className="space-y-2">
-                  {student.weaknesses.map((w, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className={cn(
-                        "w-1.5 h-1.5 rounded-full mt-1 shrink-0",
-                        w.level === 'high' ? "bg-red-500" : w.level === 'medium' ? "bg-amber-500" : "bg-blue-500"
-                      )} />
-                      <div>
-                        <p className="text-xs font-bold text-slate-700">{w.topic}</p>
-                        <p className="text-[10px] text-slate-500 leading-tight">{w.notes}</p>
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学习状况记录 (Learning Status)</h3>
+                <div className="space-y-4">
+                  {selectedStudent.status_records?.map(record => (
+                    <div key={record.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{record.date}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-500">
+                          {record.category}
+                        </span>
                       </div>
+                      <p className="text-sm text-slate-700 leading-relaxed">{record.content}</p>
+                    </div>
+                  ))}
+                  {(!selectedStudent.status_records || selectedStudent.status_records.length === 0) && (
+                    <p className="text-sm text-slate-400 italic">No status records found.</p>
+                  )}
+                  <button className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                    + Add Status Record
+                  </button>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">薄弱环节 (Weaknesses)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedStudent.weaknesses?.map((w, i) => (
+                    <div key={i} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-bold text-slate-900">{w.topic}</p>
+                        <span className={cn(
+                          "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                          w.level === 'high' ? "bg-red-100 text-red-600" : 
+                          w.level === 'medium' ? "bg-amber-100 text-amber-600" : 
+                          "bg-blue-100 text-blue-600"
+                        )}>
+                          {w.level}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">{w.notes}</p>
+                      <button className="text-[10px] font-bold text-indigo-600 hover:underline">Recommend Practice</button>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-              <span className={cn(
-                "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
-                student.is_tutor_group ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
-              )}>
-                {student.is_tutor_group ? 'Tutor Group' : 'Subject Student'}
-              </span>
-              <ChevronRight size={16} className="text-slate-400" />
+              </section>
             </div>
           </div>
-        ))}
+
+          <div className="space-y-6">
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">平时诉求 (Requests)</h3>
+              <div className="space-y-3">
+                {selectedStudent.requests?.map(req => (
+                  <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <p className="text-xs text-slate-700">{req.content}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-slate-400">{req.date}</span>
+                      <span className={cn(
+                        "text-[10px] font-bold uppercase",
+                        req.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
+                      )}>
+                        {req.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                <button className="w-full btn-secondary text-xs py-2">+ New Request</button>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">Quick Actions</h3>
+              <div className="grid grid-cols-1 gap-2">
+                <button 
+                  onClick={() => window.location.href = `mailto:upperoncall@harrowhaikou.cn?subject=Missing ${selectedStudent.name} from A219`}
+                  className="w-full py-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                >
+                  <AlertCircle size={16} /> Report Missing
+                </button>
+                <button className="w-full py-3 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-xl hover:bg-indigo-100 transition-colors">
+                  Generate Subject Report
+                </button>
+                <button className="w-full py-3 bg-slate-50 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                  Parent Meeting Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  if (selectedClass) {
+    const classStudents = MOCK_STUDENTS.filter(s => selectedClass.student_ids.includes(s.id));
+    return (
+      <div className="space-y-6">
+        <button 
+          onClick={() => onSelectClass(null)}
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+        >
+          <ChevronRight size={20} className="rotate-180" /> Back to Classes
+        </button>
+
+        <div className="glass-card p-8 space-y-8">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900">{selectedClass.name}</h2>
+              <p className="text-slate-500 mt-1">{selectedClass.year_group} • {selectedClass.description}</p>
+            </div>
+            <button className="btn-primary text-sm">Edit Profile</button>
+          </div>
+
+          <section className="space-y-4">
+            <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学生名单 (Student List)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {classStudents.map(student => (
+                <div 
+                  key={student.id}
+                  onClick={() => onSelectStudent(student.id)}
+                  className="p-4 bg-slate-50 hover:bg-white border border-slate-200 hover:border-indigo-300 rounded-xl transition-all cursor-pointer group"
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</p>
+                    <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">{student.house_points} HP • {student.weaknesses?.length || 0} Weaknesses</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-900">Student & Class Management</h2>
+        <div className="flex bg-slate-100 p-1 rounded-xl">
+          <button 
+            onClick={() => setActiveSubTab('classes')}
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-bold transition-all",
+              activeSubTab === 'classes' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            )}
+          >
+            Classes
+          </button>
+          <button 
+            onClick={() => setActiveSubTab('students')}
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-bold transition-all",
+              activeSubTab === 'students' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            )}
+          >
+            All Students
+          </button>
+        </div>
+      </div>
+
+      {activeSubTab === 'classes' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {MOCK_CLASSES.map(cls => (
+            <div 
+              key={cls.id}
+              onClick={() => onSelectClass(cls.id)}
+              className="glass-card p-6 hover:border-indigo-400 transition-all cursor-pointer group space-y-4"
+            >
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <Users size={24} />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-100 text-slate-500 rounded">
+                  {cls.year_group}
+                </span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{cls.name}</h3>
+                <p className="text-sm text-slate-500 mt-1 line-clamp-2">{cls.description}</p>
+              </div>
+              <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{cls.student_ids.length} Students</span>
+                <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {MOCK_STUDENTS.map(student => (
+            <div 
+              key={student.id} 
+              onClick={() => onSelectStudent(student.id)}
+              className="glass-card p-5 hover:shadow-md transition-shadow cursor-pointer group"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</h3>
+                  <p className="text-sm text-slate-500">{student.year_group} • {student.class_name}</p>
+                </div>
+                <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100">
+                  {student.house_points} HP
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
+                  student.is_tutor_group ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
+                )}>
+                  {student.is_tutor_group ? 'Tutor Group' : 'Subject Student'}
+                </span>
+                <ChevronRight size={16} className="text-slate-400" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-const TeachingView = ({ onOpenSyllabus }: { onOpenSyllabus: () => void }) => {
+const TeachingView = ({ 
+  onOpenSyllabus, 
+  initialUnitId, 
+  onClearInitialUnit 
+}: { 
+  onOpenSyllabus: () => void;
+  initialUnitId: string | null;
+  onClearInitialUnit: () => void;
+}) => {
+  const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<LessonPlanItem | null>(null);
+
+  useEffect(() => {
+    if (initialUnitId) {
+      const unit = MOCK_TEACHING_UNITS.find(u => u.id === initialUnitId);
+      if (unit) {
+        setSelectedUnit(unit);
+        setSelectedYear(unit.year_group);
+      }
+      onClearInitialUnit();
+    }
+  }, [initialUnitId, onClearInitialUnit]);
+
+  const years = ['Year 7', 'Year 8', 'Year 10', 'Year 11', 'Year 12'];
+
+  if (selectedLesson && selectedUnit) {
+    return (
+      <div className="space-y-6">
+        <button 
+          onClick={() => setSelectedLesson(null)}
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+        >
+          <ChevronRight size={20} className="rotate-180" /> Back to {selectedUnit.title}
+        </button>
+        
+        <div className="glass-card p-8 space-y-8">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold text-slate-900">{selectedLesson.title}</h2>
+            <p className="text-slate-500">Lesson Plan & Resources</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-emerald-500" />
+                  Lesson Objectives
+                </h3>
+                <ul className="space-y-2">
+                  {selectedLesson.objectives.map((obj, i) => (
+                    <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
+                      {obj}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <Clock size={20} className="text-indigo-500" />
+                  Activities
+                </h3>
+                <div className="space-y-3">
+                  {selectedLesson.activities.map((act, i) => (
+                    <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-700">
+                      {act}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="space-y-6">
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <BookOpen size={20} className="text-amber-500" />
+                  Resources
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {selectedLesson.resources?.map((res, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl text-sm">
+                      <span className="text-slate-700">{res}</span>
+                      <ExternalLink size={14} className="text-slate-400" />
+                    </div>
+                  ))}
+                  {(!selectedLesson.resources || selectedLesson.resources.length === 0) && (
+                    <p className="text-sm text-slate-400 italic">No specific resources listed for this lesson.</p>
+                  )}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (selectedUnit) {
     return (
       <div className="space-y-6">
         <button 
           onClick={() => setSelectedUnit(null)}
-          className="flex items-center gap-2 text-indigo-600 font-semibold hover:underline mb-4"
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
         >
-          <ChevronRight size={18} className="rotate-180" /> Back to Units
+          <ChevronRight size={20} className="rotate-180" /> Back to {selectedYear}
         </button>
-
-        <div className="flex justify-between items-start">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-              {selectedUnit.year_group}
-            </span>
-            <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedUnit.title}</h2>
-          </div>
-          <div className="flex gap-2">
-            <button className="btn-secondary text-sm">Edit Unit</button>
-            <button className="btn-primary text-sm">Share with Team</button>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Teaching Plan */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                <BookOpen size={20} className="text-indigo-600" /> 教学计划 (Teaching Plan)
-              </h3>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{selectedUnit.teaching_plan}</p>
-            </div>
-
-            {/* Typical Examples */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                <CheckCircle2 size={20} className="text-emerald-600" /> 典型例题 (Typical Examples)
-              </h3>
-              <div className="space-y-4">
-                {selectedUnit.typical_examples.map((ex, i) => (
-                  <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <p className="font-bold text-slate-900">Q: {ex.question}</p>
-                    <p className="text-sm text-slate-600 mt-2 bg-white p-3 rounded border border-slate-100 italic">
-                      A: {ex.solution}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* AI Prompt Template */}
-            <div className="glass-card p-6 border-indigo-200 bg-indigo-50/30">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-900">
-                <Lightbulb size={20} className="text-indigo-600" /> AI 指令模板 (AI Prompt Template)
-              </h3>
-              <div className="relative group">
-                <pre className="text-sm text-indigo-900 bg-white p-4 rounded-xl border border-indigo-100 whitespace-pre-wrap font-mono">
-                  {selectedUnit.ai_prompt_template}
-                </pre>
-                <button className="absolute top-2 right-2 p-2 bg-indigo-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg text-xs">
-                  Copy Template
+            <div className="glass-card p-8 space-y-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded">
+                    {selectedUnit.year_group}
+                  </span>
+                  <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedUnit.title}</h2>
+                </div>
+                <button className="btn-secondary text-xs flex items-center gap-2">
+                  <Plus size={14} /> Add Resource
                 </button>
               </div>
+
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg">教学目标 (Learning Objectives)</h3>
+                <ul className="space-y-2">
+                  {selectedUnit.learning_objectives.map((obj, i) => (
+                    <li key={i} className="flex items-start gap-2 text-slate-600">
+                      <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
+                      {obj}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg">课时拆分 (Lesson Breakdown)</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {selectedUnit.lessons.map((lesson, i) => (
+                    <button 
+                      key={lesson.id}
+                      onClick={() => setSelectedLesson(lesson)}
+                      className="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all text-left group"
+                    >
+                      <div>
+                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Lesson {i + 1}</p>
+                        <p className="font-bold text-slate-900">{lesson.title}</p>
+                      </div>
+                      <ChevronRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-bold text-lg">典型例题 (Typical Examples)</h3>
+                <div className="space-y-4">
+                  {selectedUnit.typical_examples.map((ex, i) => (
+                    <div key={i} className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                      <p className="font-bold text-indigo-900 text-sm">Q: {ex.question}</p>
+                      <p className="text-sm text-slate-600 pl-4 border-l-2 border-indigo-200">A: {ex.solution}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="glass-card p-8 space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-lg">教学总结 (Teaching Summary)</h3>
+                <button className="flex items-center gap-2 text-indigo-600 text-sm font-bold hover:underline">
+                  <Lightbulb size={16} /> AI Summary
+                </button>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed italic">
+                {selectedUnit.teaching_summary || "No summary recorded for this unit yet."}
+              </p>
             </div>
           </div>
 
           <div className="space-y-6">
-            {/* Resources */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold text-lg mb-4">资源链接 (Resources)</h3>
-              <div className="space-y-3">
-                <a href={selectedUnit.worksheet_url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-300 transition-colors shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><BookOpen size={18} /></div>
-                    <span className="text-sm font-medium">Worksheet 练习单</span>
-                  </div>
-                  <ExternalLink size={14} className="text-slate-400" />
-                </a>
-                <a href={selectedUnit.homework_url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-300 transition-colors shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Calendar size={18} /></div>
-                    <span className="text-sm font-medium">Homework 课后作业</span>
-                  </div>
-                  <ExternalLink size={14} className="text-slate-400" />
-                </a>
-              </div>
-            </div>
-
-            {/* Vocabulary */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold text-lg mb-4">核心词汇 (Vocabulary)</h3>
-              <div className="flex flex-wrap gap-2">
-                {selectedUnit.core_vocabulary.map(word => (
-                  <span key={word} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium border border-slate-200">
-                    {word}
-                  </span>
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">资料库 (Resources)</h3>
+              <div className="space-y-2">
+                {[
+                  { label: '练习单 (Worksheet)', url: selectedUnit.worksheet_url, icon: BookOpen },
+                  { label: '作业单 (Homework)', url: selectedUnit.homework_url, icon: CheckCircle2 },
+                  { label: '线上练习 (Online)', url: selectedUnit.online_practice_url, icon: ExternalLink },
+                  { label: 'Kahoot链接', url: selectedUnit.kahoot_url, icon: Star },
+                  { label: '词汇练习 (Vocab)', url: selectedUnit.vocab_practice_url, icon: Settings },
+                ].map((res, i) => (
+                  <a 
+                    key={i}
+                    href={res.url || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-xl border transition-all",
+                      res.url 
+                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm" 
+                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
+                      <span className="text-sm font-medium">{res.label}</span>
+                    </div>
+                    {res.url && <ExternalLink size={14} className="text-slate-400" />}
+                  </a>
                 ))}
               </div>
             </div>
 
-            {/* Prep Template */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold text-lg mb-4">备课资料模板</h3>
-              <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-900 italic leading-relaxed">
-                "{selectedUnit.prep_material_template}"
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">备课提示 (AI Prompt)</h3>
+              <div className="p-4 bg-slate-900 rounded-xl text-xs font-mono text-indigo-300 leading-relaxed">
+                {selectedUnit.ai_prompt_template}
               </div>
+              <button className="w-full btn-primary text-xs py-3">Copy Prompt</button>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedYear) {
+    const yearUnits = MOCK_TEACHING_UNITS.filter(u => u.year_group === selectedYear);
+    return (
+      <div className="space-y-6">
+        <button 
+          onClick={() => setSelectedYear(null)}
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+        >
+          <ChevronRight size={20} className="rotate-180" /> Back to Year Groups
+        </button>
+        
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-slate-900">{selectedYear} Units</h2>
+          <button className="btn-primary text-sm flex items-center gap-2">
+            <Plus size={18} /> New Unit
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {yearUnits.map(unit => (
+            <div 
+              key={unit.id} 
+              onClick={() => setSelectedUnit(unit)}
+              className="glass-card p-6 hover:border-indigo-400 transition-all cursor-pointer group flex flex-col justify-between"
+            >
+              <div className="space-y-2">
+                <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{unit.title}</h4>
+                <p className="text-sm text-slate-500 line-clamp-2">{unit.learning_objectives[0]}</p>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  {unit.lessons.length} Lessons
+                </span>
+                <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+          ))}
+          {yearUnits.length === 0 && (
+            <div className="col-span-full p-12 text-center glass-card border-dashed">
+              <BookOpen size={48} className="mx-auto text-slate-300 mb-4" />
+              <p className="text-slate-500">No units added for {selectedYear} yet.</p>
+              <button className="mt-4 text-indigo-600 font-bold hover:underline">Add First Unit</button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -395,72 +747,253 @@ const TeachingView = ({ onOpenSyllabus }: { onOpenSyllabus: () => void }) => {
         <h2 className="text-2xl font-bold text-slate-900">Teaching Management</h2>
         <div className="flex gap-2">
           <button onClick={onOpenSyllabus} className="btn-secondary text-sm">Curriculum Map</button>
-          <button className="btn-primary text-sm flex items-center gap-2">
-            <Plus size={18} /> New Unit
-          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-card p-6">
-            <h3 className="font-bold text-lg mb-4">教学单元 (Teaching Units)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {MOCK_TEACHING_UNITS.map(unit => (
-                <div 
-                  key={unit.id} 
-                  onClick={() => setSelectedUnit(unit)}
-                  className="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-400 transition-all cursor-pointer group"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded">
-                      {unit.year_group}
-                    </span>
-                    <ChevronRight size={16} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                  </div>
-                  <h4 className="font-bold text-slate-900">{unit.title}</h4>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-1">{unit.teaching_plan}</p>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {years.map(year => (
+          <div 
+            key={year}
+            onClick={() => setSelectedYear(year)}
+            className="glass-card p-8 hover:border-indigo-400 transition-all cursor-pointer group text-center space-y-4"
+          >
+            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-indigo-600 group-hover:text-white transition-all">
+              <BookOpen size={32} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">{year}</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {MOCK_TEACHING_UNITS.filter(u => u.year_group === year).length} Units Available
+              </p>
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="glass-card p-6">
-            <h3 className="font-bold text-lg mb-4">Class Progress Tracking</h3>
-            <div className="space-y-4">
-              {['Y10-Math-A', 'Y12-Math-HL', 'Y8-Math-B'].map(cls => (
-                <div key={cls} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-slate-900">{cls}</p>
-                    <p className="text-sm text-slate-500">Last Topic: Quadratic Equations</p>
+      <div className="glass-card p-6">
+        <h3 className="font-bold text-lg mb-4">Class Progress Tracking</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {MOCK_CLASSES.map(cls => {
+            const currentUnit = MOCK_TEACHING_UNITS.find(u => u.id === cls.current_unit_id);
+            return (
+              <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-bold text-slate-900">{cls.name}</p>
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-200 text-slate-600 rounded">
+                      {cls.year_group}
+                    </span>
                   </div>
-                  <button className="text-indigo-600 font-semibold text-sm hover:underline">Update</button>
+                  <p className="text-sm text-slate-500">
+                    Current: <span className="font-medium text-indigo-600">{currentUnit?.title || 'None'}</span>
+                  </p>
                 </div>
-              ))}
+                <div className="mt-4 flex justify-between items-center">
+                  <span className="text-xs text-slate-400">{cls.student_ids.length} Students</span>
+                  <button 
+                    onClick={() => currentUnit && setSelectedUnit(currentUnit)}
+                    className="text-indigo-600 font-semibold text-sm hover:underline"
+                  >
+                    View Unit
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Dashboard = ({ 
+  currentEvent, 
+  nextEvent, 
+  onSelectUnit 
+}: { 
+  currentEvent: TimetableEntry | undefined; 
+  nextEvent: TimetableEntry | undefined;
+  onSelectUnit: (id: string) => void;
+}) => {
+  return (
+    <div className="space-y-8">
+      {/* Header & Current Context */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900">Hello, Nalo!</h2>
+          <p className="text-slate-500 mt-1">It's {format(new Date(), 'EEEE, MMMM do, HH:mm')}</p>
+        </div>
+        
+        <div className="flex gap-3">
+          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="p-3 bg-white border border-slate-200 rounded-xl text-indigo-600 hover:bg-slate-50 transition-colors shadow-sm">
+            <ExternalLink size={20} />
+          </a>
+          <button className="btn-primary flex items-center gap-2">
+            <Plus size={18} />
+            <span>New Record</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Context Card */}
+      <section className="glass-card p-6 border-l-4 border-l-indigo-600">
+        <div className="flex items-start justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-widest">
+              <Clock size={16} />
+              <span>Current Context</span>
             </div>
+            
+            {currentEvent ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
+                  {currentEvent.type === 'lesson' && (
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                      currentEvent.is_prepared ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                    )}>
+                      {currentEvent.is_prepared ? '已备课' : '未备课'}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-slate-500">
+                  <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
+                  <span className="flex items-center gap-1"><Calendar size={16} /> Room {currentEvent.room}</span>
+                  {currentEvent.topic && (
+                    <span className="flex items-center gap-1 text-indigo-600 font-medium">
+                      <BookOpen size={16} /> {currentEvent.topic}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">Free Time / Planning</h3>
+                <p className="text-slate-500 mt-1">Perfect time to review your startup ideas or prep for next class.</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="hidden sm:block text-right">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Event</p>
+            {nextEvent ? (
+              <div className="mt-1">
+                <p className="font-bold text-slate-900">{nextEvent.subject}</p>
+                <p className="text-xs text-slate-500">
+                  {nextEvent.start_time} · {nextEvent.class_name} · Room {nextEvent.room}
+                </p>
+              </div>
+            ) : (
+              <p className="font-semibold text-slate-400 mt-1 italic">No more events today</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Class Progress Tracking */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900">Class Progress Tracking</h4>
+            <button className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {MOCK_CLASSES.slice(0, 4).map(cls => {
+              const currentUnit = MOCK_TEACHING_UNITS.find(u => u.id === cls.current_unit_id);
+              return (
+                <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">{cls.name}</p>
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
+                      Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => currentUnit && onSelectUnit(currentUnit.id)}
+                    className="mt-3 text-[10px] font-bold text-indigo-600 hover:underline text-left"
+                  >
+                    View Module →
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="glass-card p-6">
-            <h3 className="font-bold text-lg mb-4">Homework Registry</h3>
-            <div className="space-y-3">
-              {[
-                { class: 'Y10-A', status: 'Pending', count: '12/25' },
-                { class: 'Y12-HL', status: 'Completed', count: '18/18' },
-                { class: 'Y8-B', status: 'Pending', count: '5/20' }
-              ].map((hw, i) => (
-                <div key={i} className="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-lg shadow-sm">
-                  <span className="font-medium text-slate-700">{hw.class}</span>
-                  <span className={cn(
-                    "text-xs px-2 py-1 rounded-full font-bold",
-                    hw.status === 'Completed' ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
-                  )}>
-                    {hw.count}
-                  </span>
+        {/* Goals / OKRs */}
+        <div className="glass-card p-6 space-y-4">
+          <h4 className="font-bold text-slate-900">Active Goals</h4>
+          <div className="space-y-3">
+            {MOCK_GOALS.filter(g => g.status === 'in-progress').slice(0, 2).map(goal => (
+              <div key={goal.id} className="space-y-2">
+                <div className="flex justify-between text-[10px] font-bold">
+                  <span className="text-slate-600">{goal.title}</span>
+                  <span className="text-indigo-600">{goal.progress}%</span>
                 </div>
-              ))}
-            </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-600 transition-all" style={{ width: `${goal.progress}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Emergency Support */}
+        <div className="glass-card p-6 bg-red-50 border-red-100 space-y-4">
+          <h4 className="font-bold text-red-900">Emergency Support</h4>
+          <div className="space-y-2">
+            <button 
+              onClick={() => window.location.href = 'mailto:upperoncall@harrowhaikou.cn?subject=Emergency Support Needed in A219'}
+              className="w-full py-2 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <AlertCircle size={14} /> Upper On-Call
+            </button>
+            <button className="w-full py-2 bg-white text-red-600 border border-red-200 text-xs font-bold rounded-lg hover:bg-red-50 transition-colors">
+              Medical Alert
+            </button>
+          </div>
+        </div>
+
+        {/* School Events */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-slate-900">Recent Events</h4>
+            <button className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
+          <div className="space-y-3">
+            {MOCK_SCHOOL_EVENTS.slice(0, 3).map(event => (
+              <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-start">
+                  <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
+                  <span className="text-[9px] text-slate-400">{event.date}</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">{event.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Work Logs */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900">Recent Work Logs</h4>
+            <button className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
+          </div>
+          <div className="space-y-3">
+            {MOCK_WORK_LOGS.slice(0, 3).map(log => (
+              <div key={log.id} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className={cn(
+                  "w-1 h-auto rounded-full",
+                  log.category === 'tutor' ? "bg-indigo-500" : "bg-emerald-500"
+                )} />
+                <div>
+                  <p className="text-xs font-bold text-slate-900">{log.content}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{log.timestamp}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -638,6 +1171,9 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
+  const [selectedTeachingUnitId, setSelectedTeachingUnitId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -673,345 +1209,34 @@ export default function App() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <div className="space-y-8">
-            {/* Header & Current Context */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <h2 className="text-3xl font-bold text-slate-900">Hello, Nalo!</h2>
-                <p className="text-slate-500 mt-1">It's {format(currentTime, 'EEEE, MMMM do, HH:mm')}</p>
-              </div>
-              
-              <div className="flex gap-3">
-                <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="p-3 bg-white border border-slate-200 rounded-xl text-indigo-600 hover:bg-slate-50 transition-colors shadow-sm">
-                  <ExternalLink size={20} />
-                </a>
-                <button className="btn-primary flex items-center gap-2">
-                  <Plus size={18} />
-                  <span>New Record</span>
-                </button>
-              </div>
-            </header>
-
-            {/* Context Card */}
-            <section className="glass-card p-6 border-l-4 border-l-indigo-600">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-widest">
-                    <Clock size={16} />
-                    <span>Current Context</span>
-                  </div>
-                  
-                  {currentEvent ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
-                        {currentEvent.type === 'lesson' && (
-                          <span className={cn(
-                            "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                            currentEvent.is_prepared ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
-                          )}>
-                            {currentEvent.is_prepared ? '已备课' : '未备课'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 text-slate-500">
-                        <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
-                        <span className="flex items-center gap-1"><Calendar size={16} /> Room {currentEvent.room}</span>
-                        {currentEvent.topic && (
-                          <span className="flex items-center gap-1 text-indigo-600 font-medium">
-                            <BookOpen size={16} /> {currentEvent.topic}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <h3 className="text-2xl font-bold text-slate-900">Free Time / Planning</h3>
-                      <p className="text-slate-500 mt-1">Perfect time to review your startup ideas or prep for next class.</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="hidden sm:block text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Event</p>
-                  {nextEvent ? (
-                    <div className="mt-1">
-                      <p className="font-bold text-slate-900">{nextEvent.subject}</p>
-                      <p className="text-xs text-slate-500">
-                        {nextEvent.start_time} · {nextEvent.class_name} · Room {nextEvent.room}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="font-semibold text-slate-400 mt-1 italic">No more events today</p>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Recent Events / School Announcements */}
-            <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <AlertCircle size={20} className="text-amber-500" /> 近期安排 (Recent Events)
-                </h3>
-                <button className="text-indigo-600 text-sm font-semibold hover:underline">View All</button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {(['personal', 'school-wide', 'house', 'event'] as const).map(cat => (
-                  <div key={cat} className="glass-card p-4 flex flex-col h-full">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={cn(
-                        "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
-                        cat === 'personal' ? "bg-red-50 text-red-600" :
-                        cat === 'school-wide' ? "bg-blue-50 text-blue-600" :
-                        cat === 'house' ? "bg-emerald-50 text-emerald-600" :
-                        "bg-purple-50 text-purple-600"
-                      )}>
-                        {cat === 'personal' ? '与我有关' : 
-                         cat === 'school-wide' ? '学校级别' :
-                         cat === 'house' ? '院舍活动' : '学校活动'}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-3 flex-grow">
-                      {MOCK_SCHOOL_EVENTS.filter(e => e.category === cat).map(event => (
-                        <div key={event.id} className="group cursor-pointer">
-                          <h4 className="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                            {event.title}
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{event.description}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-[10px] text-slate-400 font-medium">{event.date}</span>
-                            {event.is_action_required && (
-                              <span className="flex items-center gap-1 text-[10px] text-red-500 font-bold">
-                                <AlertCircle size={10} /> Action
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      {MOCK_SCHOOL_EVENTS.filter(e => e.category === cat).length === 0 && (
-                        <p className="text-xs text-slate-400 italic">No recent updates</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Dream Board & Goals */}
-            <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <Star size={20} className="text-amber-400" /> 梦想版与目标 (Dream Board & Goals)
-                </h3>
-                <button className="text-indigo-600 text-sm font-semibold hover:underline">Manage Goals</button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {MOCK_GOALS.map(goal => (
-                  <div key={goal.id} className="glass-card overflow-hidden group">
-                    <div className="h-32 relative">
-                      <img 
-                        src={goal.image_url} 
-                        alt={goal.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <span className={cn(
-                        "absolute top-2 left-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded text-white",
-                        goal.category === 'startup' ? "bg-indigo-600" : goal.category === 'work' ? "bg-emerald-600" : "bg-purple-600"
-                      )}>
-                        {goal.category}
-                      </span>
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-slate-900 text-sm">{goal.title}</h4>
-                      <div className="mt-3 space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                          <span>Progress</span>
-                          <span>{goal.progress}%</span>
-                        </div>
-                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${goal.progress}%` }}
-                            className={cn(
-                              "h-full rounded-full",
-                              goal.category === 'startup' ? "bg-indigo-600" : goal.category === 'work' ? "bg-emerald-600" : "bg-purple-600"
-                            )}
-                          />
-                        </div>
-                      </div>
-                      {goal.deadline && (
-                        <p className="mt-3 text-[10px] text-slate-400 flex items-center gap-1">
-                          <Calendar size={10} /> Deadline: {goal.deadline}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Bento Grid Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* Quick Links */}
-              <div className="md:col-span-1 space-y-6">
-                <div className="glass-card p-5 space-y-4">
-                  <h4 className="font-bold flex items-center gap-2">
-                    <ExternalLink size={18} className="text-slate-400" />
-                    Shortcuts
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Teams', 'iSAMS', 'WeChat', 'Email', 'Drive', 'IS'].map(link => (
-                      <button key={link} className="p-3 text-xs font-semibold bg-slate-50 rounded-lg text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-slate-100">
-                        {link}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="glass-card p-5 space-y-4 border-red-100 bg-red-50/30">
-                  <h4 className="font-bold flex items-center gap-2 text-red-700">
-                    <AlertCircle size={18} />
-                    Emergency Support
-                  </h4>
-                  <a 
-                    href="mailto:upperoncall@harrowhaikou.cn?subject=Need support @A219C"
-                    className="flex flex-col gap-1 p-3 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors shadow-sm"
-                  >
-                    <span className="text-xs font-bold text-red-600">USLT & HOY Support</span>
-                    <span className="text-[10px] text-slate-500">upperoncall@harrowhaikou.cn</span>
-                  </a>
-                </div>
-
-                <div className="glass-card p-5 space-y-4">
-                  <h4 className="font-bold flex items-center gap-2">
-                    <Bell size={18} className="text-indigo-500" />
-                    Focus Reminders
-                  </h4>
-                  <div className="space-y-3">
-                    {[
-                      { text: 'Take a 5-min walk', time: 'Every 2 hours' },
-                      { text: 'Check 25maths progress', time: 'Daily 18:00' },
-                      { text: 'Update Y12 progress', time: 'Every Friday' }
-                    ].map((rem, i) => (
-                      <div key={i} className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
-                        <p className="text-xs font-bold text-indigo-900">{rem.text}</p>
-                        <p className="text-[10px] text-indigo-600 mt-0.5">{rem.time}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="glass-card p-5 space-y-4 border-emerald-100 bg-emerald-50/20">
-                  <h4 className="font-bold flex items-center gap-2 text-emerald-700">
-                    <Clock size={18} />
-                    Quick Work Log
-                  </h4>
-                  <div className="space-y-3">
-                    <textarea 
-                      placeholder="Record what you just did..."
-                      className="w-full p-3 text-xs rounded-xl border border-emerald-100 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none h-20"
-                    />
-                    <div className="flex gap-2">
-                      {['tutor', 'teaching', 'admin'].map(cat => (
-                        <button key={cat} className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider bg-white border border-emerald-100 text-emerald-600 rounded-md hover:bg-emerald-50 transition-colors">
-                          {cat}
-                        </button>
-                      ))}
-                      <button className="ml-auto btn-primary py-1 px-3 text-[10px] bg-emerald-600 hover:bg-emerald-700 border-none">
-                        Log Entry
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="glass-card p-5 space-y-4">
-                  <h4 className="font-bold flex items-center gap-2">
-                    <AlertCircle size={18} className="text-amber-500" />
-                    Urgent Tasks
-                  </h4>
-                  <div className="space-y-3">
-                    {[
-                      'Register Y10 Homework',
-                      'Contact Li Si\'s parents',
-                      'Prep for Y12 Calculus'
-                    ].map((task, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100 text-sm text-amber-900">
-                        <div className="w-2 h-2 rounded-full bg-amber-500" />
-                        {task}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Teaching Progress */}
-              <div className="md:col-span-2 glass-card p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-lg">Teaching Progress</h4>
-                  <button className="text-indigo-600 text-sm font-semibold hover:underline">View All</button>
-                </div>
-                <div className="space-y-6">
-                  {[
-                    { class: 'Y10-Math-A', topic: 'Quadratic Equations', progress: 65 },
-                    { class: 'Y12-Math-HL', topic: 'Differentiation', progress: 40 },
-                    { class: 'Y8-Math-B', topic: 'Probability', progress: 90 }
-                  ].map((item, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-bold text-slate-700">{item.class}</span>
-                        <span className="text-slate-500">{item.topic}</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${item.progress}%` }}
-                          transition={{ duration: 1, delay: i * 0.2 }}
-                          className="h-full bg-indigo-600 rounded-full" 
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Startup Ideas / Dream Board */}
-              <div className="md:col-span-3 glass-card p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-lg flex items-center gap-2">
-                    <Lightbulb size={20} className="text-indigo-600" />
-                    Startup灵感池 (25maths)
-                  </h4>
-                  <button className="btn-secondary text-xs">Manage Board</button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[
-                    { title: 'Interactive Geometry Tool', desc: 'A web app for students to visualize 3D shapes.' },
-                    { title: 'AI Math Tutor Bot', desc: 'LLM based assistant for solving word problems.' },
-                    { title: 'Curriculum Mapping', desc: 'Aligning IGCSE with local math standards.' }
-                  ].map((idea, i) => (
-                    <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 transition-colors cursor-pointer group">
-                      <h5 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{idea.title}</h5>
-                      <p className="text-sm text-slate-500 mt-1">{idea.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <Dashboard 
+            currentEvent={currentEvent} 
+            nextEvent={nextEvent} 
+            onSelectUnit={(id) => {
+              setSelectedTeachingUnitId(id);
+              setActiveTab('teaching');
+            }}
+          />
         );
       case 'timetable':
         return <TimetableView />;
       case 'students':
-        return <StudentsView />;
+        return (
+          <StudentsView 
+            selectedStudentId={selectedStudentId}
+            onSelectStudent={setSelectedStudentId}
+            selectedClassId={selectedClassId}
+            onSelectClass={setSelectedClassId}
+          />
+        );
       case 'teaching':
-        return <TeachingView onOpenSyllabus={() => setIsSyllabusModalOpen(true)} />;
+        return (
+          <TeachingView 
+            onOpenSyllabus={() => setIsSyllabusModalOpen(true)} 
+            initialUnitId={selectedTeachingUnitId}
+            onClearInitialUnit={() => setSelectedTeachingUnitId(null)}
+          />
+        );
       case 'sop':
         return <SOPView />;
       case 'worklogs':
