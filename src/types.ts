@@ -140,6 +140,7 @@ export interface SubUnit {
   online_practice_url?: string;
   kahoot_url?: string;
   homework_url?: string;
+  vocab_practice_url?: string;
   homework_content?: string;
   reflection?: TeachingReflection;
   ai_summary?: string;

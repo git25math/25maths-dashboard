@@ -85,6 +85,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   const [onlinePracticeUrl, setOnlinePracticeUrl] = useState('');
   const [kahootUrl, setKahootUrl] = useState('');
   const [homeworkUrl, setHomeworkUrl] = useState('');
+  const [vocabPracticeUrl, setVocabPracticeUrl] = useState('');
   const [homeworkContent, setHomeworkContent] = useState('');
   const [reflection, setReflection] = useState<TeachingReflection>(emptyReflection);
   const [aiSummary, setAiSummary] = useState('');
@@ -100,6 +101,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
       setOnlinePracticeUrl(subUnit.online_practice_url || '');
       setKahootUrl(subUnit.kahoot_url || '');
       setHomeworkUrl(subUnit.homework_url || '');
+      setVocabPracticeUrl(subUnit.vocab_practice_url || '');
       setHomeworkContent(subUnit.homework_content || '');
       setReflection(subUnit.reflection || emptyReflection);
       setAiSummary(subUnit.ai_summary || '');
@@ -119,6 +121,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
       online_practice_url: onlinePracticeUrl || undefined,
       kahoot_url: kahootUrl || undefined,
       homework_url: homeworkUrl || undefined,
+      vocab_practice_url: vocabPracticeUrl || undefined,
       homework_content: homeworkContent || undefined,
       reflection: reflection,
       ai_summary: aiSummary || undefined,
@@ -258,6 +261,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
               <UrlWithUpload label="线上练习 Online Practice URL" value={onlinePracticeUrl} onChange={setOnlinePracticeUrl} />
               <UrlWithUpload label="Kahoot URL" value={kahootUrl} onChange={setKahootUrl} />
               <UrlWithUpload label="课后作业 Homework URL" value={homeworkUrl} onChange={setHomeworkUrl} />
+              <UrlWithUpload label="核心词汇练习 Vocab Practice URL" value={vocabPracticeUrl} onChange={setVocabPracticeUrl} />
             </div>
           </section>
 
