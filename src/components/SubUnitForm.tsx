@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, Plus, Trash2, Paperclip, Loader2 } from 'lucide-react';
 import { SubUnit, VocabularyItem, TeachingReflection } from '../types';
 import { RichTextEditor } from './RichTextEditor';
+import { uploadFile } from '../services/storageService';
 
 interface SubUnitFormProps {
   subUnit?: SubUnit | null;
@@ -10,6 +11,61 @@ interface SubUnitFormProps {
 }
 
 const genId = () => Math.random().toString(36).substr(2, 9);
+
+function UrlWithUpload({ label, value, onChange, placeholder }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadFile(file);
+      onChange(url);
+    } catch (err) {
+      alert('Upload failed: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-1">
+      <label className="text-xs text-slate-500">{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="url"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
+          placeholder={placeholder || 'https://...'}
+        />
+        <label className={`flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 cursor-pointer transition-colors ${uploading ? 'bg-slate-100' : 'hover:bg-slate-50'}`}>
+          {uploading ? (
+            <Loader2 size={18} className="text-indigo-500 animate-spin" />
+          ) : (
+            <Paperclip size={18} className="text-slate-400" />
+          )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.ppt,.pptx"
+            className="hidden"
+            onChange={handleFile}
+            disabled={uploading}
+          />
+        </label>
+      </div>
+    </div>
+  );
+}
 
 const emptyReflection: TeachingReflection = {
   lesson_date: '',
@@ -198,46 +254,10 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">资源链接 Resource Links</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs text-slate-500">练习单 Worksheet URL</label>
-                <input
-                  type="url"
-                  value={worksheetUrl}
-                  onChange={e => setWorksheetUrl(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                  placeholder="https://..."
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-slate-500">线上练习 Online Practice URL</label>
-                <input
-                  type="url"
-                  value={onlinePracticeUrl}
-                  onChange={e => setOnlinePracticeUrl(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                  placeholder="https://..."
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-slate-500">Kahoot URL</label>
-                <input
-                  type="url"
-                  value={kahootUrl}
-                  onChange={e => setKahootUrl(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                  placeholder="https://..."
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-slate-500">课后作业 Homework URL</label>
-                <input
-                  type="url"
-                  value={homeworkUrl}
-                  onChange={e => setHomeworkUrl(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                  placeholder="https://..."
-                />
-              </div>
+              <UrlWithUpload label="练习单 Worksheet URL" value={worksheetUrl} onChange={setWorksheetUrl} />
+              <UrlWithUpload label="线上练习 Online Practice URL" value={onlinePracticeUrl} onChange={setOnlinePracticeUrl} />
+              <UrlWithUpload label="Kahoot URL" value={kahootUrl} onChange={setKahootUrl} />
+              <UrlWithUpload label="课后作业 Homework URL" value={homeworkUrl} onChange={setHomeworkUrl} />
             </div>
           </section>
 
