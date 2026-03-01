@@ -21,7 +21,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { format, isWithinInterval, parse } from 'date-fns';
 import { cn } from './lib/utils';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, SYLLABUS, MOCK_CLASSES } from './constants';
-import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonPlanItem } from './types';
+import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonPlanItem, StudentStatusRecord, StudentRequest } from './types';
+import { studentService } from './services/studentService';
+import { teachingService } from './services/teachingService';
+import { classService } from './services/classService';
+import { StudentForm } from './components/StudentForm';
+import { TeachingUnitForm } from './components/TeachingUnitForm';
+import { ClassForm } from './components/ClassForm';
+import { GenericForm } from './components/GenericForm';
+import { MarkdownRenderer } from './components/RichTextEditor';
+import { TimetableEntryForm } from './components/TimetableEntryForm';
 
 // --- Components ---
 
@@ -112,7 +121,17 @@ const QuickCapture = () => {
 
 // --- Views ---
 
-const TimetableView = () => {
+const TimetableView = ({ 
+  timetable, 
+  onEditEntry, 
+  classes, 
+  teachingUnits 
+}: { 
+  timetable: TimetableEntry[], 
+  onEditEntry: (entry: TimetableEntry) => void,
+  classes: ClassProfile[],
+  teachingUnits: TeachingUnit[]
+}) => {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   
   return (
@@ -157,18 +176,21 @@ const TimetableView = () => {
                 {time}
               </div>
               {[1, 2, 3, 4, 5].map(day => {
-                const entry = MOCK_TIMETABLE.find(e => e.day === day && e.start_time === time);
+                const entry = timetable.find(e => e.day === day && e.start_time === time);
                 return (
                   <div key={`${day}-${time}`} className="border-t border-slate-100 py-1">
                     {entry ? (
-                      <div className={cn(
-                        "p-2 rounded-lg text-[10px] h-full border shadow-sm transition-all hover:scale-[1.02]",
-                        entry.type === 'lesson' ? "bg-indigo-50 border-indigo-100 text-indigo-700" :
-                        entry.type === 'tutor' ? "bg-emerald-50 border-emerald-100 text-emerald-700" :
-                        entry.type === 'duty' ? "bg-amber-50 border-amber-100 text-amber-700" :
-                        entry.type === 'meeting' ? "bg-purple-50 border-purple-100 text-purple-700" :
-                        "bg-slate-50 border-slate-200 text-slate-600"
-                      )}>
+                      <div 
+                        onClick={() => onEditEntry(entry)}
+                        className={cn(
+                          "p-2 rounded-lg text-[10px] h-full border shadow-sm transition-all hover:scale-[1.02] cursor-pointer",
+                          entry.type === 'lesson' ? "bg-indigo-50 border-indigo-100 text-indigo-700" :
+                          entry.type === 'tutor' ? "bg-emerald-50 border-emerald-100 text-emerald-700" :
+                          entry.type === 'duty' ? "bg-amber-50 border-amber-100 text-amber-700" :
+                          entry.type === 'meeting' ? "bg-purple-50 border-purple-100 text-purple-700" :
+                          "bg-slate-50 border-slate-200 text-slate-600"
+                        )}
+                      >
                         <div className="flex justify-between items-start">
                           <p className="font-bold truncate">{entry.subject}</p>
                           {entry.is_prepared !== undefined && (
@@ -199,30 +221,74 @@ const TimetableView = () => {
 };
 
 const StudentsView = ({ 
+  students,
+  classes,
   selectedStudentId, 
   onSelectStudent, 
   selectedClassId, 
-  onSelectClass 
+  onSelectClass,
+  onAddStudent,
+  onUpdateStudent,
+  onDeleteStudent,
+  onAddClass,
+  onUpdateClass,
+  onDeleteClass,
+  onAddStatusRecord,
+  onAddRequest
 }: { 
+  students: Student[];
+  classes: ClassProfile[];
   selectedStudentId: string | null; 
   onSelectStudent: (id: string | null) => void;
   selectedClassId: string | null;
   onSelectClass: (id: string | null) => void;
+  onAddStudent: () => void;
+  onUpdateStudent: (id: string, updates: Partial<Student>) => void;
+  onDeleteStudent: (id: string) => void;
+  onAddClass: () => void;
+  onUpdateClass: (id: string) => void;
+  onDeleteClass: (id: string) => void;
+  onAddStatusRecord: (studentId: string) => void;
+  onAddRequest: (studentId: string) => void;
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'classes' | 'students'>('classes');
 
-  const selectedStudent = MOCK_STUDENTS.find(s => s.id === selectedStudentId);
-  const selectedClass = MOCK_CLASSES.find(c => c.id === selectedClassId);
+  const selectedStudent = students.find(s => s.id === selectedStudentId);
+  const selectedClass = classes.find(c => c.id === selectedClassId);
 
   if (selectedStudent) {
     return (
       <div className="space-y-6">
-        <button 
-          onClick={() => onSelectStudent(null)}
-          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-        >
-          <ChevronRight size={20} className="rotate-180" /> Back to List
-        </button>
+        <div className="flex justify-between items-center">
+          <button 
+            onClick={() => onSelectStudent(null)}
+            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+          >
+            <ChevronRight size={20} className="rotate-180" /> Back to List
+          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                // We'll handle editing in the parent component
+                onUpdateStudent(selectedStudent.id, {});
+              }}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              Edit Student
+            </button>
+            <button 
+              onClick={() => {
+                if (confirm('Are you sure you want to delete this student?')) {
+                  onDeleteStudent(selectedStudent.id);
+                  onSelectStudent(null);
+                }
+              }}
+              className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -253,13 +319,16 @@ const StudentsView = ({
                           {record.category}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-700 leading-relaxed">{record.content}</p>
+                      <MarkdownRenderer content={record.content} className="text-sm text-slate-700 leading-relaxed" />
                     </div>
                   ))}
                   {(!selectedStudent.status_records || selectedStudent.status_records.length === 0) && (
                     <p className="text-sm text-slate-400 italic">No status records found.</p>
                   )}
-                  <button className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all">
+                  <button 
+                    onClick={() => onAddStatusRecord(selectedStudent.id)}
+                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                  >
                     + Add Status Record
                   </button>
                 </div>
@@ -296,7 +365,7 @@ const StudentsView = ({
               <div className="space-y-3">
                 {selectedStudent.requests?.map(req => (
                   <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                    <p className="text-xs text-slate-700">{req.content}</p>
+                    <MarkdownRenderer content={req.content} className="text-xs text-slate-700" />
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-slate-400">{req.date}</span>
                       <span className={cn(
@@ -308,7 +377,12 @@ const StudentsView = ({
                     </div>
                   </div>
                 ))}
-                <button className="w-full btn-secondary text-xs py-2">+ New Request</button>
+                <button 
+                  onClick={() => onAddRequest(selectedStudent.id)}
+                  className="w-full btn-secondary text-xs py-2"
+                >
+                  + New Request
+                </button>
               </div>
             </div>
 
@@ -336,15 +410,36 @@ const StudentsView = ({
   }
 
   if (selectedClass) {
-    const classStudents = MOCK_STUDENTS.filter(s => selectedClass.student_ids.includes(s.id));
+    const classStudents = students.filter(s => selectedClass.student_ids.includes(s.id));
     return (
       <div className="space-y-6">
-        <button 
-          onClick={() => onSelectClass(null)}
-          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-        >
-          <ChevronRight size={20} className="rotate-180" /> Back to Classes
-        </button>
+        <div className="flex justify-between items-center">
+          <button 
+            onClick={() => onSelectClass(null)}
+            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+          >
+            <ChevronRight size={20} className="rotate-180" /> Back to Classes
+          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => onUpdateClass(selectedClass.id)}
+              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              Edit Class
+            </button>
+            <button 
+              onClick={() => {
+                if (confirm('Delete this class?')) {
+                  onDeleteClass(selectedClass.id);
+                  onSelectClass(null);
+                }
+              }}
+              className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
 
         <div className="glass-card p-8 space-y-8">
           <div className="flex justify-between items-start">
@@ -382,31 +477,40 @@ const StudentsView = ({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-900">Student & Class Management</h2>
-        <div className="flex bg-slate-100 p-1 rounded-xl">
+        <div className="flex items-center gap-4">
           <button 
-            onClick={() => setActiveSubTab('classes')}
-            className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-all",
-              activeSubTab === 'classes' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            )}
+            onClick={activeSubTab === 'students' ? onAddStudent : onAddClass}
+            className="btn-primary flex items-center gap-2"
           >
-            Classes
+            <Plus size={18} />
+            {activeSubTab === 'students' ? 'Add Student' : 'Add Class'}
           </button>
-          <button 
-            onClick={() => setActiveSubTab('students')}
-            className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-all",
-              activeSubTab === 'students' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            All Students
-          </button>
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button 
+              onClick={() => setActiveSubTab('classes')}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                activeSubTab === 'classes' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              Classes
+            </button>
+            <button 
+              onClick={() => setActiveSubTab('students')}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                activeSubTab === 'students' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              All Students
+            </button>
+          </div>
         </div>
       </div>
 
       {activeSubTab === 'classes' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_CLASSES.map(cls => (
+          {classes.map(cls => (
             <div 
               key={cls.id}
               onClick={() => onSelectClass(cls.id)}
@@ -433,7 +537,7 @@ const StudentsView = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MOCK_STUDENTS.map(student => (
+          {students.map(student => (
             <div 
               key={student.id} 
               onClick={() => onSelectStudent(student.id)}
@@ -466,13 +570,27 @@ const StudentsView = ({
 };
 
 const TeachingView = ({ 
+  teachingUnits,
   onOpenSyllabus, 
   initialUnitId, 
-  onClearInitialUnit 
+  onClearInitialUnit,
+  onAddUnit,
+  onUpdateUnit,
+  onDeleteUnit,
+  classes,
+  onUpdateClassProgress,
+  onUpdateClass
 }: { 
+  teachingUnits: TeachingUnit[];
   onOpenSyllabus: () => void;
   initialUnitId: string | null;
   onClearInitialUnit: () => void;
+  onAddUnit: () => void;
+  onUpdateUnit: (id: string) => void;
+  onDeleteUnit: (id: string) => void;
+  classes: ClassProfile[];
+  onUpdateClassProgress: (classId: string, lessonId: string, completed: boolean) => void;
+  onUpdateClass: (id: string) => void;
 }) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
@@ -480,14 +598,14 @@ const TeachingView = ({
 
   useEffect(() => {
     if (initialUnitId) {
-      const unit = MOCK_TEACHING_UNITS.find(u => u.id === initialUnitId);
+      const unit = teachingUnits.find(u => u.id === initialUnitId);
       if (unit) {
         setSelectedUnit(unit);
         setSelectedYear(unit.year_group);
       }
       onClearInitialUnit();
     }
-  }, [initialUnitId, onClearInitialUnit]);
+  }, [initialUnitId, onClearInitialUnit, teachingUnits]);
 
   const years = ['Year 7', 'Year 8', 'Year 10', 'Year 11', 'Year 12'];
 
@@ -518,7 +636,7 @@ const TeachingView = ({
                   {selectedLesson.objectives.map((obj, i) => (
                     <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
-                      {obj}
+                      <MarkdownRenderer content={obj} />
                     </li>
                   ))}
                 </ul>
@@ -531,8 +649,8 @@ const TeachingView = ({
                 </h3>
                 <div className="space-y-3">
                   {selectedLesson.activities.map((act, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-700">
-                      {act}
+                    <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <MarkdownRenderer content={act} className="text-sm text-slate-700" />
                     </div>
                   ))}
                 </div>
@@ -584,9 +702,25 @@ const TeachingView = ({
                   </span>
                   <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedUnit.title}</h2>
                 </div>
-                <button className="btn-secondary text-xs flex items-center gap-2">
-                  <Plus size={14} /> Add Resource
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => onUpdateUnit(selectedUnit.id)}
+                    className="btn-secondary text-xs"
+                  >
+                    Edit Unit
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (confirm('Delete this unit?')) {
+                        onDeleteUnit(selectedUnit.id);
+                        setSelectedUnit(null);
+                      }
+                    }}
+                    className="px-3 py-2 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
 
               <section className="space-y-4">
@@ -595,7 +729,7 @@ const TeachingView = ({
                   {selectedUnit.learning_objectives.map((obj, i) => (
                     <li key={i} className="flex items-start gap-2 text-slate-600">
                       <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                      {obj}
+                      <MarkdownRenderer content={obj} />
                     </li>
                   ))}
                 </ul>
@@ -604,19 +738,46 @@ const TeachingView = ({
               <section className="space-y-4">
                 <h3 className="font-bold text-lg">课时拆分 (Lesson Breakdown)</h3>
                 <div className="grid grid-cols-1 gap-3">
-                  {selectedUnit.lessons.map((lesson, i) => (
-                    <button 
-                      key={lesson.id}
-                      onClick={() => setSelectedLesson(lesson)}
-                      className="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all text-left group"
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Lesson {i + 1}</p>
-                        <p className="font-bold text-slate-900">{lesson.title}</p>
+                  {selectedUnit.lessons.map((lesson, i) => {
+                    const unitClasses = classes.filter(c => c.current_unit_id === selectedUnit.id);
+                    return (
+                      <div key={lesson.id} className="space-y-2">
+                        <button 
+                          onClick={() => setSelectedLesson(lesson)}
+                          className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all text-left group"
+                        >
+                          <div>
+                            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Lesson {i + 1}</p>
+                            <p className="font-bold text-slate-900">{lesson.title}</p>
+                          </div>
+                          <ChevronRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+                        </button>
+                        
+                        {unitClasses.length > 0 && (
+                          <div className="flex flex-wrap gap-2 px-2">
+                            {unitClasses.map(cls => {
+                              const isCompleted = cls.completed_lesson_ids?.includes(lesson.id);
+                              return (
+                                <button
+                                  key={cls.id}
+                                  onClick={() => onUpdateClassProgress(cls.id, lesson.id, !isCompleted)}
+                                  className={cn(
+                                    "px-2 py-0.5 rounded-full text-[9px] font-bold border transition-all flex items-center gap-1",
+                                    isCompleted 
+                                      ? "bg-indigo-600 border-indigo-600 text-white" 
+                                      : "bg-white border-slate-200 text-slate-400"
+                                  )}
+                                >
+                                  {isCompleted && <CheckCircle2 size={8} />}
+                                  {cls.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                      <ChevronRight size={18} className="text-slate-400 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
 
@@ -625,8 +786,14 @@ const TeachingView = ({
                 <div className="space-y-4">
                   {selectedUnit.typical_examples.map((ex, i) => (
                     <div key={i} className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
-                      <p className="font-bold text-indigo-900 text-sm">Q: {ex.question}</p>
-                      <p className="text-sm text-slate-600 pl-4 border-l-2 border-indigo-200">A: {ex.solution}</p>
+                      <div className="font-bold text-indigo-900 text-sm flex gap-2">
+                        <span className="shrink-0">Q:</span>
+                        <MarkdownRenderer content={ex.question} />
+                      </div>
+                      <div className="text-sm text-slate-600 pl-4 border-l-2 border-indigo-200 flex gap-2">
+                        <span className="shrink-0">A:</span>
+                        <MarkdownRenderer content={ex.solution} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -693,21 +860,26 @@ const TeachingView = ({
   }
 
   if (selectedYear) {
-    const yearUnits = MOCK_TEACHING_UNITS.filter(u => u.year_group === selectedYear);
+    const yearUnits = teachingUnits.filter(u => u.year_group === selectedYear);
     return (
       <div className="space-y-6">
-        <button 
-          onClick={() => setSelectedYear(null)}
-          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-        >
-          <ChevronRight size={20} className="rotate-180" /> Back to Year Groups
-        </button>
+        <div className="flex justify-between items-center">
+          <button 
+            onClick={() => setSelectedYear(null)}
+            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+          >
+            <ChevronRight size={20} className="rotate-180" /> Back to Year Groups
+          </button>
+          <button 
+            onClick={onAddUnit}
+            className="btn-primary text-sm flex items-center gap-2"
+          >
+            <Plus size={18} /> New Unit
+          </button>
+        </div>
         
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900">{selectedYear} Units</h2>
-          <button className="btn-primary text-sm flex items-center gap-2">
-            <Plus size={18} /> New Unit
-          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -763,7 +935,7 @@ const TeachingView = ({
             <div>
               <h3 className="text-xl font-bold text-slate-900">{year}</h3>
               <p className="text-sm text-slate-500 mt-1">
-                {MOCK_TEACHING_UNITS.filter(u => u.year_group === year).length} Units Available
+                {teachingUnits.filter(u => u.year_group === year).length} Units Available
               </p>
             </div>
           </div>
@@ -773,8 +945,9 @@ const TeachingView = ({
       <div className="glass-card p-6">
         <h3 className="font-bold text-lg mb-4">Class Progress Tracking</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MOCK_CLASSES.map(cls => {
-            const currentUnit = MOCK_TEACHING_UNITS.find(u => u.id === cls.current_unit_id);
+          {classes.map(cls => {
+            const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
+            const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / currentUnit.lessons.length) * 100) : 0;
             return (
               <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                 <div>
@@ -787,15 +960,32 @@ const TeachingView = ({
                   <p className="text-sm text-slate-500">
                     Current: <span className="font-medium text-indigo-600">{currentUnit?.title || 'None'}</span>
                   </p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                      <span>PROGRESS</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-4 flex justify-between items-center">
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => onUpdateClass(cls.id)}
+                      className="text-slate-400 font-bold text-[10px] uppercase tracking-wider hover:text-indigo-600 transition-colors"
+                    >
+                      Change Unit
+                    </button>
+                    <button 
+                      onClick={() => currentUnit && setSelectedUnit(currentUnit)}
+                      className="text-indigo-600 font-bold text-[10px] uppercase tracking-wider hover:underline"
+                    >
+                      View Unit
+                    </button>
+                  </div>
                   <span className="text-xs text-slate-400">{cls.student_ids.length} Students</span>
-                  <button 
-                    onClick={() => currentUnit && setSelectedUnit(currentUnit)}
-                    className="text-indigo-600 font-semibold text-sm hover:underline"
-                  >
-                    View Unit
-                  </button>
                 </div>
               </div>
             );
@@ -969,7 +1159,7 @@ const Dashboard = ({
                   <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
                   <span className="text-[9px] text-slate-400">{event.date}</span>
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">{event.description}</p>
+                <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 mt-1 line-clamp-1" />
               </div>
             ))}
           </div>
@@ -989,7 +1179,7 @@ const Dashboard = ({
                   log.category === 'tutor' ? "bg-indigo-500" : "bg-emerald-500"
                 )} />
                 <div>
-                  <p className="text-xs font-bold text-slate-900">{log.content}</p>
+                  <MarkdownRenderer content={log.content} className="text-xs font-bold text-slate-900" />
                   <p className="text-[10px] text-slate-400 mt-0.5">{log.timestamp}</p>
                 </div>
               </div>
@@ -1018,14 +1208,7 @@ const SOPView = () => {
               </span>
             </div>
             <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{sop.title}</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              {sop.content.split(' ').map((word, i) => {
-                if (word.includes('@')) {
-                  return <a key={i} href={`mailto:${word.replace(/[.,]$/, '')}`} className="text-indigo-600 hover:underline">{word} </a>;
-                }
-                return word + ' ';
-              })}
-            </p>
+            <MarkdownRenderer content={sop.content} className="text-sm text-slate-500 mt-1" />
             <div className="mt-4 flex items-center gap-2 text-indigo-600 text-sm font-semibold">
               Read Procedure <ChevronRight size={14} />
             </div>
@@ -1175,16 +1358,232 @@ export default function App() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
+  // Timetable State
+  const [timetable, setTimetable] = useState<TimetableEntry[]>(MOCK_TIMETABLE);
+  const [isTimetableFormOpen, setIsTimetableFormOpen] = useState(false);
+  const [editingTimetableEntry, setEditingTimetableEntry] = useState<TimetableEntry | null>(null);
+
+  // Students State
+  const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
+  const [isStudentFormOpen, setIsStudentFormOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+
+  // Teaching Units State
+  const [teachingUnits, setTeachingUnits] = useState<TeachingUnit[]>(MOCK_TEACHING_UNITS);
+  const [isTeachingUnitFormOpen, setIsTeachingUnitFormOpen] = useState(false);
+  const [editingTeachingUnit, setEditingTeachingUnit] = useState<TeachingUnit | null>(null);
+
+  // Classes State
+  const [classes, setClasses] = useState<ClassProfile[]>(MOCK_CLASSES);
+  const [isClassFormOpen, setIsClassFormOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState<ClassProfile | null>(null);
+
+  // Generic Form State
+  const [genericFormConfig, setGenericFormConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    label: string;
+    initialValue?: string;
+    onSave: (content: string) => void;
+    placeholder?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    label: '',
+    onSave: () => {}
+  });
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    fetchStudents();
+    fetchTeachingUnits();
+    fetchClasses();
     return () => clearInterval(timer);
   }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const data = await studentService.getAllStudents();
+      if (data && data.length > 0) setStudents(data);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    }
+  };
+
+  const fetchTeachingUnits = async () => {
+    try {
+      const data = await teachingService.getAllUnits();
+      if (data && data.length > 0) setTeachingUnits(data);
+    } catch (error) {
+      console.error('Error fetching teaching units:', error);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      const data = await classService.getAllClasses();
+      if (data && data.length > 0) setClasses(data);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
+
+  const handleAddStudent = async (studentData: Omit<Student, 'id'> | Student) => {
+    try {
+      if ('id' in studentData) {
+        const updated = await studentService.updateStudent(studentData.id, studentData);
+        setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
+      } else {
+        const created = await studentService.createStudent(studentData);
+        setStudents(prev => [...prev, created]);
+      }
+      setIsStudentFormOpen(false);
+      setEditingStudent(null);
+    } catch (error) {
+      console.error('Error saving student:', error);
+      alert('Failed to save student. Please check your Supabase connection.');
+    }
+  };
+
+  const handleAddTeachingUnit = async (unitData: Omit<TeachingUnit, 'id'> | TeachingUnit) => {
+    try {
+      if ('id' in unitData) {
+        const updated = await teachingService.updateUnit(unitData.id, unitData);
+        setTeachingUnits(prev => prev.map(u => u.id === updated.id ? updated : u));
+      } else {
+        const created = await teachingService.createUnit(unitData);
+        setTeachingUnits(prev => [...prev, created]);
+      }
+      setIsTeachingUnitFormOpen(false);
+      setEditingTeachingUnit(null);
+    } catch (error) {
+      console.error('Error saving teaching unit:', error);
+      alert('Failed to save teaching unit.');
+    }
+  };
+
+  const handleAddClass = async (classData: Omit<ClassProfile, 'id'> | ClassProfile) => {
+    try {
+      if ('id' in classData) {
+        const updated = await classService.updateClass(classData.id, classData);
+        setClasses(prev => prev.map(c => c.id === updated.id ? updated : c));
+      } else {
+        const created = await classService.createClass(classData);
+        setClasses(prev => [...prev, created]);
+      }
+      setIsClassFormOpen(false);
+      setEditingClass(null);
+    } catch (error) {
+      console.error('Error saving class:', error);
+      alert('Failed to save class.');
+    }
+  };
+
+  const handleDeleteClass = async (id: string) => {
+    try {
+      await classService.deleteClass(id);
+      setClasses(prev => prev.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting class:', error);
+      alert('Failed to delete class.');
+    }
+  };
+
+  const handleDeleteStudent = async (id: string) => {
+    try {
+      await studentService.deleteStudent(id);
+      setStudents(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      alert('Failed to delete student.');
+    }
+  };
+
+  const handleDeleteTeachingUnit = async (id: string) => {
+    try {
+      await teachingService.deleteUnit(id);
+      setTeachingUnits(prev => prev.filter(u => u.id !== id));
+    } catch (error) {
+      console.error('Error deleting teaching unit:', error);
+      alert('Failed to delete teaching unit.');
+    }
+  };
+
+  const handleAddStatusRecord = (studentId: string) => {
+    setGenericFormConfig({
+      isOpen: true,
+      title: 'Add Learning Status',
+      label: 'Status Content',
+      placeholder: 'Describe the student\'s learning status (supports Markdown and LaTeX)...',
+      onSave: async (content) => {
+        const newRecord: StudentStatusRecord = {
+          id: Math.random().toString(36).substr(2, 9),
+          date: new Date().toISOString().split('T')[0],
+          category: 'academic',
+          content
+        };
+        const student = students.find(s => s.id === studentId);
+        if (student) {
+          const updatedStudent = {
+            ...student,
+            status_records: [...(student.status_records || []), newRecord]
+          };
+          await handleAddStudent(updatedStudent);
+        }
+        setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const handleAddRequest = (studentId: string) => {
+    setGenericFormConfig({
+      isOpen: true,
+      title: 'New Student Request',
+      label: 'Request Details',
+      placeholder: 'What is the student requesting? (supports Markdown and LaTeX)...',
+      onSave: async (content) => {
+        const newRequest: StudentRequest = {
+          id: Math.random().toString(36).substr(2, 9),
+          date: new Date().toISOString().split('T')[0],
+          content,
+          status: 'pending'
+        };
+        const student = students.find(s => s.id === studentId);
+        if (student) {
+          const updatedStudent = {
+            ...student,
+            requests: [...(student.requests || []), newRequest]
+          };
+          await handleAddStudent(updatedStudent);
+        }
+        setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const handleUpdateTimetableEntry = (updatedEntry: TimetableEntry) => {
+    setTimetable(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
+    setIsTimetableFormOpen(false);
+    setEditingTimetableEntry(null);
+  };
+
+  const handleUpdateClassProgress = async (classId: string, lessonId: string, completed: boolean) => {
+    const cls = classes.find(c => c.id === classId);
+    if (!cls) return;
+
+    const newCompletedIds = completed 
+      ? [...(cls.completed_lesson_ids || []), lessonId]
+      : (cls.completed_lesson_ids || []).filter(id => id !== lessonId);
+
+    const updatedClass = { ...cls, completed_lesson_ids: newCompletedIds };
+    await handleAddClass(updatedClass);
+  };
 
   const getCurrentEvent = () => {
     const day = currentTime.getDay();
     const timeStr = format(currentTime, 'HH:mm');
     
-    return MOCK_TIMETABLE.find(entry => {
+    return timetable.find(entry => {
       if (entry.day !== day) return false;
       return timeStr >= entry.start_time && timeStr <= entry.end_time;
     });
@@ -1196,7 +1595,7 @@ export default function App() {
     const day = currentTime.getDay();
     const timeStr = format(currentTime, 'HH:mm');
     
-    const todaysEvents = MOCK_TIMETABLE
+    const todaysEvents = timetable
       .filter(entry => entry.day === day)
       .sort((a, b) => a.start_time.localeCompare(b.start_time));
       
@@ -1219,22 +1618,82 @@ export default function App() {
           />
         );
       case 'timetable':
-        return <TimetableView />;
+        return (
+          <TimetableView 
+            timetable={timetable}
+            onEditEntry={(entry) => {
+              setEditingTimetableEntry(entry);
+              setIsTimetableFormOpen(true);
+            }}
+            classes={classes}
+            teachingUnits={teachingUnits}
+          />
+        );
       case 'students':
         return (
           <StudentsView 
+            students={students}
+            classes={classes}
             selectedStudentId={selectedStudentId}
             onSelectStudent={setSelectedStudentId}
             selectedClassId={selectedClassId}
             onSelectClass={setSelectedClassId}
+            onAddStudent={() => {
+              setEditingStudent(null);
+              setIsStudentFormOpen(true);
+            }}
+            onUpdateStudent={(id) => {
+              const student = students.find(s => s.id === id);
+              if (student) {
+                setEditingStudent(student);
+                setIsStudentFormOpen(true);
+              }
+            }}
+            onDeleteStudent={handleDeleteStudent}
+            onAddClass={() => {
+              setEditingClass(null);
+              setIsClassFormOpen(true);
+            }}
+            onUpdateClass={(id) => {
+              const cls = classes.find(c => c.id === id);
+              if (cls) {
+                setEditingClass(cls);
+                setIsClassFormOpen(true);
+              }
+            }}
+            onDeleteClass={handleDeleteClass}
+            onAddStatusRecord={handleAddStatusRecord}
+            onAddRequest={handleAddRequest}
           />
         );
       case 'teaching':
         return (
           <TeachingView 
+            teachingUnits={teachingUnits}
             onOpenSyllabus={() => setIsSyllabusModalOpen(true)} 
             initialUnitId={selectedTeachingUnitId}
             onClearInitialUnit={() => setSelectedTeachingUnitId(null)}
+            onAddUnit={() => {
+              setEditingTeachingUnit(null);
+              setIsTeachingUnitFormOpen(true);
+            }}
+            onUpdateUnit={(id) => {
+              const unit = teachingUnits.find(u => u.id === id);
+              if (unit) {
+                setEditingTeachingUnit(unit);
+                setIsTeachingUnitFormOpen(true);
+              }
+            }}
+            onDeleteUnit={handleDeleteTeachingUnit}
+            classes={classes}
+            onUpdateClassProgress={handleUpdateClassProgress}
+            onUpdateClass={(id) => {
+              const cls = classes.find(c => c.id === id);
+              if (cls) {
+                setEditingClass(cls);
+                setIsClassFormOpen(true);
+              }
+            }}
           />
         );
       case 'sop':
@@ -1258,7 +1717,7 @@ export default function App() {
                     {idea.category}
                   </span>
                   <h3 className="font-bold text-lg text-slate-900">{idea.title}</h3>
-                  <p className="text-sm text-slate-500 mt-1 line-clamp-3">{idea.content}</p>
+                  <MarkdownRenderer content={idea.content} className="text-sm text-slate-500 mt-1 line-clamp-3" />
                 </div>
               ))}
             </div>
@@ -1363,6 +1822,60 @@ export default function App() {
         isOpen={isSyllabusModalOpen} 
         onClose={() => setIsSyllabusModalOpen(false)} 
       />
+      {isStudentFormOpen && (
+        <StudentForm 
+          student={editingStudent}
+          onSave={handleAddStudent}
+          onCancel={() => {
+            setIsStudentFormOpen(false);
+            setEditingStudent(null);
+          }}
+        />
+      )}
+      {isTeachingUnitFormOpen && (
+        <TeachingUnitForm 
+          unit={editingTeachingUnit}
+          onSave={handleAddTeachingUnit}
+          onCancel={() => {
+            setIsTeachingUnitFormOpen(false);
+            setEditingTeachingUnit(null);
+          }}
+        />
+      )}
+      {isClassFormOpen && (
+        <ClassForm 
+          classProfile={editingClass}
+          teachingUnits={teachingUnits}
+          onSave={handleAddClass}
+          onCancel={() => {
+            setIsClassFormOpen(false);
+            setEditingClass(null);
+          }}
+        />
+      )}
+      {genericFormConfig.isOpen && (
+        <GenericForm 
+          title={genericFormConfig.title}
+          label={genericFormConfig.label}
+          initialValue={genericFormConfig.initialValue}
+          onSave={genericFormConfig.onSave}
+          onCancel={() => setGenericFormConfig({ ...genericFormConfig, isOpen: false })}
+          placeholder={genericFormConfig.placeholder}
+        />
+      )}
+      {isTimetableFormOpen && editingTimetableEntry && (
+        <TimetableEntryForm 
+          entry={editingTimetableEntry}
+          classes={classes}
+          teachingUnits={teachingUnits}
+          onSave={handleUpdateTimetableEntry}
+          onCancel={() => {
+            setIsTimetableFormOpen(false);
+            setEditingTimetableEntry(null);
+          }}
+          onUpdateClassProgress={handleUpdateClassProgress}
+        />
+      )}
     </div>
   );
 }

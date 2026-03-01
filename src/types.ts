@@ -41,10 +41,14 @@ export interface TimetableEntry {
   end_time: string;
   subject: string;
   class_name: string;
+  class_id?: string; // Link to ClassProfile
   room: string;
   type: 'lesson' | 'tutor' | 'duty' | 'meeting' | 'break';
   topic?: string;
+  notes?: string;
   is_prepared?: boolean;
+  unit_id?: string; // Link to TeachingUnit
+  lesson_id?: string; // Link to specific LessonPlanItem
 }
 
 export interface LessonRecord {
@@ -126,6 +130,7 @@ export interface ClassProfile {
   year_group: string;
   description: string;
   current_unit_id?: string;
+  completed_lesson_ids?: string[]; // Track progress in current unit
   student_ids: string[];
 }
 

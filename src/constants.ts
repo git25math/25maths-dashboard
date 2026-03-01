@@ -32,21 +32,21 @@ export const MOCK_TIMETABLE: TimetableEntry[] = [
 
   // --- Monday ---
   { id: 'm-flag', day: 1, start_time: '07:35', end_time: '08:20', subject: 'Flag Raising', class_name: 'Y9-Song', room: 'A327', type: 'tutor' as const },
-  { id: 'm1', day: 1, start_time: '08:20', end_time: '09:05', subject: 'Mathematics', class_name: 'Y11/Ma/B', room: 'A219', type: 'lesson' as const, topic: 'Quadratic Functions', is_prepared: true },
-  { id: 'm2', day: 1, start_time: '11:15', end_time: '12:00', subject: 'Mathematics', class_name: 'Y7/Ma/B', room: 'A219', type: 'lesson' as const, topic: 'Fractions', is_prepared: false },
-  { id: 'm3', day: 1, start_time: '12:05', end_time: '12:50', subject: 'Mathematics', class_name: 'Y10/Ma/B', room: 'A219', type: 'lesson' as const, topic: 'Probability', is_prepared: true },
-  { id: 'm4', day: 1, start_time: '13:50', end_time: '14:35', subject: 'Mathematics', class_name: 'Y8/Ma/C', room: 'A219', type: 'lesson' as const, topic: 'Algebraic Expressions', is_prepared: true },
+  { id: 'm1', day: 1, start_time: '08:20', end_time: '09:05', subject: 'Mathematics', class_name: 'Y11/Ma/B', class_id: 'c4', unit_id: 'u-y11-1', room: 'A219', type: 'lesson' as const, topic: 'Quadratic Functions', is_prepared: true },
+  { id: 'm2', day: 1, start_time: '11:15', end_time: '12:00', subject: 'Mathematics', class_name: 'Y7/Ma/B', class_id: 'c5', unit_id: 'u-y7-1', room: 'A219', type: 'lesson' as const, topic: 'Fractions', is_prepared: false },
+  { id: 'm3', day: 1, start_time: '12:05', end_time: '12:50', subject: 'Mathematics', class_name: 'Y10/Ma/B', class_id: 'c1', unit_id: 'u1', room: 'A219', type: 'lesson' as const, topic: 'Probability', is_prepared: true },
+  { id: 'm4', day: 1, start_time: '13:50', end_time: '14:35', subject: 'Mathematics', class_name: 'Y8/Ma/C', class_id: 'c3', unit_id: 'u-y8-1', room: 'A219', type: 'lesson' as const, topic: 'Algebraic Expressions', is_prepared: true },
   { id: 'm-dept', day: 1, start_time: '15:30', end_time: '16:20', subject: 'Math Department Meeting', class_name: 'Staff', room: 'A218', type: 'meeting' as const },
   { id: 'm-staff', day: 1, start_time: '16:30', end_time: '17:20', subject: 'US Staff / Whole School Meeting', class_name: 'Staff', room: 'Auditorium', type: 'meeting' as const },
   { id: 'm6', day: 1, start_time: '17:20', end_time: '19:00', subject: 'School Bus', class_name: 'Outbound', room: '-', type: 'break' as const },
 
   // --- Tuesday ---
-  { id: 't1', day: 2, start_time: '08:20', end_time: '09:05', subject: 'Mathematics', class_name: 'Y11/Ma/B', room: 'A219', type: 'lesson' as const },
-  { id: 't2', day: 2, start_time: '09:10', end_time: '09:55', subject: 'Mathematics', class_name: 'Y8/Ma/C', room: 'A219', type: 'lesson' as const },
+  { id: 't1', day: 2, start_time: '08:20', end_time: '09:05', subject: 'Mathematics', class_name: 'Y11/Ma/B', class_id: 'c4', unit_id: 'u-y11-1', room: 'A219', type: 'lesson' as const },
+  { id: 't2', day: 2, start_time: '09:10', end_time: '09:55', subject: 'Mathematics', class_name: 'Y8/Ma/C', class_id: 'c3', unit_id: 'u-y8-1', room: 'A219', type: 'lesson' as const },
   { id: 't3', day: 2, start_time: '09:55', end_time: '10:20', subject: 'Duty (执勤)', class_name: 'Staff', room: 'Playground (操场)', type: 'duty' as const },
-  { id: 't4', day: 2, start_time: '11:15', end_time: '12:00', subject: 'Mathematics', class_name: 'Y7/Ma/B', room: 'A219', type: 'lesson' as const },
-  { id: 't5', day: 2, start_time: '12:05', end_time: '12:50', subject: 'Mathematics', class_name: 'Y10/Ma/B', room: 'A219', type: 'lesson' as const },
-  { id: 't6', day: 2, start_time: '13:50', end_time: '14:35', subject: 'Mathematics', class_name: 'Y12/Ma/A', room: 'A219', type: 'lesson' as const },
+  { id: 't4', day: 2, start_time: '11:15', end_time: '12:00', subject: 'Mathematics', class_name: 'Y7/Ma/B', class_id: 'c5', unit_id: 'u-y7-1', room: 'A219', type: 'lesson' as const },
+  { id: 't5', day: 2, start_time: '12:05', end_time: '12:50', subject: 'Mathematics', class_name: 'Y10/Ma/B', class_id: 'c1', unit_id: 'u1', room: 'A219', type: 'lesson' as const },
+  { id: 't6', day: 2, start_time: '13:50', end_time: '14:35', subject: 'Mathematics', class_name: 'Y12/Ma/A', class_id: 'c2', unit_id: 'u-y12-1', room: 'A219', type: 'lesson' as const },
   { id: 't-tutor', day: 2, start_time: '14:40', end_time: '15:25', subject: 'Tutor Meeting', class_name: 'Staff', room: 'A219', type: 'meeting' as const },
   { id: 't7', day: 2, start_time: '16:20', end_time: '19:00', subject: 'School Bus', class_name: 'Outbound', room: '-', type: 'break' as const },
 
@@ -146,6 +146,7 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 10',
     description: 'A motivated group of Year 10 students focusing on IGCSE Mathematics.',
     current_unit_id: 'u1',
+    completed_lesson_ids: ['l1'],
     student_ids: ['s1']
   },
   {
@@ -154,6 +155,7 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 12',
     description: 'Advanced Year 12 class working on Pure Mathematics.',
     current_unit_id: 'u-y12-1',
+    completed_lesson_ids: ['l1', 'l2'],
     student_ids: ['s2']
   },
   {
@@ -162,7 +164,26 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 8',
     description: 'Year 8 Mathematics class.',
     current_unit_id: 'u-y8-1',
+    completed_lesson_ids: [],
     student_ids: ['s4']
+  },
+  {
+    id: 'c4',
+    name: 'Y11/Ma/B',
+    year_group: 'Year 11',
+    description: 'Year 11 Mathematics class.',
+    current_unit_id: 'u-y11-1',
+    completed_lesson_ids: [],
+    student_ids: []
+  },
+  {
+    id: 'c5',
+    name: 'Y7/Ma/B',
+    year_group: 'Year 7',
+    description: 'Year 7 Mathematics class.',
+    current_unit_id: 'u-y7-1',
+    completed_lesson_ids: [],
+    student_ids: []
   }
 ];
 
