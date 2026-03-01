@@ -11,6 +11,7 @@ import { workLogService } from '../services/workLogService';
 import { goalService } from '../services/goalService';
 import { schoolEventService } from '../services/schoolEventService';
 import { timetableService } from '../services/timetableService';
+import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast, Toast } from './useToast';
 
@@ -31,61 +32,39 @@ export function useAppData() {
   // --- Data Fetching ---
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    // Fetch from Supabase; if empty, sync localStorage data up first.
+    async function fetchOrSync<T extends { id: string }>(
+      fetchFn: () => Promise<T[]>,
+      setter: React.Dispatch<React.SetStateAction<T[]>>,
+      localData: T[],
+      table: string,
+    ) {
+      try {
+        const remote = await fetchFn();
+        if (remote.length > 0) {
+          setter(remote);
+        } else if (localData.length > 0) {
+          await syncToSupabase(table, localData);
+        }
+      } catch {
+        // fallback to localStorage data
+      }
+    }
+
     const fetchAll = async () => {
-      try {
-        const data = await studentService.getAllStudents();
-        if (data.length > 0) setStudents(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await teachingService.getAllUnits();
-        if (data.length > 0) setTeachingUnits(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await classService.getAllClasses();
-        if (data.length > 0) setClasses(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await ideaService.getAll();
-        if (data.length > 0) setIdeas(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await sopService.getAll();
-        if (data.length > 0) setSops(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await workLogService.getAll();
-        if (data.length > 0) setWorkLogs(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await goalService.getAll();
-        if (data.length > 0) setGoals(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await schoolEventService.getAll();
-        if (data.length > 0) setSchoolEvents(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
-      try {
-        const data = await timetableService.getAll();
-        if (data.length > 0) setTimetable(data);
-      } catch (error) {
-        // fallback to localStorage data
-      }
+      await Promise.all([
+        fetchOrSync(studentService.getAllStudents, setStudents, students, 'students'),
+        fetchOrSync(teachingService.getAllUnits, setTeachingUnits, teachingUnits, 'teaching_units'),
+        fetchOrSync(classService.getAllClasses, setClasses, classes, 'classes'),
+        fetchOrSync(ideaService.getAll, setIdeas, ideas, 'ideas'),
+        fetchOrSync(sopService.getAll, setSops, sops, 'sops'),
+        fetchOrSync(workLogService.getAll, setWorkLogs, workLogs, 'work_logs'),
+        fetchOrSync(goalService.getAll, setGoals, goals, 'goals'),
+        fetchOrSync(schoolEventService.getAll, setSchoolEvents, schoolEvents, 'school_events'),
+        fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
+      ]);
     };
     fetchAll();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -256,14 +235,17 @@ export function useAppData() {
   }, [setIdeas, toast]);
 
   const updateIdea = useCallback(async (id: string, updates: Partial<Idea>) => {
+    const existing = ideas.find(i => i.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
     try {
-      const updated = await ideaService.update(id, updates);
+      const updated = await ideaService.update(id, merged);
       setIdeas(prev => prev.map(i => i.id === id ? { ...i, ...updated } : i));
       toast.success('Idea updated');
     } catch (error) {
       toast.error('Failed to update idea');
     }
-  }, [setIdeas, toast]);
+  }, [ideas, setIdeas, toast]);
 
   const deleteIdea = useCallback(async (id: string) => {
     try {
@@ -280,7 +262,7 @@ export function useAppData() {
     if (!idea) return;
     const newStatus = idea.status === 'pending' ? 'processed' : 'pending';
     try {
-      await ideaService.update(id, { status: newStatus });
+      await ideaService.update(id, { ...idea, status: newStatus });
       setIdeas(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
       toast.success('Idea status updated');
     } catch (error) {
@@ -301,14 +283,17 @@ export function useAppData() {
   }, [setSops, toast]);
 
   const updateSOP = useCallback(async (id: string, updates: Partial<SOP>) => {
+    const existing = sops.find(s => s.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
     try {
-      const updated = await sopService.update(id, updates);
+      const updated = await sopService.update(id, merged);
       setSops(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
       toast.success('SOP updated');
     } catch (error) {
       toast.error('Failed to update SOP');
     }
-  }, [setSops, toast]);
+  }, [sops, setSops, toast]);
 
   const deleteSOP = useCallback(async (id: string) => {
     try {
@@ -336,14 +321,17 @@ export function useAppData() {
   }, [setWorkLogs, toast]);
 
   const updateWorkLog = useCallback(async (id: string, updates: Partial<WorkLog>) => {
+    const existing = workLogs.find(l => l.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
     try {
-      const updated = await workLogService.update(id, updates);
+      const updated = await workLogService.update(id, merged);
       setWorkLogs(prev => prev.map(l => l.id === id ? { ...l, ...updated } : l));
       toast.success('Work log updated');
     } catch (error) {
       toast.error('Failed to update work log');
     }
-  }, [setWorkLogs, toast]);
+  }, [workLogs, setWorkLogs, toast]);
 
   const deleteWorkLog = useCallback(async (id: string) => {
     try {
@@ -368,14 +356,17 @@ export function useAppData() {
   }, [setGoals, toast]);
 
   const updateGoal = useCallback(async (id: string, updates: Partial<Goal>) => {
+    const existing = goals.find(g => g.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
     try {
-      const updated = await goalService.update(id, updates);
+      const updated = await goalService.update(id, merged);
       setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updated } : g));
       toast.success('Goal updated');
     } catch (error) {
       toast.error('Failed to update goal');
     }
-  }, [setGoals, toast]);
+  }, [goals, setGoals, toast]);
 
   const deleteGoal = useCallback(async (id: string) => {
     try {
@@ -400,14 +391,17 @@ export function useAppData() {
   }, [setSchoolEvents, toast]);
 
   const updateSchoolEvent = useCallback(async (id: string, updates: Partial<SchoolEvent>) => {
+    const existing = schoolEvents.find(e => e.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
     try {
-      const updated = await schoolEventService.update(id, updates);
+      const updated = await schoolEventService.update(id, merged);
       setSchoolEvents(prev => prev.map(e => e.id === id ? { ...e, ...updated } : e));
       toast.success('Event updated');
     } catch (error) {
       toast.error('Failed to update event');
     }
-  }, [setSchoolEvents, toast]);
+  }, [schoolEvents, setSchoolEvents, toast]);
 
   const deleteSchoolEvent = useCallback(async (id: string) => {
     try {

@@ -34,3 +34,10 @@ export const requireSupabase = () => {
   }
   return supabase;
 };
+
+/** Bulk-upsert localStorage data to Supabase (one-time migration). */
+export async function syncToSupabase<T extends { id: string }>(table: string, localData: T[]): Promise<void> {
+  if (!supabase || localData.length === 0) return;
+  const { error } = await supabase.from(table).upsert(localData, { onConflict: 'id', ignoreDuplicates: false });
+  if (error) console.warn(`syncToSupabase(${table}):`, error.message);
+}
