@@ -8,6 +8,14 @@ export interface Student {
   is_tutor_group: boolean;
   house_points: number;
   notes: string;
+  weaknesses?: StudentWeakness[];
+  attendance_status?: 'present' | 'absent' | 'late';
+}
+
+export interface StudentWeakness {
+  topic: string;
+  level: 'low' | 'medium' | 'high';
+  notes: string;
 }
 
 export interface TimetableEntry {
@@ -19,6 +27,8 @@ export interface TimetableEntry {
   class_name: string;
   room: string;
   type: 'lesson' | 'tutor' | 'duty' | 'meeting' | 'break';
+  topic?: string;
+  is_prepared?: boolean;
 }
 
 export interface LessonRecord {
@@ -58,6 +68,15 @@ export interface SchoolEvent {
   is_action_required: boolean;
 }
 
+export interface Goal {
+  id: string;
+  title: string;
+  category: 'dream' | 'work' | 'startup';
+  progress: number;
+  deadline?: string;
+  image_url?: string;
+}
+
 export interface TeachingUnit {
   id: string;
   year_group: string;
@@ -69,6 +88,14 @@ export interface TeachingUnit {
   typical_examples: { question: string; solution: string }[];
   prep_material_template: string;
   ai_prompt_template: string;
+}
+
+export interface WorkLog {
+  id: string;
+  timestamp: string;
+  content: string;
+  category: 'tutor' | 'teaching' | 'admin' | 'startup' | 'other';
+  tags?: string[];
 }
 
 export interface AppVersion {

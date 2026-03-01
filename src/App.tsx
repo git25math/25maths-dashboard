@@ -13,13 +13,15 @@ import {
   ChevronRight,
   ExternalLink,
   Menu,
-  X
+  X,
+  Star,
+  Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, isWithinInterval, parse } from 'date-fns';
 import { cn } from './lib/utils';
-import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS } from './constants';
-import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent } from './types';
+import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, SYLLABUS } from './constants';
+import { Role, TimetableEntry, Idea, Student, TeachingUnit, SchoolEvent, Goal, WorkLog } from './types';
 
 // --- Components ---
 
@@ -123,6 +125,19 @@ const TimetableView = () => {
         </div>
       </div>
 
+      <div className="glass-card p-4 bg-indigo-50/30 border-indigo-100">
+        <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+          <Plus size={16} /> Quick Add / Customize Event
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <input type="text" placeholder="Subject (e.g. Flag Raising)" className="text-xs p-2 rounded-lg border border-indigo-100 bg-white" />
+          <input type="text" placeholder="Class (e.g. Y11/Ma/B)" className="text-xs p-2 rounded-lg border border-indigo-100 bg-white" />
+          <input type="text" placeholder="Room (e.g. A327)" className="text-xs p-2 rounded-lg border border-indigo-100 bg-white" />
+          <input type="time" className="text-xs p-2 rounded-lg border border-indigo-100 bg-white" />
+          <button className="btn-primary text-xs py-2 bg-indigo-600 border-none">Add to Schedule</button>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <div className="min-w-[800px] grid grid-cols-6 gap-4">
           <div className="col-span-1"></div>
@@ -134,8 +149,8 @@ const TimetableView = () => {
 
           {/* Time Slots - Expanded to cover full day routine */}
           {[
-            '05:20', '06:20', '07:45', '08:20', '09:10', '09:55', '10:25', 
-            '11:15', '12:05', '12:50', '13:35', '13:50', '14:40', '15:25', '16:20', '17:20'
+            '05:20', '06:20', '07:35', '07:45', '08:20', '09:10', '09:55', '10:25', 
+            '11:15', '12:05', '12:50', '13:35', '13:50', '14:40', '15:25', '15:30', '16:20', '16:30', '17:20'
           ].map(time => (
             <React.Fragment key={time}>
               <div className="text-right pr-4 text-[10px] font-medium text-slate-400 py-4 border-t border-slate-100">
@@ -154,9 +169,18 @@ const TimetableView = () => {
                         entry.type === 'meeting' ? "bg-purple-50 border-purple-100 text-purple-700" :
                         "bg-slate-50 border-slate-200 text-slate-600"
                       )}>
-                        <p className="font-bold truncate">{entry.subject}</p>
+                        <div className="flex justify-between items-start">
+                          <p className="font-bold truncate">{entry.subject}</p>
+                          {entry.is_prepared !== undefined && (
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              entry.is_prepared ? "bg-emerald-500" : "bg-red-500"
+                            )} />
+                          )}
+                        </div>
                         <p className="opacity-80 truncate">{entry.class_name}</p>
                         <p className="opacity-60 truncate">{entry.room}</p>
+                        {entry.topic && <p className="mt-1 font-medium text-[8px] italic truncate">Topic: {entry.topic}</p>}
                       </div>
                     ) : (
                       <div className="h-full min-h-[40px] rounded-lg border border-dashed border-slate-100 bg-slate-50/10 flex items-center justify-center">
@@ -197,6 +221,42 @@ const StudentsView = () => {
               </div>
             </div>
             <p className="text-sm text-slate-600 mt-4 line-clamp-2 italic">"{student.notes}"</p>
+            
+            <div className="flex items-center gap-2 mt-4">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = `mailto:upperoncall@harrowhaikou.cn?subject=Missing ${student.name} from A219`;
+                }}
+                className="flex-1 py-2 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+              >
+                <AlertCircle size={12} /> Report Missing
+              </button>
+              <button className="flex-1 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded-lg hover:bg-indigo-100 transition-colors">
+                View Profile
+              </button>
+            </div>
+
+            {student.weaknesses && student.weaknesses.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Weakness Analysis</p>
+                <div className="space-y-2">
+                  {student.weaknesses.map((w, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full mt-1 shrink-0",
+                        w.level === 'high' ? "bg-red-500" : w.level === 'medium' ? "bg-amber-500" : "bg-blue-500"
+                      )} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-700">{w.topic}</p>
+                        <p className="text-[10px] text-slate-500 leading-tight">{w.notes}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
               <span className={cn(
                 "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
@@ -213,7 +273,7 @@ const StudentsView = () => {
   );
 };
 
-const TeachingView = () => {
+const TeachingView = ({ onOpenSyllabus }: { onOpenSyllabus: () => void }) => {
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
 
   if (selectedUnit) {
@@ -334,7 +394,7 @@ const TeachingView = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-900">Teaching Management</h2>
         <div className="flex gap-2">
-          <button className="btn-secondary text-sm">Curriculum Map</button>
+          <button onClick={onOpenSyllabus} className="btn-secondary text-sm">Curriculum Map</button>
           <button className="btn-primary text-sm flex items-center gap-2">
             <Plus size={18} /> New Unit
           </button>
@@ -443,12 +503,141 @@ const SOPView = () => {
   );
 };
 
+const WorkLogView = () => {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-900">Work Logs (工作日志)</h2>
+        <button className="btn-primary text-sm flex items-center gap-2">
+          <Plus size={18} /> New Log Entry
+        </button>
+      </div>
+
+      <div className="glass-card overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50 border-bottom border-slate-100">
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Timestamp</th>
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Content</th>
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Tags</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {MOCK_WORK_LOGS.map(log => (
+              <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                <td className="p-4 text-xs font-mono text-slate-500">{log.timestamp}</td>
+                <td className="p-4">
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
+                    log.category === 'tutor' ? "bg-indigo-50 text-indigo-600" :
+                    log.category === 'teaching' ? "bg-emerald-50 text-emerald-600" :
+                    log.category === 'admin' ? "bg-blue-50 text-blue-600" :
+                    log.category === 'startup' ? "bg-purple-50 text-purple-600" :
+                    "bg-slate-100 text-slate-500"
+                  )}>
+                    {log.category}
+                  </span>
+                </td>
+                <td className="p-4 text-sm text-slate-700 font-medium">{log.content}</td>
+                <td className="p-4">
+                  <div className="flex gap-1">
+                    {log.tags?.map(tag => (
+                      <span key={tag} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full border border-slate-200">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const SyllabusModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [selectedYear, setSelectedYear] = useState<string>('Year 7');
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
+          >
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Curriculum Syllabus</h3>
+                <p className="text-sm text-slate-500">Browse units by year group</p>
+              </div>
+              <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+
+            <div className="flex flex-1 overflow-hidden">
+              {/* Year Selector */}
+              <div className="w-48 border-r border-slate-100 bg-slate-50/30 p-4 space-y-2">
+                {Object.keys(SYLLABUS).map(year => (
+                  <button
+                    key={year}
+                    onClick={() => setSelectedYear(year)}
+                    className={cn(
+                      "w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-all",
+                      selectedYear === year 
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" 
+                        : "text-slate-600 hover:bg-slate-100"
+                    )}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+
+              {/* Units List */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {SYLLABUS[selectedYear].map((unit, index) => (
+                    <motion.div
+                      key={unit}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-indigo-200 transition-colors group"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {index + 1}
+                        </div>
+                        <p className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                          {unit.split(': ')[1] || unit}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -467,6 +656,19 @@ export default function App() {
 
   const currentEvent = getCurrentEvent();
 
+  const getNextEvent = () => {
+    const day = currentTime.getDay();
+    const timeStr = format(currentTime, 'HH:mm');
+    
+    const todaysEvents = MOCK_TIMETABLE
+      .filter(entry => entry.day === day)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+      
+    return todaysEvents.find(entry => entry.start_time > timeStr);
+  };
+
+  const nextEvent = getNextEvent();
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -475,7 +677,7 @@ export default function App() {
             {/* Header & Current Context */}
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900">Hello, Teacher!</h2>
+                <h2 className="text-3xl font-bold text-slate-900">Hello, Nalo!</h2>
                 <p className="text-slate-500 mt-1">It's {format(currentTime, 'EEEE, MMMM do, HH:mm')}</p>
               </div>
               
@@ -500,11 +702,26 @@ export default function App() {
                   </div>
                   
                   {currentEvent ? (
-                    <div>
-                      <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
-                      <div className="flex items-center gap-4 text-slate-500 mt-1">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
+                        {currentEvent.type === 'lesson' && (
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                            currentEvent.is_prepared ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                          )}>
+                            {currentEvent.is_prepared ? '已备课' : '未备课'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-slate-500">
                         <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
                         <span className="flex items-center gap-1"><Calendar size={16} /> Room {currentEvent.room}</span>
+                        {currentEvent.topic && (
+                          <span className="flex items-center gap-1 text-indigo-600 font-medium">
+                            <BookOpen size={16} /> {currentEvent.topic}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -516,8 +733,17 @@ export default function App() {
                 </div>
                 
                 <div className="hidden sm:block text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase">Next Event</p>
-                  <p className="font-semibold text-slate-900">Mathematics @ 08:05</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Event</p>
+                  {nextEvent ? (
+                    <div className="mt-1">
+                      <p className="font-bold text-slate-900">{nextEvent.subject}</p>
+                      <p className="text-xs text-slate-500">
+                        {nextEvent.start_time} · {nextEvent.class_name} · Room {nextEvent.room}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="font-semibold text-slate-400 mt-1 italic">No more events today</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -574,6 +800,62 @@ export default function App() {
               </div>
             </section>
 
+            {/* Dream Board & Goals */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Star size={20} className="text-amber-400" /> 梦想版与目标 (Dream Board & Goals)
+                </h3>
+                <button className="text-indigo-600 text-sm font-semibold hover:underline">Manage Goals</button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {MOCK_GOALS.map(goal => (
+                  <div key={goal.id} className="glass-card overflow-hidden group">
+                    <div className="h-32 relative">
+                      <img 
+                        src={goal.image_url} 
+                        alt={goal.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <span className={cn(
+                        "absolute top-2 left-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded text-white",
+                        goal.category === 'startup' ? "bg-indigo-600" : goal.category === 'work' ? "bg-emerald-600" : "bg-purple-600"
+                      )}>
+                        {goal.category}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-bold text-slate-900 text-sm">{goal.title}</h4>
+                      <div className="mt-3 space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                          <span>Progress</span>
+                          <span>{goal.progress}%</span>
+                        </div>
+                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${goal.progress}%` }}
+                            className={cn(
+                              "h-full rounded-full",
+                              goal.category === 'startup' ? "bg-indigo-600" : goal.category === 'work' ? "bg-emerald-600" : "bg-purple-600"
+                            )}
+                          />
+                        </div>
+                      </div>
+                      {goal.deadline && (
+                        <p className="mt-3 text-[10px] text-slate-400 flex items-center gap-1">
+                          <Calendar size={10} /> Deadline: {goal.deadline}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Bento Grid Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
@@ -605,6 +887,48 @@ export default function App() {
                     <span className="text-xs font-bold text-red-600">USLT & HOY Support</span>
                     <span className="text-[10px] text-slate-500">upperoncall@harrowhaikou.cn</span>
                   </a>
+                </div>
+
+                <div className="glass-card p-5 space-y-4">
+                  <h4 className="font-bold flex items-center gap-2">
+                    <Bell size={18} className="text-indigo-500" />
+                    Focus Reminders
+                  </h4>
+                  <div className="space-y-3">
+                    {[
+                      { text: 'Take a 5-min walk', time: 'Every 2 hours' },
+                      { text: 'Check 25maths progress', time: 'Daily 18:00' },
+                      { text: 'Update Y12 progress', time: 'Every Friday' }
+                    ].map((rem, i) => (
+                      <div key={i} className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                        <p className="text-xs font-bold text-indigo-900">{rem.text}</p>
+                        <p className="text-[10px] text-indigo-600 mt-0.5">{rem.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="glass-card p-5 space-y-4 border-emerald-100 bg-emerald-50/20">
+                  <h4 className="font-bold flex items-center gap-2 text-emerald-700">
+                    <Clock size={18} />
+                    Quick Work Log
+                  </h4>
+                  <div className="space-y-3">
+                    <textarea 
+                      placeholder="Record what you just did..."
+                      className="w-full p-3 text-xs rounded-xl border border-emerald-100 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none h-20"
+                    />
+                    <div className="flex gap-2">
+                      {['tutor', 'teaching', 'admin'].map(cat => (
+                        <button key={cat} className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider bg-white border border-emerald-100 text-emerald-600 rounded-md hover:bg-emerald-50 transition-colors">
+                          {cat}
+                        </button>
+                      ))}
+                      <button className="ml-auto btn-primary py-1 px-3 text-[10px] bg-emerald-600 hover:bg-emerald-700 border-none">
+                        Log Entry
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="glass-card p-5 space-y-4">
@@ -687,9 +1011,11 @@ export default function App() {
       case 'students':
         return <StudentsView />;
       case 'teaching':
-        return <TeachingView />;
+        return <TeachingView onOpenSyllabus={() => setIsSyllabusModalOpen(true)} />;
       case 'sop':
         return <SOPView />;
+      case 'worklogs':
+        return <WorkLogView />;
       case 'ideas':
         return (
           <div className="space-y-6">
@@ -741,6 +1067,7 @@ export default function App() {
           <SidebarItem icon={Users} label="Students" active={activeTab === 'students'} onClick={() => setActiveTab('students')} />
           <SidebarItem icon={BookOpen} label="Teaching" active={activeTab === 'teaching'} onClick={() => setActiveTab('teaching')} />
           <SidebarItem icon={Lightbulb} label="Idea Pool" active={activeTab === 'ideas'} onClick={() => setActiveTab('ideas')} />
+          <SidebarItem icon={Clock} label="Work Logs" active={activeTab === 'worklogs'} onClick={() => setActiveTab('worklogs')} />
           <SidebarItem icon={Settings} label="SOP Library" active={activeTab === 'sop'} onClick={() => setActiveTab('sop')} />
         </nav>
 
@@ -791,6 +1118,7 @@ export default function App() {
                 <SidebarItem icon={Users} label="Students" active={activeTab === 'students'} onClick={() => { setActiveTab('students'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={BookOpen} label="Teaching" active={activeTab === 'teaching'} onClick={() => { setActiveTab('teaching'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Lightbulb} label="Idea Pool" active={activeTab === 'ideas'} onClick={() => { setActiveTab('ideas'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={Clock} label="Work Logs" active={activeTab === 'worklogs'} onClick={() => { setActiveTab('worklogs'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Settings} label="SOP Library" active={activeTab === 'sop'} onClick={() => { setActiveTab('sop'); setIsSidebarOpen(false); }} />
               </nav>
             </motion.aside>
@@ -806,6 +1134,10 @@ export default function App() {
       </main>
 
       <QuickCapture />
+      <SyllabusModal 
+        isOpen={isSyllabusModalOpen} 
+        onClose={() => setIsSyllabusModalOpen(false)} 
+      />
     </div>
   );
 }
