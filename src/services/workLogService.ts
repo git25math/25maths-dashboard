@@ -21,7 +21,7 @@ export const workLogService = {
 
   async update(id: string, updates: Partial<WorkLog>): Promise<WorkLog> {
     if (!isSupabaseConfigured) return { ...updates, id } as WorkLog;
-    const { data, error } = await supabase!.from('work_logs').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('work_logs').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

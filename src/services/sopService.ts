@@ -21,7 +21,7 @@ export const sopService = {
 
   async update(id: string, updates: Partial<SOP>): Promise<SOP> {
     if (!isSupabaseConfigured) return { ...updates, id } as SOP;
-    const { data, error } = await supabase!.from('sops').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('sops').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

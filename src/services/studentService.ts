@@ -20,7 +20,7 @@ export const studentService = {
 
   async updateStudent(id: string, updates: Partial<Student>): Promise<Student> {
     if (!isSupabaseConfigured) return { ...updates, id } as Student;
-    const { data, error } = await supabase!.from('students').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('students').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },
@@ -47,7 +47,7 @@ export const studentService = {
 
   async updateWeaknesses(studentId: string, weaknesses: StudentWeakness[]): Promise<void> {
     if (!isSupabaseConfigured) return;
-    const { error } = await supabase!.from('students').update({ weaknesses }).eq('id', studentId);
+    const { error } = await supabase!.from('students').upsert({ id: studentId, weaknesses });
     if (error) throw error;
   }
 };

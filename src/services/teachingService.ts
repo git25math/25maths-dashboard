@@ -20,7 +20,7 @@ export const teachingService = {
 
   async updateUnit(id: string, updates: Partial<TeachingUnit>): Promise<TeachingUnit> {
     if (!isSupabaseConfigured) return { ...updates, id } as TeachingUnit;
-    const { data, error } = await supabase!.from('teaching_units').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('teaching_units').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

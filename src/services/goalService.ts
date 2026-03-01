@@ -21,7 +21,7 @@ export const goalService = {
 
   async update(id: string, updates: Partial<Goal>): Promise<Goal> {
     if (!isSupabaseConfigured) return { ...updates, id } as Goal;
-    const { data, error } = await supabase!.from('goals').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('goals').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

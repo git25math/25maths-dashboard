@@ -21,7 +21,7 @@ export const timetableService = {
 
   async update(id: string, updates: Partial<TimetableEntry>): Promise<TimetableEntry> {
     if (!isSupabaseConfigured) return { ...updates, id } as TimetableEntry;
-    const { data, error } = await supabase!.from('timetable_entries').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('timetable_entries').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

@@ -21,7 +21,7 @@ export const schoolEventService = {
 
   async update(id: string, updates: Partial<SchoolEvent>): Promise<SchoolEvent> {
     if (!isSupabaseConfigured) return { ...updates, id } as SchoolEvent;
-    const { data, error } = await supabase!.from('school_events').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('school_events').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

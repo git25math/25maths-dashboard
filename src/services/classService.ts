@@ -20,7 +20,7 @@ export const classService = {
 
   async updateClass(id: string, updates: Partial<ClassProfile>): Promise<ClassProfile> {
     if (!isSupabaseConfigured) return { ...updates, id } as ClassProfile;
-    const { data, error } = await supabase!.from('classes').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('classes').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },

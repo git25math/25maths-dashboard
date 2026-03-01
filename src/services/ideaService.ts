@@ -21,7 +21,7 @@ export const ideaService = {
 
   async update(id: string, updates: Partial<Idea>): Promise<Idea> {
     if (!isSupabaseConfigured) return { ...updates, id } as Idea;
-    const { data, error } = await supabase!.from('ideas').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase!.from('ideas').upsert({ ...updates, id }).select().single();
     if (error) throw error;
     return data;
   },
