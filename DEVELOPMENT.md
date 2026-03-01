@@ -60,6 +60,16 @@
 - Supabase credentials stored as GitHub Secrets
 - Live at: https://git25math.github.io/25maths-dashboard/
 
+### Phase 10 — Sub-Unit Module 小单元模块 (2026-03-01)
+- New data model: `SubUnit`, `VocabularyItem`, `TeachingReflection` types
+- Each TeachingUnit (大单元) now contains multiple SubUnits (小单元)
+- SubUnit fields: title, objectives, periods, bilingual vocabulary, classroom exercises, 4 resource links, homework content, teaching reflection (5 sub-fields), AI summary
+- New `SubUnitForm` modal component with dynamic lists, RichTextEditor, URL inputs, date picker
+- Updated TeachingView: sub-unit card grid in unit detail, full sub-unit detail view (2/3 + 1/3 layout)
+- Sub-unit CRUD operates on parent unit's `sub_units` JSONB array
+- Supabase migration: `sub_units` JSONB column on `teaching_units` table
+- Backward compatible: existing `lessons` field preserved
+
 ---
 
 ## Current Architecture
@@ -84,36 +94,36 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 
 ## Roadmap
 
-### Phase 10 — Password Protection (Next)
+### Phase 11 — Password Protection (Next)
 - [ ] Login gate with password authentication
 - [ ] Protect all routes behind auth check
 
-### Phase 11 — Missing Views
+### Phase 12 — Missing Views
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
 - [ ] Lesson Records view (CRUD for class lesson history)
 - [ ] Settings/Profile page
 
-### Phase 12 — Data & UX Improvements
+### Phase 13 — Data & UX Improvements
 - [ ] Search and filter across all entities
 - [ ] Bulk import/export (CSV/JSON)
 - [ ] Drag-and-drop timetable editing
 - [ ] Responsive mobile layout
 - [ ] Dark mode toggle
 
-### Phase 13 — Analytics & Reports
+### Phase 14 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 14 — AI Features
+### Phase 15 — AI Features
 - [ ] Gemini-powered lesson plan generation
 - [ ] Auto-categorization of ideas and work logs
 - [ ] Student weakness analysis suggestions
 - [ ] Smart timetable conflict detection
 
-### Phase 15 — Advanced
+### Phase 16 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [ ] File attachments (Supabase Storage)
