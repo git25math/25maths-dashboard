@@ -163,7 +163,10 @@ export const DashboardView = ({
 
         {/* Goals / OKRs */}
         <div className="glass-card p-6 space-y-4">
-          <h4 className="font-bold text-slate-900">Active Goals</h4>
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900">Active Goals</h4>
+            <button onClick={() => onNavigate('goals')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
           <div className="space-y-3">
             {goals.filter(g => g.status === 'in-progress').slice(0, 2).map(goal => (
               <div key={goal.id} className="space-y-2">
@@ -199,7 +202,7 @@ export const DashboardView = ({
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-slate-900">Recent Events</h4>
-            <button onClick={() => onNavigate('timetable')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+            <button onClick={() => onNavigate('events')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
           </div>
           <div className="space-y-3">
             {schoolEvents.slice(0, 3).map(event => (

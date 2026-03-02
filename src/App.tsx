@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord } from './types';
+import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -17,6 +17,8 @@ import { TimetableEntryForm } from './components/TimetableEntryForm';
 import { WorkLogForm } from './components/WorkLogForm';
 import { SOPForm } from './components/SOPForm';
 import { IdeaForm } from './components/IdeaForm';
+import { GoalForm } from './components/GoalForm';
+import { SchoolEventForm } from './components/SchoolEventForm';
 import { LoginGate, useAuth } from './components/LoginGate';
 import { DashboardView } from './views/DashboardView';
 import { TimetableView } from './views/TimetableView';
@@ -27,6 +29,9 @@ import { WorkLogView } from './views/WorkLogView';
 import { IdeasView } from './views/IdeasView';
 import { MeetingsView } from './views/MeetingsView';
 import { LessonRecordsView } from './views/LessonRecordsView';
+import { GoalsView } from './views/GoalsView';
+import { SchoolEventsView } from './views/SchoolEventsView';
+import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
   const data = useAppData();
@@ -56,6 +61,10 @@ function AppContent() {
   const [editingSOP, setEditingSOP] = useState<SOP | null>(null);
   const [isIdeaFormOpen, setIsIdeaFormOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
+  const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
 
   // GenericForm for student status/requests
   const [genericFormConfig, setGenericFormConfig] = useState<{
@@ -252,6 +261,43 @@ function AppContent() {
             onDelete={data.deleteLessonRecord}
           />
         );
+      case 'goals':
+        return (
+          <GoalsView
+            goals={data.goals}
+            onAddGoal={() => { setEditingGoal(null); setIsGoalFormOpen(true); }}
+            onDeleteGoal={data.deleteGoal}
+            onEditGoal={(goal) => { setEditingGoal(goal); setIsGoalFormOpen(true); }}
+            onUpdateGoal={(id, updates) => data.updateGoal(id, updates)}
+          />
+        );
+      case 'events':
+        return (
+          <SchoolEventsView
+            schoolEvents={data.schoolEvents}
+            onAddEvent={() => { setEditingEvent(null); setIsEventFormOpen(true); }}
+            onDeleteEvent={data.deleteSchoolEvent}
+            onEditEvent={(event) => { setEditingEvent(event); setIsEventFormOpen(true); }}
+          />
+        );
+      case 'settings':
+        return (
+          <SettingsView
+            data={{
+              timetable: data.timetable,
+              students: data.students,
+              teachingUnits: data.teachingUnits,
+              classes: data.classes,
+              ideas: data.ideas,
+              sops: data.sops,
+              goals: data.goals,
+              schoolEvents: data.schoolEvents,
+              workLogs: data.workLogs,
+              meetings: data.meetings,
+              lessonRecords: data.lessonRecords,
+            }}
+          />
+        );
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
@@ -408,6 +454,36 @@ function AppContent() {
             setEditingIdea(null);
           }}
           onCancel={() => { setIsIdeaFormOpen(false); setEditingIdea(null); }}
+        />
+      )}
+      {isGoalFormOpen && (
+        <GoalForm
+          goal={editingGoal}
+          onSave={(d) => {
+            if (editingGoal) {
+              data.updateGoal(editingGoal.id, d);
+            } else {
+              data.addGoal(d);
+            }
+            setIsGoalFormOpen(false);
+            setEditingGoal(null);
+          }}
+          onCancel={() => { setIsGoalFormOpen(false); setEditingGoal(null); }}
+        />
+      )}
+      {isEventFormOpen && (
+        <SchoolEventForm
+          event={editingEvent}
+          onSave={(d) => {
+            if (editingEvent) {
+              data.updateSchoolEvent(editingEvent.id, d);
+            } else {
+              data.addSchoolEvent(d);
+            }
+            setIsEventFormOpen(false);
+            setEditingEvent(null);
+          }}
+          onCancel={() => { setIsEventFormOpen(false); setEditingEvent(null); }}
         />
       )}
       {genericFormConfig.isOpen && (

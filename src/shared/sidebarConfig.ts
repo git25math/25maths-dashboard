@@ -8,6 +8,8 @@ import {
   Clock,
   Mic,
   Settings,
+  Target,
+  CalendarDays,
 } from 'lucide-react';
 
 export const SIDEBAR_ITEMS = [
@@ -18,6 +20,9 @@ export const SIDEBAR_ITEMS = [
   { key: 'lessons', icon: FileText, label: 'Lesson Records' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool' },
   { key: 'worklogs', icon: Clock, label: 'Work Logs' },
+  { key: 'goals', icon: Target, label: 'Goals' },
+  { key: 'events', icon: CalendarDays, label: 'School Events' },
   { key: 'meetings', icon: Mic, label: 'Meetings' },
   { key: 'sop', icon: Settings, label: 'SOP Library' },
+  { key: 'settings', icon: Settings, label: 'Settings' },
 ] as const;

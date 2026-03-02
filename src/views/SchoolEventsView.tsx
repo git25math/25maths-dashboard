@@ -1,0 +1,131 @@
+import { useState } from 'react';
+import { Plus, Pencil, Trash2, CalendarDays, AlertTriangle } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { SchoolEvent } from '../types';
+import { MarkdownRenderer } from '../components/RichTextEditor';
+import { format } from 'date-fns';
+
+interface SchoolEventsViewProps {
+  schoolEvents: SchoolEvent[];
+  onAddEvent: () => void;
+  onDeleteEvent: (id: string) => void;
+  onEditEvent: (event: SchoolEvent) => void;
+}
+
+const CATEGORY_COLORS: Record<SchoolEvent['category'], string> = {
+  'school-wide': 'bg-red-50 text-red-600 border-red-200',
+  personal: 'bg-blue-50 text-blue-600 border-blue-200',
+  house: 'bg-green-50 text-green-600 border-green-200',
+  event: 'bg-amber-50 text-amber-600 border-amber-200',
+};
+
+const CATEGORY_FILTERS = ['All', 'School-wide', 'Personal', 'House', 'Event'] as const;
+
+const categoryFilterMap: Record<string, SchoolEvent['category'] | undefined> = {
+  'All': undefined,
+  'School-wide': 'school-wide',
+  'Personal': 'personal',
+  'House': 'house',
+  'Event': 'event',
+};
+
+export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEditEvent }: SchoolEventsViewProps) => {
+  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+
+  const filtered = schoolEvents
+    .filter(e => {
+      const mapped = categoryFilterMap[categoryFilter];
+      if (mapped && e.category !== mapped) return false;
+      return true;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <CalendarDays size={24} className="text-indigo-600" /> School Events
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">{schoolEvents.length} events total</p>
+        </div>
+        <button onClick={onAddEvent} className="btn-primary flex items-center gap-2 self-start">
+          <Plus size={18} /> New Event
+        </button>
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex flex-wrap gap-1.5">
+        {CATEGORY_FILTERS.map(f => (
+          <button
+            key={f}
+            onClick={() => setCategoryFilter(f)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
+              categoryFilter === f
+                ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+            )}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Event List */}
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <CalendarDays size={48} className="mb-4 opacity-20" />
+          <p className="text-lg font-medium">No events found</p>
+          <p className="text-sm">Create your first school event to get started.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(event => (
+            <div key={event.id} className="group glass-card p-5 flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                    CATEGORY_COLORS[event.category]
+                  )}>
+                    {event.category}
+                  </span>
+                  {event.is_action_required && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                      <AlertTriangle size={10} /> Action Required
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="font-bold text-slate-900">{event.title}</h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  {format(new Date(event.date), 'EEEE, MMM d, yyyy')}
+                </p>
+                {event.description && (
+                  <MarkdownRenderer content={event.description} className="text-sm text-slate-600 mt-2 line-clamp-2" />
+                )}
+              </div>
+
+              {/* Hover actions */}
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                <button
+                  onClick={() => onEditEvent(event)}
+                  className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  <Pencil size={12} /> Edit
+                </button>
+                <button
+                  onClick={() => onDeleteEvent(event.id)}
+                  className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 transition-colors"
+                >
+                  <Trash2 size={12} /> Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
