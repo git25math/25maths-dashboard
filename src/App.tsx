@@ -293,7 +293,10 @@ function AppContent() {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">25</div>
           <span className="font-bold">Dashboard</span>
         </div>
-        <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600"><Menu size={24} /></button>
+        <div className="flex items-center gap-1">
+          <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600"><Menu size={24} /></button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
