@@ -46,7 +46,7 @@ export const geminiService = {
     const base64 = btoa(binary);
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         {
           role: 'user',
@@ -72,7 +72,7 @@ export const geminiService = {
     const ai = getClient();
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         {
           role: 'user',
@@ -136,7 +136,7 @@ Generate a lesson plan with these sections:
 Keep it concise and practical. Use bullet points. Include specific example questions where appropriate.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
 
@@ -147,7 +147,7 @@ Keep it concise and practical. Use bullet points. Include specific example quest
     const ai = getClient();
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [{
         role: 'user',
         parts: [{
@@ -181,7 +181,7 @@ ${text}`,
     const ai = getClient();
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: [{
         role: 'user',
         parts: [{
