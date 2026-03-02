@@ -278,6 +278,19 @@
   - `scripts/output/teaching-units-all.json` — combined output (752KB, import-ready)
 - Modified: 0 source files (scripts only, no app code changes)
 
+### Phase 22 — Learning Objectives 教学目标结构化 (2026-03-03)
+- **SubUnit objectives upgraded**: `objectives: string[]` → `learning_objectives: LearningObjective[]` structured objects
+- Each Learning Objective now has: `id`, `objective` (bilingual text), `status` (not_started / in_progress / completed), `periods`, optional `notes`
+- **Backward compatibility**: `normalizeTeachingUnit()` adapter auto-converts old `string[]` data from Supabase/localStorage to new format on load
+- **SubUnitForm**: replaced flat text inputs with structured LO cards — each card has objective textarea, status dropdown (3 states), periods number input
+- **TeachingView Sub-Unit Detail**: LO cards with color-coded status badges (slate/amber/emerald), click-to-cycle status, progress bar (completed/total)
+- **TeachingView Unit Detail**: sub-unit cards show "X/Y LOs" completion progress instead of plain count
+- **Class Progress Tracking** (TeachingView + DashboardView): progress calculated from completed LOs across all sub-units (was sub-unit count)
+- **AI context**: TimetableEntryForm maps `learning_objectives` to strings for Gemini lesson plan generation
+- New files:
+  - `src/lib/teachingAdapter.ts` — `normalizeTeachingUnit()` migration adapter
+- Modified files (7): types.ts, SubUnitForm.tsx, TeachingView.tsx, DashboardView.tsx, TimetableEntryForm.tsx, teachingService.ts, useAppData.ts
+
 ---
 
 ## Current Architecture
@@ -368,13 +381,20 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Incremental save + retry for API failure resilience
 - [x] Direct Supabase import: replaced skeleton data with enriched content
 
-### Phase 22 — Analytics & Reports (Next)
+### ~~Phase 22 — Learning Objectives 教学目标结构化~~ ✅ Done
+- [x] SubUnit objectives: `string[]` → `LearningObjective[]` (id, objective, status, periods, notes)
+- [x] Backward-compat normalizer in `teachingAdapter.ts`
+- [x] SubUnitForm: structured LO editing (objective, status, periods per LO)
+- [x] TeachingView: color-coded LO cards with click-to-cycle status + progress bar
+- [x] Class progress tracking: LO-based completion across TeachingView & DashboardView
+
+### Phase 23 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
-- [ ] Teaching unit completion tracking per class
+- [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 23 — Advanced
+### Phase 24 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

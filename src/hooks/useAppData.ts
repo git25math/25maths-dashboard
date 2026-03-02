@@ -14,6 +14,7 @@ import { timetableService } from '../services/timetableService';
 import { meetingService } from '../services/meetingService';
 import { lessonRecordService } from '../services/lessonRecordService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
+import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast, Toast } from './useToast';
 
@@ -58,9 +59,15 @@ export function useAppData() {
     }
 
     const fetchAll = async () => {
+      const normalizeAndSetUnits: React.Dispatch<React.SetStateAction<TeachingUnit[]>> = (val) => {
+        setTeachingUnits(prev => {
+          const next = typeof val === 'function' ? val(prev) : val;
+          return next.map(normalizeTeachingUnit);
+        });
+      };
       await Promise.all([
         fetchOrSync(studentService.getAllStudents, setStudents, students, 'students'),
-        fetchOrSync(teachingService.getAllUnits, setTeachingUnits, teachingUnits, 'teaching_units'),
+        fetchOrSync(teachingService.getAllUnits, normalizeAndSetUnits, teachingUnits, 'teaching_units'),
         fetchOrSync(classService.getAllClasses, setClasses, classes, 'classes'),
         fetchOrSync(ideaService.getAll, setIdeas, ideas, 'ideas'),
         fetchOrSync(sopService.getAll, setSops, sops, 'sops'),

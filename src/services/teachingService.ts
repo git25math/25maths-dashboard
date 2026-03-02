@@ -1,5 +1,6 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { TeachingUnit } from '../types';
+import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 
 const genId = () => Math.random().toString(36).substr(2, 9);
 
@@ -8,7 +9,7 @@ export const teachingService = {
     if (!isSupabaseConfigured) return [];
     const { data, error } = await supabase!.from('teaching_units').select('*');
     if (error) throw error;
-    return data || [];
+    return (data || []).map(normalizeTeachingUnit);
   },
 
   async createUnit(unit: Omit<TeachingUnit, 'id'>): Promise<TeachingUnit> {

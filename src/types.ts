@@ -131,10 +131,18 @@ export interface TeachingReflection {
   improvements?: string;
 }
 
+export interface LearningObjective {
+  id: string;
+  objective: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+  periods: number;
+  notes?: string;
+}
+
 export interface SubUnit {
   id: string;
   title: string;
-  objectives: string[];
+  learning_objectives: LearningObjective[];
   periods: number;
   vocabulary: VocabularyItem[];
   classroom_exercises: string;

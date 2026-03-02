@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, Plus, Trash2, Paperclip, Loader2 } from 'lucide-react';
-import { SubUnit, VocabularyItem, TeachingReflection } from '../types';
+import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { uploadFile } from '../services/storageService';
 
@@ -76,8 +76,9 @@ const emptyReflection: TeachingReflection = {
 };
 
 export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => {
+  const emptyLO = (): LearningObjective => ({ id: genId(), objective: '', status: 'not_started', periods: 1 });
   const [title, setTitle] = useState('');
-  const [objectives, setObjectives] = useState<string[]>(['']);
+  const [learningObjectives, setLearningObjectives] = useState<LearningObjective[]>([emptyLO()]);
   const [periods, setPeriods] = useState(1);
   const [vocabulary, setVocabulary] = useState<VocabularyItem[]>([{ english: '', chinese: '' }]);
   const [classroomExercises, setClassroomExercises] = useState('');
@@ -93,7 +94,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   useEffect(() => {
     if (subUnit) {
       setTitle(subUnit.title);
-      setObjectives(subUnit.objectives.length > 0 ? subUnit.objectives : ['']);
+      setLearningObjectives(subUnit.learning_objectives.length > 0 ? subUnit.learning_objectives : [emptyLO()]);
       setPeriods(subUnit.periods);
       setVocabulary(subUnit.vocabulary.length > 0 ? subUnit.vocabulary : [{ english: '', chinese: '' }]);
       setClassroomExercises(subUnit.classroom_exercises);
@@ -113,7 +114,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
     onSave({
       id: subUnit?.id || genId(),
       title,
-      objectives: objectives.filter(o => o.trim()),
+      learning_objectives: learningObjectives.filter(lo => lo.objective.trim()),
       periods,
       vocabulary: vocabulary.filter(v => v.english.trim() || v.chinese.trim()),
       classroom_exercises: classroomExercises,
@@ -128,13 +129,13 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
     });
   };
 
-  const addObjective = () => setObjectives([...objectives, '']);
-  const updateObjective = (i: number, val: string) => {
-    const arr = [...objectives];
-    arr[i] = val;
-    setObjectives(arr);
+  const addLO = () => setLearningObjectives([...learningObjectives, emptyLO()]);
+  const updateLO = (i: number, field: keyof LearningObjective, val: string | number) => {
+    const arr = [...learningObjectives];
+    arr[i] = { ...arr[i], [field]: val };
+    setLearningObjectives(arr);
   };
-  const removeObjective = (i: number) => setObjectives(objectives.filter((_, idx) => idx !== i));
+  const removeLO = (i: number) => setLearningObjectives(learningObjectives.filter((_, idx) => idx !== i));
 
   const addVocab = () => setVocabulary([...vocabulary, { english: '', chinese: '' }]);
   const updateVocab = (i: number, field: keyof VocabularyItem, val: string) => {
@@ -186,27 +187,52 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
             </div>
           </div>
 
-          {/* Objectives */}
+          {/* Learning Objectives */}
           <section className="space-y-4">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学目标 Objectives</label>
-              <button type="button" onClick={addObjective} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学目标 Learning Objectives</label>
+              <button type="button" onClick={addLO} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 <Plus size={14} /> Add
               </button>
             </div>
-            <div className="space-y-2">
-              {objectives.map((obj, i) => (
-                <div key={i} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={obj}
-                    onChange={e => updateObjective(i, e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                    placeholder={`Objective ${i + 1}`}
-                  />
-                  <button type="button" onClick={() => removeObjective(i)} className="p-2 text-red-400 hover:text-red-600">
-                    <Trash2 size={18} />
-                  </button>
+            <div className="space-y-3">
+              {learningObjectives.map((lo, i) => (
+                <div key={lo.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div className="flex gap-2">
+                    <textarea
+                      value={lo.objective}
+                      onChange={e => updateLO(i, 'objective', e.target.value)}
+                      className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm resize-none h-16"
+                      placeholder={`Learning Objective ${i + 1}`}
+                    />
+                    <button type="button" onClick={() => removeLO(i)} className="p-2 text-red-400 hover:text-red-600 self-start">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                  <div className="flex gap-4 items-center">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-slate-500">Status</label>
+                      <select
+                        value={lo.status}
+                        onChange={e => updateLO(i, 'status', e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                      >
+                        <option value="not_started">Not Started</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-slate-500">Periods</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={lo.periods}
+                        onChange={e => updateLO(i, 'periods', parseInt(e.target.value) || 1)}
+                        className="w-16 px-2 py-1 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, ChevronRight, CheckCircle2, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { TeachingUnit, ClassProfile, SubUnit } from '../types';
+import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
 import { YEAR_GROUPS } from '../shared/constants';
@@ -126,21 +126,76 @@ export const TeachingView = ({
                 </div>
               </div>
 
-              {/* Objectives */}
-              {selectedSubUnit.objectives.length > 0 && (
+              {/* Learning Objectives */}
+              {selectedSubUnit.learning_objectives.length > 0 && (
                 <section className="space-y-4">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
-                    <CheckCircle2 size={20} className="text-emerald-500" />
-                    教学目标 Objectives
-                  </h3>
-                  <ul className="space-y-2">
-                    {selectedSubUnit.objectives.map((obj, i) => (
-                      <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                        <MarkdownRenderer content={obj} />
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <CheckCircle2 size={20} className="text-emerald-500" />
+                      教学目标 Learning Objectives
+                    </h3>
+                    <span className="text-xs font-bold text-slate-500">
+                      {selectedSubUnit.learning_objectives.filter(lo => lo.status === 'completed').length}/{selectedSubUnit.learning_objectives.length} completed
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 transition-all duration-500"
+                      style={{ width: `${Math.round((selectedSubUnit.learning_objectives.filter(lo => lo.status === 'completed').length / selectedSubUnit.learning_objectives.length) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {selectedSubUnit.learning_objectives.map(lo => {
+                      const statusColors = {
+                        not_started: 'bg-slate-100 text-slate-600 border-slate-200',
+                        in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
+                        completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                      };
+                      const statusLabels = {
+                        not_started: 'Not Started',
+                        in_progress: 'In Progress',
+                        completed: 'Completed',
+                      };
+                      const cycleStatus = (current: LearningObjective['status']): LearningObjective['status'] => {
+                        const cycle: Record<string, LearningObjective['status']> = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' };
+                        return cycle[current];
+                      };
+                      return (
+                        <div key={lo.id} className={cn("p-3 rounded-xl border transition-all", statusColors[lo.status])}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 space-y-1">
+                              <MarkdownRenderer content={lo.objective} className="text-sm" />
+                              {lo.notes && <p className="text-xs text-slate-500 italic">{lo.notes}</p>}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] font-bold text-slate-400">{lo.periods}p</span>
+                              <button
+                                onClick={() => {
+                                  if (!selectedUnit) return;
+                                  const newLOs = selectedSubUnit.learning_objectives.map(l =>
+                                    l.id === lo.id ? { ...l, status: cycleStatus(l.status) } : l
+                                  );
+                                  const newSubUnit = { ...selectedSubUnit, learning_objectives: newLOs };
+                                  const newSubUnits = (selectedUnit.sub_units || []).map(s =>
+                                    s.id === selectedSubUnit.id ? newSubUnit : s
+                                  );
+                                  onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+                                  setSelectedSubUnit(newSubUnit);
+                                }}
+                                className={cn(
+                                  "px-2 py-1 text-[10px] font-bold rounded-lg border cursor-pointer transition-all hover:opacity-80",
+                                  statusColors[lo.status]
+                                )}
+                              >
+                                {statusLabels[lo.status]}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </section>
               )}
 
@@ -405,7 +460,7 @@ export const TeachingView = ({
                               <Clock size={12} /> {su.periods} 课时
                             </span>
                             <span className="flex items-center gap-1">
-                              <CheckCircle2 size={12} /> {su.objectives.length} objectives
+                              <CheckCircle2 size={12} /> {su.learning_objectives.filter(lo => lo.status === 'completed').length}/{su.learning_objectives.length} LOs
                             </span>
                           </div>
                           <div className="flex gap-1 mt-2">
@@ -615,8 +670,9 @@ export const TeachingView = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {classes.map(cls => {
             const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
-            const totalSubUnits = currentUnit?.sub_units?.length || currentUnit?.lessons.length || 1;
-            const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / totalSubUnits) * 100) : 0;
+            const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.length, 0) || currentUnit?.lessons.length || 1;
+            const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
+            const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
             return (
               <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                 <div>
