@@ -12,8 +12,9 @@ export const studentService = {
   },
 
   async createStudent(student: Omit<Student, 'id'>): Promise<Student> {
-    if (!isSupabaseConfigured) return { ...student, id: genId() };
-    const { data, error } = await supabase!.from('students').insert([student]).select().single();
+    const newStudent = { ...student, id: genId() };
+    if (!isSupabaseConfigured) return newStudent;
+    const { data, error } = await supabase!.from('students').insert([newStudent]).select().single();
     if (error) throw error;
     return data;
   },

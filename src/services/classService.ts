@@ -12,8 +12,9 @@ export const classService = {
   },
 
   async createClass(classProfile: Omit<ClassProfile, 'id'>): Promise<ClassProfile> {
-    if (!isSupabaseConfigured) return { ...classProfile, id: genId() };
-    const { data, error } = await supabase!.from('classes').insert([classProfile]).select().single();
+    const newClass = { ...classProfile, id: genId() };
+    if (!isSupabaseConfigured) return newClass;
+    const { data, error } = await supabase!.from('classes').insert([newClass]).select().single();
     if (error) throw error;
     return data;
   },

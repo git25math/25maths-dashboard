@@ -12,8 +12,9 @@ export const teachingService = {
   },
 
   async createUnit(unit: Omit<TeachingUnit, 'id'>): Promise<TeachingUnit> {
-    if (!isSupabaseConfigured) return { ...unit, id: genId() };
-    const { data, error } = await supabase!.from('teaching_units').insert([unit]).select().single();
+    const newUnit = { ...unit, id: genId() };
+    if (!isSupabaseConfigured) return newUnit;
+    const { data, error } = await supabase!.from('teaching_units').insert([newUnit]).select().single();
     if (error) throw error;
     return data;
   },
