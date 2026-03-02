@@ -196,3 +196,30 @@ export interface AppVersion {
   date: string;
   changes: string[];
 }
+
+export interface ActionItem {
+  content: string;
+  assignee: string;
+  deadline: string;
+  status: 'pending' | 'done';
+}
+
+export interface AISummary {
+  summary: string;
+  key_points: string[];
+  action_items: ActionItem[];
+  decisions: string[];
+}
+
+export interface MeetingRecord {
+  id: string;
+  title: string;
+  date: string;
+  duration: number;
+  transcript: string;
+  ai_summary: AISummary | null;
+  category: 'department' | 'tutor' | 'parent' | 'staff' | 'other';
+  participants: string[];
+  status: 'draft' | 'transcribing' | 'summarizing' | 'completed';
+  created_at: string;
+}

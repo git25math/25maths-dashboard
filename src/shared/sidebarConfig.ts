@@ -5,6 +5,7 @@ import {
   BookOpen,
   Lightbulb,
   Clock,
+  Mic,
   Settings,
 } from 'lucide-react';
 
@@ -15,5 +16,6 @@ export const SIDEBAR_ITEMS = [
   { key: 'teaching', icon: BookOpen, label: 'Teaching' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool' },
   { key: 'worklogs', icon: Clock, label: 'Work Logs' },
+  { key: 'meetings', icon: Mic, label: 'Meetings' },
   { key: 'sop', icon: Settings, label: 'SOP Library' },
 ] as const;

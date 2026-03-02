@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog } from './types';
+import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -25,6 +25,7 @@ import { TeachingView } from './views/TeachingView';
 import { SOPView } from './views/SOPView';
 import { WorkLogView } from './views/WorkLogView';
 import { IdeasView } from './views/IdeasView';
+import { MeetingsView } from './views/MeetingsView';
 
 export default function App() {
   const data = useAppData();
@@ -226,6 +227,15 @@ export default function App() {
             onDeleteIdea={data.deleteIdea}
             onEditIdea={(idea) => { setEditingIdea(idea); setIsIdeaFormOpen(true); }}
             onToggleStatus={data.toggleIdeaStatus}
+          />
+        );
+      case 'meetings':
+        return (
+          <MeetingsView
+            meetings={data.meetings}
+            onAddMeeting={data.addMeeting}
+            onUpdateMeeting={data.updateMeeting}
+            onDeleteMeeting={data.deleteMeeting}
           />
         );
       default:

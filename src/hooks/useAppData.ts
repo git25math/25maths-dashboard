@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -11,6 +11,7 @@ import { workLogService } from '../services/workLogService';
 import { goalService } from '../services/goalService';
 import { schoolEventService } from '../services/schoolEventService';
 import { timetableService } from '../services/timetableService';
+import { meetingService } from '../services/meetingService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast, Toast } from './useToast';
@@ -28,6 +29,7 @@ export function useAppData() {
   const [goals, setGoals] = useLocalStorage<Goal[]>('dashboard-goals', MOCK_GOALS);
   const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', MOCK_SCHOOL_EVENTS);
   const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', MOCK_WORK_LOGS);
+  const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
 
   // --- Data Fetching ---
 
@@ -64,6 +66,7 @@ export function useAppData() {
         fetchOrSync(goalService.getAll, setGoals, goals, 'goals'),
         fetchOrSync(schoolEventService.getAll, setSchoolEvents, schoolEvents, 'school_events'),
         fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
+        fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
       ]);
     };
     fetchAll();
@@ -427,6 +430,43 @@ export function useAppData() {
     }
   }, [setSchoolEvents, toast]);
 
+  // --- Meetings ---
+
+  const addMeeting = useCallback(async (data: Omit<MeetingRecord, 'id'>) => {
+    try {
+      const created = await meetingService.create(data);
+      setMeetings(prev => [...prev, created]);
+      toast.success('Meeting created');
+      return created;
+    } catch (error) {
+      toast.error('Failed to create meeting');
+      throw error;
+    }
+  }, [setMeetings, toast]);
+
+  const updateMeeting = useCallback(async (id: string, updates: Partial<MeetingRecord>) => {
+    const existing = meetings.find(m => m.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
+    try {
+      const updated = await meetingService.update(id, merged);
+      setMeetings(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+      toast.success('Meeting updated');
+    } catch (error) {
+      toast.error('Failed to update meeting');
+    }
+  }, [meetings, setMeetings, toast]);
+
+  const deleteMeeting = useCallback(async (id: string) => {
+    try {
+      await meetingService.delete(id);
+      setMeetings(prev => prev.filter(m => m.id !== id));
+      toast.success('Meeting deleted');
+    } catch (error) {
+      toast.error('Failed to delete meeting');
+    }
+  }, [setMeetings, toast]);
+
   // --- QuickCapture ---
 
   const quickCapture = useCallback((text: string, category: 'work' | 'student' | 'startup') => {
@@ -440,7 +480,7 @@ export function useAppData() {
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs,
+    ideas, sops, goals, schoolEvents, workLogs, meetings,
     toasts,
 
     // Student
@@ -465,6 +505,9 @@ export function useAppData() {
 
     // School Events
     addSchoolEvent, updateSchoolEvent, deleteSchoolEvent,
+
+    // Meetings
+    addMeeting, updateMeeting, deleteMeeting,
 
     // QuickCapture
     quickCapture,
