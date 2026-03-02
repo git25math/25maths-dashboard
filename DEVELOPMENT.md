@@ -287,6 +287,7 @@
 - **TeachingView Unit Detail**: sub-unit cards show "X/Y LOs" completion progress instead of plain count
 - **Class Progress Tracking** (TeachingView + DashboardView): progress calculated from completed LOs across all sub-units (was sub-unit count)
 - **AI context**: TimetableEntryForm maps `learning_objectives` to strings for Gemini lesson plan generation
+- **Hotfix — localStorage migration race condition**: normalizer ran in `useEffect` (post-render), but first render accessed `learning_objectives` on old data → `undefined.length` crash → blank page. Fix: added `|| []` defensive fallbacks at all view-layer access points + eager normalization `useEffect` on mount
 - New files:
   - `src/lib/teachingAdapter.ts` — `normalizeTeachingUnit()` migration adapter
 - Modified files (7): types.ts, SubUnitForm.tsx, TeachingView.tsx, DashboardView.tsx, TimetableEntryForm.tsx, teachingService.ts, useAppData.ts
@@ -387,6 +388,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] SubUnitForm: structured LO editing (objective, status, periods per LO)
 - [x] TeachingView: color-coded LO cards with click-to-cycle status + progress bar
 - [x] Class progress tracking: LO-based completion across TeachingView & DashboardView
+- [x] Hotfix: `|| []` defensive guards for first-render before normalizer useEffect runs
 
 ### Phase 23 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
