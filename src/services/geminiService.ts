@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { AISummary } from '../types';
+import { AISummary, Idea } from '../types';
 
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -24,6 +24,13 @@ export interface CategorizationResult {
   ideaPriority: 'low' | 'medium' | 'high';
   workLogCategory: 'tutor' | 'teaching' | 'admin' | 'startup' | 'other';
   tags: string[];
+}
+
+export interface ConsolidatedIdea {
+  title: string;
+  content: string;
+  category: Idea['category'];
+  priority: Idea['priority'];
 }
 
 export interface WeaknessInput {
@@ -202,5 +209,45 @@ Keep each section to 2-3 bullet points. Be specific and actionable.`,
     });
 
     return response.text ?? '';
+  },
+
+  async consolidateIdeas(ideas: Pick<Idea, 'title' | 'content' | 'category' | 'priority'>[]): Promise<ConsolidatedIdea> {
+    const ai = getClient();
+
+    const ideasText = ideas.map((idea, i) =>
+      `[Idea ${i + 1}]\nTitle: ${idea.title}\nContent: ${idea.content}\nCategory: ${idea.category}\nPriority: ${idea.priority}`
+    ).join('\n\n');
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a productivity assistant. The user has multiple scattered ideas that need to be consolidated into one structured note. Analyze the following ideas and merge them into a single, well-organized idea.
+
+Return ONLY valid JSON with this exact structure (no markdown fences):
+{
+  "title": "A concise title that captures the consolidated theme",
+  "content": "Well-structured Markdown content that merges, deduplicates, and organizes all the ideas. Use headings, bullet points, etc. as appropriate.",
+  "category": "work" | "student" | "startup",
+  "priority": "low" | "medium" | "high"
+}
+
+Rules:
+- The content should be in the same language as the original ideas (Chinese, English, or mixed)
+- Merge overlapping points, remove redundancy
+- Preserve all unique insights from each idea
+- Pick the most appropriate single category and the highest priority among the inputs
+- The content should be well-structured Markdown
+
+Ideas to consolidate:
+${ideasText}`,
+        }],
+      }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    return JSON.parse(jsonStr) as ConsolidatedIdea;
   },
 };

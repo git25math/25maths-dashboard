@@ -249,6 +249,7 @@ function AppContent() {
             onEditIdea={(idea) => { setEditingIdea(idea); setIsIdeaFormOpen(true); }}
             onToggleStatus={data.toggleIdeaStatus}
             onToggleDashboard={data.toggleIdeaDashboard}
+            onConsolidate={data.consolidateIdeas}
           />
         );
       case 'meetings':

@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit3, CheckCircle2, Clock, FileText, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Edit3, CheckCircle2, Clock, FileText, Eye, EyeOff, Sparkles, CheckSquare, Square, Loader2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Idea } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
+import { geminiService, ConsolidatedIdea } from '../services/geminiService';
+import { ConsolidatePreviewModal } from '../components/ConsolidatePreviewModal';
 
 type StatusFilter = 'all' | 'note' | 'pending' | 'processed';
 
@@ -26,23 +28,78 @@ interface IdeasViewProps {
   onEditIdea?: (idea: Idea) => void;
   onToggleStatus?: (id: string) => void;
   onToggleDashboard?: (id: string) => void;
+  onConsolidate?: (selectedIds: string[], consolidated: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => Promise<void>;
 }
 
-export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggleStatus, onToggleDashboard }: IdeasViewProps) => {
+export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggleStatus, onToggleDashboard, onConsolidate }: IdeasViewProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isConsolidating, setIsConsolidating] = useState(false);
+  const [consolidatePreview, setConsolidatePreview] = useState<ConsolidatedIdea | null>(null);
 
   const filteredIdeas = (statusFilter === 'all'
     ? ideas
     : ideas.filter(idea => idea.status === statusFilter)
   ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const exitSelectMode = () => {
+    setIsSelectMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleConsolidate = async () => {
+    if (selectedIds.size < 2) return;
+    setIsConsolidating(true);
+    try {
+      const selected = ideas.filter(i => selectedIds.has(i.id));
+      const result = await geminiService.consolidateIdeas(selected);
+      setConsolidatePreview(result);
+    } catch {
+      // If AI fails, silently stop loading
+    } finally {
+      setIsConsolidating(false);
+    }
+  };
+
+  const handleConfirmConsolidate = async (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => {
+    if (!onConsolidate) return;
+    await onConsolidate(Array.from(selectedIds), data);
+    setConsolidatePreview(null);
+    exitSelectMode();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-900">Startup灵感池 (25maths)</h2>
-        <button onClick={onAddIdea} className="btn-primary text-sm flex items-center gap-2">
-          <Plus size={18} /> New Idea
-        </button>
+        <div className="flex items-center gap-2">
+          {onConsolidate && (
+            <button
+              onClick={() => isSelectMode ? exitSelectMode() : setIsSelectMode(true)}
+              className={cn(
+                "text-sm flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all",
+                isSelectMode
+                  ? "bg-purple-50 text-purple-600 border border-purple-200"
+                  : "bg-white text-slate-500 border border-slate-200 hover:text-purple-600 hover:border-purple-200"
+              )}
+            >
+              {isSelectMode ? <><X size={16} /> Exit Select</> : <><CheckSquare size={16} /> Select</>}
+            </button>
+          )}
+          <button onClick={onAddIdea} className="btn-primary text-sm flex items-center gap-2">
+            <Plus size={18} /> New Idea
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -66,38 +123,57 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
         {filteredIdeas.map((idea) => {
           const cfg = STATUS_CONFIG[idea.status];
           const StatusIcon = cfg.icon;
+          const isSelected = selectedIds.has(idea.id);
           return (
-            <div key={idea.id} className="glass-card p-5 hover:shadow-md transition-shadow group relative">
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
-                {onToggleDashboard && (
+            <div
+              key={idea.id}
+              onClick={isSelectMode ? () => toggleSelect(idea.id) : undefined}
+              className={cn(
+                "glass-card p-5 transition-shadow group relative",
+                isSelectMode ? "cursor-pointer" : "hover:shadow-md",
+                isSelected && "ring-2 ring-purple-400 bg-purple-50/30"
+              )}
+            >
+              {isSelectMode && (
+                <div className="absolute top-4 right-4">
+                  {isSelected
+                    ? <CheckSquare size={20} className="text-purple-600" />
+                    : <Square size={20} className="text-slate-300" />
+                  }
+                </div>
+              )}
+              {!isSelectMode && (
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
+                  {onToggleDashboard && (
+                    <button
+                      onClick={() => onToggleDashboard(idea.id)}
+                      title={idea.show_on_dashboard ? 'Hide from Dashboard' : 'Show on Dashboard'}
+                      className={cn(
+                        "transition-colors",
+                        idea.show_on_dashboard
+                          ? "text-indigo-500 hover:text-indigo-700"
+                          : "text-slate-300 hover:text-slate-500"
+                      )}
+                    >
+                      {idea.show_on_dashboard ? <Eye size={14} /> : <EyeOff size={14} />}
+                    </button>
+                  )}
+                  {onEditIdea && (
+                    <button
+                      onClick={() => onEditIdea(idea)}
+                      className="text-slate-300 hover:text-indigo-500 transition-colors"
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                  )}
                   <button
-                    onClick={() => onToggleDashboard(idea.id)}
-                    title={idea.show_on_dashboard ? 'Hide from Dashboard' : 'Show on Dashboard'}
-                    className={cn(
-                      "transition-colors",
-                      idea.show_on_dashboard
-                        ? "text-indigo-500 hover:text-indigo-700"
-                        : "text-slate-300 hover:text-slate-500"
-                    )}
+                    onClick={() => { if (confirm('Delete this idea?')) onDeleteIdea(idea.id); }}
+                    className="text-slate-300 hover:text-red-500 transition-colors"
                   >
-                    {idea.show_on_dashboard ? <Eye size={14} /> : <EyeOff size={14} />}
+                    <Trash2 size={14} />
                   </button>
-                )}
-                {onEditIdea && (
-                  <button
-                    onClick={() => onEditIdea(idea)}
-                    className="text-slate-300 hover:text-indigo-500 transition-colors"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                )}
-                <button
-                  onClick={() => { if (confirm('Delete this idea?')) onDeleteIdea(idea.id); }}
-                  className="text-slate-300 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-3">
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
@@ -115,7 +191,7 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
                 )}>
                   {idea.priority}
                 </span>
-                {onToggleStatus && (
+                {onToggleStatus && !isSelectMode && (
                   <button
                     onClick={() => onToggleStatus(idea.id)}
                     className={cn(
@@ -141,6 +217,43 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
         <div className="glass-card p-12 text-center text-slate-400">
           {statusFilter === 'all' ? 'No ideas yet. Click "New Idea" to capture one.' : `No ${statusFilter} ideas found.`}
         </div>
+      )}
+
+      {/* Floating bottom bar in select mode */}
+      {isSelectMode && selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-purple-200 px-6 py-3 flex items-center gap-4">
+          <span className="text-sm font-bold text-slate-700">
+            {selectedIds.size} selected
+          </span>
+          <button
+            onClick={handleConsolidate}
+            disabled={selectedIds.size < 2 || isConsolidating}
+            className={cn(
+              "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all",
+              selectedIds.size >= 2 && !isConsolidating
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-200 hover:bg-purple-700"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+            )}
+          >
+            {isConsolidating
+              ? <><Loader2 size={16} className="animate-spin" /> Consolidating...</>
+              : <><Sparkles size={16} /> AI Consolidate</>
+            }
+          </button>
+          <button onClick={exitSelectMode} className="text-sm text-slate-400 hover:text-slate-600 font-bold transition-colors">
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Consolidate preview modal */}
+      {consolidatePreview && (
+        <ConsolidatePreviewModal
+          result={consolidatePreview}
+          selectedCount={selectedIds.size}
+          onConfirm={handleConfirmConsolidate}
+          onCancel={() => setConsolidatePreview(null)}
+        />
       )}
     </div>
   );

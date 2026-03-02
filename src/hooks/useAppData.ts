@@ -338,6 +338,27 @@ export function useAppData() {
     }
   }, [ideas, setIdeas, toast]);
 
+  const consolidateIdeas = useCallback(async (
+    selectedIds: string[],
+    consolidated: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }
+  ) => {
+    try {
+      await Promise.all(selectedIds.map(id => ideaService.delete(id)));
+      setIdeas(prev => prev.filter(i => !selectedIds.includes(i.id)));
+
+      const created = await ideaService.create({
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        ...consolidated,
+      });
+      setIdeas(prev => [...prev, created]);
+      toast.success(`Consolidated ${selectedIds.length} ideas into 1`);
+    } catch (error) {
+      toast.error('Failed to consolidate ideas');
+      throw error;
+    }
+  }, [setIdeas, toast]);
+
   // --- SOPs ---
 
   const addSOP = useCallback(async (data: { title: string; category: string; content: string }) => {
@@ -610,7 +631,7 @@ export function useAppData() {
     updateTimetableEntry, addTimetableEntry,
 
     // Ideas / SOPs / WorkLogs
-    addIdea, updateIdea, deleteIdea, toggleIdeaStatus, toggleIdeaDashboard,
+    addIdea, updateIdea, deleteIdea, toggleIdeaStatus, toggleIdeaDashboard, consolidateIdeas,
     addSOP, updateSOP, deleteSOP,
     addWorkLog, updateWorkLog, deleteWorkLog,
 
