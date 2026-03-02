@@ -81,6 +81,26 @@
 - Added `vocab_practice_url` field to `SubUnit` type and form (核心词汇练习链接)
 - Resource links now: Worksheet, Online Practice, Kahoot, Homework, Vocab Practice (5 total)
 
+### Phase 12 — Meeting Records 会议记录 (2026-03-02)
+- New feature: record meetings via browser microphone, auto-transcribe and generate AI summaries
+- Data model: `MeetingRecord`, `AISummary`, `ActionItem` types
+- Supabase migration: `meeting_records` table with RLS policies (deployed via `supabase db push`)
+- New `meetingService.ts`: CRUD for meeting records (ID prefix `mt-`)
+- New `geminiService.ts`: two Gemini 2.0 Flash API calls
+  - `transcribeAudio()`: base64 audio → bilingual (Chinese/English) transcript
+  - `generateMeetingSummary()`: transcript → structured JSON (summary, key_points, action_items, decisions)
+- New `MeetingsView.tsx`: full meeting management view
+  - Card grid list with category filter (department/tutor/parent/staff/other)
+  - Status badges (draft/transcribing/summarizing/completed)
+  - Inline new meeting form (title, date, category, participants)
+  - Detail view: MediaRecorder recording (start/pause/stop with live timer)
+  - Auto-pipeline: stop recording → Gemini transcribe → Gemini summarize → 4-panel display
+  - Inline card editing, regenerate summary button
+- Sidebar: "Meetings" entry with Mic icon between Work Logs and SOP Library
+- Audio is ephemeral (browser memory only) — only transcript and AI summary persist to Supabase
+- `useAppData` hook: added meetings state, Supabase sync, `addMeeting`/`updateMeeting`/`deleteMeeting`
+- Environment: `VITE_GEMINI_API_KEY` in `.env.local`
+
 ---
 
 ## Current Architecture
@@ -88,35 +108,35 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, Ideas, WorkLogs, SOP
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, Ideas, WorkLogs, Meetings, SOP
   │     ├── useAppData hook (central state management)
   │     ├── useLocalStorage (cache layer)
-  │     └── 9 Service files (Supabase API layer)
+  │     ├── 10 Service files (Supabase API layer)
+  │     └── geminiService (Gemini 2.0 Flash: audio transcription + meeting summary)
   │
   └── Data Flow:
         Load:   Supabase → State (fallback: localStorage → auto-sync to Supabase)
         Write:  Service (Supabase) → State → localStorage (write-through cache)
 ```
 
-**Supabase Tables** (12):
-students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records
+**Supabase Tables** (13):
+students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records
 
 ---
 
 ## Roadmap
 
-### Phase 11 — Password Protection (Next)
+### Phase 13 — Password Protection (Next)
 - [ ] Login gate with password authentication
 - [ ] Protect all routes behind auth check
 
-
-### Phase 12 — Missing Views
+### Phase 14 — Missing Views
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
 - [ ] Lesson Records view (CRUD for class lesson history)
 - [ ] Settings/Profile page
 
-### Phase 13 — Data & UX Improvements
+### Phase 15 — Data & UX Improvements
 - [ ] Search and filter across all entities
 - [ ] Bulk import/export (CSV/JSON)
 - [ ] Drag-and-drop timetable editing
@@ -124,19 +144,21 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Dark mode toggle
 - [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11). External link pasting also supported.
 
-### Phase 14 — Analytics & Reports
+### Phase 16 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 15 — AI Features
+### Phase 17 — AI Features
+- [x] Meeting audio transcription via Gemini 2.0 Flash (Phase 12)
+- [x] AI meeting summary generation — key points, action items, decisions (Phase 12)
 - [ ] Gemini-powered lesson plan generation
 - [ ] Auto-categorization of ideas and work logs
 - [ ] Student weakness analysis suggestions
 - [ ] Smart timetable conflict detection
 
-### Phase 16 — Advanced
+### Phase 18 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
