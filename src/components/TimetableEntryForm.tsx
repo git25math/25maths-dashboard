@@ -3,6 +3,7 @@ import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText } from 'luci
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonPlanItem } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
+import { getISODay, format } from 'date-fns';
 
 interface TimetableEntryFormProps {
   entry: TimetableEntry;
@@ -128,13 +129,57 @@ export const TimetableEntryForm = ({
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">End Time</label>
-              <input 
-                type="time" 
+              <input
+                type="time"
                 value={formData.end_time}
                 onChange={e => setFormData({ ...formData, end_time: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Schedule Type</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, date: undefined })}
+                  className={cn(
+                    "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
+                    !formData.date
+                      ? "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-700"
+                      : "bg-white text-slate-500 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600"
+                  )}
+                >
+                  Recurring Weekly
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, date: formData.date || format(new Date(), 'yyyy-MM-dd') })}
+                  className={cn(
+                    "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
+                    formData.date
+                      ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/50 dark:text-amber-300 dark:border-amber-700"
+                      : "bg-white text-slate-500 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600"
+                  )}
+                >
+                  Specific Date
+                </button>
+              </div>
+            </div>
+            {formData.date && (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Date</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={e => {
+                    const newDate = e.target.value;
+                    const newDay = newDate ? getISODay(new Date(newDate + 'T12:00:00')) : formData.day;
+                    setFormData({ ...formData, date: newDate, day: newDay });
+                  }}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">

@@ -226,9 +226,9 @@ export function useAppData() {
 
       // Auto-upsert LessonRecord for lesson entries with topic or notes
       if (updatedEntry.type === 'lesson' && (updatedEntry.topic || updatedEntry.notes)) {
-        const today = format(new Date(), 'yyyy-MM-dd');
+        const recordDate = updatedEntry.date || format(new Date(), 'yyyy-MM-dd');
         const existing = lessonRecords.find(
-          r => r.date === today && r.class_name === updatedEntry.class_name
+          r => r.date === recordDate && r.class_name === updatedEntry.class_name
         );
         if (existing) {
           const updates: Partial<LessonRecord> = {};
@@ -243,7 +243,7 @@ export function useAppData() {
         } else {
           try {
             const created = await lessonRecordService.create({
-              date: today,
+              date: recordDate,
               class_name: updatedEntry.class_name,
               topic: updatedEntry.topic || '',
               notes: updatedEntry.notes || '',

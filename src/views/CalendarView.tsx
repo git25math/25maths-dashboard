@@ -1,0 +1,477 @@
+import React, { useState, useMemo } from 'react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { TimetableEntry, ClassProfile, TeachingUnit } from '../types';
+import { DndContext, useDraggable, useDroppable, PointerSensor, useSensors, useSensor, DragEndEvent } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  addMonths,
+  subMonths,
+  isSameDay,
+  isSameMonth,
+  isToday,
+  startOfWeek,
+  endOfWeek,
+  getISODay,
+  addWeeks,
+  subWeeks,
+} from 'date-fns';
+
+const TIME_SLOTS = [
+  '05:20', '06:20', '07:35', '07:45', '08:20', '09:10', '09:55', '10:25',
+  '11:15', '12:05', '12:50', '13:35', '13:50', '14:40', '15:25', '15:30', '16:20', '16:30', '17:20'
+];
+
+interface CalendarViewProps {
+  timetable: TimetableEntry[];
+  onEditEntry: (entry: TimetableEntry) => void;
+  onAddEntry: (entry: TimetableEntry) => void;
+  onUpdateEntry?: (entry: TimetableEntry) => void;
+  classes: ClassProfile[];
+  teachingUnits: TeachingUnit[];
+}
+
+function getEntryColorClasses(type: string) {
+  switch (type) {
+    case 'lesson': return "bg-indigo-50 border-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300";
+    case 'tutor': return "bg-emerald-50 border-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:border-emerald-800 dark:text-emerald-300";
+    case 'duty': return "bg-amber-50 border-amber-100 text-amber-700 dark:bg-amber-900/40 dark:border-amber-800 dark:text-amber-300";
+    case 'meeting': return "bg-purple-50 border-purple-100 text-purple-700 dark:bg-purple-900/40 dark:border-purple-800 dark:text-purple-300";
+    default: return "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300";
+  }
+}
+
+function timeDiffMinutes(start: string, end: string): number {
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+
+function addMinutesToTime(time: string, minutes: number): string {
+  const [h, m] = time.split(':').map(Number);
+  const total = h * 60 + m + minutes;
+  const nh = Math.floor(total / 60) % 24;
+  const nm = total % 60;
+  return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`;
+}
+
+// --- DnD Wrappers ---
+function DraggableEntry({ entry, children }: { entry: TimetableEntry; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: entry.id,
+    data: { entry },
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+    position: 'relative',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      {children}
+    </div>
+  );
+}
+
+function DroppableCell({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "border-t border-slate-100 dark:border-slate-700 py-1 transition-colors",
+        isOver && "bg-indigo-50/50 dark:bg-indigo-900/30"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+// --- Helper: get entries for a given date ---
+function getEntriesForDate(date: Date, timetable: TimetableEntry[]): TimetableEntry[] {
+  const isoWeekday = getISODay(date); // 1=Mon..7=Sun
+  const dateStr = format(date, 'yyyy-MM-dd');
+
+  const recurring = timetable.filter(e => !e.date && e.day === isoWeekday);
+  const dateSpecific = timetable.filter(e => e.date === dateStr);
+
+  // Date-specific entries override recurring at the same start_time
+  const overriddenTimes = new Set(dateSpecific.map(e => e.start_time));
+  const merged = [
+    ...dateSpecific,
+    ...recurring.filter(e => !overriddenTimes.has(e.start_time)),
+  ];
+
+  return merged.sort((a, b) => a.start_time.localeCompare(b.start_time));
+}
+
+// --- Helper: count entries for a date (for month grid dots) ---
+function countEntriesForDate(date: Date, timetable: TimetableEntry[]): { total: number; hasDateSpecific: boolean } {
+  const isoWeekday = getISODay(date);
+  const dateStr = format(date, 'yyyy-MM-dd');
+  const recurring = timetable.filter(e => !e.date && e.day === isoWeekday);
+  const dateSpecific = timetable.filter(e => e.date === dateStr);
+  const overriddenTimes = new Set(dateSpecific.map(e => e.start_time));
+  const total = dateSpecific.length + recurring.filter(e => !overriddenTimes.has(e.start_time)).length;
+  return { total, hasDateSpecific: dateSpecific.length > 0 };
+}
+
+export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry, classes, teachingUnits }: CalendarViewProps) => {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(today));
+  const [selectedDate, setSelectedDate] = useState(today);
+
+  // Quick add state
+  const [quickSubject, setQuickSubject] = useState('');
+  const [quickClass, setQuickClass] = useState('');
+  const [quickRoom, setQuickRoom] = useState('');
+  const [quickTime, setQuickTime] = useState('');
+  const [quickRecurring, setQuickRecurring] = useState(false);
+
+  // DnD sensors
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Entries for selected date
+  const dayEntries = useMemo(() => getEntriesForDate(selectedDate, timetable), [selectedDate, timetable]);
+
+  // Month grid days
+  const calendarDays = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    return eachDayOfInterval({ start: calStart, end: calEnd });
+  }, [currentMonth]);
+
+  // Mobile week strip days
+  const weekDays = useMemo(() => {
+    const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
+    return eachDayOfInterval({ start: weekStart, end: weekEnd });
+  }, [selectedDate]);
+
+  const handleQuickAdd = () => {
+    if (!quickSubject || !quickTime) return;
+    const isoWeekday = getISODay(selectedDate);
+    const newEntry: TimetableEntry = {
+      id: `custom-${Date.now()}`,
+      day: isoWeekday,
+      start_time: quickTime,
+      end_time: quickTime,
+      subject: quickSubject,
+      class_name: quickClass || '-',
+      room: quickRoom || '-',
+      type: 'lesson',
+      ...(quickRecurring ? {} : { date: format(selectedDate, 'yyyy-MM-dd') }),
+    };
+    onAddEntry(newEntry);
+    setQuickSubject('');
+    setQuickClass('');
+    setQuickRoom('');
+    setQuickTime('');
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !onUpdateEntry) return;
+
+    const entry = (active.data.current as { entry: TimetableEntry }).entry;
+    const droppableId = over.id as string;
+
+    // Parse droppable ID: "slot-{time}"
+    const match = droppableId.match(/^slot-(.+)$/);
+    if (!match) return;
+
+    const newStartTime = match[1];
+
+    // Skip if no change
+    if (newStartTime === entry.start_time) return;
+
+    // Preserve duration
+    const duration = timeDiffMinutes(entry.start_time, entry.end_time);
+    const newEndTime = addMinutesToTime(newStartTime, duration);
+
+    onUpdateEntry({
+      ...entry,
+      start_time: newStartTime,
+      end_time: newEndTime,
+    });
+  };
+
+  const renderEntryCard = (entry: TimetableEntry) => (
+    <div
+      onClick={() => onEditEntry(entry)}
+      className={cn(
+        "p-2 rounded-lg text-[10px] border shadow-sm transition-all hover:scale-[1.02] cursor-pointer",
+        getEntryColorClasses(entry.type)
+      )}
+    >
+      <div className="flex justify-between items-start">
+        <p className="font-bold truncate">
+          <span className="opacity-60 mr-1">{entry.start_time}</span>
+          {entry.subject}
+        </p>
+        <div className="flex items-center gap-1 shrink-0">
+          {entry.date && (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Date-specific" />
+          )}
+          {entry.is_prepared !== undefined && (
+            <div className={cn("w-1.5 h-1.5 rounded-full", entry.is_prepared ? "bg-emerald-500" : "bg-red-500")} />
+          )}
+        </div>
+      </div>
+      <p className="opacity-80 truncate">{entry.class_name}</p>
+      <p className="opacity-60 truncate">{entry.room}</p>
+      {entry.topic && <p className="mt-1 font-medium text-[8px] italic truncate">Topic: {entry.topic}</p>}
+    </div>
+  );
+
+  // --- Sub-components ---
+
+  const CalendarHeader = () => (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
+          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        >
+          <ChevronLeft size={18} className="text-slate-500" />
+        </button>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 min-w-[160px] text-center">
+          {format(currentMonth, 'MMMM yyyy')}
+        </h3>
+        <button
+          onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
+          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        >
+          <ChevronRight size={18} className="text-slate-500" />
+        </button>
+      </div>
+      <button
+        onClick={() => { setCurrentMonth(startOfMonth(new Date())); setSelectedDate(new Date()); }}
+        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+      >
+        Today
+      </button>
+    </div>
+  );
+
+  const MonthGrid = () => (
+    <div className="space-y-2">
+      <CalendarHeader />
+      <div className="grid grid-cols-7 gap-px bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden">
+        {/* Day headers */}
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 py-2">
+            {d}
+          </div>
+        ))}
+        {/* Day cells */}
+        {calendarDays.map(day => {
+          const selected = isSameDay(day, selectedDate);
+          const todayCell = isToday(day);
+          const inMonth = isSameMonth(day, currentMonth);
+          const { total, hasDateSpecific } = countEntriesForDate(day, timetable);
+
+          return (
+            <button
+              key={day.toISOString()}
+              onClick={() => { setSelectedDate(day); if (!isSameMonth(day, currentMonth)) setCurrentMonth(startOfMonth(day)); }}
+              className={cn(
+                "relative flex flex-col items-center justify-center py-2.5 min-h-[48px] transition-all text-xs font-medium bg-white dark:bg-slate-800",
+                !inMonth && "opacity-40",
+                selected && "bg-indigo-600 dark:bg-indigo-600 text-white",
+                !selected && todayCell && "ring-2 ring-inset ring-indigo-400",
+                !selected && inMonth && "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+              )}
+            >
+              <span>{format(day, 'd')}</span>
+              {total > 0 && (
+                <div className="flex items-center gap-0.5 mt-0.5">
+                  {total <= 3 ? (
+                    Array.from({ length: total }).map((_, i) => (
+                      <span key={i} className={cn("w-1 h-1 rounded-full", selected ? "bg-white/70" : "bg-indigo-400 dark:bg-indigo-500")} />
+                    ))
+                  ) : (
+                    <span className={cn("text-[8px] font-bold", selected ? "text-white/70" : "text-indigo-400 dark:text-indigo-500")}>
+                      {total}
+                    </span>
+                  )}
+                  {hasDateSpecific && !selected && (
+                    <span className="w-1 h-1 rounded-full bg-amber-400" />
+                  )}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const DaySchedule = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+      </h3>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        {dayEntries.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 text-sm">
+            No entries for this day
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {TIME_SLOTS.map(time => {
+              const entry = dayEntries.find(e => e.start_time === time);
+              if (!entry) return null;
+              const cellId = `slot-${time}`;
+              return (
+                <DroppableCell key={cellId} id={cellId}>
+                  <DraggableEntry entry={entry}>
+                    {renderEntryCard(entry)}
+                  </DraggableEntry>
+                </DroppableCell>
+              );
+            })}
+            {/* Entries at non-standard times */}
+            {dayEntries
+              .filter(e => !TIME_SLOTS.includes(e.start_time))
+              .map(entry => {
+                const cellId = `slot-${entry.start_time}`;
+                return (
+                  <DroppableCell key={cellId} id={cellId}>
+                    <DraggableEntry entry={entry}>
+                      {renderEntryCard(entry)}
+                    </DraggableEntry>
+                  </DroppableCell>
+                );
+              })}
+          </div>
+        )}
+      </DndContext>
+    </div>
+  );
+
+  const MobileDateStrip = () => (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setSelectedDate(prev => subWeeks(prev, 1))}
+        className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 shrink-0"
+      >
+        <ChevronLeft size={16} className="text-slate-400" />
+      </button>
+      <div className="flex-1 flex gap-1 overflow-x-auto pb-1">
+        {weekDays.map(day => {
+          const selected = isSameDay(day, selectedDate);
+          const todayCell = isToday(day);
+          return (
+            <button
+              key={day.toISOString()}
+              onClick={() => { setSelectedDate(day); setCurrentMonth(startOfMonth(day)); }}
+              className={cn(
+                "flex-1 min-w-[40px] flex flex-col items-center py-2 rounded-xl text-xs font-bold transition-colors",
+                selected
+                  ? "bg-indigo-600 text-white"
+                  : todayCell
+                    ? "ring-2 ring-indigo-400 text-slate-700 dark:text-slate-300"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+              )}
+            >
+              <span className="text-[10px] uppercase">{format(day, 'EEE')}</span>
+              <span>{format(day, 'd')}</span>
+            </button>
+          );
+        })}
+      </div>
+      <button
+        onClick={() => setSelectedDate(prev => addWeeks(prev, 1))}
+        className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 shrink-0"
+      >
+        <ChevronRight size={16} className="text-slate-400" />
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Calendar</h2>
+        <div className="flex gap-2">
+          <button disabled className="btn-secondary text-sm opacity-50 cursor-not-allowed" title="Coming Soon">Download PDF</button>
+          <button disabled className="btn-primary text-sm opacity-50 cursor-not-allowed" title="Coming Soon">Edit Schedule</button>
+        </div>
+      </div>
+
+      {/* Quick Add */}
+      <div className="glass-card p-4 bg-indigo-50/30 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800">
+        <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
+          <Plus size={16} /> Quick Add / Customize Event
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <input
+            type="text"
+            placeholder="Subject"
+            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            value={quickSubject}
+            onChange={(e) => setQuickSubject(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Class"
+            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            value={quickClass}
+            onChange={(e) => setQuickClass(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Room"
+            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            value={quickRoom}
+            onChange={(e) => setQuickRoom(e.target.value)}
+          />
+          <input
+            type="time"
+            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            value={quickTime}
+            onChange={(e) => setQuickTime(e.target.value)}
+          />
+          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+            <input
+              type="checkbox"
+              checked={quickRecurring}
+              onChange={(e) => setQuickRecurring(e.target.checked)}
+              className="rounded border-slate-300"
+            />
+            Recurring
+          </label>
+          <button onClick={handleQuickAdd} className="btn-primary text-xs py-2 bg-indigo-600 border-none">Add</button>
+        </div>
+      </div>
+
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        <MobileDateStrip />
+        <DaySchedule />
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MonthGrid />
+        </div>
+        <div className="lg:col-span-1">
+          <DaySchedule />
+        </div>
+      </div>
+    </div>
+  );
+};

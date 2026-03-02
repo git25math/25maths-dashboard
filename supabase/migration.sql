@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS timetable_entries (
   is_prepared boolean DEFAULT false,
   unit_id text,
   lesson_id text,
+  date text,  -- ISO date for date-specific entries, NULL for recurring
   created_at timestamptz DEFAULT now()
 );
 

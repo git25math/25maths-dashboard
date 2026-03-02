@@ -23,7 +23,7 @@ import { SchoolEventForm } from './components/SchoolEventForm';
 import { LoginGate, useAuth } from './components/LoginGate';
 import { GlobalSearch } from './components/GlobalSearch';
 import { DashboardView } from './views/DashboardView';
-import { TimetableView } from './views/TimetableView';
+import { CalendarView } from './views/CalendarView';
 import { StudentsView } from './views/StudentsView';
 import { TeachingView } from './views/TeachingView';
 import { SOPView } from './views/SOPView';
@@ -84,18 +84,26 @@ function AppContent() {
     return () => clearInterval(timer);
   }, []);
 
-  // --- Timetable helpers ---
+  // --- Timetable/Calendar helpers ---
   const getCurrentEvent = () => {
-    const day = currentTime.getDay();
+    const todayStr = format(currentTime, 'yyyy-MM-dd');
     const timeStr = format(currentTime, 'HH:mm');
-    return data.timetable.find(e => e.day === day && timeStr >= e.start_time && timeStr <= e.end_time);
+    const isoWeekday = currentTime.getDay() === 0 ? 7 : currentTime.getDay();
+    // Date-specific entries take priority over recurring
+    return data.timetable.find(e => e.date === todayStr && timeStr >= e.start_time && timeStr <= e.end_time)
+      || data.timetable.find(e => !e.date && e.day === isoWeekday && timeStr >= e.start_time && timeStr <= e.end_time);
   };
 
   const getNextEvent = () => {
-    const day = currentTime.getDay();
+    const todayStr = format(currentTime, 'yyyy-MM-dd');
     const timeStr = format(currentTime, 'HH:mm');
-    return data.timetable
-      .filter(e => e.day === day)
+    const isoWeekday = currentTime.getDay() === 0 ? 7 : currentTime.getDay();
+    const dateSpecific = data.timetable.filter(e => e.date === todayStr);
+    const recurring = data.timetable.filter(e => !e.date && e.day === isoWeekday);
+    // Date-specific entries override recurring at the same start_time
+    const overriddenTimes = new Set(dateSpecific.map(e => e.start_time));
+    const merged = [...dateSpecific, ...recurring.filter(e => !overriddenTimes.has(e.start_time))];
+    return merged
       .sort((a, b) => a.start_time.localeCompare(b.start_time))
       .find(e => e.start_time > timeStr);
   };
@@ -159,7 +167,7 @@ function AppContent() {
         );
       case 'timetable':
         return (
-          <TimetableView
+          <CalendarView
             timetable={data.timetable}
             onEditEntry={(entry) => { setEditingTimetableEntry(entry); setIsTimetableFormOpen(true); }}
             onAddEntry={data.addTimetableEntry}

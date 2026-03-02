@@ -38,7 +38,7 @@ const ENTITY_CONFIG = [
   { key: 'meetings', tabKey: 'meetings', label: 'Meetings', icon: Mic },
   { key: 'lessonRecords', tabKey: 'lessons', label: 'Lesson Records', icon: FileText },
   { key: 'classes', tabKey: 'students', label: 'Classes', icon: GraduationCap },
-  { key: 'timetable', tabKey: 'timetable', label: 'Timetable', icon: Calendar },
+  { key: 'timetable', tabKey: 'timetable', label: 'Calendar', icon: Calendar },
 ] as const;
 
 function getSearchableText(item: Record<string, unknown>, entityKey: string): string {
@@ -85,7 +85,7 @@ function getSearchableText(item: Record<string, unknown>, entityKey: string): st
     }
     case 'timetable': {
       const t = item as unknown as TimetableEntry;
-      return [t.subject, t.class_name, t.topic].filter(Boolean).join(' ');
+      return [t.subject, t.class_name, t.topic, t.date].filter(Boolean).join(' ');
     }
     default:
       return '';
@@ -120,7 +120,10 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
     case 'meetings': return (item as unknown as MeetingRecord).date;
     case 'lessonRecords': return (item as unknown as LessonRecord).date;
     case 'classes': return (item as unknown as ClassProfile).year_group;
-    case 'timetable': return (item as unknown as TimetableEntry).room;
+    case 'timetable': {
+      const t = item as unknown as TimetableEntry;
+      return t.date ? `${t.room} \u00b7 ${t.date}` : t.room;
+    }
     default: return undefined;
   }
 }

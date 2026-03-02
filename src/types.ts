@@ -67,6 +67,7 @@ export interface TimetableEntry {
   is_prepared?: boolean;
   unit_id?: string; // Link to TeachingUnit
   lesson_id?: string; // Link to specific LessonPlanItem
+  date?: string; // ISO 'YYYY-MM-DD'. If set, date-specific (non-recurring). If absent, recurring weekly.
 }
 
 export interface LessonRecord {

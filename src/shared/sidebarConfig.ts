@@ -14,7 +14,7 @@ import {
 
 export const SIDEBAR_ITEMS = [
   { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { key: 'timetable', icon: Calendar, label: 'Timetable' },
+  { key: 'timetable', icon: Calendar, label: 'Calendar' },
   { key: 'students', icon: Users, label: 'Students' },
   { key: 'teaching', icon: BookOpen, label: 'Teaching' },
   { key: 'lessons', icon: FileText, label: 'Lesson Records' },
