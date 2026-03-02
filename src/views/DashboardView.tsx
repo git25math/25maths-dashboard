@@ -124,8 +124,8 @@ export const DashboardView = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {classes.slice(0, 4).map(cls => {
               const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
-              const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.length, 0) || currentUnit?.lessons.length || 1;
-              const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
+              const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
+              const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
               const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
               return (
                 <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">

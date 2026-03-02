@@ -34,6 +34,11 @@ export function useAppData() {
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
   const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
 
+  // --- Normalize localStorage data (migrates old objectives: string[] → learning_objectives) ---
+  useEffect(() => {
+    setTeachingUnits(prev => prev.map(normalizeTeachingUnit));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // --- Data Fetching ---
 
   useEffect(() => {

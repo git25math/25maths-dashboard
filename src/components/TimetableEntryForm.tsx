@@ -279,7 +279,7 @@ export const TimetableEntryForm = ({
                           yearGroup: selectedClass?.year_group || '',
                           unitTitle: selectedUnit.title,
                           unitObjectives: selectedUnit.learning_objectives,
-                          subUnits: selectedUnit.sub_units?.map(s => ({ title: s.title, objectives: s.learning_objectives.map(lo => lo.objective) })),
+                          subUnits: selectedUnit.sub_units?.map(s => ({ title: s.title, objectives: (s.learning_objectives || []).map(lo => lo.objective) })),
                           completedLessons: selectedClass?.completed_lesson_ids
                             ? selectedUnit.lessons
                                 .filter(l => selectedClass.completed_lesson_ids!.includes(l.id))

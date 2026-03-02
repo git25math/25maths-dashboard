@@ -127,7 +127,7 @@ export const TeachingView = ({
               </div>
 
               {/* Learning Objectives */}
-              {selectedSubUnit.learning_objectives.length > 0 && (
+              {(selectedSubUnit.learning_objectives || []).length > 0 && (
                 <section className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-lg flex items-center gap-2">
@@ -135,18 +135,18 @@ export const TeachingView = ({
                       教学目标 Learning Objectives
                     </h3>
                     <span className="text-xs font-bold text-slate-500">
-                      {selectedSubUnit.learning_objectives.filter(lo => lo.status === 'completed').length}/{selectedSubUnit.learning_objectives.length} completed
+                      {(selectedSubUnit.learning_objectives || []).filter(lo => lo.status === 'completed').length}/{(selectedSubUnit.learning_objectives || []).length} completed
                     </span>
                   </div>
                   {/* Progress bar */}
                   <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-500 transition-all duration-500"
-                      style={{ width: `${Math.round((selectedSubUnit.learning_objectives.filter(lo => lo.status === 'completed').length / selectedSubUnit.learning_objectives.length) * 100)}%` }}
+                      style={{ width: `${(selectedSubUnit.learning_objectives || []).length > 0 ? Math.round(((selectedSubUnit.learning_objectives || []).filter(lo => lo.status === 'completed').length / (selectedSubUnit.learning_objectives || []).length) * 100) : 0}%` }}
                     />
                   </div>
                   <div className="grid grid-cols-1 gap-2">
-                    {selectedSubUnit.learning_objectives.map(lo => {
+                    {(selectedSubUnit.learning_objectives || []).map(lo => {
                       const statusColors = {
                         not_started: 'bg-slate-100 text-slate-600 border-slate-200',
                         in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -173,7 +173,7 @@ export const TeachingView = ({
                               <button
                                 onClick={() => {
                                   if (!selectedUnit) return;
-                                  const newLOs = selectedSubUnit.learning_objectives.map(l =>
+                                  const newLOs = (selectedSubUnit.learning_objectives || []).map(l =>
                                     l.id === lo.id ? { ...l, status: cycleStatus(l.status) } : l
                                   );
                                   const newSubUnit = { ...selectedSubUnit, learning_objectives: newLOs };
@@ -460,7 +460,7 @@ export const TeachingView = ({
                               <Clock size={12} /> {su.periods} 课时
                             </span>
                             <span className="flex items-center gap-1">
-                              <CheckCircle2 size={12} /> {su.learning_objectives.filter(lo => lo.status === 'completed').length}/{su.learning_objectives.length} LOs
+                              <CheckCircle2 size={12} /> {(su.learning_objectives || []).filter(lo => lo.status === 'completed').length}/{(su.learning_objectives || []).length} LOs
                             </span>
                           </div>
                           <div className="flex gap-1 mt-2">
@@ -670,8 +670,8 @@ export const TeachingView = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {classes.map(cls => {
             const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
-            const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.length, 0) || currentUnit?.lessons.length || 1;
-            const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
+            const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
+            const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
             const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
             return (
               <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">

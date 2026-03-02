@@ -94,7 +94,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   useEffect(() => {
     if (subUnit) {
       setTitle(subUnit.title);
-      setLearningObjectives(subUnit.learning_objectives.length > 0 ? subUnit.learning_objectives : [emptyLO()]);
+      setLearningObjectives((subUnit.learning_objectives || []).length > 0 ? subUnit.learning_objectives : [emptyLO()]);
       setPeriods(subUnit.periods);
       setVocabulary(subUnit.vocabulary.length > 0 ? subUnit.vocabulary : [{ english: '', chinese: '' }]);
       setClassroomExercises(subUnit.classroom_exercises);
