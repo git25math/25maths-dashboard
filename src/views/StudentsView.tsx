@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X } from 'lucide-react';
+import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile, ExamRecord } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
+import { geminiService } from '../services/geminiService';
 
 interface StudentsViewProps {
   students: Student[];
@@ -43,6 +44,8 @@ export const StudentsView = ({
   const [activeSubTab, setActiveSubTab] = useState<'classes' | 'students'>('classes');
   const [showExamForm, setShowExamForm] = useState(false);
   const [examForm, setExamForm] = useState({ exam_name: '', date: '', score: '', total_score: '', weaknesses: '' });
+  const [recommendationLoading, setRecommendationLoading] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<Record<string, string>>({});
 
   const selectedStudent = students.find(s => s.id === selectedStudentId);
   const selectedClass = classes.find(c => c.id === selectedClassId);
@@ -275,23 +278,58 @@ export const StudentsView = ({
               <section className="space-y-4">
                 <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-700 pb-2">薄弱环节 (Weaknesses)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedStudent.weaknesses?.map((w, i) => (
-                    <div key={i} className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p className="font-bold text-slate-900 dark:text-slate-100">{w.topic}</p>
-                        <span className={cn(
-                          "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                          w.level === 'high' ? "bg-red-100 text-red-600" :
-                          w.level === 'medium' ? "bg-amber-100 text-amber-600" :
-                          "bg-blue-100 text-blue-600"
-                        )}>
-                          {w.level}
-                        </span>
+                  {selectedStudent.weaknesses?.map((w, i) => {
+                    const wKey = `${selectedStudent.id}-${w.topic}`;
+                    const isLoading = recommendationLoading === wKey;
+                    const rec = recommendations[wKey];
+                    return (
+                      <div key={i} className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm space-y-2">
+                        <div className="flex justify-between items-center">
+                          <p className="font-bold text-slate-900 dark:text-slate-100">{w.topic}</p>
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                            w.level === 'high' ? "bg-red-100 text-red-600" :
+                            w.level === 'medium' ? "bg-amber-100 text-amber-600" :
+                            "bg-blue-100 text-blue-600"
+                          )}>
+                            {w.level}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{w.notes}</p>
+                        <button
+                          disabled={isLoading}
+                          onClick={async () => {
+                            setRecommendationLoading(wKey);
+                            try {
+                              const result = await geminiService.recommendPractice({
+                                topic: w.topic,
+                                level: w.level,
+                                notes: w.notes,
+                                studentYearGroup: selectedStudent.year_group,
+                              });
+                              setRecommendations(prev => ({ ...prev, [wKey]: result }));
+                            } catch {
+                              // Silent fail
+                            } finally {
+                              setRecommendationLoading(null);
+                            }
+                          }}
+                          className={cn(
+                            "text-[10px] font-bold flex items-center gap-1",
+                            isLoading ? "text-slate-400 cursor-not-allowed" : "text-indigo-600 hover:underline"
+                          )}
+                        >
+                          {isLoading && <Loader2 size={10} className="animate-spin" />}
+                          {isLoading ? 'Analysing...' : 'Recommend Practice'}
+                        </button>
+                        {rec && (
+                          <div className="mt-2 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-100 dark:border-indigo-800">
+                            <MarkdownRenderer content={rec} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed" />
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{w.notes}</p>
-                      <button disabled className="text-[10px] font-bold text-slate-400 cursor-not-allowed" title="Coming Soon">Recommend Practice</button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             </div>

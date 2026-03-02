@@ -1,30 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle } from 'lucide-react';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonPlanItem } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
 import { getISODay, format } from 'date-fns';
+import { geminiService } from '../services/geminiService';
+import { detectConflicts } from '../lib/timetableUtils';
 
 interface TimetableEntryFormProps {
   entry: TimetableEntry;
   classes: ClassProfile[];
   teachingUnits: TeachingUnit[];
+  allEntries: TimetableEntry[];
   onSave: (entry: TimetableEntry) => void;
   onCancel: () => void;
   onUpdateClassProgress?: (classId: string, lessonId: string, completed: boolean) => void;
 }
 
-export const TimetableEntryForm = ({ 
-  entry, 
-  classes, 
-  teachingUnits, 
-  onSave, 
+export const TimetableEntryForm = ({
+  entry,
+  classes,
+  teachingUnits,
+  allEntries,
+  onSave,
   onCancel,
-  onUpdateClassProgress 
+  onUpdateClassProgress
 }: TimetableEntryFormProps) => {
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const conflicts = useMemo(
+    () => detectConflicts(formData, allEntries),
+    [formData.start_time, formData.end_time, formData.day, formData.date, allEntries]
+  );
 
   useEffect(() => {
     if (formData.class_id) {
@@ -253,23 +264,65 @@ export const TimetableEntryForm = ({
               <div className="pt-4 border-t border-indigo-100">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">AI Preparation Assistant</h4>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      const prompt = selectedUnit.ai_prompt_template || "Generate a lesson plan for this topic.";
-                      setFormData({ 
-                        ...formData, 
-                        notes: (formData.notes || '') + `\n\n### AI Generated Plan\nBased on prompt: *${prompt}*\n\n1. **Starter**: Quick review of previous lesson.\n2. **Main**: Introduction to ${formData.topic || 'the topic'} using visual aids.\n3. **Activity**: Group work on practice problems.\n4. **Plenary**: Exit ticket to check understanding.`
-                      });
+                  <button
+                    type="button"
+                    disabled={isGenerating}
+                    onClick={async () => {
+                      setIsGenerating(true);
+                      setAiError(null);
+                      try {
+                        const plan = await geminiService.generateLessonPlan({
+                          aiPromptTemplate: selectedUnit.ai_prompt_template || 'Generate a lesson plan for this topic.',
+                          subject: formData.subject,
+                          topic: formData.topic || 'the topic',
+                          className: selectedClass?.name || formData.class_name,
+                          yearGroup: selectedClass?.year_group || '',
+                          unitTitle: selectedUnit.title,
+                          unitObjectives: selectedUnit.learning_objectives,
+                          subUnits: selectedUnit.sub_units?.map(s => ({ title: s.title, objectives: s.objectives })),
+                          completedLessons: selectedClass?.completed_lesson_ids
+                            ? selectedUnit.lessons
+                                .filter(l => selectedClass.completed_lesson_ids!.includes(l.id))
+                                .map(l => l.title)
+                            : [],
+                        });
+                        setFormData(prev => ({
+                          ...prev,
+                          notes: (prev.notes || '') + '\n\n' + plan,
+                        }));
+                      } catch (err) {
+                        setAiError(err instanceof Error ? err.message : 'Failed to generate plan');
+                      } finally {
+                        setIsGenerating(false);
+                      }
                     }}
-                    className="flex items-center gap-1 text-indigo-600 text-xs font-bold hover:underline"
+                    className={cn(
+                      "flex items-center gap-1 text-xs font-bold",
+                      isGenerating ? "text-slate-400 cursor-not-allowed" : "text-indigo-600 hover:underline"
+                    )}
                   >
-                    <Sparkles size={14} /> Generate Plan
+                    {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    {isGenerating ? 'Generating...' : 'Generate Plan'}
                   </button>
                 </div>
                 <div className="p-4 bg-slate-900 rounded-2xl text-xs font-mono text-indigo-300 leading-relaxed">
                   {selectedUnit.ai_prompt_template || "No AI template defined for this unit."}
                 </div>
+                {aiError && (
+                  <p className="text-xs text-red-500 mt-2">{aiError}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {conflicts.length > 0 && (
+            <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-2xl">
+              <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-300">Schedule Conflict Detected</p>
+                {conflicts.map((c, i) => (
+                  <p key={i} className="text-xs text-amber-600 dark:text-amber-400">{c.message}</p>
+                ))}
               </div>
             </div>
           )}

@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { TimetableEntry, ClassProfile, TeachingUnit } from '../types';
 import { DndContext, useDraggable, useDroppable, PointerSensor, useSensors, useSensor, DragEndEvent } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { detectConflicts } from '../lib/timetableUtils';
 import {
   format,
   startOfMonth,
@@ -206,14 +207,17 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     });
   };
 
-  const renderEntryCard = (entry: TimetableEntry) => (
+  const renderEntryCard = (entry: TimetableEntry, hasConflict = false) => (
     <div
       onClick={() => onEditEntry(entry)}
       className={cn(
-        "p-2 rounded-lg text-[10px] border shadow-sm transition-all hover:scale-[1.02] cursor-pointer",
+        "p-2 rounded-lg text-[10px] border shadow-sm transition-all hover:scale-[1.02] cursor-pointer relative",
         getEntryColorClasses(entry.type)
       )}
     >
+      {hasConflict && (
+        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" title="Schedule conflict" />
+      )}
       <div className="flex justify-between items-start">
         <p className="font-bold truncate">
           <span className="opacity-60 mr-1">{entry.start_time}</span>
@@ -317,48 +321,59 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     </div>
   );
 
-  const DaySchedule = () => (
-    <div className="space-y-3">
-      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-        {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-      </h3>
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        {dayEntries.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-sm">
-            No entries for this day
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {TIME_SLOTS.map(time => {
-              const entry = dayEntries.find(e => e.start_time === time);
-              if (!entry) return null;
-              const cellId = `slot-${time}`;
-              return (
-                <DroppableCell key={cellId} id={cellId}>
-                  <DraggableEntry entry={entry}>
-                    {renderEntryCard(entry)}
-                  </DraggableEntry>
-                </DroppableCell>
-              );
-            })}
-            {/* Entries at non-standard times */}
-            {dayEntries
-              .filter(e => !TIME_SLOTS.includes(e.start_time))
-              .map(entry => {
-                const cellId = `slot-${entry.start_time}`;
+  const DaySchedule = () => {
+    const conflictSet = useMemo(() => {
+      const ids = new Set<string>();
+      for (const entry of dayEntries) {
+        const c = detectConflicts(entry, dayEntries);
+        if (c.length > 0) ids.add(entry.id);
+      }
+      return ids;
+    }, [dayEntries]);
+
+    return (
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+        </h3>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          {dayEntries.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-sm">
+              No entries for this day
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {TIME_SLOTS.map(time => {
+                const entry = dayEntries.find(e => e.start_time === time);
+                if (!entry) return null;
+                const cellId = `slot-${time}`;
                 return (
                   <DroppableCell key={cellId} id={cellId}>
                     <DraggableEntry entry={entry}>
-                      {renderEntryCard(entry)}
+                      {renderEntryCard(entry, conflictSet.has(entry.id))}
                     </DraggableEntry>
                   </DroppableCell>
                 );
               })}
-          </div>
-        )}
-      </DndContext>
-    </div>
-  );
+              {/* Entries at non-standard times */}
+              {dayEntries
+                .filter(e => !TIME_SLOTS.includes(e.start_time))
+                .map(entry => {
+                  const cellId = `slot-${entry.start_time}`;
+                  return (
+                    <DroppableCell key={cellId} id={cellId}>
+                      <DraggableEntry entry={entry}>
+                        {renderEntryCard(entry, conflictSet.has(entry.id))}
+                      </DraggableEntry>
+                    </DroppableCell>
+                  );
+                })}
+            </div>
+          )}
+        </DndContext>
+      </div>
+    );
+  };
 
   const MobileDateStrip = () => (
     <div className="flex items-center gap-1">

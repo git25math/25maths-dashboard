@@ -448,6 +448,7 @@ function AppContent() {
           entry={editingTimetableEntry}
           classes={data.classes}
           teachingUnits={data.teachingUnits}
+          allEntries={data.timetable}
           onSave={(e) => { data.updateTimetableEntry(e); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onCancel={() => { setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onUpdateClassProgress={data.updateClassProgress}

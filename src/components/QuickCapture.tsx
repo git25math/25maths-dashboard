@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { geminiService } from '../services/geminiService';
 
 interface QuickCaptureProps {
   onSave: (text: string, category: 'work' | 'student' | 'startup') => void;
@@ -11,13 +12,30 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<'work' | 'student' | 'startup'>('work');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
     onSave(text, category);
     setText('');
+    setAiSuggestion(null);
     setIsOpen(false);
+  };
+
+  const handleAiSuggest = async () => {
+    if (text.trim().length < 10 || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const result = await geminiService.suggestCategorization(text);
+      setCategory(result.ideaCategory);
+      setAiSuggestion(result.ideaCategory);
+    } catch {
+      // Silent fail
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -44,22 +62,43 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                 placeholder="What's on your mind?"
                 className="w-full h-24 p-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm dark:text-slate-100"
               />
-              <div className="flex gap-2">
-                {(['work', 'student', 'startup'] as const).map((cat) => (
+              <div className="space-y-1.5">
+                <div className="flex gap-2">
+                  {(['work', 'student', 'startup'] as const).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => { setCategory(cat); setAiSuggestion(null); }}
+                      className={cn(
+                        "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border",
+                        category === cat
+                          ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                          : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
                   <button
-                    key={cat}
                     type="button"
-                    onClick={() => setCategory(cat)}
+                    onClick={handleAiSuggest}
+                    disabled={text.trim().length < 10 || aiLoading}
                     className={cn(
-                      "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border",
-                      category === cat
-                        ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                        : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400"
+                      "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border flex items-center gap-1",
+                      aiLoading
+                        ? "bg-purple-50 border-purple-200 text-purple-400 cursor-not-allowed"
+                        : text.trim().length < 10
+                          ? "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-300 cursor-not-allowed"
+                          : "bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                     )}
                   >
-                    {cat}
+                    <Sparkles size={10} />
+                    {aiLoading ? '...' : 'AI'}
                   </button>
-                ))}
+                </div>
+                {aiSuggestion && (
+                  <p className="text-[10px] text-purple-500 font-medium">AI suggested: {aiSuggestion}</p>
+                )}
               </div>
               <button type="submit" className="w-full btn-primary py-2 text-sm">
                 Save Note
