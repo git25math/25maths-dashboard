@@ -90,13 +90,16 @@
   - `transcribeAudio()`: base64 audio → bilingual (Chinese/English) transcript
   - `generateMeetingSummary()`: transcript → structured JSON (summary, key_points, action_items, decisions)
 - New `MeetingsView.tsx`: full meeting management view
-  - Card grid list with category filter (department/tutor/parent/staff/other)
-  - Status badges (draft/transcribing/summarizing/completed)
+  - Card grid list with category filter and status badges
   - Inline new meeting form (title, date, category, participants)
   - Detail view: MediaRecorder recording (start/pause/stop with live timer)
   - Auto-pipeline: stop recording → Gemini transcribe → Gemini summarize → 4-panel display
   - Inline card editing, regenerate summary button
 - Sidebar: "Meetings" entry with Mic icon between Work Logs and SOP Library
+- 9 meeting categories with distinct color badges:
+  Flag Raising (red), WS Staff Meeting (purple), US Staff Meeting (violet),
+  Tutor Meeting (green), Department Meeting (indigo), SPTC Meeting (cyan),
+  Assembly (amber), Parent Meeting (orange), Others (grey)
 - Audio is ephemeral (browser memory only) — only transcript and AI summary persist to Supabase
 - `useAppData` hook: added meetings state, Supabase sync, `addMeeting`/`updateMeeting`/`deleteMeeting`
 - Environment: `VITE_GEMINI_API_KEY` in `.env.local`
