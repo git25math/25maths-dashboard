@@ -197,6 +197,42 @@
 - New files: `src/hooks/useDarkMode.ts`, `src/components/GlobalSearch.tsx`
 - Modified: 34 files total (914 insertions, 521 deletions)
 
+### Phase 18 — Calendar View 日历视图 (2026-03-02)
+- **Timetable → Calendar**: replaced weekly grid with full month calendar + day schedule panel
+- Date navigation: month grid with entry count dots, week strip for mobile, "Today" quick nav
+- **Date-specific entries**: new `date?: string` field on `TimetableEntry` for one-off schedule overrides
+  - "Recurring Weekly" / "Specific Date" toggle in TimetableEntryForm
+  - Date-specific entries override recurring at the same start_time
+- Day schedule: shows merged recurring + date-specific entries for selected date
+- **Quick Add**: inline form (subject, class, room, time, recurring toggle) creates entries for selected date
+- **Drag-and-drop**: DnD from Phase 17 carried forward — reorder entries within day schedule
+- Entry cards: start_time prefix, amber dot for date-specific, green/red dot for prep status
+- Helper functions: `getEntriesForDate()`, `countEntriesForDate()` with recurring/date-specific merge logic
+- Month grid: dots for entry count (≤3 = dots, >3 = number), amber dot for date-specific presence
+- Mobile: week strip with chevron navigation (±1 week), responsive layout
+
+### Phase 19 — AI Features 智能功能 (2026-03-02)
+- **Gemini Lesson Plan Generation**: replaced hardcoded "Generate Plan" stub in TimetableEntryForm with real Gemini 2.0 Flash API call
+  - `geminiService.generateLessonPlan()`: sends subject, topic, class, unit objectives, sub-units, completed lessons as context
+  - Returns Markdown with Starter/Main/Practice/Plenary/Homework sections, appended to notes
+  - Loading spinner (`Loader2`), error display, button disabled during generation
+- **QuickCapture AI Auto-Categorization**: new "AI" button after category buttons
+  - `geminiService.suggestCategorization()`: analyzes note text, returns `{ ideaCategory, ideaPriority, workLogCategory, tags }`
+  - Auto-selects suggested category, shows "AI suggested: X" label
+  - Min 10 chars required, disabled while loading, silent fail on error, reset on submit
+- **Student Weakness Practice Recommendations**: enabled previously disabled "Recommend Practice" button
+  - `geminiService.recommendPractice()`: sends topic, severity, notes, year group to Gemini
+  - Returns concise Markdown with Diagnosis / Practice Strategy / Quick Win sections
+  - Per-weakness loading state, inline rendering with `MarkdownRenderer`, ephemeral results
+- **Smart Timetable Conflict Detection**: pure logic, no AI
+  - New `src/lib/timetableUtils.ts`: `detectConflicts(entry, allEntries)` → `TimetableConflict[]`
+  - Handles recurring vs date-specific matching by day number
+  - Default 45-min duration when end_time === start_time (quick-add case)
+  - TimetableEntryForm: amber warning box listing conflicts (warning only, not blocking save)
+  - CalendarView DaySchedule: pulsing red dot on conflicting entry cards
+- New file: `src/lib/timetableUtils.ts`
+- Modified: 7 files (429 insertions, 83 deletions)
+
 ---
 
 ## Current Architecture
@@ -211,7 +247,8 @@ Browser
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
   │     ├── 11 Service files (Supabase API layer)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
-  │     └── geminiService (Gemini 2.0 Flash: audio transcription + meeting summary)
+  │     ├── geminiService (Gemini 2.0 Flash: transcription, meeting summary, lesson plans, categorization, practice recs)
+  │     └── timetableUtils (conflict detection for recurring/date-specific entries)
   │
   └── Data Flow:
         Load:   Supabase → State (fallback: localStorage → auto-sync to Supabase)
@@ -255,21 +292,28 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Dark mode toggle with localStorage persistence + system preference fallback
 - [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11)
 
-### Phase 18 — Analytics & Reports (Next)
+### ~~Phase 18 — Calendar View 日历视图~~ ✅ Done
+- [x] Month calendar grid with entry count dots and date navigation
+- [x] Date-specific entries (one-off overrides) with recurring/date-specific toggle
+- [x] Day schedule panel with merged recurring + date-specific entries
+- [x] Quick Add inline form for fast entry creation
+- [x] Mobile week strip with responsive layout
+
+### ~~Phase 19 — AI Features 智能功能~~ ✅ Done
+- [x] Meeting audio transcription via Gemini 2.0 Flash (Phase 12)
+- [x] AI meeting summary generation — key points, action items, decisions (Phase 12)
+- [x] Gemini-powered lesson plan generation (replaces hardcoded stub)
+- [x] Auto-categorization of ideas via AI button in QuickCapture
+- [x] Student weakness practice recommendations with inline Markdown rendering
+- [x] Smart timetable conflict detection with amber warnings + pulsing red dots
+
+### Phase 20 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 19 — AI Features
-- [x] Meeting audio transcription via Gemini 2.0 Flash (Phase 12)
-- [x] AI meeting summary generation — key points, action items, decisions (Phase 12)
-- [ ] Gemini-powered lesson plan generation
-- [ ] Auto-categorization of ideas and work logs
-- [ ] Student weakness analysis suggestions
-- [ ] Smart timetable conflict detection
-
-### Phase 20 — Advanced
+### Phase 21 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
