@@ -134,6 +134,15 @@
 - Sidebar: "Lesson Records" entry with FileText icon, placed after Teaching
 - `useAppData`: `lessonRecords` state with localStorage persistence, Supabase fetchOrSync, 3 CRUD functions (`addLessonRecord`, `updateLessonRecord`, `deleteLessonRecord`)
 
+### Phase 15 — Password Protection 增强安全性 (2026-03-02)
+- LoginGate token format upgraded: plain hash string → JSON `{ hash, timestamp }` with automatic old-format migration
+- **7-day session expiry**: token validated against `Date.now() - timestamp < 7 days`; expired tokens auto-cleared on mount
+- **AuthContext + useAuth() hook**: React Context exposing `logout()` function to all child components
+- **Logout button**: added to both desktop sidebar (below "Current Role" card) and mobile sidebar (bottom of nav)
+- Logout clears localStorage token and returns to login screen
+- App restructured: split into `App` (LoginGate wrapper) + `AppContent` (inner component consuming auth context)
+- **deploy.yml fix**: added missing `VITE_GEMINI_API_KEY` secret to build env (production meeting transcription now works)
+
 ---
 
 ## Current Architecture
@@ -165,11 +174,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Lesson Records view: 按班级分组查看历史上课记录
 - [ ] LessonRecord 与 TimetableEntry 双向关联（timetable_entry_id）— deferred
 
-### Phase 15 — Password Protection (Next)
-- [ ] Login gate with password authentication
-- [ ] Protect all routes behind auth check
+### ~~Phase 15 — Password Protection 增强安全性~~ ✅ Done
+- [x] Login gate with SHA-256 password authentication
+- [x] Protect all routes behind auth check
+- [x] 7-day session expiry with JSON token format
+- [x] Logout button in desktop & mobile sidebars
+- [x] deploy.yml: added VITE_GEMINI_API_KEY for production meeting transcription
 
-### Phase 16 — Missing Views
+### Phase 16 — Missing Views (Next)
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
 - [ ] Settings/Profile page
