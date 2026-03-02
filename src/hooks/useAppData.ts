@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
-import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord } from '../types';
+import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -12,6 +12,7 @@ import { goalService } from '../services/goalService';
 import { schoolEventService } from '../services/schoolEventService';
 import { timetableService } from '../services/timetableService';
 import { meetingService } from '../services/meetingService';
+import { lessonRecordService } from '../services/lessonRecordService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast, Toast } from './useToast';
@@ -30,6 +31,7 @@ export function useAppData() {
   const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', MOCK_SCHOOL_EVENTS);
   const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', MOCK_WORK_LOGS);
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
+  const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
 
   // --- Data Fetching ---
 
@@ -67,6 +69,7 @@ export function useAppData() {
         fetchOrSync(schoolEventService.getAll, setSchoolEvents, schoolEvents, 'school_events'),
         fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
         fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
+        fetchOrSync(lessonRecordService.getAll, setLessonRecords, lessonRecords, 'lesson_records'),
       ]);
     };
     fetchAll();
@@ -220,10 +223,44 @@ export function useAppData() {
     try {
       await timetableService.update(updatedEntry.id, updatedEntry);
       setTimetable(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
+
+      // Auto-upsert LessonRecord for lesson entries with topic or notes
+      if (updatedEntry.type === 'lesson' && (updatedEntry.topic || updatedEntry.notes)) {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const existing = lessonRecords.find(
+          r => r.date === today && r.class_name === updatedEntry.class_name
+        );
+        if (existing) {
+          const updates: Partial<LessonRecord> = {};
+          if (updatedEntry.topic) updates.topic = updatedEntry.topic;
+          if (updatedEntry.notes) updates.notes = updatedEntry.notes;
+          try {
+            const updated = await lessonRecordService.update(existing.id, { ...existing, ...updates });
+            setLessonRecords(prev => prev.map(r => r.id === existing.id ? { ...r, ...updated } : r));
+          } catch {
+            // silent fallback
+          }
+        } else {
+          try {
+            const created = await lessonRecordService.create({
+              date: today,
+              class_name: updatedEntry.class_name,
+              topic: updatedEntry.topic || '',
+              notes: updatedEntry.notes || '',
+              progress: '',
+              homework_assigned: '',
+              next_lesson_plan: '',
+            });
+            setLessonRecords(prev => [...prev, created]);
+          } catch {
+            // silent fallback
+          }
+        }
+      }
     } catch (error) {
       toast.error('Failed to update timetable entry');
     }
-  }, [setTimetable, toast]);
+  }, [setTimetable, toast, lessonRecords, setLessonRecords]);
 
   const addTimetableEntry = useCallback(async (newEntry: TimetableEntry) => {
     try {
@@ -481,6 +518,41 @@ export function useAppData() {
     }
   }, [setMeetings, toast]);
 
+  // --- Lesson Records ---
+
+  const addLessonRecord = useCallback(async (data: Omit<LessonRecord, 'id'>) => {
+    try {
+      const created = await lessonRecordService.create(data);
+      setLessonRecords(prev => [...prev, created]);
+      toast.success('Lesson record added');
+    } catch (error) {
+      toast.error('Failed to add lesson record');
+    }
+  }, [setLessonRecords, toast]);
+
+  const updateLessonRecord = useCallback(async (id: string, updates: Partial<LessonRecord>) => {
+    const existing = lessonRecords.find(r => r.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
+    try {
+      const updated = await lessonRecordService.update(id, merged);
+      setLessonRecords(prev => prev.map(r => r.id === id ? { ...r, ...updated } : r));
+      toast.success('Lesson record updated');
+    } catch (error) {
+      toast.error('Failed to update lesson record');
+    }
+  }, [lessonRecords, setLessonRecords, toast]);
+
+  const deleteLessonRecord = useCallback(async (id: string) => {
+    try {
+      await lessonRecordService.delete(id);
+      setLessonRecords(prev => prev.filter(r => r.id !== id));
+      toast.success('Lesson record deleted');
+    } catch (error) {
+      toast.error('Failed to delete lesson record');
+    }
+  }, [setLessonRecords, toast]);
+
   // --- QuickCapture ---
 
   const quickCapture = useCallback((text: string, category: 'work' | 'student' | 'startup') => {
@@ -494,7 +566,7 @@ export function useAppData() {
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords,
     toasts,
 
     // Student
@@ -522,6 +594,9 @@ export function useAppData() {
 
     // Meetings
     addMeeting, updateMeeting, deleteMeeting,
+
+    // Lesson Records
+    addLessonRecord, updateLessonRecord, deleteLessonRecord,
 
     // QuickCapture
     quickCapture,

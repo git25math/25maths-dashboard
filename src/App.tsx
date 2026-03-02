@@ -26,6 +26,7 @@ import { SOPView } from './views/SOPView';
 import { WorkLogView } from './views/WorkLogView';
 import { IdeasView } from './views/IdeasView';
 import { MeetingsView } from './views/MeetingsView';
+import { LessonRecordsView } from './views/LessonRecordsView';
 
 export default function App() {
   const data = useAppData();
@@ -238,6 +239,16 @@ export default function App() {
             onAddMeeting={data.addMeeting}
             onUpdateMeeting={data.updateMeeting}
             onDeleteMeeting={data.deleteMeeting}
+          />
+        );
+      case 'lessons':
+        return (
+          <LessonRecordsView
+            lessonRecords={data.lessonRecords}
+            classes={data.classes}
+            onAdd={data.addLessonRecord}
+            onUpdate={data.updateLessonRecord}
+            onDelete={data.deleteLessonRecord}
           />
         );
       default:

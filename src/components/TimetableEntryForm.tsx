@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles } from 'lucide-react';
+import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText } from 'lucide-react';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonPlanItem } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
@@ -79,6 +79,16 @@ export const TimetableEntryForm = ({
                 type="text" 
                 value={formData.subject}
                 onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Topic</label>
+              <input
+                type="text"
+                value={formData.topic || ''}
+                onChange={e => setFormData({ ...formData, topic: e.target.value })}
+                placeholder="e.g. Quadratic Equations"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               />
             </div>
@@ -227,20 +237,28 @@ export const TimetableEntryForm = ({
           />
         </form>
 
-        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
-          <button 
-            onClick={onCancel}
-            className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={handleSubmit}
-            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
-          >
-            <Save size={20} />
-            Save Changes
-          </button>
+        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4">
+          {formData.type === 'lesson' && (
+            <div className="flex items-center gap-2 text-xs text-teal-600">
+              <FileText size={14} />
+              <span>Saving will auto-record to Lesson Records</span>
+            </div>
+          )}
+          <div className={cn("flex gap-4", formData.type !== 'lesson' && "ml-auto")}>
+            <button
+              onClick={onCancel}
+              className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
+            >
+              <Save size={20} />
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </div>

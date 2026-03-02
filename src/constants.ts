@@ -1,4 +1,6 @@
-import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile } from './types';
+import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord } from './types';
+
+export const MOCK_LESSON_RECORDS: LessonRecord[] = [];
 
 export const MOCK_WORK_LOGS: WorkLog[] = [
   {
