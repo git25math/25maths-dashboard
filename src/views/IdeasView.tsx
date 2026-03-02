@@ -39,7 +39,7 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Startup灵感池 (25maths)</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Startup灵感池 (25maths)</h2>
         <button onClick={onAddIdea} className="btn-primary text-sm flex items-center gap-2">
           <Plus size={18} /> New Idea
         </button>
@@ -54,7 +54,7 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
               "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
               statusFilter === filter
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600"
             )}
           >
             {FILTER_LABELS[filter]}
@@ -131,8 +131,8 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
                   <Eye size={12} className="text-indigo-400" />
                 )}
               </div>
-              <h3 className="font-bold text-lg text-slate-900">{idea.title}</h3>
-              <MarkdownRenderer content={idea.content} className="text-sm text-slate-500 mt-1 line-clamp-3" />
+              <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{idea.title}</h3>
+              <MarkdownRenderer content={idea.content} className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-3" />
             </div>
           );
         })}

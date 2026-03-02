@@ -121,7 +121,7 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-slate-900">Meeting Records</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Meeting Records</h2>
           <button onClick={() => setViewMode('new')} className="btn-primary text-sm flex items-center gap-2">
             <Plus size={18} /> New Meeting
           </button>
@@ -136,7 +136,7 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
                 "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                 categoryFilter === filter
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               )}
             >
               {filter === 'all' ? 'All' : CATEGORIES.find(c => c.value === filter)?.label}
@@ -188,7 +188,7 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
                       {meeting.status}
                     </span>
                   </div>
-                  <h3 className="font-bold text-lg text-slate-900">{meeting.title}</h3>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{meeting.title}</h3>
                   <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
                     <span className="flex items-center gap-1"><Calendar size={12} /> {meeting.date}</span>
                     {meeting.duration > 0 && <span className="flex items-center gap-1"><Clock size={12} /> {formatDuration(meeting.duration)}</span>}
@@ -212,28 +212,28 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
   if (viewMode === 'new') {
     return (
       <div className="space-y-6">
-        <button onClick={() => setViewMode('list')} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700">
+        <button onClick={() => setViewMode('list')} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
           <ArrowLeft size={16} /> Back to Meetings
         </button>
-        <h2 className="text-2xl font-bold text-slate-900">New Meeting</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">New Meeting</h2>
         <div className="glass-card p-6 space-y-4 max-w-lg">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
-            <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Meeting title..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
+            <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Meeting title..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-            <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date</label>
+            <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
-            <select value={newCategory} onChange={e => setNewCategory(e.target.value as MeetingRecord['category'])} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+            <select value={newCategory} onChange={e => setNewCategory(e.target.value as MeetingRecord['category'])} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100">
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Participants (comma-separated)</label>
-            <input value={newParticipants} onChange={e => setNewParticipants(e.target.value)} placeholder="Alice, Bob, Charlie" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Participants (comma-separated)</label>
+            <input value={newParticipants} onChange={e => setNewParticipants(e.target.value)} placeholder="Alice, Bob, Charlie" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100" />
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={handleCreate} disabled={!newTitle.trim()} className="btn-primary text-sm px-6 py-2.5 disabled:opacity-40">Create Meeting</button>
@@ -394,7 +394,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
 
   return (
     <div className="space-y-6">
-      <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700">
+      <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
         <ArrowLeft size={16} /> Back to Meetings
       </button>
 
@@ -408,7 +408,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
             {meeting.status}
           </span>
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">{meeting.title}</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{meeting.title}</h2>
         <div className="flex items-center gap-4 mt-2 text-sm text-slate-400">
           <span className="flex items-center gap-1"><Calendar size={14} /> {meeting.date}</span>
           {meeting.duration > 0 && <span className="flex items-center gap-1"><Clock size={14} /> {formatDuration(meeting.duration)}</span>}
@@ -420,7 +420,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
 
       {/* Recording */}
       <div className="glass-card p-6">
-        <h3 className="font-bold text-slate-900 mb-4">Recording</h3>
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Recording</h3>
         <div className="flex items-center gap-4">
           {!isRecording ? (
             <button onClick={startRecording} disabled={isTranscribing || isSummarizing} className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-xl font-medium text-sm hover:bg-red-600 transition-colors disabled:opacity-40">
@@ -440,7 +440,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
                   <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isPaused ? "bg-amber-400" : "bg-red-400")} />
                   <span className={cn("relative inline-flex rounded-full h-3 w-3", isPaused ? "bg-amber-500" : "bg-red-500")} />
                 </span>
-                <span className="font-mono text-sm text-slate-600">{formatDuration(recordingTime)}</span>
+                <span className="font-mono text-sm text-slate-600 dark:text-slate-300">{formatDuration(recordingTime)}</span>
               </div>
             </>
           )}
@@ -462,11 +462,11 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
       {meeting.transcript && (
         <div className="glass-card p-6">
           <button onClick={() => setShowTranscript(!showTranscript)} className="flex items-center justify-between w-full">
-            <h3 className="font-bold text-slate-900">Transcript</h3>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Transcript</h3>
             {showTranscript ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
           </button>
           {showTranscript && (
-            <p className="mt-4 text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{meeting.transcript}</p>
+            <p className="mt-4 text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{meeting.transcript}</p>
           )}
         </div>
       )}
@@ -494,21 +494,21 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating }: { summary: AI
       {/* Summary */}
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-slate-900">Summary</h3>
+          <h3 className="font-bold text-slate-900 dark:text-slate-100">Summary</h3>
           <button onClick={onRegenerate} disabled={isRegenerating} className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-40">
             <RefreshCw size={12} className={isRegenerating ? 'animate-spin' : ''} /> Regenerate
           </button>
         </div>
-        <p className="text-sm text-slate-600 leading-relaxed">{summary.summary}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{summary.summary}</p>
       </div>
 
       {/* Key Points */}
       {summary.key_points.length > 0 && (
         <div className="glass-card p-6">
-          <h3 className="font-bold text-slate-900 mb-3">Key Points</h3>
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3">Key Points</h3>
           <ul className="space-y-2">
             {summary.key_points.map((point, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
                 <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
                 {point}
               </li>
@@ -520,13 +520,13 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating }: { summary: AI
       {/* Action Items */}
       {summary.action_items.length > 0 && (
         <div className="glass-card p-6">
-          <h3 className="font-bold text-slate-900 mb-3">Action Items</h3>
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3">Action Items</h3>
           <div className="space-y-3">
             {summary.action_items.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+              <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
                 <Tag size={14} className="text-indigo-500 mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700">{item.content}</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">{item.content}</p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
                     {item.assignee && <span>Assignee: {item.assignee}</span>}
                     {item.deadline && <span>Deadline: {item.deadline}</span>}
@@ -544,10 +544,10 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating }: { summary: AI
       {/* Decisions */}
       {summary.decisions.length > 0 && (
         <div className="glass-card p-6">
-          <h3 className="font-bold text-slate-900 mb-3">Decisions</h3>
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3">Decisions</h3>
           <ul className="space-y-2">
             {summary.decisions.map((decision, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
                 <AlertCircle size={16} className="text-indigo-500 mt-0.5 shrink-0" />
                 {decision}
               </li>

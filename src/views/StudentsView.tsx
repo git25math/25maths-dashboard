@@ -53,14 +53,14 @@ export const StudentsView = ({
         <div className="flex justify-between items-center">
           <button
             onClick={() => onSelectStudent(null)}
-            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors font-medium"
           >
             <ChevronRight size={20} className="rotate-180" /> Back to List
           </button>
           <div className="flex gap-2">
             <button
               onClick={() => onUpdateStudent(selectedStudent.id)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+              className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
               Edit Student
             </button>
@@ -87,11 +87,11 @@ export const StudentsView = ({
                     {selectedStudent.name.charAt(0)}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900">
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                       {selectedStudent.name}
                       {selectedStudent.chinese_name && <span className="text-xl text-slate-400 ml-2">{selectedStudent.chinese_name}</span>}
                     </h2>
-                    <p className="text-slate-500">
+                    <p className="text-slate-500 dark:text-slate-400">
                       {selectedStudent.year_group} • {selectedStudent.class_name}
                       {selectedStudent.tutor_group && <> • Tutor: {selectedStudent.tutor_group}</>}
                       {selectedStudent.house && <> • {selectedStudent.house}</>}
@@ -137,14 +137,14 @@ export const StudentsView = ({
 
               {/* Exam Records */}
               <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2 flex items-center gap-2">
+                <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-700 pb-2 flex items-center gap-2">
                   <Trophy size={18} className="text-amber-500" /> 成绩登记 (Exam Records)
                 </h3>
                 {selectedStudent.exam_records && selectedStudent.exam_records.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200">
+                        <tr className="border-b border-slate-200 dark:border-slate-700">
                           <th className="text-left py-2 px-3 text-xs font-bold text-slate-400 uppercase">考试</th>
                           <th className="text-left py-2 px-3 text-xs font-bold text-slate-400 uppercase">日期</th>
                           <th className="text-center py-2 px-3 text-xs font-bold text-slate-400 uppercase">成绩</th>
@@ -155,9 +155,9 @@ export const StudentsView = ({
                         {selectedStudent.exam_records.map(exam => {
                           const pct = exam.total_score > 0 ? Math.round((exam.score / exam.total_score) * 100) : 0;
                           return (
-                            <tr key={exam.id} className="border-b border-slate-100 hover:bg-slate-50">
-                              <td className="py-3 px-3 font-medium text-slate-900">{exam.exam_name}</td>
-                              <td className="py-3 px-3 text-slate-500">{exam.date}</td>
+                            <tr key={exam.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
+                              <td className="py-3 px-3 font-medium text-slate-900 dark:text-slate-100">{exam.exam_name}</td>
+                              <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{exam.date}</td>
                               <td className="py-3 px-3 text-center">
                                 <span className={cn(
                                   "font-bold",
@@ -167,7 +167,7 @@ export const StudentsView = ({
                                 </span>
                                 <span className="text-slate-400 text-xs ml-1">({pct}%)</span>
                               </td>
-                              <td className="py-3 px-3 text-slate-500">{exam.weaknesses || '—'}</td>
+                              <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{exam.weaknesses || '—'}</td>
                             </tr>
                           );
                         })}
@@ -179,33 +179,33 @@ export const StudentsView = ({
                 )}
 
                 {showExamForm ? (
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-slate-700">添加考试成绩</span>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">添加考试成绩</span>
                       <button onClick={() => setShowExamForm(false)} className="p-1 hover:bg-slate-200 rounded-full"><X size={16} /></button>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <input
-                        className="px-3 py-2 rounded-lg border border-slate-200 text-sm col-span-2"
+                        className="px-3 py-2 rounded-lg border border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 text-sm col-span-2"
                         placeholder="考试名称 e.g. 第1次考试"
                         value={examForm.exam_name}
                         onChange={e => setExamForm(f => ({ ...f, exam_name: e.target.value }))}
                       />
                       <input
-                        type="date" className="px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                        type="date" className="px-3 py-2 rounded-lg border border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 text-sm"
                         value={examForm.date}
                         onChange={e => setExamForm(f => ({ ...f, date: e.target.value }))}
                       />
                       <div className="flex gap-1 items-center">
                         <input
-                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 text-sm w-20"
+                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 text-sm w-20"
                           placeholder="成绩"
                           value={examForm.score}
                           onChange={e => setExamForm(f => ({ ...f, score: e.target.value }))}
                         />
                         <span className="text-slate-400">/</span>
                         <input
-                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 text-sm w-20"
+                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 text-sm w-20"
                           placeholder="总分"
                           value={examForm.total_score}
                           onChange={e => setExamForm(f => ({ ...f, total_score: e.target.value }))}
@@ -213,7 +213,7 @@ export const StudentsView = ({
                       </div>
                     </div>
                     <input
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 text-sm"
                       placeholder="薄弱环节 e.g. Algebra, Trigonometry"
                       value={examForm.weaknesses}
                       onChange={e => setExamForm(f => ({ ...f, weaknesses: e.target.value }))}
@@ -247,17 +247,17 @@ export const StudentsView = ({
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学习状况记录 (Learning Status)</h3>
+                <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-700 pb-2">学习状况记录 (Learning Status)</h3>
                 <div className="space-y-4">
                   {selectedStudent.status_records?.map(record => (
-                    <div key={record.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <div key={record.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{record.date}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-500">
+                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-slate-500 dark:text-slate-400">
                           {record.category}
                         </span>
                       </div>
-                      <MarkdownRenderer content={record.content} className="text-sm text-slate-700 leading-relaxed" />
+                      <MarkdownRenderer content={record.content} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed" />
                     </div>
                   ))}
                   {(!selectedStudent.status_records || selectedStudent.status_records.length === 0) && (
@@ -273,12 +273,12 @@ export const StudentsView = ({
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">薄弱环节 (Weaknesses)</h3>
+                <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-700 pb-2">薄弱环节 (Weaknesses)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedStudent.weaknesses?.map((w, i) => (
-                    <div key={i} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
+                    <div key={i} className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm space-y-2">
                       <div className="flex justify-between items-center">
-                        <p className="font-bold text-slate-900">{w.topic}</p>
+                        <p className="font-bold text-slate-900 dark:text-slate-100">{w.topic}</p>
                         <span className={cn(
                           "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
                           w.level === 'high' ? "bg-red-100 text-red-600" :
@@ -288,7 +288,7 @@ export const StudentsView = ({
                           {w.level}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500">{w.notes}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{w.notes}</p>
                       <button disabled className="text-[10px] font-bold text-slate-400 cursor-not-allowed" title="Coming Soon">Recommend Practice</button>
                     </div>
                   ))}
@@ -302,8 +302,8 @@ export const StudentsView = ({
               <h3 className="font-bold text-lg">平时诉求 (Requests)</h3>
               <div className="space-y-3">
                 {selectedStudent.requests?.map(req => (
-                  <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                    <MarkdownRenderer content={req.content} className="text-xs text-slate-700" />
+                  <div key={req.id} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                    <MarkdownRenderer content={req.content} className="text-xs text-slate-700 dark:text-slate-300" />
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-slate-400">{req.date}</span>
                       <span className={cn(
@@ -354,14 +354,14 @@ export const StudentsView = ({
         <div className="flex justify-between items-center">
           <button
             onClick={() => onSelectClass(null)}
-            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors font-medium"
           >
             <ChevronRight size={20} className="rotate-180" /> Back to Classes
           </button>
           <div className="flex gap-2">
             <button
               onClick={() => onUpdateClass(selectedClass.id)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+              className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
               Edit Class
             </button>
@@ -382,25 +382,25 @@ export const StudentsView = ({
         <div className="glass-card p-8 space-y-8">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-3xl font-bold text-slate-900">{selectedClass.name}</h2>
-              <p className="text-slate-500 mt-1">{selectedClass.year_group} • {selectedClass.description}</p>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{selectedClass.name}</h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-1">{selectedClass.year_group} • {selectedClass.description}</p>
             </div>
           </div>
 
           <section className="space-y-4">
-            <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学生名单 (Student List)</h3>
+            <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-700 pb-2">学生名单 (Student List)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {classStudents.map(student => (
                 <div
                   key={student.id}
                   onClick={() => onSelectStudent(student.id)}
-                  className="p-4 bg-slate-50 hover:bg-white border border-slate-200 hover:border-indigo-300 rounded-xl transition-all cursor-pointer group"
+                  className="p-4 bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 rounded-xl transition-all cursor-pointer group"
                 >
                   <div className="flex justify-between items-center">
-                    <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</p>
+                    <p className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{student.name}</p>
                     <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">{student.house_points} HP • {student.weaknesses?.length || 0} Weaknesses</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{student.house_points} HP • {student.weaknesses?.length || 0} Weaknesses</p>
                 </div>
               ))}
             </div>
@@ -413,7 +413,7 @@ export const StudentsView = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Student & Class Management</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Student & Class Management</h2>
         <div className="flex items-center gap-4">
           <button
             onClick={activeSubTab === 'students' ? onAddStudent : onAddClass}
@@ -422,7 +422,7 @@ export const StudentsView = ({
             <Plus size={18} />
             {activeSubTab === 'students' ? 'Add Student' : 'Add Class'}
           </button>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
             <button
               onClick={() => setActiveSubTab('classes')}
               className={cn(
@@ -457,15 +457,15 @@ export const StudentsView = ({
                 <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
                   <Users size={24} />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-100 text-slate-500 rounded">
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
                   {cls.year_group}
                 </span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{cls.name}</h3>
-                <p className="text-sm text-slate-500 mt-1 line-clamp-2">{cls.description}</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{cls.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{cls.description}</p>
               </div>
-              <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{cls.student_ids.length} Students</span>
                 <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
               </div>
@@ -482,17 +482,17 @@ export const StudentsView = ({
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
                     {student.name}
                     {student.chinese_name && <span className="text-sm text-slate-400 ml-1.5 font-normal">{student.chinese_name}</span>}
                   </h3>
-                  <p className="text-sm text-slate-500">{student.year_group} • {student.class_name}{student.house && ` • ${student.house}`}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{student.year_group} • {student.class_name}{student.house && ` • ${student.house}`}</p>
                 </div>
                 <div className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100">
                   {student.house_points} HP
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
                   student.is_tutor_group ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
@@ -506,7 +506,7 @@ export const StudentsView = ({
           {students.length === 0 && (
             <div className="col-span-full glass-card p-12 text-center border-dashed">
               <Users size={48} className="mx-auto text-slate-300 mb-4" />
-              <p className="text-slate-500">No students added yet.</p>
+              <p className="text-slate-500 dark:text-slate-400">No students added yet.</p>
               <button onClick={onAddStudent} className="mt-4 text-indigo-600 font-bold hover:underline">Add First Student</button>
             </div>
           )}

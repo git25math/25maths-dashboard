@@ -32,40 +32,40 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
-        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-xl font-bold text-slate-900">{event ? 'Edit Event' : 'New Event'}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
-            <X size={20} className="text-slate-500" />
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/50">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{event ? 'Edit Event' : 'New Event'}</h2>
+          <button onClick={onCancel} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
+            <X size={20} className="text-slate-500 dark:text-slate-400" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Title</label>
+            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Title</label>
             <input
               required
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Event title"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Date</label>
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Date</label>
               <input
                 required
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Category</label>
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Category</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(cat => (
                   <button
@@ -74,7 +74,7 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
                     onClick={() => setCategory(cat.value)}
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                      category === cat.value ? cat.color : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                      category === cat.value ? cat.color : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400 hover:text-slate-600"
                     )}
                   >
                     {cat.label}
@@ -84,8 +84,8 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
               <AlertTriangle size={16} className={isActionRequired ? "text-red-500" : "text-slate-400"} />
               Action Required
             </div>
@@ -111,8 +111,8 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
             placeholder="Describe the event..."
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-            <button type="button" onClick={onCancel} className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <button type="button" onClick={onCancel} className="px-6 py-2 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">
               Cancel
             </button>
             <button type="submit" className="px-8 py-2 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">

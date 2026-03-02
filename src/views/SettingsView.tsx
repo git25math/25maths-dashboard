@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { Settings, User, Lock, Database, Info, Download, Trash2, ExternalLink } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Settings, User, Lock, Database, Info, Download, Upload, Trash2, ExternalLink, Moon, Sun, Palette } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../components/LoginGate';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 interface SettingsViewProps {
   data: Record<string, unknown>;
+  onImport?: (data: Record<string, unknown>) => void;
 }
+
+const KNOWN_KEYS = ['students', 'teachingUnits', 'classes', 'timetable', 'ideas', 'sops', 'goals', 'schoolEvents', 'workLogs', 'meetings', 'lessonRecords'];
 
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -15,13 +19,19 @@ async function sha256(text: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export const SettingsView = ({ data }: SettingsViewProps) => {
+export const SettingsView = ({ data, onImport }: SettingsViewProps) => {
   const { logout } = useAuth();
+  const { isDark, toggleDarkMode } = useDarkMode();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Import state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importPreview, setImportPreview] = useState<{ data: Record<string, unknown>; keys: string[] } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,42 +83,103 @@ export const SettingsView = ({ data }: SettingsViewProps) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImportError(null);
+    setImportPreview(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string);
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          setImportError('Invalid format: expected a JSON object.');
+          return;
+        }
+        const recognized = KNOWN_KEYS.filter(k => k in parsed && Array.isArray(parsed[k]));
+        if (recognized.length === 0) {
+          setImportError('No recognized data keys found in file.');
+          return;
+        }
+        setImportPreview({ data: parsed, keys: recognized });
+      } catch {
+        setImportError('Invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+  };
+
+  const confirmImport = () => {
+    if (importPreview && onImport) {
+      onImport(importPreview.data);
+      setImportPreview(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <Settings size={24} className="text-indigo-600" /> Settings
         </h2>
-        <p className="text-sm text-slate-500 mt-1">Manage your profile and application preferences</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your profile and application preferences</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profile */}
         <div className="glass-card p-6 space-y-4">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <User size={18} className="text-indigo-600" /> Profile
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <span className="text-sm text-slate-500">Role</span>
-              <span className="text-sm font-bold text-slate-900">Math Teacher</span>
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
+              <span className="text-sm text-slate-500 dark:text-slate-400">Role</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Math Teacher</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-              <span className="text-sm text-slate-500">App Version</span>
-              <span className="text-sm font-bold text-slate-900">v1.0</span>
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
+              <span className="text-sm text-slate-500 dark:text-slate-400">App Version</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">v1.0</span>
             </div>
           </div>
           <button
             onClick={logout}
-            className="w-full py-2 text-red-600 font-bold text-sm border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+            className="w-full py-2 text-red-600 font-bold text-sm border border-red-200 dark:border-red-800 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
           >
             Logout
           </button>
         </div>
 
+        {/* Appearance */}
+        <div className="glass-card p-6 space-y-4">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Palette size={18} className="text-indigo-600" /> Appearance
+          </h3>
+          <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
+            <div className="flex items-center gap-2">
+              {isDark ? <Moon size={16} className="text-indigo-400" /> : <Sun size={16} className="text-amber-500" />}
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Dark Mode</span>
+            </div>
+            <button
+              onClick={toggleDarkMode}
+              className={cn(
+                "relative w-11 h-6 rounded-full transition-colors",
+                isDark ? "bg-indigo-600" : "bg-slate-300"
+              )}
+            >
+              <div className={cn(
+                "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform",
+                isDark ? "translate-x-[22px]" : "translate-x-0.5"
+              )} />
+            </button>
+          </div>
+          <p className="text-[10px] text-slate-400">Toggle between light and dark themes. Your preference is saved locally.</p>
+        </div>
+
         {/* Change Password */}
         <div className="glass-card p-6 space-y-4">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Lock size={18} className="text-indigo-600" /> Change Password
           </h3>
           <form onSubmit={handleChangePassword} className="space-y-3">
@@ -118,7 +189,7 @@ export const SettingsView = ({ data }: SettingsViewProps) => {
               onChange={e => setCurrentPassword(e.target.value)}
               placeholder="Current password"
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
             />
             <input
               type="password"
@@ -126,7 +197,7 @@ export const SettingsView = ({ data }: SettingsViewProps) => {
               onChange={e => setNewPassword(e.target.value)}
               placeholder="New password"
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
             />
             <input
               type="password"
@@ -134,7 +205,7 @@ export const SettingsView = ({ data }: SettingsViewProps) => {
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
             />
             {passwordMsg && (
               <p className={cn("text-xs font-medium", passwordMsg.type === 'success' ? "text-emerald-600" : "text-red-600")}>
@@ -152,46 +223,89 @@ export const SettingsView = ({ data }: SettingsViewProps) => {
 
         {/* Data Management */}
         <div className="glass-card p-6 space-y-4">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Database size={18} className="text-indigo-600" /> Data Management
           </h3>
           <div className="space-y-3">
             <button
               onClick={handleClearCache}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-red-600 font-bold text-sm border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-red-600 font-bold text-sm border border-red-200 dark:border-red-800 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
             >
               <Trash2 size={14} /> Clear Local Cache
             </button>
             <p className="text-[10px] text-slate-400">Removes all locally stored data and reloads the app with defaults.</p>
             <button
               onClick={handleExportData}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-indigo-600 font-bold text-sm border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-indigo-600 dark:text-indigo-400 font-bold text-sm border border-indigo-200 dark:border-indigo-800 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
             >
               <Download size={14} /> Export Data as JSON
             </button>
             <p className="text-[10px] text-slate-400">Downloads all your data as a JSON file for backup.</p>
+
+            {/* Import */}
+            <input ref={fileInputRef} type="file" accept=".json" onChange={handleImportFile} className="hidden" />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-emerald-600 dark:text-emerald-400 font-bold text-sm border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors"
+            >
+              <Upload size={14} /> Import Data
+            </button>
+            <p className="text-[10px] text-slate-400">Import a previously exported JSON backup to restore your data.</p>
+
+            {importError && (
+              <p className="text-xs font-medium text-red-600">{importError}</p>
+            )}
+
+            {importPreview && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl space-y-2">
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Confirm Import</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400">The following data will be replaced:</p>
+                <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1">
+                  {importPreview.keys.map(k => (
+                    <li key={k} className="flex justify-between">
+                      <span>{k}</span>
+                      <span className="font-bold">{(importPreview.data[k] as unknown[]).length} items</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={confirmImport}
+                    className="flex-1 py-2 bg-amber-600 text-white font-bold text-xs rounded-lg hover:bg-amber-700 transition-colors"
+                  >
+                    Confirm Import
+                  </button>
+                  <button
+                    onClick={() => setImportPreview(null)}
+                    className="flex-1 py-2 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* About */}
         <div className="glass-card p-6 space-y-4">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Info size={18} className="text-indigo-600" /> About
           </h3>
           <div className="space-y-3">
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <p className="text-sm font-bold text-slate-900">25Maths Dashboard</p>
-              <p className="text-xs text-slate-500 mt-1">A personal teaching dashboard for managing lessons, students, goals, and more.</p>
+            <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">25Maths Dashboard</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">A personal teaching dashboard for managing lessons, students, goals, and more.</p>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+            <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl space-y-1">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tech Stack</p>
-              <p className="text-xs text-slate-600">React 19 + TypeScript + Vite + Tailwind CSS</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">React 19 + TypeScript + Vite + Tailwind CSS</p>
             </div>
             <a
               href="https://github.com/git25math/25maths-dashboard"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-center gap-2 py-2.5 text-slate-600 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+              className="flex items-center justify-center gap-2 py-2.5 text-slate-600 dark:text-slate-300 font-bold text-sm border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <ExternalLink size={14} /> GitHub Repository
             </a>

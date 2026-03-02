@@ -16,7 +16,7 @@ export const SOPView = ({ sops, onAddSOP, onDeleteSOP, onEditSOP }: SOPViewProps
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">SOP Library</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">SOP Library</h2>
         <button onClick={onAddSOP} className="btn-primary text-sm flex items-center gap-2">
           <Plus size={18} /> Add New SOP
         </button>
@@ -44,13 +44,13 @@ export const SOPView = ({ sops, onAddSOP, onDeleteSOP, onEditSOP }: SOPViewProps
                 </button>
               </div>
               <div className="flex justify-between items-start mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-100 text-slate-500 rounded">
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
                   {sop.category}
                 </span>
               </div>
-              <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{sop.title}</h3>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{sop.title}</h3>
               <div className={isExpanded ? '' : 'line-clamp-3'}>
-                <MarkdownRenderer content={sop.content} className="text-sm text-slate-500 mt-1" />
+                <MarkdownRenderer content={sop.content} className="text-sm text-slate-500 dark:text-slate-400 mt-1" />
               </div>
               <button
                 onClick={() => setExpandedId(isExpanded ? null : sop.id)}

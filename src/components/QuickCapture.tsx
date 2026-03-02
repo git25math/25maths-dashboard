@@ -32,7 +32,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
           >
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-semibold text-slate-900">Quick Capture</h3>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Quick Capture</h3>
                 <button type="button" onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
                   <X size={16} />
                 </button>
@@ -42,7 +42,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="What's on your mind?"
-                className="w-full h-24 p-3 rounded-lg bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
+                className="w-full h-24 p-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm dark:text-slate-100"
               />
               <div className="flex gap-2">
                 {(['work', 'student', 'startup'] as const).map((cat) => (
@@ -54,7 +54,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                       "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border",
                       category === cat
                         ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                        : "bg-white border-slate-200 text-slate-400"
+                        : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400"
                     )}
                   >
                     {cat}

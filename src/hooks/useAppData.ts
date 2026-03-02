@@ -563,6 +563,34 @@ export function useAppData() {
     }
   }, [addIdea, addWorkLog]);
 
+  // --- Bulk Import ---
+
+  const bulkImport = useCallback((imported: Record<string, unknown>) => {
+    const keyMap: Record<string, (val: unknown) => void> = {
+      students: (v) => setStudents(v as Student[]),
+      teachingUnits: (v) => setTeachingUnits(v as TeachingUnit[]),
+      classes: (v) => setClasses(v as ClassProfile[]),
+      timetable: (v) => setTimetable(v as TimetableEntry[]),
+      ideas: (v) => setIdeas(v as Idea[]),
+      sops: (v) => setSops(v as SOP[]),
+      goals: (v) => setGoals(v as Goal[]),
+      schoolEvents: (v) => setSchoolEvents(v as SchoolEvent[]),
+      workLogs: (v) => setWorkLogs(v as WorkLog[]),
+      meetings: (v) => setMeetings(v as MeetingRecord[]),
+      lessonRecords: (v) => setLessonRecords(v as LessonRecord[]),
+    };
+    let count = 0;
+    for (const [key, setter] of Object.entries(keyMap)) {
+      if (key in imported && Array.isArray(imported[key])) {
+        setter(imported[key]);
+        count++;
+      }
+    }
+    if (count > 0) {
+      toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
+    }
+  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, toast]);
+
   return {
     // State
     timetable, students, teachingUnits, classes,
@@ -600,6 +628,9 @@ export function useAppData() {
 
     // QuickCapture
     quickCapture,
+
+    // Bulk Import
+    bulkImport,
 
     // Toast
     toast,
