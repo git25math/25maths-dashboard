@@ -50,17 +50,17 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
   const set = (field: string, value: string | number | boolean) =>
     setFormData(prev => ({ ...prev, [field]: value }));
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100";
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all";
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
-        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/50">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h2 className="text-2xl font-bold text-slate-900">
             {student ? 'Edit Student' : 'Add New Student'}
           </h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
-            <X size={24} className="text-slate-500 dark:text-slate-400" />
+          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+            <X size={24} className="text-slate-500" />
           </button>
         </div>
 
@@ -68,7 +68,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">English Name</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">English Name</label>
               <input
                 required type="text" value={formData.name}
                 onChange={e => set('name', e.target.value)}
@@ -76,7 +76,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Chinese Name 中文名</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Chinese Name 中文名</label>
               <input
                 type="text" value={formData.chinese_name || ''}
                 onChange={e => set('chinese_name', e.target.value)}
@@ -88,7 +88,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           {/* Class / Year / Tutor / House */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Year Group</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Year Group</label>
               <select
                 value={formData.year_group}
                 onChange={e => set('year_group', e.target.value)}
@@ -98,7 +98,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Class 班级</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Class 班级</label>
               <input
                 required type="text" value={formData.class_name}
                 onChange={e => set('class_name', e.target.value)}
@@ -106,7 +106,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tutor Group 导师组</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tutor Group 导师组</label>
               <input
                 type="text" value={formData.tutor_group || ''}
                 onChange={e => set('tutor_group', e.target.value)}
@@ -114,7 +114,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">House 院舍</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">House 院舍</label>
               <input
                 type="text" value={formData.house || ''}
                 onChange={e => set('house', e.target.value)}
@@ -126,7 +126,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           {/* Tutors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tutor 1 导师1</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tutor 1 导师1</label>
               <input
                 type="text" value={formData.tutor_1 || ''}
                 onChange={e => set('tutor_1', e.target.value)}
@@ -134,7 +134,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tutor 2 导师2</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tutor 2 导师2</label>
               <input
                 type="text" value={formData.tutor_2 || ''}
                 onChange={e => set('tutor_2', e.target.value)}
@@ -146,7 +146,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           {/* Contact & Accounts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Parent Email 家长邮箱</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Parent Email 家长邮箱</label>
               <input
                 type="email" value={formData.parent_email || ''}
                 onChange={e => set('parent_email', e.target.value)}
@@ -154,7 +154,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">DFM Username</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">DFM Username</label>
               <input
                 type="text" value={formData.dfm_username || ''}
                 onChange={e => set('dfm_username', e.target.value)}
@@ -162,7 +162,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">DFM Password</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">DFM Password</label>
               <input
                 type="text" value={formData.dfm_password || ''}
                 onChange={e => set('dfm_password', e.target.value)}
@@ -185,7 +185,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
               </label>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">House Points</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">House Points</label>
               <input
                 type="number" value={formData.house_points}
                 onChange={e => set('house_points', parseInt(e.target.value) || 0)}
@@ -205,16 +205,16 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           </div>
         </form>
 
-        <div className="px-4 sm:px-8 py-6 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-4">
+        <div className="px-4 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
           <button
             onClick={onCancel}
-            className="px-6 py-3 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+            className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center gap-2"
+            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
           >
             <Save size={20} />
             Save Student

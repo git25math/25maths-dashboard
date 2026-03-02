@@ -44,10 +44,10 @@ export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEd
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <CalendarDays size={24} className="text-indigo-600" /> School Events
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{schoolEvents.length} events total</p>
+          <p className="text-sm text-slate-500 mt-1">{schoolEvents.length} events total</p>
         </div>
         <button onClick={onAddEvent} className="btn-primary flex items-center gap-2 self-start">
           <Plus size={18} /> New Event
@@ -64,7 +64,7 @@ export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEd
               "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
               categoryFilter === f
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
             )}
           >
             {f}
@@ -98,12 +98,12 @@ export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEd
                   )}
                 </div>
 
-                <h3 className="font-bold text-slate-900 dark:text-slate-100">{event.title}</h3>
+                <h3 className="font-bold text-slate-900">{event.title}</h3>
                 <p className="text-xs text-slate-400 mt-1">
                   {format(new Date(event.date), 'EEEE, MMM d, yyyy')}
                 </p>
                 {event.description && (
-                  <MarkdownRenderer content={event.description} className="text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2" />
+                  <MarkdownRenderer content={event.description} className="text-sm text-slate-600 mt-2 line-clamp-2" />
                 )}
               </div>
 

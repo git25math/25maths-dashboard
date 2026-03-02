@@ -38,11 +38,11 @@ interface CalendarViewProps {
 
 function getEntryColorClasses(type: string) {
   switch (type) {
-    case 'lesson': return "bg-indigo-50 border-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300";
-    case 'tutor': return "bg-emerald-50 border-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:border-emerald-800 dark:text-emerald-300";
-    case 'duty': return "bg-amber-50 border-amber-100 text-amber-700 dark:bg-amber-900/40 dark:border-amber-800 dark:text-amber-300";
-    case 'meeting': return "bg-purple-50 border-purple-100 text-purple-700 dark:bg-purple-900/40 dark:border-purple-800 dark:text-purple-300";
-    default: return "bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300";
+    case 'lesson': return "bg-indigo-50 border-indigo-100 text-indigo-700";
+    case 'tutor': return "bg-emerald-50 border-emerald-100 text-emerald-700";
+    case 'duty': return "bg-amber-50 border-amber-100 text-amber-700";
+    case 'meeting': return "bg-purple-50 border-purple-100 text-purple-700";
+    default: return "bg-slate-50 border-slate-200 text-slate-600";
   }
 }
 
@@ -87,8 +87,8 @@ function DroppableCell({ id, children }: { id: string; children: React.ReactNode
     <div
       ref={setNodeRef}
       className={cn(
-        "border-t border-slate-100 dark:border-slate-700 py-1 transition-colors",
-        isOver && "bg-indigo-50/50 dark:bg-indigo-900/30"
+        "border-t border-slate-100 py-1 transition-colors",
+        isOver && "bg-indigo-50/50"
       )}
     >
       {children}
@@ -245,23 +245,23 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
       <div className="flex items-center gap-2">
         <button
           onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
         >
           <ChevronLeft size={18} className="text-slate-500" />
         </button>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 min-w-[160px] text-center">
+        <h3 className="text-lg font-bold text-slate-900 min-w-[160px] text-center">
           {format(currentMonth, 'MMMM yyyy')}
         </h3>
         <button
           onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
         >
           <ChevronRight size={18} className="text-slate-500" />
         </button>
       </div>
       <button
         onClick={() => { setCurrentMonth(startOfMonth(new Date())); setSelectedDate(new Date()); }}
-        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+        className="text-xs font-bold text-indigo-600 hover:underline px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
       >
         Today
       </button>
@@ -271,10 +271,10 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
   const MonthGrid = () => (
     <div className="space-y-2">
       <CalendarHeader />
-      <div className="grid grid-cols-7 gap-px bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden">
+      <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-xl overflow-hidden">
         {/* Day headers */}
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 py-2">
+          <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 py-2">
             {d}
           </div>
         ))}
@@ -290,11 +290,11 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
               key={day.toISOString()}
               onClick={() => { setSelectedDate(day); if (!isSameMonth(day, currentMonth)) setCurrentMonth(startOfMonth(day)); }}
               className={cn(
-                "relative flex flex-col items-center justify-center py-2.5 min-h-[48px] transition-all text-xs font-medium bg-white dark:bg-slate-800",
+                "relative flex flex-col items-center justify-center py-2.5 min-h-[48px] transition-all text-xs font-medium bg-white",
                 !inMonth && "opacity-40",
-                selected && "bg-indigo-600 dark:bg-indigo-600 text-white",
+                selected && "bg-indigo-600 text-white",
                 !selected && todayCell && "ring-2 ring-inset ring-indigo-400",
-                !selected && inMonth && "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+                !selected && inMonth && "text-slate-700 hover:bg-slate-50",
               )}
             >
               <span>{format(day, 'd')}</span>
@@ -302,10 +302,10 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
                 <div className="flex items-center gap-0.5 mt-0.5">
                   {total <= 3 ? (
                     Array.from({ length: total }).map((_, i) => (
-                      <span key={i} className={cn("w-1 h-1 rounded-full", selected ? "bg-white/70" : "bg-indigo-400 dark:bg-indigo-500")} />
+                      <span key={i} className={cn("w-1 h-1 rounded-full", selected ? "bg-white/70" : "bg-indigo-400")} />
                     ))
                   ) : (
-                    <span className={cn("text-[8px] font-bold", selected ? "text-white/70" : "text-indigo-400 dark:text-indigo-500")}>
+                    <span className={cn("text-[8px] font-bold", selected ? "text-white/70" : "text-indigo-400")}>
                       {total}
                     </span>
                   )}
@@ -333,7 +333,7 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
 
     return (
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        <h3 className="text-sm font-bold text-slate-900">
           {format(selectedDate, 'EEEE, MMMM d, yyyy')}
         </h3>
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -379,7 +379,7 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     <div className="flex items-center gap-1">
       <button
         onClick={() => setSelectedDate(prev => subWeeks(prev, 1))}
-        className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 shrink-0"
+        className="p-1 rounded-lg hover:bg-slate-100 shrink-0"
       >
         <ChevronLeft size={16} className="text-slate-400" />
       </button>
@@ -396,8 +396,8 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
                 selected
                   ? "bg-indigo-600 text-white"
                   : todayCell
-                    ? "ring-2 ring-indigo-400 text-slate-700 dark:text-slate-300"
-                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    ? "ring-2 ring-indigo-400 text-slate-700"
+                    : "text-slate-500 hover:bg-slate-100"
               )}
             >
               <span className="text-[10px] uppercase">{format(day, 'EEE')}</span>
@@ -408,7 +408,7 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
       </div>
       <button
         onClick={() => setSelectedDate(prev => addWeeks(prev, 1))}
-        className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 shrink-0"
+        className="p-1 rounded-lg hover:bg-slate-100 shrink-0"
       >
         <ChevronRight size={16} className="text-slate-400" />
       </button>
@@ -419,7 +419,7 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Calendar</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Calendar</h2>
         <div className="flex gap-2">
           <button disabled className="btn-secondary text-sm opacity-50 cursor-not-allowed" title="Coming Soon">Download PDF</button>
           <button disabled className="btn-primary text-sm opacity-50 cursor-not-allowed" title="Coming Soon">Edit Schedule</button>
@@ -427,39 +427,39 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
       </div>
 
       {/* Quick Add */}
-      <div className="glass-card p-4 bg-indigo-50/30 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800">
-        <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
+      <div className="glass-card p-4 bg-indigo-50/30 border-indigo-100">
+        <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
           <Plus size={16} /> Quick Add / Customize Event
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           <input
             type="text"
             placeholder="Subject"
-            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
             value={quickSubject}
             onChange={(e) => setQuickSubject(e.target.value)}
           />
           <input
             type="text"
             placeholder="Class"
-            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
             value={quickClass}
             onChange={(e) => setQuickClass(e.target.value)}
           />
           <input
             type="text"
             placeholder="Room"
-            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
             value={quickRoom}
             onChange={(e) => setQuickRoom(e.target.value)}
           />
           <input
             type="time"
-            className="text-xs p-2 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-slate-700 dark:text-slate-100"
+            className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
             value={quickTime}
             onChange={(e) => setQuickTime(e.target.value)}
           />
-          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+          <label className="flex items-center gap-2 text-xs text-slate-600">
             <input
               type="checkbox"
               checked={quickRecurring}

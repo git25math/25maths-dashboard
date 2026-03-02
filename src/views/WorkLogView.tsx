@@ -23,7 +23,7 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog }: Work
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Work Logs (工作日志)</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Work Logs (工作日志)</h2>
         <button onClick={onAddLog} className="btn-primary text-sm flex items-center gap-2">
           <Plus size={18} /> New Log Entry
         </button>
@@ -38,7 +38,7 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog }: Work
               "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
               activeFilter === filter
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600"
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
             )}
           >
             {filter === 'All' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -50,7 +50,7 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog }: Work
         <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-800 border-bottom border-slate-100 dark:border-slate-700">
+            <tr className="bg-slate-50 border-bottom border-slate-100">
               <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Timestamp</th>
               <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
               <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Content</th>
@@ -58,10 +58,10 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog }: Work
               <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 w-16"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-slate-100">
             {filteredLogs.map(log => (
-              <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group">
-                <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{log.timestamp}</td>
+              <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                <td className="p-4 text-xs font-mono text-slate-500">{log.timestamp}</td>
                 <td className="p-4">
                   <span className={cn(
                     "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded",
@@ -74,11 +74,11 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog }: Work
                     {log.category}
                   </span>
                 </td>
-                <td className="p-4 text-sm text-slate-700 dark:text-slate-300 font-medium">{log.content}</td>
+                <td className="p-4 text-sm text-slate-700 font-medium">{log.content}</td>
                 <td className="p-4">
                   <div className="flex gap-1">
                     {log.tags?.map(tag => (
-                      <span key={tag} className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">
+                      <span key={tag} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full border border-slate-200">
                         #{tag}
                       </span>
                     ))}

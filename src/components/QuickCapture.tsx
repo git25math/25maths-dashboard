@@ -50,7 +50,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
           >
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Quick Capture</h3>
+                <h3 className="text-sm font-semibold text-slate-900">Quick Capture</h3>
                 <button type="button" onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
                   <X size={16} />
                 </button>
@@ -60,7 +60,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="What's on your mind?"
-                className="w-full h-24 p-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm dark:text-slate-100"
+                className="w-full h-24 p-3 rounded-lg bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
               />
               <div className="space-y-1.5">
                 <div className="flex gap-2">
@@ -73,7 +73,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                         "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border",
                         category === cat
                           ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                          : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400"
+                          : "bg-white border-slate-200 text-slate-400"
                       )}
                     >
                       {cat}
@@ -88,7 +88,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                       aiLoading
                         ? "bg-purple-50 border-purple-200 text-purple-400 cursor-not-allowed"
                         : text.trim().length < 10
-                          ? "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-300 cursor-not-allowed"
+                          ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
                           : "bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                     )}
                   >

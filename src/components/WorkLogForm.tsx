@@ -32,17 +32,17 @@ export const WorkLogForm = ({ workLog, onSave, onCancel }: WorkLogFormProps) => 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
-        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/50">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{workLog ? 'Edit Work Log' : 'New Work Log'}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
-            <X size={20} className="text-slate-500 dark:text-slate-400" />
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h2 className="text-xl font-bold text-slate-900">{workLog ? 'Edit Work Log' : 'New Work Log'}</h2>
+          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+            <X size={20} className="text-slate-500" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Category</label>
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Category</label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map(cat => (
                 <button
@@ -53,7 +53,7 @@ export const WorkLogForm = ({ workLog, onSave, onCancel }: WorkLogFormProps) => 
                     "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                     category === cat.value
                       ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                      : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400 hover:text-slate-600"
+                      : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                   )}
                 >
                   {cat.label}
@@ -70,18 +70,18 @@ export const WorkLogForm = ({ workLog, onSave, onCancel }: WorkLogFormProps) => 
           />
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tags (comma-separated)</label>
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Tags (comma-separated)</label>
             <input
               type="text"
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               placeholder="e.g. Y10, Homework, Meeting"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-            <button type="button" onClick={onCancel} className="px-6 py-2 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button type="button" onClick={onCancel} className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">
               Cancel
             </button>
             <button type="submit" className="px-8 py-2 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">

@@ -93,7 +93,7 @@ export const TeachingView = ({
       <div className="space-y-6">
         <button
           onClick={() => setSelectedSubUnit(null)}
-          className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors font-medium"
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
         >
           <ChevronRight size={20} className="rotate-180" /> Back to {selectedUnit.title}
         </button>
@@ -108,7 +108,7 @@ export const TeachingView = ({
                   <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded">
                     小单元
                   </span>
-                  <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">{selectedSubUnit.title}</h2>
+                  <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedSubUnit.title}</h2>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -135,7 +135,7 @@ export const TeachingView = ({
                   </h3>
                   <ul className="space-y-2">
                     {selectedSubUnit.objectives.map((obj, i) => (
-                      <li key={i} className="flex items-start gap-2 text-slate-600 dark:text-slate-400 text-sm">
+                      <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                         <MarkdownRenderer content={obj} />
                       </li>
@@ -147,7 +147,7 @@ export const TeachingView = ({
               {/* Periods */}
               <section className="flex items-center gap-3">
                 <Clock size={18} className="text-indigo-500" />
-                <span className="font-bold text-sm text-slate-700 dark:text-slate-300">课时安排</span>
+                <span className="font-bold text-sm text-slate-700">课时安排</span>
                 <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-full">
                   {selectedSubUnit.periods} 课时
                 </span>
@@ -160,19 +160,19 @@ export const TeachingView = ({
                     <BookOpen size={20} className="text-amber-500" />
                     双语核心词汇 Vocabulary
                   </h3>
-                  <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="overflow-hidden rounded-xl border border-slate-200">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-slate-50 dark:bg-slate-800">
-                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">English</th>
-                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">中文</th>
+                        <tr className="bg-slate-50">
+                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">English</th>
+                          <th className="text-left px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">中文</th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedSubUnit.vocabulary.map((v, i) => (
-                          <tr key={i} className="border-t border-slate-100 dark:border-slate-700">
-                            <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300">{v.english}</td>
-                            <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300">{v.chinese}</td>
+                          <tr key={i} className="border-t border-slate-100">
+                            <td className="px-4 py-2 text-sm text-slate-700">{v.english}</td>
+                            <td className="px-4 py-2 text-sm text-slate-700">{v.chinese}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -188,8 +188,8 @@ export const TeachingView = ({
                     <Edit3 size={20} className="text-indigo-500" />
                     课堂讲练 Classroom Exercises
                   </h3>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <MarkdownRenderer content={selectedSubUnit.classroom_exercises} className="text-sm text-slate-700 dark:text-slate-300" />
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <MarkdownRenderer content={selectedSubUnit.classroom_exercises} className="text-sm text-slate-700" />
                   </div>
                 </section>
               )}
@@ -296,14 +296,14 @@ export const TeachingView = ({
                     className={cn(
                       "flex items-center justify-between p-3 rounded-xl border transition-all",
                       res.url
-                        ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 opacity-50 cursor-not-allowed"
+                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm"
+                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
                     )}
                     onClick={res.url ? undefined : (e) => e.preventDefault()}
                   >
                     <div className="flex items-center gap-3">
                       <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
-                      <span className="text-sm font-medium dark:text-slate-300">{res.label}</span>
+                      <span className="text-sm font-medium">{res.label}</span>
                     </div>
                     {res.url && <ExternalLink size={14} className="text-slate-400" />}
                   </a>
@@ -331,7 +331,7 @@ export const TeachingView = ({
       <div className="space-y-6">
         <button
           onClick={() => setSelectedUnit(null)}
-          className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors font-medium"
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
         >
           <ChevronRight size={20} className="rotate-180" /> Back to {selectedYear}
         </button>
@@ -344,7 +344,7 @@ export const TeachingView = ({
                   <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded">
                     {selectedUnit.year_group}
                   </span>
-                  <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">{selectedUnit.title}</h2>
+                  <h2 className="text-3xl font-bold text-slate-900 mt-2">{selectedUnit.title}</h2>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -371,7 +371,7 @@ export const TeachingView = ({
                 <h3 className="font-bold text-lg">教学目标 (Learning Objectives)</h3>
                 <ul className="space-y-2">
                   {selectedUnit.learning_objectives.map((obj, i) => (
-                    <li key={i} className="flex items-start gap-2 text-slate-600 dark:text-slate-400">
+                    <li key={i} className="flex items-start gap-2 text-slate-600">
                       <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
                       <MarkdownRenderer content={obj} />
                     </li>
@@ -395,12 +395,12 @@ export const TeachingView = ({
                     <div
                       key={su.id}
                       onClick={() => setSelectedSubUnit(su)}
-                      className="p-4 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-indigo-200 rounded-xl transition-all cursor-pointer group"
+                      className="p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all cursor-pointer group"
                     >
                       <div className="flex justify-between items-start">
                         <div className="space-y-1 flex-1">
-                          <p className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{su.title}</p>
-                          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{su.title}</p>
+                          <div className="flex items-center gap-3 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
                               <Clock size={12} /> {su.periods} 课时
                             </span>
@@ -421,7 +421,7 @@ export const TeachingView = ({
                   ))}
                 </div>
                 {subUnits.length === 0 && (
-                  <div className="p-8 text-center bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                  <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <p className="text-sm text-slate-400">No sub-units yet.</p>
                     <button
                       onClick={() => { setEditingSubUnit(null); setIsSubUnitFormOpen(true); }}
@@ -459,7 +459,7 @@ export const TeachingView = ({
                   <Lightbulb size={16} /> AI Summary
                 </button>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed italic">
+              <p className="text-slate-600 text-sm leading-relaxed italic">
                 {selectedUnit.teaching_summary || "No summary recorded for this unit yet."}
               </p>
             </div>
@@ -484,14 +484,14 @@ export const TeachingView = ({
                     className={cn(
                       "flex items-center justify-between p-3 rounded-xl border transition-all",
                       res.url
-                        ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 opacity-50 cursor-not-allowed"
+                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm"
+                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
                     )}
                     onClick={res.url ? undefined : (e) => e.preventDefault()}
                   >
                     <div className="flex items-center gap-3">
                       <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
-                      <span className="text-sm font-medium dark:text-slate-300">{res.label}</span>
+                      <span className="text-sm font-medium">{res.label}</span>
                     </div>
                     {res.url && <ExternalLink size={14} className="text-slate-400" />}
                   </a>
@@ -533,7 +533,7 @@ export const TeachingView = ({
         <div className="flex justify-between items-center">
           <button
             onClick={() => setSelectedYear(null)}
-            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors font-medium"
+            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
           >
             <ChevronRight size={20} className="rotate-180" /> Back to Year Groups
           </button>
@@ -546,7 +546,7 @@ export const TeachingView = ({
         </div>
 
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{selectedYear} Units</h2>
+          <h2 className="text-2xl font-bold text-slate-900">{selectedYear} Units</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -557,8 +557,8 @@ export const TeachingView = ({
               className="glass-card p-6 hover:border-indigo-400 transition-all cursor-pointer group flex flex-col justify-between"
             >
               <div className="space-y-2">
-                <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{unit.title}</h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{unit.learning_objectives[0]}</p>
+                <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{unit.title}</h4>
+                <p className="text-sm text-slate-500 line-clamp-2">{unit.learning_objectives[0]}</p>
               </div>
               <div className="mt-6 flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
@@ -571,7 +571,7 @@ export const TeachingView = ({
           {yearUnits.length === 0 && (
             <div className="col-span-full p-12 text-center glass-card border-dashed">
               <BookOpen size={48} className="mx-auto text-slate-300 mb-4" />
-              <p className="text-slate-500 dark:text-slate-400">No units added for {selectedYear} yet.</p>
+              <p className="text-slate-500">No units added for {selectedYear} yet.</p>
               <button onClick={onAddUnit} className="mt-4 text-indigo-600 font-bold hover:underline">Add First Unit</button>
             </div>
           )}
@@ -584,7 +584,7 @@ export const TeachingView = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Teaching Management</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Teaching Management</h2>
         <div className="flex gap-2">
           <button onClick={onOpenSyllabus} className="btn-secondary text-sm">Curriculum Map</button>
         </div>
@@ -601,8 +601,8 @@ export const TeachingView = ({
               <BookOpen size={32} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{year}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <h3 className="text-xl font-bold text-slate-900">{year}</h3>
+              <p className="text-sm text-slate-500 mt-1">
                 {teachingUnits.filter(u => u.year_group === year).length} Units Available
               </p>
             </div>
@@ -618,15 +618,15 @@ export const TeachingView = ({
             const totalSubUnits = currentUnit?.sub_units?.length || currentUnit?.lessons.length || 1;
             const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / totalSubUnits) * 100) : 0;
             return (
-              <div key={cls.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+              <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <p className="font-bold text-slate-900 dark:text-slate-100">{cls.name}</p>
+                    <p className="font-bold text-slate-900">{cls.name}</p>
                     <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-slate-200 text-slate-600 rounded">
                       {cls.year_group}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-slate-500">
                     Current: <span className="font-medium text-indigo-600">{currentUnit?.title || 'None'}</span>
                   </p>
                   <div className="mt-3 space-y-1">
@@ -634,7 +634,7 @@ export const TeachingView = ({
                       <span>PROGRESS</span>
                       <span>{progress}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                       <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
                     </div>
                   </div>

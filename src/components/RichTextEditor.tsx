@@ -58,14 +58,14 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex justify-between items-center">
-        {label && <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{label}</label>}
-        <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
+        {label && <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">{label}</label>}
+        <div className="flex bg-slate-100 p-1 rounded-lg">
           <button
             type="button"
             onClick={() => setIsEditing(false)}
             className={cn(
               "px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1",
-              !isEditing ? "bg-white dark:bg-slate-600 text-indigo-600" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+              !isEditing ? "bg-white text-indigo-600" : "text-slate-500 hover:text-slate-700"
             )}
           >
             <Eye size={14} /> Preview
@@ -75,7 +75,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
             onClick={() => setIsEditing(true)}
             className={cn(
               "px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1",
-              isEditing ? "bg-white dark:bg-slate-600 text-indigo-600" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+              isEditing ? "bg-white text-indigo-600" : "text-slate-500 hover:text-slate-700"
             )}
           >
             <Edit3 size={14} /> Edit
@@ -85,15 +85,15 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
 
       <div className="relative group">
         {isEditing ? (
-          <div className="border border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
-            <div className="flex items-center gap-1 p-2 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 overflow-x-auto">
+          <div className="border border-slate-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
+            <div className="flex items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 overflow-x-auto">
               {toolbarButtons.map((btn, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={btn.action}
                   title={btn.label}
-                  className="p-2 hover:bg-white dark:hover:bg-slate-600 hover:text-indigo-600 rounded-lg text-slate-500 dark:text-slate-400 transition-all"
+                  className="p-2 hover:bg-white hover:text-indigo-600 rounded-lg text-slate-500 transition-all"
                 >
                   <btn.icon size={16} />
                 </button>
@@ -104,13 +104,13 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder={placeholder}
-              className="w-full h-48 p-4 outline-none resize-none text-sm font-sans leading-relaxed dark:bg-slate-800 dark:text-slate-100"
+              className="w-full h-48 p-4 outline-none resize-none text-sm font-sans leading-relaxed"
             />
           </div>
         ) : (
           <div 
             onClick={() => setIsEditing(true)}
-            className="min-h-[12rem] p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-2xl cursor-text hover:border-indigo-300 transition-all"
+            className="min-h-[12rem] p-4 bg-white border border-slate-200 rounded-2xl cursor-text hover:border-indigo-300 transition-all"
           >
             {value ? (
               <div className="markdown-content">

@@ -57,10 +57,10 @@ export const GoalsView = ({ goals, onAddGoal, onDeleteGoal, onEditGoal, onUpdate
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Target size={24} className="text-indigo-600" /> Goals
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{goals.length} goals total</p>
+          <p className="text-sm text-slate-500 mt-1">{goals.length} goals total</p>
         </div>
         <button onClick={onAddGoal} className="btn-primary flex items-center gap-2 self-start">
           <Plus size={18} /> New Goal
@@ -78,7 +78,7 @@ export const GoalsView = ({ goals, onAddGoal, onDeleteGoal, onEditGoal, onUpdate
                 "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                 categoryFilter === f
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
               )}
             >
               {f}
@@ -94,7 +94,7 @@ export const GoalsView = ({ goals, onAddGoal, onDeleteGoal, onEditGoal, onUpdate
                 "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                 statusFilter === f
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
               )}
             >
               {f}
@@ -136,14 +136,14 @@ export const GoalsView = ({ goals, onAddGoal, onDeleteGoal, onEditGoal, onUpdate
                   </button>
                 </div>
 
-                <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3">{goal.title}</h3>
+                <h3 className="font-bold text-slate-900 mb-3">{goal.title}</h3>
 
                 <div className="space-y-1.5 mt-auto">
                   <div className="flex justify-between text-[10px] font-bold text-slate-400">
                     <span>PROGRESS</span>
                     <span>{goal.progress}%</span>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-all duration-500",

@@ -38,16 +38,16 @@ function UrlWithUpload({ label, value, onChange, placeholder }: {
 
   return (
     <div className="space-y-1">
-      <label className="text-xs text-slate-500 dark:text-slate-400">{label}</label>
+      <label className="text-xs text-slate-500">{label}</label>
       <div className="flex gap-2">
         <input
           type="url"
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
           placeholder={placeholder || 'https://...'}
         />
-        <label className={`flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-600 cursor-pointer transition-colors ${uploading ? 'bg-slate-100 dark:bg-slate-600' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+        <label className={`flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 cursor-pointer transition-colors ${uploading ? 'bg-slate-100' : 'hover:bg-slate-50'}`}>
           {uploading ? (
             <Loader2 size={18} className="text-indigo-500 animate-spin" />
           ) : (
@@ -150,13 +150,13 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/50">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h2 className="text-2xl font-bold text-slate-900">
             {subUnit ? '编辑小单元 Edit Sub-Unit' : '添加小单元 Add Sub-Unit'}
           </h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
-            <X size={24} className="text-slate-500 dark:text-slate-400" />
+          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+            <X size={24} className="text-slate-500" />
           </button>
         </div>
 
@@ -164,24 +164,24 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           {/* Title & Periods */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">小单元名称 Title</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">小单元名称 Title</label>
               <input
                 required
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                 placeholder="e.g. Linear Equations Introduction"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">课时安排 Periods</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">课时安排 Periods</label>
               <input
                 type="number"
                 min={1}
                 value={periods}
                 onChange={e => setPeriods(parseInt(e.target.value) || 1)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:bg-slate-700 dark:text-slate-100"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           {/* Objectives */}
           <section className="space-y-4">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">教学目标 Objectives</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学目标 Objectives</label>
               <button type="button" onClick={addObjective} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 <Plus size={14} /> Add
               </button>
@@ -201,7 +201,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                     type="text"
                     value={obj}
                     onChange={e => updateObjective(i, e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                     placeholder={`Objective ${i + 1}`}
                   />
                   <button type="button" onClick={() => removeObjective(i)} className="p-2 text-red-400 hover:text-red-600">
@@ -215,7 +215,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           {/* Vocabulary */}
           <section className="space-y-4">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">双语核心词汇 Vocabulary</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">双语核心词汇 Vocabulary</label>
               <button type="button" onClick={addVocab} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 <Plus size={14} /> Add
               </button>
@@ -227,14 +227,14 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                     type="text"
                     value={v.english}
                     onChange={e => updateVocab(i, 'english', e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                     placeholder="English"
                   />
                   <input
                     type="text"
                     value={v.chinese}
                     onChange={e => updateVocab(i, 'chinese', e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                     placeholder="中文"
                   />
                   <button type="button" onClick={() => removeVocab(i)} className="p-2 text-red-400 hover:text-red-600">
@@ -255,7 +255,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
 
           {/* Resource Links */}
           <section className="space-y-4">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">资源链接 Resource Links</label>
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">资源链接 Resource Links</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UrlWithUpload label="练习单 Worksheet URL" value={worksheetUrl} onChange={setWorksheetUrl} />
               <UrlWithUpload label="线上练习 Online Practice URL" value={onlinePracticeUrl} onChange={setOnlinePracticeUrl} />
@@ -275,23 +275,23 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
 
           {/* Teaching Reflection */}
           <section className="space-y-4">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">教学总结及反思 Teaching Reflection</label>
-            <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学总结及反思 Teaching Reflection</label>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs text-slate-500 dark:text-slate-400">上课时间 Lesson Date</label>
+                <label className="text-xs text-slate-500">上课时间 Lesson Date</label>
                 <input
                   type="date"
                   value={reflection.lesson_date || ''}
                   onChange={e => updateReflection('lesson_date', e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-slate-500 dark:text-slate-400">学生接受状态 Student Reception</label>
+                <label className="text-xs text-slate-500">学生接受状态 Student Reception</label>
                 <textarea
                   value={reflection.student_reception || ''}
                   onChange={e => updateReflection('student_reception', e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm dark:bg-slate-700 dark:text-slate-100 h-20 resize-none"
+                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm h-20 resize-none"
                   placeholder="How well did students receive the content?"
                 />
               </div>
@@ -325,16 +325,16 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           />
         </form>
 
-        <div className="px-4 sm:px-8 py-6 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-4">
+        <div className="px-4 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
           <button
             onClick={onCancel}
-            className="px-6 py-3 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+            className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center gap-2"
+            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
           >
             <Save size={20} />
             Save Sub-Unit

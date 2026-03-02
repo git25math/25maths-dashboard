@@ -55,32 +55,4 @@ body {
   @apply bg-slate-100 px-1 rounded font-mono text-xs;
 }
 
-/* Dark mode overrides */
-.dark body {
-  @apply bg-slate-900 text-slate-100;
-}
-
-.dark .glass-card {
-  @apply bg-slate-800/80 border-slate-700/50;
-}
-
-.dark .btn-secondary {
-  @apply bg-slate-700 text-slate-200 border-slate-600 hover:bg-slate-600;
-}
-
-.dark .markdown-content {
-  @apply text-slate-300;
-}
-
-.dark .markdown-content strong {
-  @apply text-slate-100;
-}
-
-.dark .markdown-content a {
-  @apply text-indigo-400;
-}
-
-.dark .markdown-content code {
-  @apply bg-slate-700 text-slate-200;
-}
 

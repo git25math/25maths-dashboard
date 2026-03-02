@@ -39,12 +39,12 @@ export const DashboardView = ({
       {/* Header & Current Context */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Hello, {USER_CONFIG.name}!</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">It's {format(new Date(), 'EEEE, MMMM do, HH:mm')}</p>
+          <h2 className="text-3xl font-bold text-slate-900">Hello, {USER_CONFIG.name}!</h2>
+          <p className="text-slate-500 mt-1">It's {format(new Date(), 'EEEE, MMMM do, HH:mm')}</p>
         </div>
 
         <div className="flex gap-3">
-          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="p-3 bg-white border border-slate-200 rounded-xl text-indigo-600 hover:bg-slate-50 transition-colors shadow-sm">
             <ExternalLink size={20} />
           </a>
           <button
@@ -69,7 +69,7 @@ export const DashboardView = ({
             {currentEvent ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{currentEvent.subject}</h3>
+                  <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
                   {currentEvent.type === 'lesson' && (
                     <span className={cn(
                       "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
@@ -79,7 +79,7 @@ export const DashboardView = ({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-4 text-slate-500">
                   <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
                   <span className="flex items-center gap-1"><Calendar size={16} /> Room {currentEvent.room}</span>
                   {currentEvent.topic && (
@@ -91,8 +91,8 @@ export const DashboardView = ({
               </div>
             ) : (
               <div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Free Time / Planning</h3>
-                <p className="text-slate-500 dark:text-slate-400 mt-1">Perfect time to review your startup ideas or prep for next class.</p>
+                <h3 className="text-2xl font-bold text-slate-900">Free Time / Planning</h3>
+                <p className="text-slate-500 mt-1">Perfect time to review your startup ideas or prep for next class.</p>
               </div>
             )}
           </div>
@@ -101,8 +101,8 @@ export const DashboardView = ({
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Event</p>
             {nextEvent ? (
               <div className="mt-1">
-                <p className="font-bold text-slate-900 dark:text-slate-100">{nextEvent.subject}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="font-bold text-slate-900">{nextEvent.subject}</p>
+                <p className="text-xs text-slate-500">
                   {nextEvent.start_time} · {nextEvent.class_name} · Room {nextEvent.room}
                 </p>
               </div>
@@ -118,7 +118,7 @@ export const DashboardView = ({
         {/* Class Progress Tracking */}
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-slate-900 dark:text-slate-100">Class Progress Tracking</h4>
+            <h4 className="font-bold text-slate-900">Class Progress Tracking</h4>
             <button onClick={() => onNavigate('teaching')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -127,10 +127,10 @@ export const DashboardView = ({
               const totalSubUnits = currentUnit?.sub_units?.length || currentUnit?.lessons.length || 1;
               const progress = currentUnit ? Math.round(((cls.completed_lesson_ids?.length || 0) / totalSubUnits) * 100) : 0;
               return (
-                <div key={cls.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{cls.name}</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+                    <p className="font-bold text-slate-900 text-sm">{cls.name}</p>
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
                       Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
                     </p>
                     {currentUnit && (
@@ -139,7 +139,7 @@ export const DashboardView = ({
                           <span>PROGRESS</span>
                           <span>{progress}%</span>
                         </div>
-                        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                           <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
                         </div>
                       </div>
@@ -164,7 +164,7 @@ export const DashboardView = ({
         {/* Goals / OKRs */}
         <div className="glass-card p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-slate-900 dark:text-slate-100">Active Goals</h4>
+            <h4 className="font-bold text-slate-900">Active Goals</h4>
             <button onClick={() => onNavigate('goals')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
           </div>
           <div className="space-y-3">
@@ -174,7 +174,7 @@ export const DashboardView = ({
                   <span className="text-slate-600">{goal.title}</span>
                   <span className="text-indigo-600">{goal.progress}%</span>
                 </div>
-                <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div className="h-full bg-indigo-600 transition-all" style={{ width: `${goal.progress}%` }} />
                 </div>
               </div>
@@ -201,17 +201,17 @@ export const DashboardView = ({
         {/* School Events */}
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-slate-900 dark:text-slate-100">Recent Events</h4>
+            <h4 className="font-bold text-slate-900">Recent Events</h4>
             <button onClick={() => onNavigate('events')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
           </div>
           <div className="space-y-3">
             {schoolEvents.slice(0, 3).map(event => (
-              <div key={event.id} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+              <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="flex justify-between items-start">
-                  <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">{event.title}</h5>
+                  <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
                   <span className="text-[9px] text-slate-400">{event.date}</span>
                 </div>
-                <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1" />
+                <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 mt-1 line-clamp-1" />
               </div>
             ))}
           </div>
@@ -220,7 +220,7 @@ export const DashboardView = ({
         {/* Recent Updates */}
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-slate-900 dark:text-slate-100">Recent Updates</h4>
+            <h4 className="font-bold text-slate-900">Recent Updates</h4>
             <button onClick={() => onNavigate('worklogs')} className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
           </div>
           <div className="space-y-3">
@@ -231,7 +231,7 @@ export const DashboardView = ({
               ];
               items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
               return items.slice(0, 5).map(item => (
-                <div key={`${item.type}-${item.id}`} className="flex gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div key={`${item.type}-${item.id}`} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div className={cn(
                     "w-1 h-auto rounded-full flex-shrink-0",
                     item.type === 'idea' ? "bg-purple-500" :
@@ -251,9 +251,9 @@ export const DashboardView = ({
                       )}
                     </div>
                     {item.type === 'idea' && (
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-0.5">{(item as Extract<UpdateItem, { type: 'idea' }>).title}</p>
+                      <p className="text-xs font-bold text-slate-900 mt-0.5">{(item as Extract<UpdateItem, { type: 'idea' }>).title}</p>
                     )}
-                    <MarkdownRenderer content={item.content} className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 line-clamp-2" />
+                    <MarkdownRenderer content={item.content} className="text-xs text-slate-700 mt-0.5 line-clamp-2" />
                     <p className="text-[10px] text-slate-400 mt-0.5">{item.time}</p>
                   </div>
                 </div>

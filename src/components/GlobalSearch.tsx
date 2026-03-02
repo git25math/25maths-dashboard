@@ -191,11 +191,11 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
     <div className="fixed inset-0 z-[70] flex items-start justify-center pt-[15vh]" onClick={() => setIsOpen(false)}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl mx-4 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700"
+        className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200">
           <Search size={20} className="text-slate-400 shrink-0" />
           <input
             ref={inputRef}
@@ -203,12 +203,12 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search students, units, ideas, logs..."
-            className="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+            className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-md">
+          <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-slate-400 bg-slate-100 rounded-md">
             ESC
           </kbd>
-          <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
             <X size={18} />
           </button>
         </div>
@@ -226,7 +226,7 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
           ) : (
             Object.entries(results).map(([groupLabel, items]) => (
               <div key={groupLabel}>
-                <div className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-700/50">
+                <div className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50">
                   {groupLabel} ({items.length})
                 </div>
                 {items.map((result, i) => {
@@ -235,13 +235,13 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
                     <button
                       key={`${groupLabel}-${i}`}
                       onClick={() => { onNavigate(result.tabKey); setIsOpen(false); }}
-                      className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors"
                     >
                       <Icon size={16} className="text-indigo-500 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{result.title}</p>
+                        <p className="text-sm font-medium text-slate-900 truncate">{result.title}</p>
                         {result.subtitle && (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{result.subtitle}</p>
+                          <p className="text-xs text-slate-500 truncate">{result.subtitle}</p>
                         )}
                       </div>
                     </button>
@@ -253,10 +253,10 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="px-5 py-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400">
           <span>{totalResults} result{totalResults !== 1 ? 's' : ''}</span>
           <span className="hidden sm:inline">
-            <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono">⌘K</kbd> to toggle
+            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono">⌘K</kbd> to toggle
           </span>
         </div>
       </div>

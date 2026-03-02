@@ -78,11 +78,11 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   if (authorized) return <AuthContext.Provider value={{ logout }}>{children}</AuthContext.Provider>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 w-full max-w-sm space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
           <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">25</div>
-          <h1 className="text-xl font-bold dark:text-slate-100">25Maths Dashboard</h1>
+          <h1 className="text-xl font-bold">25Maths Dashboard</h1>
           <p className="text-sm text-slate-400">Enter password to access</p>
         </div>
         <div className="relative">
@@ -93,7 +93,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
             onChange={e => setPassword(e.target.value)}
             placeholder="Password"
             autoFocus
-            className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-slate-100"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}

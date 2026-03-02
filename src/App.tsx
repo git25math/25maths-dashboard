@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Menu, X, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent } from './types';
 import { useAppData } from './hooks/useAppData';
-import { useDarkMode } from './hooks/useDarkMode';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
 import { QuickCapture } from './components/QuickCapture';
@@ -38,8 +37,6 @@ import { SettingsView } from './views/SettingsView';
 function AppContent() {
   const data = useAppData();
   const { logout } = useAuth();
-  const { isDark, toggleDarkMode } = useDarkMode();
-
   // --- UI State ---
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -323,29 +320,23 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex bg-slate-50">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-6 space-y-8">
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-8">
         <div className="flex items-center gap-3 px-2">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">25</div>
-          <h1 className="text-xl font-bold tracking-tight dark:text-slate-100">Dashboard</h1>
+          <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
         </div>
         <nav className="flex-1 space-y-2">
           {SIDEBAR_ITEMS.map(item => (
             <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => setActiveTab(item.key)} />
           ))}
         </nav>
-        <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl">
+        <div className="p-4 bg-slate-50 rounded-2xl">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Current Role</p>
-          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium text-sm">
+          <div className="flex items-center gap-2 text-indigo-600 font-medium text-sm">
             <CheckCircle2 size={16} /> Math Teacher
           </div>
-        </div>
-        <div className="flex items-center gap-2 px-2">
-          <button onClick={toggleDarkMode} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm transition-colors">
-            {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            {isDark ? 'Light Mode' : 'Dark Mode'}
-          </button>
         </div>
         <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2">
           <LogOut size={16} /> Logout
@@ -353,17 +344,14 @@ function AppContent() {
       </aside>
 
       {/* Mobile Nav Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-40 px-4 py-3 flex justify-between items-center">
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-40 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">25</div>
-          <span className="font-bold dark:text-slate-100">Dashboard</span>
+          <span className="font-bold">Dashboard</span>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={toggleDarkMode} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
           <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600 dark:text-slate-300"><Menu size={24} /></button>
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600"><Menu size={24} /></button>
         </div>
       </div>
 
@@ -372,20 +360,16 @@ function AppContent() {
         {isSidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden" />
-            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 z-50 p-6 flex flex-col lg:hidden">
+            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-64 bg-white z-50 p-6 flex flex-col lg:hidden">
               <div className="flex justify-between items-center mb-8">
-                <span className="font-bold text-xl dark:text-slate-100">Menu</span>
-                <button onClick={() => setIsSidebarOpen(false)} className="dark:text-slate-300"><X size={24} /></button>
+                <span className="font-bold text-xl">Menu</span>
+                <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
               </div>
               <nav className="flex-1 space-y-2">
                 {SIDEBAR_ITEMS.map(item => (
                   <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
                 ))}
               </nav>
-              <button onClick={toggleDarkMode} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm transition-colors px-2 py-3">
-                {isDark ? <Sun size={16} /> : <Moon size={16} />}
-                {isDark ? 'Light Mode' : 'Dark Mode'}
-              </button>
               <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2 py-3">
                 <LogOut size={16} /> Logout
               </button>
@@ -395,7 +379,7 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8 overflow-y-auto dark:text-slate-100">
+      <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8 overflow-y-auto">
         <div className="max-w-5xl mx-auto space-y-8">{renderContent()}</div>
       </main>
 
