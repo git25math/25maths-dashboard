@@ -8,11 +8,15 @@ type CategoryFilter = 'all' | MeetingRecord['category'];
 type ViewMode = 'list' | 'detail' | 'new';
 
 const CATEGORIES: { value: MeetingRecord['category']; label: string }[] = [
-  { value: 'department', label: 'Department' },
-  { value: 'tutor', label: 'Tutor' },
-  { value: 'parent', label: 'Parent' },
-  { value: 'staff', label: 'Staff' },
-  { value: 'other', label: 'Other' },
+  { value: 'flag-raising', label: 'Flag Raising' },
+  { value: 'ws-staff', label: 'WS Staff Meeting' },
+  { value: 'us-staff', label: 'US Staff Meeting' },
+  { value: 'tutor', label: 'Tutor Meeting' },
+  { value: 'department', label: 'Department Meeting' },
+  { value: 'sptc', label: 'SPTC Meeting' },
+  { value: 'assembly', label: 'Assembly' },
+  { value: 'parent', label: 'Parent Meeting' },
+  { value: 'other', label: 'Others' },
 ];
 
 const STATUS_COLORS: Record<MeetingRecord['status'], string> = {
@@ -23,10 +27,14 @@ const STATUS_COLORS: Record<MeetingRecord['status'], string> = {
 };
 
 const CATEGORY_COLORS: Record<MeetingRecord['category'], string> = {
-  department: 'bg-indigo-50 text-indigo-600',
+  'flag-raising': 'bg-red-50 text-red-600',
+  'ws-staff': 'bg-purple-50 text-purple-600',
+  'us-staff': 'bg-violet-50 text-violet-600',
   tutor: 'bg-emerald-50 text-emerald-600',
-  parent: 'bg-amber-50 text-amber-600',
-  staff: 'bg-purple-50 text-purple-600',
+  department: 'bg-indigo-50 text-indigo-600',
+  sptc: 'bg-cyan-50 text-cyan-600',
+  assembly: 'bg-amber-50 text-amber-600',
+  parent: 'bg-orange-50 text-orange-600',
   other: 'bg-slate-100 text-slate-500',
 };
 
@@ -46,12 +54,12 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
   // New meeting form
   const [newTitle, setNewTitle] = useState('');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
-  const [newCategory, setNewCategory] = useState<MeetingRecord['category']>('department');
+  const [newCategory, setNewCategory] = useState<MeetingRecord['category']>('flag-raising');
   const [newParticipants, setNewParticipants] = useState('');
 
   // Editing fields
   const [editTitle, setEditTitle] = useState('');
-  const [editCategory, setEditCategory] = useState<MeetingRecord['category']>('department');
+  const [editCategory, setEditCategory] = useState<MeetingRecord['category']>('flag-raising');
   const [editParticipants, setEditParticipants] = useState('');
 
   const filteredMeetings = categoryFilter === 'all'

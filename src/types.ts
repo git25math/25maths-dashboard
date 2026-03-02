@@ -218,7 +218,7 @@ export interface MeetingRecord {
   duration: number;
   transcript: string;
   ai_summary: AISummary | null;
-  category: 'department' | 'tutor' | 'parent' | 'staff' | 'other';
+  category: 'flag-raising' | 'ws-staff' | 'us-staff' | 'tutor' | 'department' | 'sptc' | 'assembly' | 'parent' | 'other';
   participants: string[];
   status: 'draft' | 'transcribing' | 'summarizing' | 'completed';
   created_at: string;
