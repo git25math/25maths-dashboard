@@ -118,6 +118,22 @@
 - Dashboard: Ideas shown with purple indicator bar and "Idea" source label (vs green/indigo for WorkLogs)
 - `useAppData`: `toggleIdeaStatus()` now 3-state cycle; new `toggleIdeaDashboard()` function
 
+### Phase 14 — Timetable → Lesson Records 上课记录自动关联 (2026-03-02)
+- New `lessonRecordService.ts`: CRUD service for `lesson_records` table (ID prefix `lr-`)
+- New `LessonRecordsView.tsx`: dedicated view for browsing/editing lesson records
+  - Class tab filtering (All + per-class buttons)
+  - Records sorted by date descending
+  - Inline editing: click Edit to expand full edit form within the card
+  - Manual "New Record" form with all fields (date, class, topic, progress, homework, notes, next plan)
+  - Delete with confirmation
+- **Auto-record**: `updateTimetableEntry` in `useAppData` now auto-upserts a `LessonRecord` when saving a `type=lesson` entry with topic or notes
+  - Key: `date (today) + class_name` — same day + same class updates existing record, new day creates new record
+  - Ensures weekly records accumulate without overwriting history
+- TimetableEntryForm: added standalone "Topic" input field (previously only in subject)
+- TimetableEntryForm: save area shows hint "Saving will auto-record to Lesson Records" for lesson-type entries
+- Sidebar: "Lesson Records" entry with FileText icon, placed after Teaching
+- `useAppData`: `lessonRecords` state with localStorage persistence, Supabase fetchOrSync, 3 CRUD functions (`addLessonRecord`, `updateLessonRecord`, `deleteLessonRecord`)
+
 ---
 
 ## Current Architecture
@@ -125,10 +141,10 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, Ideas, WorkLogs, Meetings, SOP
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Meetings, SOP
   │     ├── useAppData hook (central state management)
   │     ├── useLocalStorage (cache layer)
-  │     ├── 10 Service files (Supabase API layer)
+  │     ├── 11 Service files (Supabase API layer)
   │     └── geminiService (Gemini 2.0 Flash: audio transcription + meeting summary)
   │
   └── Data Flow:
@@ -143,14 +159,19 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 
 ## Roadmap
 
-### Phase 14 — Password Protection (Next)
+### ~~Phase 14 — Timetable → Lesson Records 上课记录自动关联~~ ✅ Done
+- [x] 上课时在 TimetableEntryForm 记录的 topic/notes 自动写入对应班级的 LessonRecord
+- [x] 每周自动新建 LessonRecord，不覆盖历史记录（按 date + class_name 去重）
+- [x] Lesson Records view: 按班级分组查看历史上课记录
+- [ ] LessonRecord 与 TimetableEntry 双向关联（timetable_entry_id）— deferred
+
+### Phase 15 — Password Protection (Next)
 - [ ] Login gate with password authentication
 - [ ] Protect all routes behind auth check
 
-### Phase 15 — Missing Views
+### Phase 16 — Missing Views
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
-- [ ] Lesson Records view (CRUD for class lesson history)
 - [ ] Settings/Profile page
 
 ### Phase 16 — Data & UX Improvements
