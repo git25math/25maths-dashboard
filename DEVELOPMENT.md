@@ -167,6 +167,36 @@
 - `App.tsx`: imported 5 new components, added `isGoalFormOpen/editingGoal` and `isEventFormOpen/editingEvent` state, 3 new switch cases (`goals`, `events`, `settings`), GoalForm + SchoolEventForm modal renders
 - `DashboardView.tsx`: Goals section "View All" → navigates to `'goals'`; School Events "View All" → navigates to `'events'` (was incorrectly pointing to `'timetable'`)
 
+### Phase 17 — Data & UX Improvements 数据与用户体验 (2026-03-02)
+- **Dark Mode**: full dark theme with `useDarkMode` hook (localStorage + `prefers-color-scheme` fallback)
+  - Toggle `dark` class on `<html>`, persists across reloads
+  - CSS overrides for `.glass-card`, `.btn-secondary`, `.markdown-content` in `index.css`
+  - `dark:` prefixes added to all 12 views, 13 components, App.tsx, SidebarItem, LoginGate
+  - Toggle button in desktop sidebar footer, mobile nav bar, and mobile sidebar
+  - "Appearance" settings card with toggle switch in SettingsView
+- **Global Search (Cmd+K)**: `GlobalSearch.tsx` overlay at z-[70] with keyboard shortcut
+  - Case-insensitive substring search across all 11 entity types
+  - Fields searched: Student (name, chinese_name, class_name, notes), TeachingUnit (title, year_group), Idea (title, content), SOP (title, content), WorkLog (content), Goal (title), SchoolEvent (title, description), Meeting (title, participants), LessonRecord (topic, class_name), Class (name), Timetable (subject, class_name, topic)
+  - Results grouped by type with lucide icons, max 5 per type, click navigates to tab
+  - Escape / backdrop click to close
+- **Bulk Import**: JSON import in SettingsView for data restoration
+  - `bulkImport()` in `useAppData`: maps 11 known entity keys to state setters
+  - Hidden file input (`.json`), parses + validates (checks for known keys + Array values)
+  - Confirmation dialog showing entity names + item counts before overwrite
+  - Error messages for invalid JSON / no recognized keys
+- **Responsive Mobile Layout**:
+  - TimetableView: extracted `TIME_SLOTS` constant, new `mobileDay` state (defaults to current weekday), mobile day-selector tabs + stacked entry cards (`md:hidden`), desktop grid wrapped in `hidden md:block`
+  - 11 form components: `p-8` → `p-4 sm:p-8`, `px-8` → `px-4 sm:px-8` for form body/header/footer padding
+  - WorkLogView: `<table>` wrapped in `<div className="overflow-x-auto">`
+- **Drag-and-Drop Timetable** (desktop grid only):
+  - Installed `@dnd-kit/core` + `@dnd-kit/utilities`
+  - `DndContext` with `PointerSensor` (distance: 8 to prevent click→drag conflict)
+  - Inline `DraggableEntry` + `DroppableCell` wrappers around existing entry cards / grid cells
+  - `handleDragEnd`: parses droppable ID `{day}-slot-{time}`, preserves entry duration via `timeDiffMinutes()` + `addMinutesToTime()`, calls `onUpdateEntry`
+  - Visual feedback: drop target highlights with indigo background, dragged entry shows 50% opacity
+- New files: `src/hooks/useDarkMode.ts`, `src/components/GlobalSearch.tsx`
+- Modified: 34 files total (914 insertions, 521 deletions)
+
 ---
 
 ## Current Architecture
@@ -175,9 +205,12 @@
 Browser
   ├── React App (Vite build)
   │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, Settings
-  │     ├── useAppData hook (central state management)
+  │     ├── useAppData hook (central state management + bulkImport)
+  │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
+  │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
   │     ├── 11 Service files (Supabase API layer)
+  │     ├── @dnd-kit (drag-and-drop timetable grid)
   │     └── geminiService (Gemini 2.0 Flash: audio transcription + meeting summary)
   │
   └── Data Flow:
@@ -213,16 +246,16 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Sidebar entries: Goals (Target), School Events (CalendarDays), Settings
 - [x] Dashboard "View All" links navigate to Goals and School Events views
 
-### Phase 17 — Data & UX Improvements (Next)
+### ~~Phase 17 — Data & UX Improvements 数据与用户体验~~ ✅ Done
 - [x] Idea Pool: 3-state status filter, dashboard visibility toggle, sorted by date (Phase 13)
-- [ ] Search and filter across all entities
-- [ ] Bulk import/export (CSV/JSON)
-- [ ] Drag-and-drop timetable editing
-- [ ] Responsive mobile layout
-- [ ] Dark mode toggle
-- [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11). External link pasting also supported.
+- [x] Global search (Cmd+K) across all 11 entity types with grouped results
+- [x] Bulk JSON import in Settings with validation + confirmation dialog
+- [x] Drag-and-drop timetable editing on desktop grid (@dnd-kit, preserves duration)
+- [x] Responsive mobile layout: TimetableView day tabs, form padding responsive, WorkLog table scroll
+- [x] Dark mode toggle with localStorage persistence + system preference fallback
+- [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11)
 
-### Phase 18 — Analytics & Reports
+### Phase 18 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
