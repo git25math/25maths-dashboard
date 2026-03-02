@@ -324,10 +324,10 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
     return new Promise<Blob>((resolve) => {
       mediaRecorderRef.current!.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        mediaRecorderRef.current!.stream.getTracks().forEach(t => t.stop());
         resolve(blob);
       };
       mediaRecorderRef.current!.stop();
-      mediaRecorderRef.current!.stream.getTracks().forEach(t => t.stop());
       if (timerRef.current) clearInterval(timerRef.current);
       setIsRecording(false);
       setIsPaused(false);
@@ -360,6 +360,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
       }
       setIsSummarizing(false);
     } catch (err) {
+      console.error('Transcription failed:', err);
       setError('Failed to transcribe audio. Please try recording again.');
       onUpdate({ status: 'draft' });
       setIsTranscribing(false);

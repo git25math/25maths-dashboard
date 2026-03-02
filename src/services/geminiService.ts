@@ -37,7 +37,13 @@ export const geminiService = {
   async transcribeAudio(audioBlob: Blob): Promise<string> {
     const ai = getClient();
     const buffer = await audioBlob.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    const base64 = btoa(binary);
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
