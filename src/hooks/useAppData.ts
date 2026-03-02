@@ -394,6 +394,23 @@ export function useAppData() {
     }
   }, [setSops, toast]);
 
+  const consolidateSOPs = useCallback(async (
+    selectedIds: string[],
+    consolidated: { title: string; content: string; category: string }
+  ) => {
+    try {
+      await Promise.all(selectedIds.map(id => sopService.delete(id)));
+      setSops(prev => prev.filter(s => !selectedIds.includes(s.id)));
+
+      const created = await sopService.create(consolidated);
+      setSops(prev => [...prev, created]);
+      toast.success(`Consolidated ${selectedIds.length} SOPs into 1`);
+    } catch (error) {
+      toast.error('Failed to consolidate SOPs');
+      throw error;
+    }
+  }, [setSops, toast]);
+
   // --- Work Logs ---
 
   const addWorkLog = useCallback(async (data: { content: string; category: WorkLog['category']; tags?: string[] }) => {
@@ -429,6 +446,26 @@ export function useAppData() {
       toast.success('Work log deleted');
     } catch (error) {
       toast.error('Failed to delete work log');
+    }
+  }, [setWorkLogs, toast]);
+
+  const consolidateWorkLogs = useCallback(async (
+    selectedIds: string[],
+    consolidated: { content: string; category: WorkLog['category']; tags?: string[] }
+  ) => {
+    try {
+      await Promise.all(selectedIds.map(id => workLogService.delete(id)));
+      setWorkLogs(prev => prev.filter(l => !selectedIds.includes(l.id)));
+
+      const created = await workLogService.create({
+        timestamp: format(new Date(), 'yyyy-MM-dd HH:mm'),
+        ...consolidated,
+      });
+      setWorkLogs(prev => [created, ...prev]);
+      toast.success(`Consolidated ${selectedIds.length} logs into 1`);
+    } catch (error) {
+      toast.error('Failed to consolidate work logs');
+      throw error;
     }
   }, [setWorkLogs, toast]);
 
@@ -632,8 +669,8 @@ export function useAppData() {
 
     // Ideas / SOPs / WorkLogs
     addIdea, updateIdea, deleteIdea, toggleIdeaStatus, toggleIdeaDashboard, consolidateIdeas,
-    addSOP, updateSOP, deleteSOP,
-    addWorkLog, updateWorkLog, deleteWorkLog,
+    addSOP, updateSOP, deleteSOP, consolidateSOPs,
+    addWorkLog, updateWorkLog, deleteWorkLog, consolidateWorkLogs,
 
     // Goals
     addGoal, updateGoal, deleteGoal,

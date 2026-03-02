@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { AISummary, Idea } from '../types';
+import { AISummary, Idea, WorkLog, SOP } from '../types';
 
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -31,6 +31,18 @@ export interface ConsolidatedIdea {
   content: string;
   category: Idea['category'];
   priority: Idea['priority'];
+}
+
+export interface ConsolidatedWorkLog {
+  content: string;
+  category: WorkLog['category'];
+  tags: string[];
+}
+
+export interface ConsolidatedSOP {
+  title: string;
+  content: string;
+  category: string;
 }
 
 export interface WeaknessInput {
@@ -249,5 +261,83 @@ ${ideasText}`,
     const raw = (response.text ?? '').trim();
     const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
     return JSON.parse(jsonStr) as ConsolidatedIdea;
+  },
+
+  async consolidateWorkLogs(logs: Pick<WorkLog, 'content' | 'category' | 'tags' | 'timestamp'>[]): Promise<ConsolidatedWorkLog> {
+    const ai = getClient();
+
+    const logsText = logs.map((log, i) =>
+      `[Log ${i + 1}]\nTimestamp: ${log.timestamp}\nCategory: ${log.category}\nContent: ${log.content}\nTags: ${log.tags?.join(', ') || 'none'}`
+    ).join('\n\n');
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a productivity assistant. The user has multiple work log entries that need to be consolidated into one comprehensive summary log. Analyze the following work logs and merge them.
+
+Return ONLY valid JSON with this exact structure (no markdown fences):
+{
+  "content": "Well-structured summary of all work done. Use Markdown formatting.",
+  "category": "tutor" | "teaching" | "admin" | "startup" | "other",
+  "tags": ["tag1", "tag2"]
+}
+
+Rules:
+- The content should be in the same language as the original logs (Chinese, English, or mixed)
+- Merge overlapping work items, remove redundancy
+- Preserve all unique work details
+- Pick the most representative category
+- Combine all unique tags from the inputs
+
+Work logs to consolidate:
+${logsText}`,
+        }],
+      }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    return JSON.parse(jsonStr) as ConsolidatedWorkLog;
+  },
+
+  async consolidateSOPs(sops: Pick<SOP, 'title' | 'content' | 'category'>[]): Promise<ConsolidatedSOP> {
+    const ai = getClient();
+
+    const sopsText = sops.map((sop, i) =>
+      `[SOP ${i + 1}]\nTitle: ${sop.title}\nCategory: ${sop.category}\nContent: ${sop.content}`
+    ).join('\n\n');
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a productivity assistant. The user has multiple Standard Operating Procedures (SOPs) that overlap or are related. Consolidate them into one comprehensive SOP.
+
+Return ONLY valid JSON with this exact structure (no markdown fences):
+{
+  "title": "A concise title for the consolidated SOP",
+  "content": "Well-structured Markdown procedure that merges all steps. Use numbered lists and headings.",
+  "category": "The most appropriate category"
+}
+
+Rules:
+- The content should be in the same language as the original SOPs (Chinese, English, or mixed)
+- Merge overlapping steps, remove redundancy
+- Preserve all unique procedures and details
+- Maintain logical step ordering
+- The content should be well-structured Markdown with clear numbered steps
+
+SOPs to consolidate:
+${sopsText}`,
+        }],
+      }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    return JSON.parse(jsonStr) as ConsolidatedSOP;
   },
 };

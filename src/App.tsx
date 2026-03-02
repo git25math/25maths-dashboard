@@ -229,6 +229,7 @@ function AppContent() {
             onAddSOP={() => { setEditingSOP(null); setIsSOPFormOpen(true); }}
             onDeleteSOP={data.deleteSOP}
             onEditSOP={(sop) => { setEditingSOP(sop); setIsSOPFormOpen(true); }}
+            onConsolidate={data.consolidateSOPs}
           />
         );
       case 'worklogs':
@@ -238,6 +239,7 @@ function AppContent() {
             onAddLog={() => { setEditingWorkLog(null); setIsWorkLogFormOpen(true); }}
             onDeleteLog={data.deleteWorkLog}
             onEditLog={(log) => { setEditingWorkLog(log); setIsWorkLogFormOpen(true); }}
+            onConsolidate={data.consolidateWorkLogs}
           />
         );
       case 'ideas':
