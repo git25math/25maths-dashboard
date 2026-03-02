@@ -292,6 +292,17 @@
   - `src/lib/teachingAdapter.ts` — `normalizeTeachingUnit()` migration adapter
 - Modified files (7): types.ts, SubUnitForm.tsx, TeachingView.tsx, DashboardView.tsx, TimetableEntryForm.tsx, teachingService.ts, useAppData.ts
 
+### Phase 23-UI — Teaching 页面 + 表单体验优化 (2026-03-03)
+- **TeachingView LO cards** (Sub-Unit Detail): replaced right-side text status button with left-side clickable status icons (`Circle`/`Clock`/`CheckCircle2`), moved periods text below objective, added completion percentage to stats header (`3/5 completed (60%)`)
+- **TeachingView Sub-Unit cards** (Unit Detail): added mini `h-1` emerald progress bar at bottom of each card, updated text to `"3/5 LOs completed"`
+- **TeachingView Year Units List**: added total LO count next to sub-unit count (`"3 Sub-Units · 12 LOs"`)
+- **TeachingView Class Progress**: added `"X/Y LOs completed"` text below progress bar, color-coded progress bar (red < 30%, amber 30-70%, emerald > 70%)
+- **SubUnitForm LO editing**: added `#1, #2...` numbered badges, replaced status dropdown with 3 icon buttons (`Circle`/`Clock`/`CheckCircle2`) with `ring-2` highlight on active, added `shadow-sm` to cards, added empty state guidance
+- **SubUnitForm section dividers**: added `border-t border-slate-100 pt-8` between all sections
+- **SubUnitForm section icons**: Target (LO), BookOpen (Vocab), Link (Resources), MessageSquare (Reflection)
+- **SubUnitForm upload error**: replaced `alert()` with inline `<p className="text-xs text-red-500">` error message
+- Modified files (2): TeachingView.tsx, SubUnitForm.tsx
+
 ---
 
 ## Current Architecture
@@ -389,6 +400,13 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] TeachingView: color-coded LO cards with click-to-cycle status + progress bar
 - [x] Class progress tracking: LO-based completion across TeachingView & DashboardView
 - [x] Hotfix: `|| []` defensive guards for first-render before normalizer useEffect runs
+
+### ~~Phase 23-UI — Teaching 页面 + 表单体验优化~~ ✅ Done
+- [x] LO cards: left-side status icons (Circle/Clock/CheckCircle2) with click-to-cycle, periods below text, completion %
+- [x] Sub-Unit cards: mini emerald progress bar, "X/Y LOs completed" text
+- [x] Year Units List: total LO count ("3 Sub-Units · 12 LOs")
+- [x] Class Progress: color-coded progress bar (red/amber/emerald), LO count text
+- [x] SubUnitForm: numbered badges, icon button group for status, section dividers + icons, inline upload error
 
 ### Phase 23 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)

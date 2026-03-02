@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Plus, Trash2, Paperclip, Loader2 } from 'lucide-react';
+import { X, Save, Plus, Trash2, Paperclip, Loader2, Circle, Clock, CheckCircle2, Target, BookOpen, Link, FileText, MessageSquare, Sparkles } from 'lucide-react';
 import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { uploadFile } from '../services/storageService';
@@ -20,16 +20,18 @@ function UrlWithUpload({ label, value, onChange, placeholder }: {
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadError(null);
     try {
       const url = await uploadFile(file);
       onChange(url);
     } catch (err) {
-      alert('Upload failed: ' + (err instanceof Error ? err.message : String(err)));
+      setUploadError('Upload failed: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -43,7 +45,7 @@ function UrlWithUpload({ label, value, onChange, placeholder }: {
         <input
           type="url"
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={e => { onChange(e.target.value); setUploadError(null); }}
           className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
           placeholder={placeholder || 'https://...'}
         />
@@ -63,6 +65,7 @@ function UrlWithUpload({ label, value, onChange, placeholder }: {
           />
         </label>
       </div>
+      {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
     </div>
   );
 }
@@ -188,17 +191,23 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           </div>
 
           {/* Learning Objectives */}
-          <section className="space-y-4">
+          <section className="space-y-4 border-t border-slate-100 pt-8">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学目标 Learning Objectives</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <Target size={16} className="text-indigo-500" />
+                教学目标 Learning Objectives
+              </label>
               <button type="button" onClick={addLO} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 <Plus size={14} /> Add
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {learningObjectives.map((lo, i) => (
-                <div key={lo.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex gap-2">
+                <div key={lo.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                  <div className="flex gap-3">
+                    <span className="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">
+                      #{i + 1}
+                    </span>
                     <textarea
                       value={lo.objective}
                       onChange={e => updateLO(i, 'objective', e.target.value)}
@@ -209,18 +218,23 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                       <Trash2 size={18} />
                     </button>
                   </div>
-                  <div className="flex gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs text-slate-500">Status</label>
-                      <select
-                        value={lo.status}
-                        onChange={e => updateLO(i, 'status', e.target.value)}
-                        className="px-2 py-1 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                      >
-                        <option value="not_started">Not Started</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                      </select>
+                  <div className="flex gap-4 items-center pl-10">
+                    <div className="flex items-center gap-1">
+                      {([
+                        { value: 'not_started' as const, Icon: Circle, color: 'text-slate-400', ring: 'ring-slate-300' },
+                        { value: 'in_progress' as const, Icon: Clock, color: 'text-amber-500', ring: 'ring-amber-300' },
+                        { value: 'completed' as const, Icon: CheckCircle2, color: 'text-emerald-500', ring: 'ring-emerald-300' },
+                      ]).map(({ value, Icon, color, ring }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => updateLO(i, 'status', value)}
+                          className={`p-1.5 rounded-full transition-all ${color} ${lo.status === value ? `ring-2 ${ring} bg-white` : 'opacity-40 hover:opacity-70'}`}
+                          title={value.replace('_', ' ')}
+                        >
+                          <Icon size={16} />
+                        </button>
+                      ))}
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="text-xs text-slate-500">Periods</label>
@@ -235,13 +249,25 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                   </div>
                 </div>
               ))}
+              {learningObjectives.length === 0 && (
+                <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  <Target size={24} className="mx-auto text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-400">No learning objectives yet.</p>
+                  <button type="button" onClick={addLO} className="mt-2 text-indigo-600 text-sm font-bold hover:underline">
+                    Add First Objective
+                  </button>
+                </div>
+              )}
             </div>
           </section>
 
           {/* Vocabulary */}
-          <section className="space-y-4">
+          <section className="space-y-4 border-t border-slate-100 pt-8">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">双语核心词汇 Vocabulary</label>
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <BookOpen size={16} className="text-amber-500" />
+                双语核心词汇 Vocabulary
+              </label>
               <button type="button" onClick={addVocab} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 <Plus size={14} /> Add
               </button>
@@ -272,16 +298,21 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           </section>
 
           {/* Classroom Exercises */}
-          <RichTextEditor
-            label="课堂讲练 Classroom Exercises"
-            value={classroomExercises}
-            onChange={setClassroomExercises}
-            placeholder="Enter classroom exercises and worked examples..."
-          />
+          <div className="border-t border-slate-100 pt-8">
+            <RichTextEditor
+              label="课堂讲练 Classroom Exercises"
+              value={classroomExercises}
+              onChange={setClassroomExercises}
+              placeholder="Enter classroom exercises and worked examples..."
+            />
+          </div>
 
           {/* Resource Links */}
-          <section className="space-y-4">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">资源链接 Resource Links</label>
+          <section className="space-y-4 border-t border-slate-100 pt-8">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <Link size={16} className="text-blue-500" />
+              资源链接 Resource Links
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UrlWithUpload label="练习单 Worksheet URL" value={worksheetUrl} onChange={setWorksheetUrl} />
               <UrlWithUpload label="线上练习 Online Practice URL" value={onlinePracticeUrl} onChange={setOnlinePracticeUrl} />
@@ -292,16 +323,21 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           </section>
 
           {/* Homework Content */}
-          <RichTextEditor
-            label="课后作业说明 Homework Content"
-            value={homeworkContent}
-            onChange={setHomeworkContent}
-            placeholder="Describe homework assignments..."
-          />
+          <div className="border-t border-slate-100 pt-8">
+            <RichTextEditor
+              label="课后作业说明 Homework Content"
+              value={homeworkContent}
+              onChange={setHomeworkContent}
+              placeholder="Describe homework assignments..."
+            />
+          </div>
 
           {/* Teaching Reflection */}
-          <section className="space-y-4">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">教学总结及反思 Teaching Reflection</label>
+          <section className="space-y-4 border-t border-slate-100 pt-8">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <MessageSquare size={16} className="text-rose-500" />
+              教学总结及反思 Teaching Reflection
+            </label>
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
               <div className="space-y-1">
                 <label className="text-xs text-slate-500">上课时间 Lesson Date</label>
@@ -343,12 +379,14 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           </section>
 
           {/* AI Summary */}
-          <RichTextEditor
-            label="AI总结 AI Summary"
-            value={aiSummary}
-            onChange={setAiSummary}
-            placeholder="AI-generated summary or notes..."
-          />
+          <div className="border-t border-slate-100 pt-8">
+            <RichTextEditor
+              label="AI总结 AI Summary"
+              value={aiSummary}
+              onChange={setAiSummary}
+              placeholder="AI-generated summary or notes..."
+            />
+          </div>
         </form>
 
         <div className="px-4 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
