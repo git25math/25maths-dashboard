@@ -257,6 +257,27 @@
 - New files: 3 modal components
 - Modified: 5 files (977 insertions, 119 deletions across 2 commits)
 
+### Phase 21 — AI Batch Teaching Data 批量备课数据生成 (2026-03-03)
+- **Offline batch generation**: Node.js scripts extract 5 bilingual .docx teaching plans (Year 7–11) and use Gemini 2.5 Flash to generate structured teaching data
+- Pipeline: `textutil` (macOS) extracts .docx → Gemini parses document structure → Gemini generates supplementary content per sub-unit
+- **Generated content** (55 teaching units, 111 sub-units):
+  - Objectives: extracted verbatim from documents (bilingual English + Chinese)
+  - **1,575 bilingual vocabulary items** (`{english, chinese}` pairs)
+  - **111 classroom exercise sets** (5-8 questions each, with LaTeX math, bilingual instructions)
+  - **111 homework sets** (5-6 questions each, slightly harder than classwork)
+  - Period estimates per sub-unit (1-4 × 45-min classes)
+- **Supabase import**: replaced 55 empty skeleton Year 7–11 units with fully enriched data; Year 12 (17 units) preserved intact; total 72 units
+- Technical challenges solved:
+  - Proxy-aware API calls via `curl` (Node.js `fetch` doesn't respect `HTTP_PROXY`)
+  - LaTeX-in-JSON sanitizer: fixes `\frac`→`\f` (form feed), `\times`→`\t` (tab), `\sqrt`→`\s` (invalid) collisions with JSON escape characters
+  - Incremental save per year-group for crash recovery; retry script for failed sub-units
+- New files:
+  - `scripts/generate-teaching-data.mjs` — main generation script (~59 Gemini API calls)
+  - `scripts/retry-failed.mjs` — retry failed sub-units
+  - `scripts/import-to-supabase.mjs` — direct Supabase batch upsert (DELETE old + INSERT new)
+  - `scripts/output/teaching-units-all.json` — combined output (752KB, import-ready)
+- Modified: 0 source files (scripts only, no app code changes)
+
 ---
 
 ## Current Architecture
@@ -339,13 +360,21 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Confirm & Replace: deletes old items, creates merged new item, Supabase synced
 - [x] 3 new preview modals, 3 new geminiService methods, 3 new useAppData methods
 
-### Phase 21 — Analytics & Reports (Next)
+### ~~Phase 21 — AI Batch Teaching Data 批量备课数据生成~~ ✅ Done
+- [x] Offline Node.js scripts: extract .docx → Gemini parse → Gemini generate content
+- [x] 55 teaching units × 111 sub-units with vocabulary, exercises, homework
+- [x] 1,575 bilingual vocabulary items generated
+- [x] LaTeX-in-JSON sanitizer for backslash collision handling
+- [x] Incremental save + retry for API failure resilience
+- [x] Direct Supabase import: replaced skeleton data with enriched content
+
+### Phase 22 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 22 — Advanced
+### Phase 23 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
