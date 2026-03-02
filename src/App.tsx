@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Menu, X, Settings } from 'lucide-react';
+import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord } from './types';
@@ -17,7 +17,7 @@ import { TimetableEntryForm } from './components/TimetableEntryForm';
 import { WorkLogForm } from './components/WorkLogForm';
 import { SOPForm } from './components/SOPForm';
 import { IdeaForm } from './components/IdeaForm';
-import { LoginGate } from './components/LoginGate';
+import { LoginGate, useAuth } from './components/LoginGate';
 import { DashboardView } from './views/DashboardView';
 import { TimetableView } from './views/TimetableView';
 import { StudentsView } from './views/StudentsView';
@@ -28,8 +28,9 @@ import { IdeasView } from './views/IdeasView';
 import { MeetingsView } from './views/MeetingsView';
 import { LessonRecordsView } from './views/LessonRecordsView';
 
-export default function App() {
+function AppContent() {
   const data = useAppData();
+  const { logout } = useAuth();
 
   // --- UI State ---
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -263,7 +264,6 @@ export default function App() {
   };
 
   return (
-    <LoginGate>
     <div className="min-h-screen flex bg-slate-50">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-8">
@@ -282,6 +282,9 @@ export default function App() {
             <CheckCircle2 size={16} /> Math Teacher
           </div>
         </div>
+        <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2">
+          <LogOut size={16} /> Logout
+        </button>
       </aside>
 
       {/* Mobile Nav Bar */}
@@ -308,6 +311,9 @@ export default function App() {
                   <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
                 ))}
               </nav>
+              <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2 py-3">
+                <LogOut size={16} /> Logout
+              </button>
             </motion.aside>
           </>
         )}
@@ -412,6 +418,13 @@ export default function App() {
         />
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <LoginGate>
+      <AppContent />
     </LoginGate>
   );
 }

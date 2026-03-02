@@ -1,8 +1,24 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, FormEvent } from 'react';
 import { Lock } from 'lucide-react';
 
 const STORAGE_KEY = 'dashboard-auth-token';
 const PASSWORD_HASH = import.meta.env.VITE_ACCESS_PASSWORD_HASH || '';
+const SESSION_DAYS = 7;
+
+interface AuthToken {
+  hash: string;
+  timestamp: number;
+}
+
+interface AuthContextType {
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType>({ logout: () => {} });
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -20,11 +36,26 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
 
   // Check stored auth on mount
   useEffect(() => {
-    const token = localStorage.getItem(STORAGE_KEY);
-    if (token === PASSWORD_HASH && PASSWORD_HASH) {
-      setAuthorized(true);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw && PASSWORD_HASH) {
+      try {
+        const token: AuthToken = JSON.parse(raw);
+        const age = Date.now() - token.timestamp;
+        if (token.hash === PASSWORD_HASH && age < SESSION_DAYS * 86400000) {
+          setAuthorized(true);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY); // migrate old format
+      }
     }
     setChecking(false);
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setAuthorized(false);
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -32,7 +63,8 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
     setError('');
     const hash = await sha256(password);
     if (hash === PASSWORD_HASH) {
-      localStorage.setItem(STORAGE_KEY, hash);
+      const token: AuthToken = { hash, timestamp: Date.now() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(token));
       setAuthorized(true);
     } else {
       setError('Incorrect password');
@@ -41,9 +73,9 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   };
 
   // No hash configured = no protection (dev mode)
-  if (!PASSWORD_HASH) return <>{children}</>;
+  if (!PASSWORD_HASH) return <AuthContext.Provider value={{ logout }}>{children}</AuthContext.Provider>;
   if (checking) return null;
-  if (authorized) return <>{children}</>;
+  if (authorized) return <AuthContext.Provider value={{ logout }}>{children}</AuthContext.Provider>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
