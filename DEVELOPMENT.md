@@ -104,6 +104,20 @@
 - `useAppData` hook: added meetings state, Supabase sync, `addMeeting`/`updateMeeting`/`deleteMeeting`
 - Environment: `VITE_GEMINI_API_KEY` in `.env.local`
 
+### Phase 13 — Idea Pool Enhancement 灵感池增强 (2026-03-02)
+- Idea status expanded from 2-state to 3-state: `note`(只是记录) / `pending`(待处理) / `processed`(已处理)
+- Status badge click cycles through states: note → pending → processed → note
+- Status badge colors: note=slate, pending=amber, processed=emerald, with Chinese labels
+- New `show_on_dashboard` boolean field on ideas (Supabase migration: `20260302100000_idea_dashboard_flag.sql`)
+- IdeasView: 4 filter tabs (All / Note / Pending / Processed), default to Pending
+- IdeasView: cards sorted by `created_at` descending (newest first)
+- IdeasView: Eye/EyeOff icon per card to toggle Dashboard visibility
+- IdeaForm: new toggle switch for "Show on Dashboard"
+- Dashboard: "Recent Work Logs" renamed to "Recent Updates"
+- Dashboard: mixes WorkLogs + dashboard-visible Ideas, sorted by time, top 5 items
+- Dashboard: Ideas shown with purple indicator bar and "Idea" source label (vs green/indigo for WorkLogs)
+- `useAppData`: `toggleIdeaStatus()` now 3-state cycle; new `toggleIdeaDashboard()` function
+
 ---
 
 ## Current Architecture
@@ -129,17 +143,18 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 
 ## Roadmap
 
-### Phase 13 — Password Protection (Next)
+### Phase 14 — Password Protection (Next)
 - [ ] Login gate with password authentication
 - [ ] Protect all routes behind auth check
 
-### Phase 14 — Missing Views
+### Phase 15 — Missing Views
 - [ ] Goals dedicated view (currently only on Dashboard)
 - [ ] School Events dedicated view
 - [ ] Lesson Records view (CRUD for class lesson history)
 - [ ] Settings/Profile page
 
-### Phase 15 — Data & UX Improvements
+### Phase 16 — Data & UX Improvements
+- [x] Idea Pool: 3-state status filter, dashboard visibility toggle, sorted by date (Phase 13)
 - [ ] Search and filter across all entities
 - [ ] Bulk import/export (CSV/JSON)
 - [ ] Drag-and-drop timetable editing
@@ -147,13 +162,13 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Dark mode toggle
 - [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11). External link pasting also supported.
 
-### Phase 16 — Analytics & Reports
+### Phase 17 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 17 — AI Features
+### Phase 18 — AI Features
 - [x] Meeting audio transcription via Gemini 2.0 Flash (Phase 12)
 - [x] AI meeting summary generation — key points, action items, decisions (Phase 12)
 - [ ] Gemini-powered lesson plan generation
@@ -161,7 +176,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Student weakness analysis suggestions
 - [ ] Smart timetable conflict detection
 
-### Phase 18 — Advanced
+### Phase 19 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
