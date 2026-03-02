@@ -143,6 +143,30 @@
 - App restructured: split into `App` (LoginGate wrapper) + `AppContent` (inner component consuming auth context)
 - **deploy.yml fix**: added missing `VITE_GEMINI_API_KEY` secret to build env (production meeting transcription now works)
 
+### Phase 16 — Missing Views + Settings 全功能设置 (2026-03-02)
+- New `GoalsView.tsx`: dedicated goals management with full CRUD
+  - Category filter (All / Dream / Work / Startup), Status filter (All / In Progress / Completed / On Hold)
+  - Responsive card grid (3-col lg, 2-col md, 1-col sm), each card with category badge, clickable status badge (cycles through states), progress bar with percentage, optional deadline, optional header background image
+  - Hover: Edit + Delete buttons; empty state placeholder
+- New `GoalForm.tsx`: modal form following IdeaForm pattern
+  - Fields: title, category (button group), status (button group), progress (range slider 0-100 with live label), deadline (date), image_url (text)
+  - Create / Edit mode based on `goal` prop
+- New `SchoolEventsView.tsx`: dedicated school events management with full CRUD
+  - Category filter (All / School-wide / Personal / House / Event), sorted by date descending
+  - Single-column card list with category badge, date, MarkdownRenderer description (line-clamp-2)
+  - `is_action_required` → red AlertTriangle icon + "Action Required" label
+  - Hover: Edit + Delete buttons; empty state placeholder
+- New `SchoolEventForm.tsx`: modal form following IdeaForm pattern
+  - Fields: title, date, category (button group), description (RichTextEditor), is_action_required (toggle switch)
+- New `SettingsView.tsx`: self-contained settings page using `useAuth()` for logout
+  - **Profile**: role display ("Math Teacher"), app version "v1.0", logout button
+  - **Change Password**: current/new/confirm fields → SHA-256 hash validation against stored hash, updates localStorage token
+  - **Data Management**: "Clear Local Cache" (removes all `dashboard-*` keys, reloads), "Export Data" (downloads all entities as JSON)
+  - **About**: app description, tech stack summary, GitHub repo link
+- `sidebarConfig.ts`: added Goals (Target icon), School Events (CalendarDays icon), Settings (Settings icon)
+- `App.tsx`: imported 5 new components, added `isGoalFormOpen/editingGoal` and `isEventFormOpen/editingEvent` state, 3 new switch cases (`goals`, `events`, `settings`), GoalForm + SchoolEventForm modal renders
+- `DashboardView.tsx`: Goals section "View All" → navigates to `'goals'`; School Events "View All" → navigates to `'events'` (was incorrectly pointing to `'timetable'`)
+
 ---
 
 ## Current Architecture
@@ -150,7 +174,7 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Meetings, SOP
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, Settings
   │     ├── useAppData hook (central state management)
   │     ├── useLocalStorage (cache layer)
   │     ├── 11 Service files (Supabase API layer)
@@ -181,12 +205,15 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Logout button in desktop & mobile sidebars
 - [x] deploy.yml: added VITE_GEMINI_API_KEY for production meeting transcription
 
-### Phase 16 — Missing Views (Next)
-- [ ] Goals dedicated view (currently only on Dashboard)
-- [ ] School Events dedicated view
-- [ ] Settings/Profile page
+### ~~Phase 16 — Missing Views + Settings 全功能设置~~ ✅ Done
+- [x] Goals dedicated view with category/status filters, card grid, full CRUD, clickable status cycle
+- [x] School Events dedicated view with category filter, action required flag, full CRUD
+- [x] Settings page: profile, password change (SHA-256), data export (JSON), cache clear, about info
+- [x] GoalForm + SchoolEventForm modals following IdeaForm pattern
+- [x] Sidebar entries: Goals (Target), School Events (CalendarDays), Settings
+- [x] Dashboard "View All" links navigate to Goals and School Events views
 
-### Phase 16 — Data & UX Improvements
+### Phase 17 — Data & UX Improvements (Next)
 - [x] Idea Pool: 3-state status filter, dashboard visibility toggle, sorted by date (Phase 13)
 - [ ] Search and filter across all entities
 - [ ] Bulk import/export (CSV/JSON)
@@ -195,13 +222,13 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Dark mode toggle
 - [x] File storage: Supabase Storage upload for PDFs/docs in sub-unit resource fields (Phase 11). External link pasting also supported.
 
-### Phase 17 — Analytics & Reports
+### Phase 18 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 18 — AI Features
+### Phase 19 — AI Features
 - [x] Meeting audio transcription via Gemini 2.0 Flash (Phase 12)
 - [x] AI meeting summary generation — key points, action items, decisions (Phase 12)
 - [ ] Gemini-powered lesson plan generation
@@ -209,7 +236,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Student weakness analysis suggestions
 - [ ] Smart timetable conflict detection
 
-### Phase 19 — Advanced
+### Phase 20 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
