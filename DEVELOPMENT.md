@@ -233,6 +233,30 @@
 - New file: `src/lib/timetableUtils.ts`
 - Modified: 7 files (429 insertions, 83 deletions)
 
+### Phase 20 — AI Idea Consolidation 智能整合 (2026-03-02)
+- **AI Consolidation feature**: select multiple items, AI merges into one structured note, preview & edit, confirm replaces old with new
+- Supported across 3 modules: **Ideas**, **Work Logs**, **SOP Library**
+- `geminiService.ts`: 3 new Gemini 2.5 Flash methods
+  - `consolidateIdeas()`: merges ideas → `{title, content, category, priority}` JSON
+  - `consolidateWorkLogs()`: merges logs → `{content, category, tags}` JSON
+  - `consolidateSOPs()`: merges SOPs → `{title, content, category}` JSON
+- `useAppData.ts`: 3 new state management methods
+  - `consolidateIdeas()`, `consolidateWorkLogs()`, `consolidateSOPs()`
+  - Each: `Promise.all` delete selected → create merged new item → toast notification
+- 3 new preview modal components (purple theme + Sparkles icon):
+  - `ConsolidatePreviewModal.tsx` — Ideas: editable title, content (RichTextEditor), category, priority
+  - `ConsolidateWorkLogPreviewModal.tsx` — WorkLogs: editable content, category, tags
+  - `ConsolidateSOPPreviewModal.tsx` — SOPs: editable title, content, category (select dropdown)
+- 3 views updated with selection mode:
+  - `IdeasView.tsx`: Select/Exit Select toggle, card checkboxes with purple highlight ring, floating bottom bar
+  - `WorkLogView.tsx`: table row checkboxes, conditional column display (hide actions in select mode)
+  - `SOPView.tsx`: card checkboxes with purple highlight ring, hide expand/edit/delete in select mode
+- Each view: floating bottom bar with selected count + "AI Consolidate" button (enabled at ≥2) + Cancel
+- User flow: Select → check items → AI Consolidate → loading → preview modal → edit → Confirm & Replace
+- `App.tsx`: wired `onConsolidate` prop for all 3 views
+- New files: 3 modal components
+- Modified: 5 files (977 insertions, 119 deletions across 2 commits)
+
 ---
 
 ## Current Architecture
@@ -247,7 +271,7 @@ Browser
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
   │     ├── 11 Service files (Supabase API layer)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
-  │     ├── geminiService (Gemini 2.0 Flash: transcription, meeting summary, lesson plans, categorization, practice recs)
+  │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
   │
   └── Data Flow:
@@ -307,13 +331,21 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Student weakness practice recommendations with inline Markdown rendering
 - [x] Smart timetable conflict detection with amber warnings + pulsing red dots
 
-### Phase 20 — Analytics & Reports (Next)
+### ~~Phase 20 — AI Idea Consolidation 智能整合~~ ✅ Done
+- [x] Select mode in Ideas, Work Logs, SOP Library (checkbox + purple highlight)
+- [x] Floating bottom bar with selected count + AI Consolidate button (≥2 to activate)
+- [x] Gemini 2.5 Flash consolidation: merges multiple items into one structured note
+- [x] Preview modal (purple theme): editable AI result before confirming
+- [x] Confirm & Replace: deletes old items, creates merged new item, Supabase synced
+- [x] 3 new preview modals, 3 new geminiService methods, 3 new useAppData methods
+
+### Phase 21 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 21 — Advanced
+### Phase 22 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
