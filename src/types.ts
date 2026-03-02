@@ -86,7 +86,8 @@ export interface Idea {
   content: string;
   category: 'work' | 'student' | 'startup';
   priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'processed';
+  status: 'note' | 'pending' | 'processed';
+  show_on_dashboard?: boolean;
   created_at: string;
 }
 

@@ -237,7 +237,7 @@ export function useAppData() {
 
   // --- Ideas ---
 
-  const addIdea = useCallback(async (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => {
+  const addIdea = useCallback(async (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority']; show_on_dashboard?: boolean }) => {
     try {
       const created = await ideaService.create({
         status: 'pending',
@@ -277,13 +277,27 @@ export function useAppData() {
   const toggleIdeaStatus = useCallback(async (id: string) => {
     const idea = ideas.find(i => i.id === id);
     if (!idea) return;
-    const newStatus = idea.status === 'pending' ? 'processed' : 'pending';
+    const cycle: Record<string, Idea['status']> = { note: 'pending', pending: 'processed', processed: 'note' };
+    const newStatus = cycle[idea.status] || 'pending';
     try {
       await ideaService.update(id, { ...idea, status: newStatus });
       setIdeas(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
       toast.success('Idea status updated');
     } catch (error) {
       toast.error('Failed to update idea status');
+    }
+  }, [ideas, setIdeas, toast]);
+
+  const toggleIdeaDashboard = useCallback(async (id: string) => {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    const newVal = !idea.show_on_dashboard;
+    try {
+      await ideaService.update(id, { ...idea, show_on_dashboard: newVal });
+      setIdeas(prev => prev.map(i => i.id === id ? { ...i, show_on_dashboard: newVal } : i));
+      toast.success(newVal ? 'Shown on Dashboard' : 'Hidden from Dashboard');
+    } catch (error) {
+      toast.error('Failed to update dashboard visibility');
     }
   }, [ideas, setIdeas, toast]);
 
@@ -496,7 +510,7 @@ export function useAppData() {
     updateTimetableEntry, addTimetableEntry,
 
     // Ideas / SOPs / WorkLogs
-    addIdea, updateIdea, deleteIdea, toggleIdeaStatus,
+    addIdea, updateIdea, deleteIdea, toggleIdeaStatus, toggleIdeaDashboard,
     addSOP, updateSOP, deleteSOP,
     addWorkLog, updateWorkLog, deleteWorkLog,
 

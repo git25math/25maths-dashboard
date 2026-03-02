@@ -1,9 +1,13 @@
-import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle } from 'lucide-react';
+import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
-import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
+
+type UpdateItem =
+  | { type: 'worklog'; id: string; time: string; content: string; category: string }
+  | { type: 'idea'; id: string; time: string; content: string; title: string };
 
 interface DashboardViewProps {
   currentEvent: TimetableEntry | undefined;
@@ -14,6 +18,7 @@ interface DashboardViewProps {
   goals: Goal[];
   schoolEvents: SchoolEvent[];
   workLogs: WorkLog[];
+  ideas: Idea[];
   onNavigate: (tab: string) => void;
 }
 
@@ -26,6 +31,7 @@ export const DashboardView = ({
   goals,
   schoolEvents,
   workLogs,
+  ideas,
   onNavigate,
 }: DashboardViewProps) => {
   return (
@@ -208,25 +214,48 @@ export const DashboardView = ({
           </div>
         </div>
 
-        {/* Recent Work Logs */}
+        {/* Recent Updates */}
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-bold text-slate-900">Recent Work Logs</h4>
+            <h4 className="font-bold text-slate-900">Recent Updates</h4>
             <button onClick={() => onNavigate('worklogs')} className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
           </div>
           <div className="space-y-3">
-            {workLogs.slice(0, 3).map(log => (
-              <div key={log.id} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <div className={cn(
-                  "w-1 h-auto rounded-full",
-                  log.category === 'tutor' ? "bg-indigo-500" : "bg-emerald-500"
-                )} />
-                <div>
-                  <MarkdownRenderer content={log.content} className="text-xs font-bold text-slate-900" />
-                  <p className="text-[10px] text-slate-400 mt-0.5">{log.timestamp}</p>
+            {(() => {
+              const items: UpdateItem[] = [
+                ...workLogs.map(log => ({ type: 'worklog' as const, id: log.id, time: log.timestamp, content: log.content, category: log.category })),
+                ...ideas.filter(i => i.show_on_dashboard).map(idea => ({ type: 'idea' as const, id: idea.id, time: idea.created_at, content: idea.content, title: idea.title })),
+              ];
+              items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+              return items.slice(0, 5).map(item => (
+                <div key={`${item.type}-${item.id}`} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className={cn(
+                    "w-1 h-auto rounded-full flex-shrink-0",
+                    item.type === 'idea' ? "bg-purple-500" :
+                    (item as Extract<UpdateItem, { type: 'worklog' }>).category === 'tutor' ? "bg-indigo-500" : "bg-emerald-500"
+                  )} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      {item.type === 'idea' && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 flex items-center gap-0.5">
+                          <Lightbulb size={9} /> Idea
+                        </span>
+                      )}
+                      {item.type === 'worklog' && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">
+                          Work Log
+                        </span>
+                      )}
+                    </div>
+                    {item.type === 'idea' && (
+                      <p className="text-xs font-bold text-slate-900 mt-0.5">{(item as Extract<UpdateItem, { type: 'idea' }>).title}</p>
+                    )}
+                    <MarkdownRenderer content={item.content} className="text-xs text-slate-700 mt-0.5 line-clamp-2" />
+                    <p className="text-[10px] text-slate-400 mt-0.5">{item.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         </div>
       </div>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Idea } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 
 interface IdeaFormProps {
   idea?: Idea | null;
-  onSave: (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => void;
+  onSave: (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority']; show_on_dashboard?: boolean }) => void;
   onCancel: () => void;
 }
 
@@ -15,11 +15,12 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
   const [content, setContent] = useState(idea?.content || '');
   const [category, setCategory] = useState<Idea['category']>(idea?.category || 'startup');
   const [priority, setPriority] = useState<Idea['priority']>(idea?.priority || 'medium');
+  const [showOnDashboard, setShowOnDashboard] = useState(idea?.show_on_dashboard ?? false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
-    onSave({ title, content, category, priority });
+    onSave({ title, content, category, priority, show_on_dashboard: showOnDashboard });
   };
 
   return (
@@ -89,6 +90,26 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+              {showOnDashboard ? <Eye size={16} className="text-indigo-500" /> : <EyeOff size={16} className="text-slate-400" />}
+              Show on Dashboard
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowOnDashboard(!showOnDashboard)}
+              className={cn(
+                "relative w-10 h-6 rounded-full transition-colors",
+                showOnDashboard ? "bg-indigo-600" : "bg-slate-300"
+              )}
+            >
+              <span className={cn(
+                "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform",
+                showOnDashboard ? "translate-x-[18px]" : "translate-x-0.5"
+              )} />
+            </button>
           </div>
 
           <RichTextEditor

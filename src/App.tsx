@@ -133,6 +133,7 @@ export default function App() {
             goals={data.goals}
             schoolEvents={data.schoolEvents}
             workLogs={data.workLogs}
+            ideas={data.ideas}
             onNavigate={(tab) => {
               setActiveTab(tab);
               if (tab === 'worklogs') {
@@ -227,6 +228,7 @@ export default function App() {
             onDeleteIdea={data.deleteIdea}
             onEditIdea={(idea) => { setEditingIdea(idea); setIsIdeaFormOpen(true); }}
             onToggleStatus={data.toggleIdeaStatus}
+            onToggleDashboard={data.toggleIdeaDashboard}
           />
         );
       case 'meetings':
