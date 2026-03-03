@@ -158,10 +158,6 @@ function AppContent() {
             ideas={data.ideas}
             onNavigate={(tab) => {
               setActiveTab(tab);
-              if (tab === 'worklogs') {
-                setEditingWorkLog(null);
-                setIsWorkLogFormOpen(true);
-              }
             }}
           />
         );

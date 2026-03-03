@@ -388,8 +388,18 @@
   - **Token guard**: unconfigured token shows setup instructions (no crash)
 - **Sidebar**: Terminal icon, positioned between SOP Library and Settings
 - **Environment**: `VITE_GITHUB_TOKEN` added to vite-env.d.ts, .env.example, deploy.yml
+- **API Key 轮换**: 3 个 Anthropic API key 自动 fallback（一个限速自动切换下一个）
+  - Workflow input `api_key_slot`: auto / 1 / 2 / 3
+  - Auto 模式: `run_number % 3` 选起始 key，失败自动轮换
+  - DevConsoleView: Key 选择器 (Auto / #1 / #2 / #3)
 - New files (3): self-evolve.yml, githubService.ts, DevConsoleView.tsx
 - Modified files (6): sidebarConfig.ts, App.tsx, vite-env.d.ts, .env.example, deploy.yml, DEVELOPMENT.md
+
+### Hotfix — Dashboard "View History" 导航修复 (2026-03-03)
+- **DashboardView → Work Logs**: 点击 "View History" 按钮不再自动弹出 New Work Log 表单
+  - 之前 `onNavigate('worklogs')` 在 App.tsx 中会同时执行 `setIsWorkLogFormOpen(true)`，导致跳转后立即弹出新建窗口
+  - 修复: 移除 `onNavigate` 中的表单自动打开逻辑，仅执行 `setActiveTab(tab)`
+- Modified files (1): App.tsx
 
 ---
 
@@ -514,8 +524,16 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Dev Console view (instruction input, provider selection, run history with auto-polling)
 - [x] Token guard: unconfigured state shows setup instructions
 - [x] Sidebar entry (Terminal icon), App.tsx routing, env var plumbing
+- [x] API key 3-slot 自动轮换（限速自动 fallback 到下一个 key）
+- [x] Dashboard "View History" 导航修复（不再弹出新建表单）
 
-### Phase 26 — Analytics & Reports (Next)
+### Phase 26 — Self-Evolve Enhancement 自进化增强 (Next)
+- [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
+- [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）
+- [ ] 指令模板/历史记录（常用指令一键复用）
+- [ ] 自动 PR 模式（AI 改动走 PR review 而非直接 push main）
+
+### Phase 27 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -523,7 +541,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 27 — Advanced
+### Phase 28 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
