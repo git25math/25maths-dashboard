@@ -1,0 +1,133 @@
+name: Self-Evolve
+
+on:
+  workflow_dispatch:
+    inputs:
+      instruction:
+        description: 'Development instruction for AI'
+        required: true
+        type: string
+      provider:
+        description: 'AI provider'
+        required: true
+        type: choice
+        options:
+          - claude
+          - gemini
+      api_key_slot:
+        description: 'API key slot (auto = round-robin)'
+        required: true
+        type: choice
+        options:
+          - auto
+          - '1'
+          - '2'
+          - '3'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: self-evolve
+  cancel-in-progress: false
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Claude Code CLI
+        if: inputs.provider == 'claude'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install Gemini CLI
+        if: inputs.provider == 'gemini'
+        run: npm install -g @anthropic-ai/claude-code  # placeholder — replace with gemini CLI when available
+
+      - name: Run AI with auto key rotation
+        env:
+          KEY1: ${{ secrets.ANTHROPIC_API_KEY_1 }}
+          KEY2: ${{ secrets.ANTHROPIC_API_KEY_2 }}
+          KEY3: ${{ secrets.ANTHROPIC_API_KEY_3 }}
+        run: |
+          SUFFIX="
+
+          After completing the task:
+          1. Update DEVELOPMENT.md development log with what you changed.
+          2. Update the Roadmap section in DEVELOPMENT.md if relevant.
+          3. Run 'npm run build' to verify the build passes.
+          4. Do NOT commit or push — the workflow handles that."
+
+          # Build ordered key list: start from preferred slot, then cycle
+          SLOT="${{ inputs.api_key_slot }}"
+          if [ "$SLOT" = "auto" ]; then
+            SLOT=$(( (${{ github.run_number }} % 3) + 1 ))
+          fi
+
+          KEYS=()
+          for i in 1 2 3; do
+            IDX=$(( ((SLOT - 1 + i - 1) % 3) + 1 ))
+            eval "KEYS+=(\"slot$IDX:\$KEY$IDX\")"
+          done
+
+          SUCCESS=false
+          for ENTRY in "${KEYS[@]}"; do
+            SLOT_LABEL="${ENTRY%%:*}"
+            API_KEY="${ENTRY#*:}"
+
+            if [ -z "$API_KEY" ]; then
+              echo "⚠️  $SLOT_LABEL is empty, skipping"
+              continue
+            fi
+
+            echo "🔑 Trying $SLOT_LABEL..."
+            export ANTHROPIC_API_KEY="$API_KEY"
+
+            if [ "${{ inputs.provider }}" = "claude" ]; then
+              if claude -p "${{ inputs.instruction }}${SUFFIX}"; then
+                echo "✅ $SLOT_LABEL succeeded"
+                SUCCESS=true
+                break
+              else
+                EXIT_CODE=$?
+                echo "❌ $SLOT_LABEL failed (exit $EXIT_CODE), rotating to next key..."
+              fi
+            else
+              echo "Gemini CLI not yet configured"
+              exit 1
+            fi
+          done
+
+          if [ "$SUCCESS" = false ]; then
+            echo "❌ All 3 API keys exhausted"
+            exit 1
+          fi
+
+      - name: Build verification
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ACCESS_PASSWORD_HASH: ${{ secrets.VITE_ACCESS_PASSWORD_HASH }}
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
+        run: npm run build
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "self-evolve[bot]"
+          git config user.email "self-evolve[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "self-evolve: ${{ inputs.instruction }}"
+            git push
+          else
+            echo "No changes to commit"
+          fi

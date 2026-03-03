@@ -369,6 +369,28 @@
   - 之前仅依赖 `addWorkLog` 的 `[created, ...prev]` 插入顺序，Supabase 加载后顺序不保证
 - Modified files (1): WorkLogView.tsx
 
+### Phase 25 — Self-Evolve Dev Console 自进化开发控制台 (2026-03-03)
+- **Self-Evolve workflow**: `.github/workflows/self-evolve.yml` — `workflow_dispatch` with `instruction` + `provider` (claude/gemini) inputs
+  - Checkout → npm ci → install AI CLI → run instruction with mandatory suffix (update DEVELOPMENT.md, build verification, no self-commit)
+  - Independent `npm run build` verification step with all VITE_* secrets
+  - Auto-commit by `self-evolve[bot]` + push to main → triggers existing deploy.yml
+  - Concurrency group `self-evolve` prevents parallel runs
+- **GitHub Service**: `src/services/githubService.ts` — REST API wrapper
+  - `triggerWorkflow(instruction, provider)`: POST workflow_dispatch
+  - `listRuns(perPage)`: GET workflow runs for self-evolve.yml
+  - `getRun(runId)`: GET single run details
+  - `isConfigured()`: checks `VITE_GITHUB_TOKEN` availability
+  - Auth via Fine-grained PAT (Actions R/W + Contents R/W)
+- **DevConsoleView**: `src/views/DevConsoleView.tsx` — self-contained view (no props, like SettingsView)
+  - **Instruction input**: textarea + provider toggle (Claude/Gemini) + Execute button
+  - **Run history**: status icons (Clock/Loader2-spin/CheckCircle2/XCircle), color-coded status badges, relative timestamps, duration, GitHub external link
+  - **Auto-polling**: `useRef` + `setInterval` 5s when active runs exist, auto-stops on completion
+  - **Token guard**: unconfigured token shows setup instructions (no crash)
+- **Sidebar**: Terminal icon, positioned between SOP Library and Settings
+- **Environment**: `VITE_GITHUB_TOKEN` added to vite-env.d.ts, .env.example, deploy.yml
+- New files (3): self-evolve.yml, githubService.ts, DevConsoleView.tsx
+- Modified files (6): sidebarConfig.ts, App.tsx, vite-env.d.ts, .env.example, deploy.yml, DEVELOPMENT.md
+
 ---
 
 ## Current Architecture
@@ -376,12 +398,12 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, Settings
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, DevConsole, Settings
   │     ├── useAppData hook (central state management + bulkImport)
   │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
-  │     ├── 11 Service files (Supabase API layer, with timetable_entry_id linkage)
+  │     ├── 12 Service files (Supabase API layer + GitHub Actions API)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
   │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
@@ -486,7 +508,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 上课记录 notes / next_lesson_plan 支持 Markdown + LaTeX 富文本（RichTextEditor + MarkdownRenderer）
 - [x] HousePoint 积分分配：LessonRecord 中记录学生积分 awards，自动同步到学生 house_points 总数，支持新建/编辑/删除时的 delta 计算
 
-### Phase 25 — Analytics & Reports (Next)
+### ~~Phase 25 — Self-Evolve Dev Console 自进化开发控制台~~ ✅ Done
+- [x] Self-Evolve GitHub Actions workflow (workflow_dispatch, Claude/Gemini provider, build verification, auto-commit)
+- [x] GitHub REST API service (trigger workflow, list/get runs, token check)
+- [x] Dev Console view (instruction input, provider selection, run history with auto-polling)
+- [x] Token guard: unconfigured state shows setup instructions
+- [x] Sidebar entry (Terminal icon), App.tsx routing, env var plumbing
+
+### Phase 26 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -494,7 +523,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 26 — Advanced
+### Phase 27 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

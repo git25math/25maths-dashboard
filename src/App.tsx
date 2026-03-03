@@ -33,6 +33,7 @@ import { LessonRecordsView } from './views/LessonRecordsView';
 import { GoalsView } from './views/GoalsView';
 import { SchoolEventsView } from './views/SchoolEventsView';
 import { SettingsView } from './views/SettingsView';
+import { DevConsoleView } from './views/DevConsoleView';
 
 function AppContent() {
   const data = useAppData();
@@ -305,6 +306,8 @@ function AppContent() {
             onEditEvent={(event) => { setEditingEvent(event); setIsEventFormOpen(true); }}
           />
         );
+      case 'dev-console':
+        return <DevConsoleView />;
       case 'settings':
         return (
           <SettingsView

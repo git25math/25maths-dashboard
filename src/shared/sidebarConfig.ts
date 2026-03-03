@@ -10,6 +10,7 @@ import {
   Settings,
   Target,
   CalendarDays,
+  Terminal,
 } from 'lucide-react';
 
 export const SIDEBAR_ITEMS = [
@@ -24,5 +25,6 @@ export const SIDEBAR_ITEMS = [
   { key: 'events', icon: CalendarDays, label: 'School Events' },
   { key: 'meetings', icon: Mic, label: 'Meetings' },
   { key: 'sop', icon: Settings, label: 'SOP Library' },
+  { key: 'dev-console', icon: Terminal, label: 'Dev Console' },
   { key: 'settings', icon: Settings, label: 'Settings' },
 ] as const;
