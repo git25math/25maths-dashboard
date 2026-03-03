@@ -207,6 +207,21 @@ function AppContent() {
             onDeleteClass={data.deleteClass}
             onAddStatusRecord={openStatusRecordForm}
             onAddRequest={openRequestForm}
+            onEditRequest={(studentId, requestId, currentContent) => {
+              setGenericFormConfig({
+                isOpen: true,
+                title: 'Edit Request',
+                label: 'Request Details',
+                initialValue: currentContent,
+                placeholder: 'What is the student requesting? (supports Markdown and LaTeX)...',
+                onSave: async (content) => {
+                  await data.updateStudentRequest(studentId, requestId, content);
+                  setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onDeleteRequest={data.deleteStudentRequest}
+            onToggleRequestStatus={data.toggleRequestStatus}
             onAddExamRecord={data.addExamRecord}
             onBatchAwardHP={(awards) => data.batchAwardHP(awards)}
             hpAwardLogs={data.hpAwardLogs}

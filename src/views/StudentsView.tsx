@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3 } from 'lucide-react';
+import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile, ExamRecord, HPAwardLog } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
@@ -21,6 +21,9 @@ interface StudentsViewProps {
   onDeleteClass: (id: string) => void;
   onAddStatusRecord: (studentId: string) => void;
   onAddRequest: (studentId: string) => void;
+  onEditRequest?: (studentId: string, requestId: string, currentContent: string) => void;
+  onDeleteRequest?: (studentId: string, requestId: string) => void;
+  onToggleRequestStatus?: (studentId: string, requestId: string) => void;
   onAddExamRecord: (studentId: string, record: Omit<ExamRecord, 'id'>) => void;
   onBatchAwardHP: (awards: { student_id: string; points: number; reason: string }[]) => void;
   hpAwardLogs?: HPAwardLog[];
@@ -42,6 +45,9 @@ export const StudentsView = ({
   onDeleteClass,
   onAddStatusRecord,
   onAddRequest,
+  onEditRequest,
+  onDeleteRequest,
+  onToggleRequestStatus,
   onAddExamRecord,
   onBatchAwardHP,
   hpAwardLogs,
@@ -432,19 +438,61 @@ export const StudentsView = ({
               <h3 className="font-bold text-lg">平时诉求 (Requests)</h3>
               <div className="space-y-3">
                 {selectedStudent.requests?.map(req => (
-                  <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                  <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
                     <MarkdownRenderer content={req.content} className="text-xs text-slate-700" />
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-slate-400">{req.date}</span>
-                      <span className={cn(
-                        "text-[10px] font-bold uppercase",
-                        req.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
-                      )}>
-                        {req.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {onToggleRequestStatus && (
+                          <button
+                            onClick={() => onToggleRequestStatus(selectedStudent.id, req.id)}
+                            className={cn(
+                              "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
+                              req.status === 'resolved'
+                                ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                : "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                            )}
+                            title={req.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
+                          >
+                            {req.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
+                            {req.status}
+                          </button>
+                        )}
+                        {!onToggleRequestStatus && (
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase",
+                            req.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
+                          )}>
+                            {req.status}
+                          </span>
+                        )}
+                        {onEditRequest && (
+                          <button
+                            onClick={() => onEditRequest(selectedStudent.id, req.id, req.content)}
+                            className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Edit"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        )}
+                        {onDeleteRequest && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Delete this request?')) onDeleteRequest(selectedStudent.id, req.id);
+                            }}
+                            className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
+                {(!selectedStudent.requests || selectedStudent.requests.length === 0) && (
+                  <p className="text-sm text-slate-400 italic">No requests yet.</p>
+                )}
                 <button
                   onClick={() => onAddRequest(selectedStudent.id)}
                   className="w-full btn-secondary text-xs py-2"

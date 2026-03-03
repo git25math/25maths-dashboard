@@ -245,6 +245,38 @@ export function useAppData() {
     }
   }, [students, saveStudent]);
 
+  const updateStudentRequest = useCallback(async (studentId: string, requestId: string, content: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        requests: (student.requests || []).map(r => r.id === requestId ? { ...r, content } : r),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const deleteStudentRequest = useCallback(async (studentId: string, requestId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        requests: (student.requests || []).filter(r => r.id !== requestId),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const toggleRequestStatus = useCallback(async (studentId: string, requestId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        requests: (student.requests || []).map(r =>
+          r.id === requestId ? { ...r, status: r.status === 'pending' ? 'resolved' as const : 'pending' as const } : r
+        ),
+      });
+    }
+  }, [students, saveStudent]);
+
   const addExamRecord = useCallback(async (studentId: string, record: Omit<ExamRecord, 'id'>) => {
     const newRecord: ExamRecord = {
       id: Math.random().toString(36).substr(2, 9),
@@ -1053,7 +1085,7 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, addExamRecord, batchAwardHP,
+    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus, addExamRecord, batchAwardHP,
 
     // Teaching
     saveTeachingUnit, deleteTeachingUnit,
