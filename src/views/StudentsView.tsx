@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil } from 'lucide-react';
+import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Student, ClassProfile, ExamRecord, HPAwardLog } from '../types';
+import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { geminiService } from '../services/geminiService';
@@ -24,6 +24,10 @@ interface StudentsViewProps {
   onEditRequest?: (studentId: string, requestId: string, currentContent: string) => void;
   onDeleteRequest?: (studentId: string, requestId: string) => void;
   onToggleRequestStatus?: (studentId: string, requestId: string) => void;
+  onAddParentComm: (studentId: string) => void;
+  onEditParentComm?: (studentId: string, commId: string, currentContent: string) => void;
+  onDeleteParentComm?: (studentId: string, commId: string) => void;
+  onToggleParentCommStatus?: (studentId: string, commId: string) => void;
   onAddExamRecord: (studentId: string, record: Omit<ExamRecord, 'id'>) => void;
   onBatchAwardHP: (awards: { student_id: string; points: number; reason: string }[]) => void;
   hpAwardLogs?: HPAwardLog[];
@@ -48,6 +52,10 @@ export const StudentsView = ({
   onEditRequest,
   onDeleteRequest,
   onToggleRequestStatus,
+  onAddParentComm,
+  onEditParentComm,
+  onDeleteParentComm,
+  onToggleParentCommStatus,
   onAddExamRecord,
   onBatchAwardHP,
   hpAwardLogs,
@@ -498,6 +506,76 @@ export const StudentsView = ({
                   className="w-full btn-secondary text-xs py-2"
                 >
                   + New Request
+                </button>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <MessageSquare size={18} className="text-blue-500" /> 家校沟通 (Parent Comm.)
+              </h3>
+              <div className="space-y-3">
+                {selectedStudent.parent_communications?.map(comm => (
+                  <div key={comm.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
+                    <MarkdownRenderer content={comm.content} className="text-xs text-slate-700" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-slate-400">{comm.date}</span>
+                      <div className="flex items-center gap-2">
+                        {onToggleParentCommStatus && (
+                          <button
+                            onClick={() => onToggleParentCommStatus(selectedStudent.id, comm.id)}
+                            className={cn(
+                              "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
+                              comm.status === 'resolved'
+                                ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                : "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                            )}
+                            title={comm.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
+                          >
+                            {comm.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
+                            {comm.status}
+                          </button>
+                        )}
+                        {!onToggleParentCommStatus && (
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase",
+                            comm.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
+                          )}>
+                            {comm.status}
+                          </span>
+                        )}
+                        {onEditParentComm && (
+                          <button
+                            onClick={() => onEditParentComm(selectedStudent.id, comm.id, comm.content)}
+                            className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Edit"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        )}
+                        {onDeleteParentComm && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Delete this communication record?')) onDeleteParentComm(selectedStudent.id, comm.id);
+                            }}
+                            className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {(!selectedStudent.parent_communications || selectedStudent.parent_communications.length === 0) && (
+                  <p className="text-sm text-slate-400 italic">No communication records yet.</p>
+                )}
+                <button
+                  onClick={() => onAddParentComm(selectedStudent.id)}
+                  className="w-full btn-secondary text-xs py-2"
+                >
+                  + New Communication
                 </button>
               </div>
             </div>

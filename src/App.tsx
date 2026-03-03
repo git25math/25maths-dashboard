@@ -127,6 +127,19 @@ function AppContent() {
     });
   };
 
+  const openParentCommForm = (studentId: string) => {
+    setGenericFormConfig({
+      isOpen: true,
+      title: 'New Parent Communication',
+      label: 'Communication Details',
+      placeholder: 'Record parent request or communication details (supports Markdown and LaTeX)...',
+      onSave: async (content) => {
+        await data.addParentCommunication(studentId, content);
+        setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
   const openRequestForm = (studentId: string) => {
     setGenericFormConfig({
       isOpen: true,
@@ -222,6 +235,22 @@ function AppContent() {
             }}
             onDeleteRequest={data.deleteStudentRequest}
             onToggleRequestStatus={data.toggleRequestStatus}
+            onAddParentComm={openParentCommForm}
+            onEditParentComm={(studentId, commId, currentContent) => {
+              setGenericFormConfig({
+                isOpen: true,
+                title: 'Edit Communication',
+                label: 'Communication Details',
+                initialValue: currentContent,
+                placeholder: 'Record parent request or communication details (supports Markdown and LaTeX)...',
+                onSave: async (content) => {
+                  await data.updateParentCommunication(studentId, commId, content);
+                  setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onDeleteParentComm={data.deleteParentCommunication}
+            onToggleParentCommStatus={data.toggleParentCommunicationStatus}
             onAddExamRecord={data.addExamRecord}
             onBatchAwardHP={(awards) => data.batchAwardHP(awards)}
             hpAwardLogs={data.hpAwardLogs}

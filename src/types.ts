@@ -44,6 +44,7 @@ export interface Student {
   attendance_status?: 'present' | 'absent' | 'late';
   status_records?: StudentStatusRecord[];
   requests?: StudentRequest[];
+  parent_communications?: ParentCommunication[];
 }
 
 export interface ExamRecord {
@@ -63,6 +64,13 @@ export interface StudentStatusRecord {
 }
 
 export interface StudentRequest {
+  id: string;
+  date: string;
+  content: string;
+  status: 'pending' | 'resolved';
+}
+
+export interface ParentCommunication {
   id: string;
   date: string;
   content: string;

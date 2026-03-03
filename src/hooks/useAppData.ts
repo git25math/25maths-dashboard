@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -272,6 +272,56 @@ export function useAppData() {
         ...student,
         requests: (student.requests || []).map(r =>
           r.id === requestId ? { ...r, status: r.status === 'pending' ? 'resolved' as const : 'pending' as const } : r
+        ),
+      });
+    }
+  }, [students, saveStudent]);
+
+  // --- Parent Communication CRUD ---
+
+  const addParentCommunication = useCallback(async (studentId: string, content: string) => {
+    const newComm: ParentCommunication = {
+      id: Math.random().toString(36).substr(2, 9),
+      date: new Date().toISOString().split('T')[0],
+      content,
+      status: 'pending',
+    };
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        parent_communications: [...(student.parent_communications || []), newComm],
+      });
+    }
+  }, [students, saveStudent]);
+
+  const updateParentCommunication = useCallback(async (studentId: string, commId: string, content: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        parent_communications: (student.parent_communications || []).map(c => c.id === commId ? { ...c, content } : c),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const deleteParentCommunication = useCallback(async (studentId: string, commId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        parent_communications: (student.parent_communications || []).filter(c => c.id !== commId),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const toggleParentCommunicationStatus = useCallback(async (studentId: string, commId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        parent_communications: (student.parent_communications || []).map(c =>
+          c.id === commId ? { ...c, status: c.status === 'pending' ? 'resolved' as const : 'pending' as const } : c
         ),
       });
     }
@@ -1085,7 +1135,9 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus, addExamRecord, batchAwardHP,
+    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
+    addParentCommunication, updateParentCommunication, deleteParentCommunication, toggleParentCommunicationStatus,
+    addExamRecord, batchAwardHP,
 
     // Teaching
     saveTeachingUnit, deleteTeachingUnit,
