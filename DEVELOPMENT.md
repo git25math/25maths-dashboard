@@ -765,12 +765,30 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `npm run build` ✅
   - 现有功能入口、页面行为、对外 hook API 保持兼容
 
+### Hotfix — Dashboard Class Progress 年级固定显示 (2026-03-04)
+- **需求**: Dashboard 首页 Class Progress Tracking 需固定显示 Year 7 / Year 8 / Year 10 / Year 11 / Year 12
+- **实现**:
+  - `DashboardView` 使用固定年级列表渲染，不再依赖 `classes.slice(0, 4)` 的顺序截断
+  - 每个年级优先匹配该年级已分配单元的班级展示进度；无班级时显示 `Not Assigned`
+  - 卡片保留原有进度计算与 `View Module` 行为
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+- Modified files (1): `src/views/DashboardView.tsx`
+
 ### Phase 29b — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
 - [ ] 增加 AppData Contract 文档：列出 `useAppData` 返回字段、依赖关系、跨域副作用边界
 - [ ] 引入最小测试骨架（Vitest）：先覆盖 `computeHousePointDeltas`、task status cycle、idea status cycle
 - [ ] CI 加质量门禁：在 deploy 前增加 `npm run lint`（后续接入测试后补 `npm run test`）
+
+### Phase 29c — Dashboard Progress Hardening (Planned)
+- [x] 首页固定显示 Year 7 / 8 / 10 / 11 / 12 教学进度卡片
+- [ ] Year 级别聚合：同年级多班时显示加权总进度（按 LO 总数汇总）
+- [ ] 空态增强：无班级/无单元时提供引导入口（跳转 Students / Teaching）
+- [ ] 交互增强：点击年级标题可快速切换到 Teaching 对应年级
+- [ ] 增加 Dashboard progress 映射单测（固定年级、缺失数据、同年级多班）
 
 ### Phase 30 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)

@@ -48,6 +48,8 @@ interface DashboardViewProps {
   onNavigate: (tab: string) => void;
 }
 
+const DASHBOARD_PROGRESS_YEARS = ['Year 7', 'Year 8', 'Year 10', 'Year 11', 'Year 12'] as const;
+
 export const DashboardView = ({
   currentEvent,
   nextEvent,
@@ -156,15 +158,22 @@ export const DashboardView = ({
             <button onClick={() => onNavigate('teaching')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {classes.slice(0, 4).map(cls => {
-              const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
+            {DASHBOARD_PROGRESS_YEARS.map(year => {
+              const yearClasses = classes.filter(cls => cls.year_group === year);
+              const primaryClass = yearClasses.find(cls => cls.current_unit_id) || yearClasses[0];
+              const currentUnit = primaryClass
+                ? teachingUnits.find(u => u.id === primaryClass.current_unit_id)
+                : teachingUnits.find(u => u.year_group === year);
               const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
-              const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
+              const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (primaryClass?.completed_lesson_ids?.length || 0);
               const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
               return (
-                <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
+                <div key={year} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                   <div>
-                    <p className="font-bold text-slate-900 text-sm">{cls.name}</p>
+                    <p className="font-bold text-slate-900 text-sm">{year}</p>
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
+                      Class: <span className="text-slate-700 font-medium">{primaryClass?.name || 'Not Assigned'}</span>
+                    </p>
                     <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
                       Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
                     </p>
