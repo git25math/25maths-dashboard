@@ -206,6 +206,7 @@ function AppContent() {
             onAddStatusRecord={openStatusRecordForm}
             onAddRequest={openRequestForm}
             onAddExamRecord={data.addExamRecord}
+            onBatchAwardHP={(awards) => data.batchAwardHP(awards)}
           />
         );
       case 'teaching':

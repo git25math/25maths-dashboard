@@ -719,6 +719,26 @@ export function useAppData() {
     }
   }, [students, saveStudent]);
 
+  const batchAwardHP = useCallback(async (
+    awards: { student_id: string; points: number; reason: string }[]
+  ) => {
+    try {
+      for (const award of awards) {
+        const student = students.find(s => s.id === award.student_id);
+        if (student) {
+          await saveStudent({
+            ...student,
+            house_points: student.house_points + award.points,
+          });
+        }
+      }
+      const totalPoints = awards.reduce((sum, a) => sum + a.points, 0);
+      toast.success(`Awarded ${totalPoints} HP to ${awards.length} student${awards.length !== 1 ? 's' : ''}`);
+    } catch (error) {
+      toast.error('Failed to award house points');
+    }
+  }, [students, saveStudent, toast]);
+
   // --- Lesson Records ---
 
   const addLessonRecord = useCallback(async (data: Omit<LessonRecord, 'id'>) => {
@@ -884,7 +904,7 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, addExamRecord,
+    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, addExamRecord, batchAwardHP,
 
     // Teaching
     saveTeachingUnit, deleteTeachingUnit,

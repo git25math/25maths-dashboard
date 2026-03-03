@@ -462,6 +462,8 @@ Browser
         Write:  Service (Supabase) → State → localStorage (write-through cache)
 ```
 
+**Key UI Patterns**: glass-card, cn() utility, emerald HP theming, indigo class filters, fixed floating action bars
+
 **Supabase Tables** (13):
 students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records
 
@@ -592,7 +594,30 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 移动端 + 桌面端侧边栏 `<nav>` 添加 `overflow-y-auto min-h-0`，14 个菜单项在小屏幕上可滚动
 - [x] 标题区域添加 `shrink-0` 防止被压缩
 
-### Phase 28 — Analytics & Reports (Next)
+### Phase 28 — Student Management Enhancement 学生管理增强 (2026-03-03)
+- **Class-Based Filtering**: "All Students" 标签页新增班级筛选 tabs（indigo 主题）
+  - 从 `students.map(s => s.class_name)` 提取唯一班名，动态生成 "All Classes" + 各班级按钮
+  - 筛选后 `filteredStudents` 替代原始 `students` 渲染列表
+  - 切换 class filter 或 sub-tab 时自动清空选择状态
+- **Multi-View Toggle (Card / Table)**: header 区域新增视图切换按钮组（LayoutGrid / TableIcon 图标）
+  - Card View（默认）：现有卡片网格，左上角新增 checkbox 选择
+  - Table View：紧凑表格，列 = checkbox | Name(+chinese) | Class | Year | HP badge | Weaknesses count | Edit 按钮
+  - 选中卡片/行显示 emerald 高亮（ring-2 / bg 着色）
+- **Batch HP Award 批量积分分配**: 选中学生后底部浮出操作栏（emerald 主题，fixed bottom）
+  - 操作栏：Award 图标 | N selected | 分数选择 (1-10 HP) | 原因输入 | "Award HP" 按钮 | X 取消
+  - `batchAwardHP()` in `useAppData.ts`：循环调用 `saveStudent` 累加积分，成功后 toast 显示总分和学生数
+  - 表头 checkbox 支持 Select All / Deselect All
+- **Props 更新**: StudentsView 新增 `onBatchAwardHP` prop，App.tsx 传入 `data.batchAwardHP`
+- Modified files (3): useAppData.ts, App.tsx, StudentsView.tsx
+
+### ~~Phase 28 — Student Management Enhancement 学生管理增强~~ ✅ Done
+- [x] Class-Based Filtering：班级筛选 tabs（indigo 主题），动态提取唯一班名
+- [x] Multi-View Toggle：Card / Table 视图切换（LayoutGrid / TableIcon），表格含 checkbox、HP badge、Weaknesses count、Edit
+- [x] Batch HP Award：批量积分分配，底部浮出 emerald 操作栏（分数 1-10 + 原因 + Award HP）
+- [x] Select All / Deselect All 全选支持
+- [x] 切换 class filter 或 sub-tab 时自动清空选择
+
+### Phase 29 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -600,7 +625,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 29 — Advanced
+### Phase 30 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
