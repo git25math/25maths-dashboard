@@ -778,15 +778,21 @@ export function useAppData() {
 
   const addTask = useCallback(async (data: Omit<Task, 'id' | 'created_at'>) => {
     try {
+      // Strip undefined values to avoid PostgREST issues
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([, v]) => v !== undefined)
+      ) as Omit<Task, 'id' | 'created_at'>;
       const created = await taskService.create({
-        ...data,
+        ...cleanData,
         created_at: new Date().toISOString(),
       });
       setTasks(prev => [...prev, created]);
       toast.success('Task added');
       return created;
-    } catch (error) {
-      toast.error('Failed to add task');
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('addTask failed:', error);
+      toast.error(`Failed to add task: ${msg}`);
       throw error;
     }
   }, [setTasks, toast]);

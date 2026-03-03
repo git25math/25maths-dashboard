@@ -15,7 +15,10 @@ export const taskService = {
     const newTask = { ...task, id: genId() };
     if (!isSupabaseConfigured) return newTask;
     const { data, error } = await supabase!.from('tasks').insert([newTask]).select().single();
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase task insert error:', error, 'Payload:', newTask);
+      throw new Error(error.message || error.code || 'Unknown Supabase error');
+    }
     return data;
   },
 

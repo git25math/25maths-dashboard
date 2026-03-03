@@ -581,10 +581,14 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
     setIsSmartExtracting(false);
   };
 
-  const handleSmartExtractConfirm = (tasks: Omit<Task, 'id' | 'created_at'>[]) => {
+  const handleSmartExtractConfirm = async (tasks: Omit<Task, 'id' | 'created_at'>[]) => {
     if (!onAddTask) return;
     for (const task of tasks) {
-      onAddTask(task);
+      try {
+        await onAddTask(task);
+      } catch {
+        // error already toasted by addTask
+      }
     }
     setSmartExtractPreview(null);
   };
