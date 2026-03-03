@@ -727,6 +727,18 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] EmailDigestView 三模式视图（list/new/detail）+ AI 处理 + checkbox + Task 转换
 - [x] useAppData 集成 + Sidebar + GlobalSearch + Settings Export/Import
 
+### Hotfix — Email Digest Supabase 表缺失 (2026-03-03)
+- **根因**: Phase 29 功能代码已部署，但 Supabase `email_digests` 表未创建，导致所有写入操作 404 → "Failed to create email digest"
+- **修复**: 新增 `20260309000000_email_digests.sql` 迁移（id, subject, original_content, chinese_translation, items jsonb, created_at + RLS policies），执行 `supabase db push` 推送到生产库
+- New files (1): `supabase/migrations/20260309000000_email_digests.sql`
+
+### Hotfix — AI 错误信息增强 (2026-03-03)
+- **问题**: Meeting 录音转录失败时仅显示笼统的 "Failed to transcribe audio"，无法定位具体原因（API 额度/网络/录音格式等）
+- **排查结论**: Gemini API key 有效、额度正常、`gemini-2.5-flash` 支持 inline audio（经 REST API + WAV 测试验证）
+- **修复**: MeetingsView 转录和摘要生成的 catch 块改为显示实际 `err.message`（如 `Failed to transcribe audio: <具体错误>`），方便用户和开发者定位问题
+- EmailDigestView 同步增加 `console.error` 日志输出
+- Modified files (2): MeetingsView.tsx, EmailDigestView.tsx
+
 ### Phase 30 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
@@ -735,14 +747,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] 家校沟通统计面板（沟通频率、待处理跟进汇总、按沟通方式分类统计）
 
-### Phase 32 — Student Reports & Communication
+### Phase 31 — Student Reports & Communication
 - [ ] Generate Subject Report（基于 exam_records + weaknesses + status_records 自动生成学科报告）
 - [ ] Parent Meeting Notes（从家校沟通记录 AI 生成家长会备忘录）
 - [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息：成绩、薄弱环节、学习状态、诉求、家校沟通）
 - [ ] 批量家长邮件通知（基于 parent_email 字段）
 - [ ] 家校沟通跟进提醒（Dashboard 显示待跟进事项，超期预警）
 
-### Phase 33 — Advanced
+### Phase 32 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
