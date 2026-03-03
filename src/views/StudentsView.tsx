@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare } from 'lucide-react';
+import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare, Phone, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication, StudentWeakness } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
@@ -31,7 +31,8 @@ interface StudentsViewProps {
   onToggleRequestStatus?: (studentId: string, requestId: string) => void;
   onUpdateRequestDate?: (studentId: string, requestId: string, field: 'date' | 'resolved_date', value: string) => void;
   onAddParentComm: (studentId: string) => void;
-  onEditParentComm?: (studentId: string, commId: string, currentContent: string) => void;
+  onEditParentComm?: (studentId: string, comm: ParentCommunication) => void;
+  onAddParentCommFollowUp?: (studentId: string, commId: string) => void;
   onDeleteParentComm?: (studentId: string, commId: string) => void;
   onToggleParentCommStatus?: (studentId: string, commId: string) => void;
   onUpdateParentCommDate?: (studentId: string, commId: string, field: 'date' | 'resolved_date', value: string) => void;
@@ -67,6 +68,7 @@ export const StudentsView = ({
   onUpdateRequestDate,
   onAddParentComm,
   onEditParentComm,
+  onAddParentCommFollowUp,
   onDeleteParentComm,
   onToggleParentCommStatus,
   onUpdateParentCommDate,
@@ -611,86 +613,122 @@ export const StudentsView = ({
                 <MessageSquare size={18} className="text-blue-500" /> 家校沟通 (Parent Comm.)
               </h3>
               <div className="space-y-3">
-                {selectedStudent.parent_communications?.map(comm => (
-                  <div key={comm.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
-                    <MarkdownRenderer content={comm.content} className="text-xs text-slate-700" />
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                        <span>提出:</span>
-                        {onUpdateParentCommDate ? (
-                          <input
-                            type="date"
-                            value={comm.date}
-                            onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'date', e.target.value)}
-                            className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
-                          />
-                        ) : (
-                          <span>{comm.date}</span>
-                        )}
-                      </div>
-                      {comm.status === 'resolved' && (
-                        <div className="flex items-center gap-1 text-[10px] text-emerald-500">
-                          <span>解决:</span>
+                {selectedStudent.parent_communications?.map(comm => {
+                  const methodIcon = comm.method === 'phone' ? <Phone size={10} />
+                    : comm.method === 'wechat' ? <MessageCircle size={10} />
+                    : comm.method === 'email' ? <Mail size={10} />
+                    : comm.method === 'face-to-face' ? <Users size={10} />
+                    : <MoreHorizontal size={10} />;
+                  const methodLabel = comm.method === 'face-to-face' ? '面谈'
+                    : comm.method === 'phone' ? '电话'
+                    : comm.method === 'wechat' ? '微信'
+                    : comm.method === 'email' ? '邮件'
+                    : '其他';
+                  return (
+                    <div key={comm.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
+                      {/* Header: date + method + actions */}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
                           {onUpdateParentCommDate ? (
                             <input
                               type="date"
-                              value={comm.resolved_date || ''}
-                              onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'resolved_date', e.target.value)}
-                              className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
+                              value={comm.date}
+                              onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'date', e.target.value)}
+                              className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
                             />
                           ) : (
-                            <span>{comm.resolved_date || '—'}</span>
+                            <span>{comm.date}</span>
                           )}
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 ml-auto">
-                        {onToggleParentCommStatus && (
-                          <button
-                            onClick={() => onToggleParentCommStatus(selectedStudent.id, comm.id)}
-                            className={cn(
-                              "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
-                              comm.status === 'resolved'
-                                ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
-                                : "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                          {methodIcon} {methodLabel}
+                        </span>
+                        {comm.status === 'resolved' && comm.resolved_date && (
+                          <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+                            <span>解决:</span>
+                            {onUpdateParentCommDate ? (
+                              <input
+                                type="date"
+                                value={comm.resolved_date}
+                                onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'resolved_date', e.target.value)}
+                                className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
+                              />
+                            ) : (
+                              <span>{comm.resolved_date}</span>
                             )}
-                            title={comm.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
-                          >
-                            {comm.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
-                            {comm.status}
-                          </button>
+                          </div>
                         )}
-                        {!onToggleParentCommStatus && (
-                          <span className={cn(
-                            "text-[10px] font-bold uppercase",
-                            comm.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
-                          )}>
-                            {comm.status}
-                          </span>
-                        )}
-                        {onEditParentComm && (
-                          <button
-                            onClick={() => onEditParentComm(selectedStudent.id, comm.id, comm.content)}
-                            className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Edit"
-                          >
-                            <Pencil size={12} />
-                          </button>
-                        )}
-                        {onDeleteParentComm && (
-                          <button
-                            onClick={() => {
-                              if (confirm('Delete this communication record?')) onDeleteParentComm(selectedStudent.id, comm.id);
-                            }}
-                            className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Delete"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2 ml-auto">
+                          {onToggleParentCommStatus && (
+                            <button
+                              onClick={() => onToggleParentCommStatus(selectedStudent.id, comm.id)}
+                              className={cn(
+                                "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
+                                comm.status === 'resolved'
+                                  ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                                  : "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                              )}
+                              title={comm.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
+                            >
+                              {comm.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
+                              {comm.status}
+                            </button>
+                          )}
+                          {onEditParentComm && (
+                            <button
+                              onClick={() => onEditParentComm(selectedStudent.id, comm)}
+                              className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
+                              title="Edit"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          )}
+                          {onDeleteParentComm && (
+                            <button
+                              onClick={() => {
+                                if (confirm('Delete this communication record?')) onDeleteParentComm(selectedStudent.id, comm.id);
+                              }}
+                              className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                              title="Delete"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
                       </div>
+                      {/* Content */}
+                      <MarkdownRenderer content={comm.content} className="text-xs text-slate-700" />
+                      {/* Follow-up plan */}
+                      {comm.needs_follow_up && comm.follow_up_plan && (
+                        <div className="p-2 bg-amber-50 rounded-lg border border-amber-100">
+                          <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">跟进计划</p>
+                          <p className="text-xs text-amber-700">{comm.follow_up_plan}</p>
+                        </div>
+                      )}
+                      {/* Follow-up records */}
+                      {comm.follow_ups && comm.follow_ups.length > 0 && (
+                        <div className="space-y-1.5 pl-3 border-l-2 border-blue-200">
+                          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">跟进记录</p>
+                          {comm.follow_ups.map((fu, idx) => (
+                            <div key={idx} className="text-xs text-slate-600">
+                              <span className="text-[10px] text-slate-400 font-mono mr-2">{fu.date}</span>
+                              {fu.content}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* Add follow-up button (only for pending items with follow-up plan) */}
+                      {comm.needs_follow_up && onAddParentCommFollowUp && (
+                        <button
+                          onClick={() => onAddParentCommFollowUp(selectedStudent.id, comm.id)}
+                          className="text-[10px] font-bold text-blue-500 hover:underline"
+                        >
+                          + 追加跟进记录
+                        </button>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {(!selectedStudent.parent_communications || selectedStudent.parent_communications.length === 0) && (
                   <p className="text-sm text-slate-400 italic">No communication records yet.</p>
                 )}
@@ -698,7 +736,7 @@ export const StudentsView = ({
                   onClick={() => onAddParentComm(selectedStudent.id)}
                   className="w-full btn-secondary text-xs py-2"
                 >
-                  + New Communication
+                  + 新增沟通记录
                 </button>
               </div>
             </div>

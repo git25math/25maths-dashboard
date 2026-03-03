@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, StudentWeakness, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
+import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -14,6 +14,7 @@ import { TeachingUnitForm } from './components/TeachingUnitForm';
 import { ClassForm } from './components/ClassForm';
 import { GenericForm } from './components/GenericForm';
 import { WeaknessForm } from './components/WeaknessForm';
+import { ParentCommForm } from './components/ParentCommForm';
 import { TimetableEntryForm } from './components/TimetableEntryForm';
 import { WorkLogForm } from './components/WorkLogForm';
 import { SOPForm } from './components/SOPForm';
@@ -74,6 +75,14 @@ function AppContent() {
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // ParentCommForm
+  const [parentCommFormConfig, setParentCommFormConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    initialValue?: ParentCommunication;
+    onSave: (data: { date: string; method: ParentCommMethod; content: string; needs_follow_up: boolean; follow_up_plan?: string }) => void;
+  }>({ isOpen: false, title: '', onSave: () => {} });
 
   // WeaknessForm
   const [weaknessFormConfig, setWeaknessFormConfig] = useState<{
@@ -137,14 +146,12 @@ function AppContent() {
   };
 
   const openParentCommForm = (studentId: string) => {
-    setGenericFormConfig({
+    setParentCommFormConfig({
       isOpen: true,
-      title: 'New Parent Communication',
-      label: 'Communication Details',
-      placeholder: 'Record parent request or communication details (supports Markdown and LaTeX)...',
-      onSave: async (content) => {
-        await data.addParentCommunication(studentId, content);
-        setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+      title: '新增家校沟通记录',
+      onSave: async (formData) => {
+        await data.addParentCommunication(studentId, formData);
+        setParentCommFormConfig(prev => ({ ...prev, isOpen: false }));
       }
     });
   };
@@ -282,15 +289,25 @@ function AppContent() {
             onToggleRequestStatus={data.toggleRequestStatus}
             onUpdateRequestDate={data.updateRequestDate}
             onAddParentComm={openParentCommForm}
-            onEditParentComm={(studentId, commId, currentContent) => {
+            onEditParentComm={(studentId, comm) => {
+              setParentCommFormConfig({
+                isOpen: true,
+                title: '编辑家校沟通记录',
+                initialValue: comm,
+                onSave: async (formData) => {
+                  await data.updateParentCommunication(studentId, comm.id, formData);
+                  setParentCommFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onAddParentCommFollowUp={(studentId, commId) => {
               setGenericFormConfig({
                 isOpen: true,
-                title: 'Edit Communication',
-                label: 'Communication Details',
-                initialValue: currentContent,
-                placeholder: 'Record parent request or communication details (supports Markdown and LaTeX)...',
+                title: '追加跟进记录',
+                label: '跟进状况',
+                placeholder: '记录后续跟进状况...',
                 onSave: async (content) => {
-                  await data.updateParentCommunication(studentId, commId, content);
+                  await data.addParentCommFollowUp(studentId, commId, content);
                   setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
                 }
               });
@@ -682,6 +699,14 @@ function AppContent() {
             setEditingTask(null);
           }}
           onCancel={() => { setIsTaskFormOpen(false); setEditingTask(null); }}
+        />
+      )}
+      {parentCommFormConfig.isOpen && (
+        <ParentCommForm
+          title={parentCommFormConfig.title}
+          initialValue={parentCommFormConfig.initialValue}
+          onSave={parentCommFormConfig.onSave}
+          onCancel={() => setParentCommFormConfig(prev => ({ ...prev, isOpen: false }))}
         />
       )}
       {weaknessFormConfig.isOpen && (

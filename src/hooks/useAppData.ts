@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -370,30 +370,104 @@ export function useAppData() {
 
   // --- Parent Communication CRUD ---
 
-  const addParentCommunication = useCallback(async (studentId: string, content: string) => {
-    const newComm: ParentCommunication = {
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString().split('T')[0],
-      content,
-      status: 'pending',
-    };
-    const student = students.find(s => s.id === studentId);
-    if (student) {
-      await saveStudent({
-        ...student,
-        parent_communications: [...(student.parent_communications || []), newComm],
-      });
+  const createFollowUpTask = useCallback(async (
+    student: Student, commId: string, method: ParentCommMethod, content: string, followUpPlan: string
+  ) => {
+    try {
+      const cleanData = Object.fromEntries(
+        Object.entries({
+          title: `[家校沟通] ${student.name}: ${followUpPlan.slice(0, 60)}`,
+          description: `学生: ${student.name} (${student.class_name})\n沟通方式: ${method}\n沟通内容: ${content}\n\n跟进计划: ${followUpPlan}`,
+          status: 'next',
+          priority: 'medium',
+          source_type: 'parent-comm',
+          source_id: `${student.id}:${commId}`,
+          tags: ['家校沟通'],
+        }).filter(([, v]) => v !== undefined)
+      ) as Omit<Task, 'id' | 'created_at'>;
+      const created = await taskService.create({ ...cleanData, created_at: new Date().toISOString() } as Omit<Task, 'id'>);
+      setTasks(prev => [...prev, created]);
+      return created.id;
+    } catch {
+      return undefined;
     }
-  }, [students, saveStudent]);
+  }, [setTasks]);
 
-  const updateParentCommunication = useCallback(async (studentId: string, commId: string, content: string) => {
+  const addParentCommunication = useCallback(async (
+    studentId: string,
+    data: { date: string; method: ParentCommMethod; content: string; needs_follow_up: boolean; follow_up_plan?: string }
+  ) => {
+    const commId = Math.random().toString(36).substr(2, 9);
     const student = students.find(s => s.id === studentId);
-    if (student) {
-      await saveStudent({
-        ...student,
-        parent_communications: (student.parent_communications || []).map(c => c.id === commId ? { ...c, content } : c),
-      });
+    if (!student) return;
+
+    let taskId: string | undefined;
+    if (data.needs_follow_up && data.follow_up_plan) {
+      taskId = await createFollowUpTask(student, commId, data.method, data.content, data.follow_up_plan);
     }
+
+    const newComm: ParentCommunication = {
+      id: commId,
+      date: data.date,
+      method: data.method,
+      content: data.content,
+      status: data.needs_follow_up ? 'pending' : 'resolved',
+      needs_follow_up: data.needs_follow_up,
+      follow_up_plan: data.follow_up_plan,
+      follow_up_task_id: taskId,
+    };
+    await saveStudent({
+      ...student,
+      parent_communications: [...(student.parent_communications || []), newComm],
+    });
+    if (taskId) toast.success('已创建跟进待办事项');
+  }, [students, saveStudent, createFollowUpTask, toast]);
+
+  const updateParentCommunication = useCallback(async (
+    studentId: string,
+    commId: string,
+    data: { date: string; method: ParentCommMethod; content: string; needs_follow_up: boolean; follow_up_plan?: string }
+  ) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    const existing = (student.parent_communications || []).find(c => c.id === commId);
+    if (!existing) return;
+
+    let taskId = existing.follow_up_task_id;
+    if (data.needs_follow_up && data.follow_up_plan && !taskId) {
+      taskId = await createFollowUpTask(student, commId, data.method, data.content, data.follow_up_plan);
+      if (taskId) toast.success('已创建跟进待办事项');
+    }
+
+    await saveStudent({
+      ...student,
+      parent_communications: (student.parent_communications || []).map(c =>
+        c.id === commId ? {
+          ...c,
+          date: data.date,
+          method: data.method,
+          content: data.content,
+          needs_follow_up: data.needs_follow_up,
+          follow_up_plan: data.follow_up_plan,
+          follow_up_task_id: taskId,
+        } : c
+      ),
+    });
+  }, [students, saveStudent, createFollowUpTask, toast]);
+
+  const addParentCommFollowUp = useCallback(async (studentId: string, commId: string, followUpContent: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    const newFollowUp: ParentCommFollowUp = {
+      date: format(new Date(), 'yyyy-MM-dd'),
+      content: followUpContent,
+    };
+    await saveStudent({
+      ...student,
+      parent_communications: (student.parent_communications || []).map(c =>
+        c.id === commId ? { ...c, follow_ups: [...(c.follow_ups || []), newFollowUp] } : c
+      ),
+    });
   }, [students, saveStudent]);
 
   const updateParentCommDate = useCallback(async (studentId: string, commId: string, field: 'date' | 'resolved_date', value: string) => {
@@ -1245,7 +1319,7 @@ export function useAppData() {
     // Student
     saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addWeakness, updateWeakness, deleteWeakness,
     addStudentRequest, updateStudentRequest, updateRequestDate, deleteStudentRequest, toggleRequestStatus,
-    addParentCommunication, updateParentCommunication, updateParentCommDate, deleteParentCommunication, toggleParentCommunicationStatus,
+    addParentCommunication, updateParentCommunication, addParentCommFollowUp, updateParentCommDate, deleteParentCommunication, toggleParentCommunicationStatus,
     addExamRecord, batchAwardHP,
 
     // Teaching

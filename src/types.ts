@@ -6,7 +6,7 @@ export type PrepStatus = 'not_prepared' | 'prepared' | 'finished' | 'recorded';
 // --- GTD Task types ---
 export type TaskStatus = 'inbox' | 'next' | 'waiting' | 'someday' | 'done';
 export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea';
+export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea' | 'parent-comm';
 
 export interface Task {
   id: string;
@@ -71,12 +71,24 @@ export interface StudentRequest {
   resolved_date?: string;
 }
 
+export type ParentCommMethod = 'face-to-face' | 'phone' | 'wechat' | 'email' | 'other';
+
+export interface ParentCommFollowUp {
+  date: string;
+  content: string;
+}
+
 export interface ParentCommunication {
   id: string;
   date: string;
+  method: ParentCommMethod;
   content: string;
   status: 'pending' | 'resolved';
   resolved_date?: string;
+  needs_follow_up: boolean;
+  follow_up_plan?: string;
+  follow_up_task_id?: string;
+  follow_ups?: ParentCommFollowUp[];
 }
 
 export interface StudentWeakness {
