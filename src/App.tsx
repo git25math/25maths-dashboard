@@ -219,6 +219,20 @@ function AppContent() {
             }}
             onDeleteClass={data.deleteClass}
             onAddStatusRecord={openStatusRecordForm}
+            onEditStatusRecord={(studentId, recordId, currentContent) => {
+              setGenericFormConfig({
+                isOpen: true,
+                title: 'Edit Status Record',
+                label: 'Status Content',
+                initialValue: currentContent,
+                placeholder: 'Describe the student\'s learning status (supports Markdown and LaTeX)...',
+                onSave: async (content) => {
+                  await data.updateStatusRecord(studentId, recordId, content);
+                  setGenericFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onDeleteStatusRecord={data.deleteStatusRecord}
             onAddRequest={openRequestForm}
             onEditRequest={(studentId, requestId, currentContent) => {
               setGenericFormConfig({

@@ -251,6 +251,26 @@ export function useAppData() {
     }
   }, [students, saveStudent]);
 
+  const updateStatusRecord = useCallback(async (studentId: string, recordId: string, content: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        status_records: (student.status_records || []).map(r => r.id === recordId ? { ...r, content } : r),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const deleteStatusRecord = useCallback(async (studentId: string, recordId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        status_records: (student.status_records || []).filter(r => r.id !== recordId),
+      });
+    }
+  }, [students, saveStudent]);
+
   const addStudentRequest = useCallback(async (studentId: string, content: string) => {
     const newRequest: StudentRequest = {
       id: Math.random().toString(36).substr(2, 9),
@@ -1157,7 +1177,7 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
+    saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
     addParentCommunication, updateParentCommunication, deleteParentCommunication, toggleParentCommunicationStatus,
     addExamRecord, batchAwardHP,
 
