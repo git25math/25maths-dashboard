@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -624,17 +624,55 @@ export function useAppData() {
     }
   }, [setMeetings, toast]);
 
+  // --- House Point Delta Helper ---
+
+  const computeHousePointDeltas = (
+    oldAwards: HousePointAward[],
+    newAwards: HousePointAward[],
+  ): Map<string, number> => {
+    const deltas = new Map<string, number>();
+    for (const a of oldAwards) {
+      deltas.set(a.student_id, (deltas.get(a.student_id) || 0) - a.points);
+    }
+    for (const a of newAwards) {
+      deltas.set(a.student_id, (deltas.get(a.student_id) || 0) + a.points);
+    }
+    // Remove zero-delta entries
+    for (const [id, d] of deltas) {
+      if (d === 0) deltas.delete(id);
+    }
+    return deltas;
+  };
+
+  const applyHousePointDeltas = useCallback(async (deltas: Map<string, number>) => {
+    for (const [studentId, delta] of deltas) {
+      const student = students.find(s => s.id === studentId);
+      if (student) {
+        await saveStudent({
+          ...student,
+          house_points: Math.max(0, student.house_points + delta),
+        });
+      }
+    }
+  }, [students, saveStudent]);
+
   // --- Lesson Records ---
 
   const addLessonRecord = useCallback(async (data: Omit<LessonRecord, 'id'>) => {
     try {
       const created = await lessonRecordService.create(data);
       setLessonRecords(prev => [...prev, created]);
+      // Sync house points for new awards
+      const awards = data.house_point_awards || [];
+      if (awards.length > 0) {
+        const deltas = computeHousePointDeltas([], awards);
+        await applyHousePointDeltas(deltas);
+      }
       toast.success('Lesson record added');
     } catch (error) {
       toast.error('Failed to add lesson record');
     }
-  }, [setLessonRecords, toast]);
+  }, [setLessonRecords, toast, applyHousePointDeltas]);
 
   const updateLessonRecord = useCallback(async (id: string, updates: Partial<LessonRecord>) => {
     const existing = lessonRecords.find(r => r.id === id);
@@ -643,21 +681,35 @@ export function useAppData() {
     try {
       const updated = await lessonRecordService.update(id, merged);
       setLessonRecords(prev => prev.map(r => r.id === id ? { ...r, ...updated } : r));
+      // Sync house point deltas
+      const oldAwards = existing.house_point_awards || [];
+      const newAwards = updates.house_point_awards || existing.house_point_awards || [];
+      if (oldAwards.length > 0 || newAwards.length > 0) {
+        const deltas = computeHousePointDeltas(oldAwards, newAwards);
+        await applyHousePointDeltas(deltas);
+      }
       toast.success('Lesson record updated');
     } catch (error) {
       toast.error('Failed to update lesson record');
     }
-  }, [lessonRecords, setLessonRecords, toast]);
+  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas]);
 
   const deleteLessonRecord = useCallback(async (id: string) => {
+    const existing = lessonRecords.find(r => r.id === id);
     try {
       await lessonRecordService.delete(id);
       setLessonRecords(prev => prev.filter(r => r.id !== id));
+      // Reverse house points for deleted record
+      const awards = existing?.house_point_awards || [];
+      if (awards.length > 0) {
+        const deltas = computeHousePointDeltas(awards, []);
+        await applyHousePointDeltas(deltas);
+      }
       toast.success('Lesson record deleted');
     } catch (error) {
       toast.error('Failed to delete lesson record');
     }
-  }, [setLessonRecords, toast]);
+  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas]);
 
   // --- QuickCapture ---
 

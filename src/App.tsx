@@ -276,6 +276,7 @@ function AppContent() {
           <LessonRecordsView
             lessonRecords={data.lessonRecords}
             classes={data.classes}
+            students={data.students}
             onAdd={data.addLessonRecord}
             onUpdate={data.updateLessonRecord}
             onDelete={data.deleteLessonRecord}
@@ -457,6 +458,7 @@ function AppContent() {
           lessonRecords={data.lessonRecords}
           onUpdateLessonRecord={data.updateLessonRecord}
           onAddLessonRecord={data.addLessonRecord}
+          students={data.students}
         />
       )}
       {isWorkLogFormOpen && (

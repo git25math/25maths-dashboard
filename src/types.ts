@@ -71,6 +71,13 @@ export interface TimetableEntry {
   recurring_id?: string; // If this is a single-day override, points to the original recurring entry's id
 }
 
+export interface HousePointAward {
+  student_id: string;
+  student_name: string;
+  points: number;
+  reason: string;
+}
+
 export interface LessonRecord {
   id: string;
   date: string;
@@ -81,6 +88,7 @@ export interface LessonRecord {
   notes: string;
   next_lesson_plan: string;
   timetable_entry_id?: string; // Back-reference to linked timetable entry
+  house_point_awards?: HousePointAward[];
 }
 
 export interface Idea {

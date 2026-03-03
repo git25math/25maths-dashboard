@@ -339,6 +339,31 @@
 - **TimetableEntryForm 内联上课记录面板**: next_lesson_plan 字段 `<textarea>` → `RichTextEditor`
 - Modified files (2): LessonRecordsView.tsx, TimetableEntryForm.tsx
 
+### Phase 24c — HousePoint 积分分配系统 (2026-03-03)
+- **数据模型**: 新增 `HousePointAward` 接口（student_id, student_name, points, reason），`LessonRecord` 新增 `house_point_awards?: HousePointAward[]` 字段
+- **Supabase migration**: `20260305000000_lesson_record_house_points.sql` — ALTER TABLE 增加 `house_point_awards jsonb` 列
+- **积分同步逻辑** (`useAppData.ts`):
+  - `computeHousePointDeltas(oldAwards, newAwards)`: 计算新旧 awards 间的积分差值 Map
+  - `applyHousePointDeltas()`: 批量更新学生 `house_points`，`Math.max(0, ...)` 防止负数
+  - `addLessonRecord`: 创建后自动给 awards 中的学生加分
+  - `updateLessonRecord`: old vs new delta 计算，仅修改差值部分
+  - `deleteLessonRecord`: 反扣已发放积分
+- **新组件 `HousePointAwardsEditor.tsx`** (emerald 色系):
+  - 学生选择器：下拉列表按 class_name 过滤，已选学生自动排除
+  - 每条 award: 学生名 | 分数下拉 (1-10) | 理由输入 | 删除按钮
+  - 底部汇总：学生数 + 总分
+- **LessonRecordsView**: 新增 `students` prop + `newAwards`/`editAwards` state
+  - 新建表单：选定 class 后显示 HousePointAwardsEditor
+  - 编辑表单：`startEdit` 初始化 editAwards，内嵌 Editor
+  - 展示模式：awards 渲染为 emerald 色标签列表（学生名 +积分 +理由）
+- **TimetableEntryForm**: 新增 `students` prop + `lrAwards` state
+  - 从 matchedLessonRecord 初始化 lrAwards
+  - 内联面板 Next Lesson Plan 下方显示 HousePointAwardsEditor（按 class_name 过滤学生）
+  - `handleSaveLessonRecord` / `handleCreateLessonRecord` 合并 awards
+- **App.tsx**: `LessonRecordsView` 和 `TimetableEntryForm` 传入 `students={data.students}`
+- New files: HousePointAwardsEditor.tsx, migration SQL
+- Modified files (5): types.ts, useAppData.ts, LessonRecordsView.tsx, TimetableEntryForm.tsx, App.tsx
+
 ---
 
 ## Current Architecture
@@ -454,12 +479,15 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 上课记录页面 → 日历跳转（CalendarDays 图标 → 切换到对应日期）
 - [x] 日程卡片显示 lesson record 关联图标（teal FileText）
 - [x] 上课记录 notes / next_lesson_plan 支持 Markdown + LaTeX 富文本（RichTextEditor + MarkdownRenderer）
+- [x] HousePoint 积分分配：LessonRecord 中记录学生积分 awards，自动同步到学生 house_points 总数，支持新建/编辑/删除时的 delta 计算
 
 ### Phase 25 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
+- [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
+- [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
 ### Phase 26 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
@@ -467,3 +495,4 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] File attachments (Supabase Storage — done in Phase 11)
 - [ ] PWA support (offline mode + install)
 - [ ] Custom domain setup
+- [ ] House Point 批量导入/导出（CSV/Excel 格式，方便与学校系统对接）

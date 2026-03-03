@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus } from 'lucide-react';
-import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord, Student, HousePointAward } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
+import { HousePointAwardsEditor } from './HousePointAwardsEditor';
 import { getISODay, format } from 'date-fns';
 import { geminiService } from '../services/geminiService';
 import { detectConflicts } from '../lib/timetableUtils';
@@ -21,6 +22,7 @@ interface TimetableEntryFormProps {
   lessonRecords?: LessonRecord[];
   onUpdateLessonRecord?: (id: string, updates: Partial<LessonRecord>) => void;
   onAddLessonRecord?: (data: Omit<LessonRecord, 'id'>) => void;
+  students?: Student[];
 }
 
 export const TimetableEntryForm = ({
@@ -37,6 +39,7 @@ export const TimetableEntryForm = ({
   lessonRecords = [],
   onUpdateLessonRecord,
   onAddLessonRecord,
+  students = [],
 }: TimetableEntryFormProps) => {
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
@@ -48,6 +51,7 @@ export const TimetableEntryForm = ({
   // Inline lesson record state
   const [lrForm, setLrForm] = useState<Partial<LessonRecord>>({});
   const [isCreatingLR, setIsCreatingLR] = useState(false);
+  const [lrAwards, setLrAwards] = useState<HousePointAward[]>([]);
 
   const conflicts = useMemo(
     () => detectConflicts(formData, allEntries),
@@ -73,6 +77,7 @@ export const TimetableEntryForm = ({
         homework_assigned: matchedLessonRecord.homework_assigned,
         next_lesson_plan: matchedLessonRecord.next_lesson_plan,
       });
+      setLrAwards(matchedLessonRecord.house_point_awards || []);
     }
   }, [matchedLessonRecord]);
 
@@ -127,7 +132,7 @@ export const TimetableEntryForm = ({
 
   const handleSaveLessonRecord = () => {
     if (matchedLessonRecord && onUpdateLessonRecord) {
-      onUpdateLessonRecord(matchedLessonRecord.id, lrForm);
+      onUpdateLessonRecord(matchedLessonRecord.id, { ...lrForm, house_point_awards: lrAwards });
     }
   };
 
@@ -142,9 +147,13 @@ export const TimetableEntryForm = ({
       notes: formData.notes || '',
       next_lesson_plan: '',
       timetable_entry_id: formData.id,
+      house_point_awards: lrAwards,
     });
     setIsCreatingLR(false);
   };
+
+  // Students filtered by class for awards editor
+  const classStudents = students.filter(s => s.class_name === formData.class_name);
 
   const isRecurringEntry = !entry.date && !entry.recurring_id;
   const isOverrideEntry = !!entry.recurring_id;
@@ -506,6 +515,15 @@ export const TimetableEntryForm = ({
                         placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
                       />
                     </div>
+                    {classStudents.length > 0 && (
+                      <div className="md:col-span-2 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                        <HousePointAwardsEditor
+                          awards={lrAwards}
+                          onChange={setLrAwards}
+                          students={classStudents}
+                        />
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"

@@ -1,25 +1,31 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText, CalendarDays } from 'lucide-react';
+import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText, CalendarDays, Award } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { LessonRecord, ClassProfile } from '../types';
+import { LessonRecord, ClassProfile, Student, HousePointAward } from '../types';
 import { RichTextEditor, MarkdownRenderer } from '../components/RichTextEditor';
+import { HousePointAwardsEditor } from '../components/HousePointAwardsEditor';
 
 interface LessonRecordsViewProps {
   lessonRecords: LessonRecord[];
   classes: ClassProfile[];
+  students: Student[];
   onAdd: (data: Omit<LessonRecord, 'id'>) => void;
   onUpdate: (id: string, updates: Partial<LessonRecord>) => void;
   onDelete: (id: string) => void;
   onViewInCalendar?: (date: string) => void;
 }
 
-export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onDelete, onViewInCalendar }: LessonRecordsViewProps) => {
+export const LessonRecordsView = ({ lessonRecords, classes, students, onAdd, onUpdate, onDelete, onViewInCalendar }: LessonRecordsViewProps) => {
   const [classFilter, setClassFilter] = useState<string>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState<Partial<LessonRecord>>({});
+  const [editAwards, setEditAwards] = useState<HousePointAward[]>([]);
+
+  // New record awards state
+  const [newAwards, setNewAwards] = useState<HousePointAward[]>([]);
 
   // New record form state
   const [newForm, setNewForm] = useState<Omit<LessonRecord, 'id'>>({
@@ -47,24 +53,27 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
   const startEdit = (record: LessonRecord) => {
     setEditingId(record.id);
     setEditForm({ ...record });
+    setEditAwards(record.house_point_awards || []);
   };
 
   const saveEdit = () => {
     if (editingId && editForm) {
-      onUpdate(editingId, editForm);
+      onUpdate(editingId, { ...editForm, house_point_awards: editAwards });
       setEditingId(null);
       setEditForm({});
+      setEditAwards([]);
     }
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditForm({});
+    setEditAwards([]);
   };
 
   const handleAdd = () => {
     if (!newForm.class_name.trim() || !newForm.topic.trim()) return;
-    onAdd(newForm);
+    onAdd({ ...newForm, house_point_awards: newAwards });
     setNewForm({
       date: new Date().toISOString().split('T')[0],
       class_name: '',
@@ -74,8 +83,19 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
       notes: '',
       next_lesson_plan: '',
     });
+    setNewAwards([]);
     setIsAdding(false);
   };
+
+  // Students filtered by selected class for the new form
+  const newFormStudents = newForm.class_name
+    ? students.filter(s => s.class_name === newForm.class_name)
+    : [];
+
+  // Students filtered by selected class for the edit form
+  const editFormStudents = editForm.class_name
+    ? students.filter(s => s.class_name === editForm.class_name)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -197,6 +217,15 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
                 placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
               />
             </div>
+            {newForm.class_name && newFormStudents.length > 0 && (
+              <div className="md:col-span-2 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                <HousePointAwardsEditor
+                  awards={newAwards}
+                  onChange={setNewAwards}
+                  students={newFormStudents}
+                />
+              </div>
+            )}
           </div>
           <div className="flex gap-3 pt-2">
             <button
@@ -317,6 +346,15 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
                       placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
                     />
                   </div>
+                  {editFormStudents.length > 0 && (
+                    <div className="md:col-span-2 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                      <HousePointAwardsEditor
+                        awards={editAwards}
+                        onChange={setEditAwards}
+                        students={editFormStudents}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button onClick={saveEdit} className="btn-primary text-xs px-4 py-1.5 flex items-center gap-1">
@@ -365,6 +403,24 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
                     <div className="md:col-span-2">
                       <span className="text-xs font-bold text-slate-400 uppercase">Next Lesson Plan</span>
                       <MarkdownRenderer content={record.next_lesson_plan} className="text-sm text-slate-600" />
+                    </div>
+                  )}
+                  {record.house_point_awards && record.house_point_awards.length > 0 && (
+                    <div className="md:col-span-2">
+                      <span className="text-xs font-bold text-emerald-500 uppercase flex items-center gap-1">
+                        <Award size={12} /> House Points
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {record.house_point_awards.map(a => (
+                          <span
+                            key={a.student_id}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium border border-emerald-100"
+                          >
+                            {a.student_name} +{a.points}
+                            {a.reason && <span className="text-emerald-400">({a.reason})</span>}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
