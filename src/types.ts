@@ -1,5 +1,28 @@
 export type Role = 'teacher' | 'tutor' | 'entrepreneur';
 
+// --- PrepStatus (4-state) ---
+export type PrepStatus = 'not_prepared' | 'prepared' | 'finished' | 'recorded';
+
+// --- GTD Task types ---
+export type TaskStatus = 'inbox' | 'next' | 'waiting' | 'someday' | 'done';
+export type TaskPriority = 'high' | 'medium' | 'low';
+export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  source_type?: TaskSource;
+  source_id?: string;
+  assignee?: string;
+  due_date?: string;
+  tags?: string[];
+  created_at: string;
+  completed_at?: string;
+}
+
 export interface Student {
   id: string;
   name: string;
@@ -64,11 +87,13 @@ export interface TimetableEntry {
   type: 'lesson' | 'tutor' | 'duty' | 'meeting' | 'break';
   topic?: string;
   notes?: string;
-  is_prepared?: boolean;
+  is_prepared?: boolean; // @deprecated — use prep_status instead
+  prep_status?: PrepStatus;
   unit_id?: string; // Link to TeachingUnit
   lesson_id?: string; // Link to specific LessonPlanItem
   date?: string; // ISO 'YYYY-MM-DD'. If set, date-specific (non-recurring). If absent, recurring weekly.
   recurring_id?: string; // If this is a single-day override, points to the original recurring entry's id
+  meeting_record_id?: string; // Link to MeetingRecord for meeting-type entries
 }
 
 export interface HousePointAward {
@@ -109,10 +134,16 @@ export interface SOP {
   content: string;
 }
 
+export type EventTimeMode = 'all-day' | 'multi-day' | 'timed' | 'multi-day-timed';
+
 export interface SchoolEvent {
   id: string;
   title: string;
   date: string;
+  end_date?: string;
+  start_time?: string;
+  end_time?: string;
+  time_mode?: EventTimeMode;
   category: 'school-wide' | 'personal' | 'house' | 'event';
   description: string;
   is_action_required: boolean;

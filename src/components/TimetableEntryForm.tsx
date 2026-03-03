@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus } from 'lucide-react';
-import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord, Student, HousePointAward } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord, Student, HousePointAward, MeetingRecord, PrepStatus } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
 import { HousePointAwardsEditor } from './HousePointAwardsEditor';
@@ -23,7 +23,15 @@ interface TimetableEntryFormProps {
   onUpdateLessonRecord?: (id: string, updates: Partial<LessonRecord>) => void;
   onAddLessonRecord?: (data: Omit<LessonRecord, 'id'>) => void;
   students?: Student[];
+  meetings?: MeetingRecord[];
 }
+
+const PREP_STATUS_CONFIG: Record<PrepStatus, { label: string; color: string; next: PrepStatus }> = {
+  not_prepared: { label: 'Not Prepared', color: 'bg-red-100 text-red-600 border-red-200', next: 'prepared' },
+  prepared: { label: 'Prepared', color: 'bg-emerald-100 text-emerald-600 border-emerald-200', next: 'finished' },
+  finished: { label: 'Finished', color: 'bg-blue-100 text-blue-600 border-blue-200', next: 'recorded' },
+  recorded: { label: 'Recorded', color: 'bg-slate-100 text-slate-600 border-slate-200', next: 'not_prepared' },
+};
 
 export const TimetableEntryForm = ({
   entry,
@@ -40,6 +48,7 @@ export const TimetableEntryForm = ({
   onUpdateLessonRecord,
   onAddLessonRecord,
   students = [],
+  meetings = [],
 }: TimetableEntryFormProps) => {
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
@@ -337,16 +346,18 @@ export const TimetableEntryForm = ({
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Preparation Status</label>
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, is_prepared: !formData.is_prepared })}
+                onClick={() => {
+                  const current: PrepStatus = formData.prep_status || (formData.is_prepared ? 'prepared' : 'not_prepared');
+                  const next = PREP_STATUS_CONFIG[current].next;
+                  setFormData({ ...formData, prep_status: next, is_prepared: next === 'prepared' || next === 'finished' || next === 'recorded' });
+                }}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
-                  formData.is_prepared
-                    ? "bg-emerald-100 text-emerald-600 border border-emerald-200"
-                    : "bg-red-100 text-red-600 border border-red-200"
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border",
+                  PREP_STATUS_CONFIG[formData.prep_status || (formData.is_prepared ? 'prepared' : 'not_prepared')].color
                 )}
               >
-                {formData.is_prepared ? <CheckCircle2 size={14} /> : <X size={14} />}
-                {formData.is_prepared ? 'Prepared' : 'Not Prepared'}
+                {(formData.prep_status === 'prepared' || formData.prep_status === 'finished' || formData.prep_status === 'recorded') ? <CheckCircle2 size={14} /> : <X size={14} />}
+                {PREP_STATUS_CONFIG[formData.prep_status || (formData.is_prepared ? 'prepared' : 'not_prepared')].label}
               </button>
             </div>
           </div>
@@ -472,6 +483,40 @@ export const TimetableEntryForm = ({
             onChange={val => setFormData({ ...formData, notes: val })}
             placeholder="Add any specific notes for this lesson..."
           />
+
+          {/* Inline Meeting Panel */}
+          {formData.type === 'meeting' && effectiveDate && (
+            <div className="space-y-4 p-6 bg-purple-50/50 rounded-3xl border border-purple-100">
+              <div className="flex items-center gap-2 text-purple-600 font-bold text-sm uppercase tracking-widest">
+                <Clock size={16} />
+                <span>Meeting Record</span>
+              </div>
+              {(() => {
+                const linked = formData.meeting_record_id
+                  ? meetings.find(m => m.id === formData.meeting_record_id)
+                  : null;
+                if (linked) {
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                          linked.status === 'completed' ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-600"
+                        )}>{linked.status}</span>
+                        {linked.duration > 0 && <span className="text-slate-400 text-xs">{Math.floor(linked.duration / 60)}:{(linked.duration % 60).toString().padStart(2, '0')}</span>}
+                      </div>
+                      {linked.ai_summary && (
+                        <p className="text-xs text-slate-600 line-clamp-2">{linked.ai_summary.summary}</p>
+                      )}
+                      <p className="text-[10px] text-purple-500 italic">Linked meeting record will appear in the Meetings module.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <p className="text-xs text-purple-500 italic">A meeting record will be auto-created when you save this entry.</p>
+                );
+              })()}
+            </div>
+          )}
 
           {/* Inline Lesson Record Panel */}
           {formData.type === 'lesson' && effectiveDate && (onUpdateLessonRecord || onAddLessonRecord) && (

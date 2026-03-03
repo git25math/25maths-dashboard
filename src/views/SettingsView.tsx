@@ -8,7 +8,7 @@ interface SettingsViewProps {
   onImport?: (data: Record<string, unknown>) => void;
 }
 
-const KNOWN_KEYS = ['students', 'teachingUnits', 'classes', 'timetable', 'ideas', 'sops', 'goals', 'schoolEvents', 'workLogs', 'meetings', 'lessonRecords'];
+const KNOWN_KEYS = ['students', 'teachingUnits', 'classes', 'timetable', 'ideas', 'sops', 'goals', 'schoolEvents', 'workLogs', 'meetings', 'lessonRecords', 'tasks'];
 
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();

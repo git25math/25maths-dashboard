@@ -1,9 +1,34 @@
-import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb } from 'lucide-react';
+import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb, CheckSquare, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
-import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea, Task, EventTimeMode } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
+
+function formatEventDateShort(event: SchoolEvent): string {
+  const mode: EventTimeMode = event.time_mode || 'all-day';
+  const d = new Date(event.date);
+  switch (mode) {
+    case 'multi-day': {
+      const end = event.end_date ? new Date(event.end_date) : d;
+      if (d.getMonth() === end.getMonth()) {
+        return `${format(d, 'MMM d')}–${format(end, 'd')}`;
+      }
+      return `${format(d, 'MMM d')}–${format(end, 'MMM d')}`;
+    }
+    case 'timed':
+      return `${format(d, 'MMM d')} ${event.start_time || ''}`;
+    case 'multi-day-timed': {
+      const end = event.end_date ? new Date(event.end_date) : d;
+      if (d.getMonth() === end.getMonth()) {
+        return `${format(d, 'MMM d')}–${format(end, 'd')}`;
+      }
+      return `${format(d, 'MMM d')}–${format(end, 'MMM d')}`;
+    }
+    default:
+      return format(d, 'MMM d');
+  }
+}
 
 type UpdateItem =
   | { type: 'worklog'; id: string; time: string; content: string; category: string }
@@ -19,6 +44,7 @@ interface DashboardViewProps {
   schoolEvents: SchoolEvent[];
   workLogs: WorkLog[];
   ideas: Idea[];
+  tasks: Task[];
   onNavigate: (tab: string) => void;
 }
 
@@ -32,6 +58,7 @@ export const DashboardView = ({
   schoolEvents,
   workLogs,
   ideas,
+  tasks,
   onNavigate,
 }: DashboardViewProps) => {
   return (
@@ -70,14 +97,21 @@ export const DashboardView = ({
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <h3 className="text-2xl font-bold text-slate-900">{currentEvent.subject}</h3>
-                  {currentEvent.type === 'lesson' && (
-                    <span className={cn(
-                      "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                      currentEvent.is_prepared ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
-                    )}>
-                      {currentEvent.is_prepared ? '已备课' : '未备课'}
-                    </span>
-                  )}
+                  {currentEvent.type === 'lesson' && (() => {
+                    const ps = currentEvent.prep_status || (currentEvent.is_prepared ? 'prepared' : 'not_prepared');
+                    const cfg: Record<string, { label: string; color: string }> = {
+                      not_prepared: { label: '未备课', color: 'bg-red-50 text-red-600' },
+                      prepared: { label: '已备课', color: 'bg-emerald-50 text-emerald-600' },
+                      finished: { label: '已完成', color: 'bg-blue-50 text-blue-600' },
+                      recorded: { label: '已归档', color: 'bg-slate-100 text-slate-600' },
+                    };
+                    const c = cfg[ps] || cfg.not_prepared;
+                    return (
+                      <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded", c.color)}>
+                        {c.label}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="flex items-center gap-4 text-slate-500">
                   <span className="flex items-center gap-1"><Users size={16} /> {currentEvent.class_name}</span>
@@ -199,6 +233,50 @@ export const DashboardView = ({
           </div>
         </div>
 
+        {/* GTD Tasks Widget */}
+        <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-bold text-slate-900 flex items-center gap-2">
+              <CheckSquare size={16} className="text-cyan-600" />
+              GTD Tasks
+              {tasks.filter(t => t.status === 'inbox').length > 0 && (
+                <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <Inbox size={9} />
+                  {tasks.filter(t => t.status === 'inbox').length}
+                </span>
+              )}
+            </h4>
+            <button onClick={() => onNavigate('tasks')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
+          </div>
+          <div className="space-y-2">
+            {(() => {
+              const priorityOrder = { high: 0, medium: 1, low: 2 };
+              const nextTasks = tasks
+                .filter(t => t.status === 'next')
+                .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+                .slice(0, 3);
+              if (nextTasks.length === 0) {
+                return <p className="text-xs text-slate-400 italic">No next actions. Check your inbox!</p>;
+              }
+              return nextTasks.map(task => (
+                <div key={task.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className={cn("w-1.5 h-full min-h-[24px] rounded-full flex-shrink-0",
+                    task.priority === 'high' ? "bg-red-500" : task.priority === 'medium' ? "bg-amber-500" : "bg-blue-400"
+                  )} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">{task.title}</p>
+                    {task.due_date && (
+                      <p className={cn("text-[10px]", new Date(task.due_date) < new Date() ? "text-red-500 font-bold" : "text-slate-400")}>
+                        Due: {task.due_date}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+
         {/* School Events */}
         <div className="lg:col-span-2 glass-card p-6 space-y-4">
           <div className="flex items-center justify-between">
@@ -210,7 +288,7 @@ export const DashboardView = ({
               <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="flex justify-between items-start">
                   <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
-                  <span className="text-[9px] text-slate-400">{event.date}</span>
+                  <span className="text-[9px] text-slate-400">{formatEventDateShort(event)}</span>
                 </div>
                 <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 mt-1 line-clamp-1" />
               </div>

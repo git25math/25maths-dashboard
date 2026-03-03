@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, Task, PrepStatus } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -13,6 +13,7 @@ import { schoolEventService } from '../services/schoolEventService';
 import { timetableService } from '../services/timetableService';
 import { meetingService } from '../services/meetingService';
 import { lessonRecordService } from '../services/lessonRecordService';
+import { taskService } from '../services/taskService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { useLocalStorage } from './useLocalStorage';
@@ -33,10 +34,19 @@ export function useAppData() {
   const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', MOCK_WORK_LOGS);
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
   const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
+  const [tasks, setTasks] = useLocalStorage<Task[]>('dashboard-tasks', []);
 
-  // --- Normalize localStorage data (migrates old objectives: string[] → learning_objectives) ---
+  // --- Normalize localStorage data ---
   useEffect(() => {
     setTeachingUnits(prev => prev.map(normalizeTeachingUnit));
+    // Migrate is_prepared → prep_status
+    setTimetable(prev => prev.map(entry => {
+      if (entry.prep_status) return entry;
+      if (entry.is_prepared !== undefined) {
+        return { ...entry, prep_status: entry.is_prepared ? 'prepared' : 'not_prepared' };
+      }
+      return entry;
+    }));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Data Fetching ---
@@ -82,6 +92,7 @@ export function useAppData() {
         fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
         fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
         fetchOrSync(lessonRecordService.getAll, setLessonRecords, lessonRecords, 'lesson_records'),
+        fetchOrSync(taskService.getAll, setTasks, tasks, 'tasks'),
       ]);
     };
     fetchAll();
@@ -233,6 +244,32 @@ export function useAppData() {
 
   const updateTimetableEntry = useCallback(async (updatedEntry: TimetableEntry) => {
     try {
+      // Auto-associate meeting record for meeting-type entries
+      if (updatedEntry.type === 'meeting' && !updatedEntry.meeting_record_id) {
+        const entryDate = updatedEntry.date || format(new Date(), 'yyyy-MM-dd');
+        const match = meetings.find(m => m.date === entryDate && m.title === updatedEntry.subject);
+        if (match) {
+          updatedEntry = { ...updatedEntry, meeting_record_id: match.id };
+        } else {
+          try {
+            const created = await meetingService.create({
+              title: updatedEntry.subject,
+              date: entryDate,
+              duration: 0,
+              transcript: '',
+              ai_summary: null,
+              category: 'other',
+              participants: [],
+              status: 'draft',
+              created_at: new Date().toISOString(),
+            });
+            setMeetings(prev => [...prev, created]);
+            updatedEntry = { ...updatedEntry, meeting_record_id: created.id };
+          } catch {
+            // silent fallback
+          }
+        }
+      }
       await timetableService.update(updatedEntry.id, updatedEntry);
       setTimetable(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
 
@@ -277,6 +314,32 @@ export function useAppData() {
 
   const addTimetableEntry = useCallback(async (newEntry: TimetableEntry) => {
     try {
+      // Auto-associate meeting record for meeting-type entries
+      if (newEntry.type === 'meeting' && !newEntry.meeting_record_id) {
+        const entryDate = newEntry.date || format(new Date(), 'yyyy-MM-dd');
+        const match = meetings.find(m => m.date === entryDate && m.title === newEntry.subject);
+        if (match) {
+          newEntry = { ...newEntry, meeting_record_id: match.id };
+        } else {
+          try {
+            const mr = await meetingService.create({
+              title: newEntry.subject,
+              date: entryDate,
+              duration: 0,
+              transcript: '',
+              ai_summary: null,
+              category: 'other',
+              participants: [],
+              status: 'draft',
+              created_at: new Date().toISOString(),
+            });
+            setMeetings(prev => [...prev, mr]);
+            newEntry = { ...newEntry, meeting_record_id: mr.id };
+          } catch {
+            // silent fallback
+          }
+        }
+      }
       const created = await timetableService.create(newEntry);
       setTimetable(prev => [...prev, created]);
       toast.success('Entry added to schedule');
@@ -711,15 +774,73 @@ export function useAppData() {
     }
   }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas]);
 
+  // --- Tasks (GTD) ---
+
+  const addTask = useCallback(async (data: Omit<Task, 'id' | 'created_at'>) => {
+    try {
+      const created = await taskService.create({
+        ...data,
+        created_at: new Date().toISOString(),
+      });
+      setTasks(prev => [...prev, created]);
+      toast.success('Task added');
+      return created;
+    } catch (error) {
+      toast.error('Failed to add task');
+      throw error;
+    }
+  }, [setTasks, toast]);
+
+  const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
+    const existing = tasks.find(t => t.id === id);
+    if (!existing) return;
+    // Auto-set completed_at when moving to done
+    if (updates.status === 'done' && existing.status !== 'done') {
+      updates.completed_at = new Date().toISOString();
+    } else if (updates.status && updates.status !== 'done') {
+      updates.completed_at = undefined;
+    }
+    const merged = { ...existing, ...updates };
+    try {
+      const updated = await taskService.update(id, merged);
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+      toast.success('Task updated');
+    } catch (error) {
+      toast.error('Failed to update task');
+    }
+  }, [tasks, setTasks, toast]);
+
+  const deleteTask = useCallback(async (id: string) => {
+    try {
+      await taskService.delete(id);
+      setTasks(prev => prev.filter(t => t.id !== id));
+      toast.success('Task deleted');
+    } catch (error) {
+      toast.error('Failed to delete task');
+    }
+  }, [setTasks, toast]);
+
+  const cycleTaskStatus = useCallback(async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const cycle: Record<string, Task['status']> = {
+      inbox: 'next', next: 'waiting', waiting: 'someday', someday: 'done', done: 'inbox'
+    };
+    const newStatus = cycle[task.status] || 'inbox';
+    await updateTask(id, { status: newStatus });
+  }, [tasks, updateTask]);
+
   // --- QuickCapture ---
 
-  const quickCapture = useCallback((text: string, category: 'work' | 'student' | 'startup') => {
-    if (category === 'startup') {
+  const quickCapture = useCallback((text: string, category: 'work' | 'student' | 'startup' | 'task') => {
+    if (category === 'task') {
+      addTask({ title: text.slice(0, 100), description: text.length > 100 ? text : undefined, status: 'inbox', priority: 'medium' });
+    } else if (category === 'startup') {
       addIdea({ title: text.slice(0, 50), content: text, category: 'startup', priority: 'medium' });
     } else {
       addWorkLog({ content: text, category: category === 'student' ? 'tutor' : 'teaching', tags: [category] });
     }
-  }, [addIdea, addWorkLog]);
+  }, [addIdea, addWorkLog, addTask]);
 
   // --- Bulk Import ---
 
@@ -736,6 +857,7 @@ export function useAppData() {
       workLogs: (v) => setWorkLogs(v as WorkLog[]),
       meetings: (v) => setMeetings(v as MeetingRecord[]),
       lessonRecords: (v) => setLessonRecords(v as LessonRecord[]),
+      tasks: (v) => setTasks(v as Task[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -752,7 +874,7 @@ export function useAppData() {
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks,
     toasts,
 
     // Student
@@ -783,6 +905,9 @@ export function useAppData() {
 
     // Lesson Records
     addLessonRecord, updateLessonRecord, deleteLessonRecord,
+
+    // Tasks (GTD)
+    addTask, updateTask, deleteTask, cycleTaskStatus,
 
     // QuickCapture
     quickCapture,

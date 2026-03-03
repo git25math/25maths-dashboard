@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Edit3, ArrowLeft, Mic, Square, Pause, Play, RefreshCw, ChevronDown, ChevronUp, Users, Calendar, Tag, Clock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { MeetingRecord, AISummary } from '../types';
+import { MeetingRecord, AISummary, Task } from '../types';
 import { geminiService } from '../services/geminiService';
 
 type CategoryFilter = 'all' | MeetingRecord['category'];
@@ -43,9 +43,10 @@ interface MeetingsViewProps {
   onAddMeeting: (data: Omit<MeetingRecord, 'id'>) => Promise<MeetingRecord>;
   onUpdateMeeting: (id: string, updates: Partial<MeetingRecord>) => void;
   onDeleteMeeting: (id: string) => void;
+  onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
 }
 
-export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDeleteMeeting }: MeetingsViewProps) => {
+export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDeleteMeeting, onAddTask }: MeetingsViewProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingRecord | null>(null);
@@ -251,6 +252,7 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
         meeting={selectedMeeting}
         onBack={() => { setViewMode('list'); setSelectedMeeting(null); }}
         onUpdate={(updates) => onUpdateMeeting(selectedMeeting.id, updates)}
+        onAddTask={onAddTask}
       />
     );
   }
@@ -264,9 +266,10 @@ interface MeetingDetailProps {
   meeting: MeetingRecord;
   onBack: () => void;
   onUpdate: (updates: Partial<MeetingRecord>) => void;
+  onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
 }
 
-function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
+function MeetingDetail({ meeting, onBack, onUpdate, onAddTask }: MeetingDetailProps) {
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -354,6 +357,11 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
       try {
         const summary = await geminiService.generateMeetingSummary(transcript);
         onUpdate({ ai_summary: summary, status: 'completed' });
+        // Auto-create post-meeting tasks
+        if (onAddTask) {
+          onAddTask({ title: `整理录音稿: ${meeting.title}`, status: 'inbox', priority: 'medium', source_type: 'meeting', source_id: meeting.id });
+          onAddTask({ title: `Review action items: ${meeting.title}`, status: 'inbox', priority: 'medium', source_type: 'meeting', source_id: meeting.id });
+        }
       } catch (err) {
         setError('Failed to generate summary. You can retry with the button below.');
         onUpdate({ status: 'draft' });
@@ -474,7 +482,7 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
 
       {/* AI Summary */}
       {meeting.ai_summary && (
-        <AISummaryPanel summary={meeting.ai_summary} onRegenerate={handleRegenerateSummary} isRegenerating={isSummarizing} />
+        <AISummaryPanel summary={meeting.ai_summary} onRegenerate={handleRegenerateSummary} isRegenerating={isSummarizing} onAddTask={onAddTask} meetingId={meeting.id} />
       )}
 
       {/* Regenerate button when transcript exists but no summary */}
@@ -489,7 +497,26 @@ function MeetingDetail({ meeting, onBack, onUpdate }: MeetingDetailProps) {
 
 // --- AI Summary Panel ---
 
-function AISummaryPanel({ summary, onRegenerate, isRegenerating }: { summary: AISummary; onRegenerate: () => void; isRegenerating: boolean }) {
+function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meetingId }: { summary: AISummary; onRegenerate: () => void; isRegenerating: boolean; onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void; meetingId?: string }) {
+  const [extracted, setExtracted] = useState(false);
+
+  const handleExtractToTasks = () => {
+    if (!onAddTask) return;
+    const pendingItems = summary.action_items.filter(item => item.status === 'pending');
+    for (const item of pendingItems) {
+      onAddTask({
+        title: item.content,
+        status: 'inbox',
+        priority: 'medium',
+        source_type: 'meeting',
+        source_id: meetingId,
+        assignee: item.assignee || undefined,
+        due_date: item.deadline || undefined,
+      });
+    }
+    setExtracted(true);
+  };
+
   return (
     <div className="space-y-4">
       {/* Summary */}
@@ -521,7 +548,24 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating }: { summary: AI
       {/* Action Items */}
       {summary.action_items.length > 0 && (
         <div className="glass-card p-6">
-          <h3 className="font-bold text-slate-900 mb-3">Action Items</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-slate-900">Action Items</h3>
+            {onAddTask && summary.action_items.some(i => i.status === 'pending') && (
+              <button
+                onClick={handleExtractToTasks}
+                disabled={extracted}
+                className={cn(
+                  "flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg transition-all",
+                  extracted
+                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                    : "bg-cyan-50 text-cyan-600 border border-cyan-200 hover:bg-cyan-100"
+                )}
+              >
+                <CheckCircle2 size={12} />
+                {extracted ? 'Extracted' : 'Extract to Tasks'}
+              </button>
+            )}
+          </div>
           <div className="space-y-3">
             {summary.action_items.map((item, i) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">

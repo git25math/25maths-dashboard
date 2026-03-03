@@ -5,13 +5,13 @@ import { cn } from '../lib/utils';
 import { geminiService } from '../services/geminiService';
 
 interface QuickCaptureProps {
-  onSave: (text: string, category: 'work' | 'student' | 'startup') => void;
+  onSave: (text: string, category: 'work' | 'student' | 'startup' | 'task') => void;
 }
 
 export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
-  const [category, setCategory] = useState<'work' | 'student' | 'startup'>('work');
+  const [category, setCategory] = useState<'work' | 'student' | 'startup' | 'task'>('work');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
               />
               <div className="space-y-1.5">
                 <div className="flex gap-2">
-                  {(['work', 'student', 'startup'] as const).map((cat) => (
+                  {(['work', 'student', 'startup', 'task'] as const).map((cat) => (
                     <button
                       key={cat}
                       type="button"
@@ -72,7 +72,9 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                       className={cn(
                         "px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider border",
                         category === cat
-                          ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                          ? cat === 'task'
+                            ? "bg-cyan-50 border-cyan-200 text-cyan-600"
+                            : "bg-indigo-50 border-indigo-200 text-indigo-600"
                           : "bg-white border-slate-200 text-slate-400"
                       )}
                     >

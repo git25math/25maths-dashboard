@@ -420,6 +420,26 @@
 - New files (2): `supabase/functions/_shared/cors.ts`, `supabase/functions/github-proxy/index.ts`
 - Modified files (7): githubService.ts, DevConsoleView.tsx, vite-env.d.ts, .env.example, .env.local, deploy.yml, self-evolve.yml
 
+### Phase 26 — SchoolEvent 多模式时间支持 (2026-03-03)
+- **需求**: 原 SchoolEvent 仅有单个 `date` 字段，无法表达连续多天、定时、跨天定时等活动场景
+- **数据模型**: 新增 `EventTimeMode` 类型 (`'all-day' | 'multi-day' | 'timed' | 'multi-day-timed'`)
+  - SchoolEvent 新增 4 字段: `end_date?`, `start_time?`, `end_time?`, `time_mode?`
+  - `time_mode` 默认 `'all-day'`，向后兼容旧数据（无字段时按整日处理）
+- **SchoolEventForm**: 新增 4 模式按钮组（整日活动/连续数天/定时活动/跨天定时），每个带图标+主题色
+  - 根据 mode 条件显示字段：all-day 仅 Date；multi-day 显示 Start Date + End Date；timed 显示 Date + Start/End Time；multi-day-timed 全部显示
+  - Category 按钮组独立为单独 section
+- **SchoolEventsView**: `formatEventDate()` 按 mode 分支渲染
+  - all-day: `Monday, Mar 10, 2026`
+  - multi-day: `Mar 10 – Mar 14, 2026`
+  - timed: `Monday, Mar 10, 2026 · 14:00–16:00`
+  - multi-day-timed: `Mar 10 08:00 – Mar 12 17:00`
+- **DashboardView**: `formatEventDateShort()` 简短格式
+  - all-day: `Mar 10` / multi-day: `Mar 10–14` / timed: `Mar 10 14:00` / multi-day-timed: `Mar 10–12`
+- **GlobalSearch**: `getDisplaySubtitle` 对 schoolEvents 返回 mode-aware 格式化日期
+- **Supabase migration**: `20260307000000_school_event_time_modes.sql` — 新增 `end_date`, `start_time`, `end_time`, `time_mode` 四列
+- New files (1): migration SQL
+- Modified files (5): types.ts, SchoolEventForm.tsx, SchoolEventsView.tsx, DashboardView.tsx, GlobalSearch.tsx
+
 ---
 
 ## Current Architecture
@@ -547,13 +567,22 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Dashboard "View History" 导航修复（不再弹出新建表单）
 - [x] **安全加固**: GitHub PAT 从前端 `VITE_GITHUB_TOKEN` 迁移至 Supabase Edge Function 服务端密钥，前端 bundle 不再泄露 PAT
 
-### Phase 26 — Self-Evolve Enhancement 自进化增强 (Next)
+### ~~Phase 26 — SchoolEvent 多模式时间支持~~ ✅ Done
+- [x] 新增 `EventTimeMode` 类型 + SchoolEvent 4 个时间字段 (end_date, start_time, end_time, time_mode)
+- [x] SchoolEventForm: 4 模式按钮组（整日/连续数天/定时/跨天定时）+ 条件字段显示
+- [x] SchoolEventsView: mode-aware 完整日期格式化
+- [x] DashboardView: mode-aware 简短日期格式化
+- [x] GlobalSearch: subtitle mode-aware 格式化
+- [x] Supabase migration: 新增 4 列
+- [x] 向后兼容：`time_mode` 默认 `'all-day'`，旧数据无需迁移
+
+### Phase 27 — Self-Evolve Enhancement 自进化增强 (Next)
 - [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
 - [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）
 - [ ] 指令模板/历史记录（常用指令一键复用）
 - [ ] 自动 PR 模式（AI 改动走 PR review 而非直接 push main）
 
-### Phase 27 — Analytics & Reports
+### Phase 28 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -561,7 +590,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 28 — Advanced
+### Phase 29 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

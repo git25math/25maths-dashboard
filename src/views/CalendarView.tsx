@@ -303,8 +303,13 @@ export const CalendarView = ({
             {!entry.recurring_id && entry.date && (
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Date-specific" />
             )}
-            {entry.is_prepared !== undefined && (
-              <div className={cn("w-1.5 h-1.5 rounded-full", entry.is_prepared ? "bg-emerald-500" : "bg-red-500")} />
+            {(entry.prep_status || entry.is_prepared !== undefined) && (
+              <div className={cn("w-1.5 h-1.5 rounded-full",
+                (entry.prep_status === 'recorded') ? "bg-slate-400" :
+                (entry.prep_status === 'finished') ? "bg-blue-500" :
+                (entry.prep_status === 'prepared' || (!entry.prep_status && entry.is_prepared)) ? "bg-emerald-500" :
+                "bg-red-500"
+              )} />
             )}
           </div>
         </div>

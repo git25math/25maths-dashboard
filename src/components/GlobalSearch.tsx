@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, X, Users, Calendar, BookOpen, Lightbulb, Clock, Target, CalendarDays, Mic, FileText, Settings, GraduationCap } from 'lucide-react';
-import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry } from '../types';
+import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, FileText, Settings, GraduationCap } from 'lucide-react';
+import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry, Task, EventTimeMode } from '../types';
 
 interface GlobalSearchProps {
   data: {
@@ -15,6 +15,7 @@ interface GlobalSearchProps {
     lessonRecords: LessonRecord[];
     classes: ClassProfile[];
     timetable: TimetableEntry[];
+    tasks: Task[];
   };
   onNavigate: (tabKey: string) => void;
 }
@@ -39,6 +40,7 @@ const ENTITY_CONFIG = [
   { key: 'lessonRecords', tabKey: 'lessons', label: 'Lesson Records', icon: FileText },
   { key: 'classes', tabKey: 'students', label: 'Classes', icon: GraduationCap },
   { key: 'timetable', tabKey: 'timetable', label: 'Calendar', icon: Calendar },
+  { key: 'tasks', tabKey: 'tasks', label: 'Tasks', icon: CheckSquare },
 ] as const;
 
 function getSearchableText(item: Record<string, unknown>, entityKey: string): string {
@@ -87,6 +89,10 @@ function getSearchableText(item: Record<string, unknown>, entityKey: string): st
       const t = item as unknown as TimetableEntry;
       return [t.subject, t.class_name, t.topic, t.date].filter(Boolean).join(' ');
     }
+    case 'tasks': {
+      const t = item as unknown as Task;
+      return [t.title, t.description, t.assignee, ...(t.tags || [])].filter(Boolean).join(' ');
+    }
     default:
       return '';
   }
@@ -105,6 +111,7 @@ function getDisplayTitle(item: Record<string, unknown>, entityKey: string): stri
     case 'lessonRecords': return (item as unknown as LessonRecord).topic || (item as unknown as LessonRecord).class_name;
     case 'classes': return (item as unknown as ClassProfile).name;
     case 'timetable': return `${(item as unknown as TimetableEntry).subject} — ${(item as unknown as TimetableEntry).class_name}`;
+    case 'tasks': return (item as unknown as Task).title;
     default: return '';
   }
 }
@@ -116,7 +123,20 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
     case 'ideas': return (item as unknown as Idea).category;
     case 'sops': return (item as unknown as SOP).category;
     case 'workLogs': return (item as unknown as WorkLog).category;
-    case 'schoolEvents': return (item as unknown as SchoolEvent).date;
+    case 'schoolEvents': {
+      const ev = item as unknown as SchoolEvent;
+      const mode: EventTimeMode = ev.time_mode || 'all-day';
+      switch (mode) {
+        case 'multi-day':
+          return ev.end_date ? `${ev.date} – ${ev.end_date}` : ev.date;
+        case 'timed':
+          return ev.start_time ? `${ev.date} ${ev.start_time}–${ev.end_time || ''}` : ev.date;
+        case 'multi-day-timed':
+          return `${ev.date} ${ev.start_time || ''} – ${ev.end_date || ev.date} ${ev.end_time || ''}`;
+        default:
+          return ev.date;
+      }
+    }
     case 'meetings': return (item as unknown as MeetingRecord).date;
     case 'lessonRecords': return (item as unknown as LessonRecord).date;
     case 'classes': return (item as unknown as ClassProfile).year_group;
@@ -124,6 +144,7 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
       const t = item as unknown as TimetableEntry;
       return t.date ? `${t.room} \u00b7 ${t.date}` : t.room;
     }
+    case 'tasks': return (item as unknown as Task).status;
     default: return undefined;
   }
 }

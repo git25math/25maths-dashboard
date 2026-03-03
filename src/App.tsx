@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord } from './types';
+import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -19,6 +19,7 @@ import { SOPForm } from './components/SOPForm';
 import { IdeaForm } from './components/IdeaForm';
 import { GoalForm } from './components/GoalForm';
 import { SchoolEventForm } from './components/SchoolEventForm';
+import { TaskForm } from './components/TaskForm';
 import { LoginGate, useAuth } from './components/LoginGate';
 import { GlobalSearch } from './components/GlobalSearch';
 import { DashboardView } from './views/DashboardView';
@@ -32,6 +33,7 @@ import { MeetingsView } from './views/MeetingsView';
 import { LessonRecordsView } from './views/LessonRecordsView';
 import { GoalsView } from './views/GoalsView';
 import { SchoolEventsView } from './views/SchoolEventsView';
+import { TasksView } from './views/TasksView';
 import { SettingsView } from './views/SettingsView';
 import { DevConsoleView } from './views/DevConsoleView';
 
@@ -68,6 +70,8 @@ function AppContent() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [isEventFormOpen, setIsEventFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // GenericForm for student status/requests
   const [genericFormConfig, setGenericFormConfig] = useState<{
@@ -156,6 +160,7 @@ function AppContent() {
             schoolEvents={data.schoolEvents}
             workLogs={data.workLogs}
             ideas={data.ideas}
+            tasks={data.tasks}
             onNavigate={(tab) => {
               setActiveTab(tab);
             }}
@@ -257,6 +262,20 @@ function AppContent() {
             onToggleStatus={data.toggleIdeaStatus}
             onToggleDashboard={data.toggleIdeaDashboard}
             onConsolidate={data.consolidateIdeas}
+            onConvertToTask={(idea) => {
+              data.addTask({ title: idea.title, description: idea.content, status: 'inbox', priority: idea.priority, source_type: 'idea', source_id: idea.id });
+            }}
+          />
+        );
+      case 'tasks':
+        return (
+          <TasksView
+            tasks={data.tasks}
+            onAddTask={() => { setEditingTask(null); setIsTaskFormOpen(true); }}
+            onEditTask={(task) => { setEditingTask(task); setIsTaskFormOpen(true); }}
+            onDeleteTask={data.deleteTask}
+            onCycleStatus={data.cycleTaskStatus}
+            onNavigate={navigateTo}
           />
         );
       case 'meetings':
@@ -266,6 +285,7 @@ function AppContent() {
             onAddMeeting={data.addMeeting}
             onUpdateMeeting={data.updateMeeting}
             onDeleteMeeting={data.deleteMeeting}
+            onAddTask={data.addTask}
           />
         );
       case 'lessons':
@@ -319,6 +339,7 @@ function AppContent() {
               workLogs: data.workLogs,
               meetings: data.meetings,
               lessonRecords: data.lessonRecords,
+              tasks: data.tasks,
             }}
             onImport={data.bulkImport}
           />
@@ -412,6 +433,7 @@ function AppContent() {
           lessonRecords: data.lessonRecords,
           classes: data.classes,
           timetable: data.timetable,
+          tasks: data.tasks,
         }}
         onNavigate={navigateTo}
       />
@@ -458,6 +480,7 @@ function AppContent() {
           onUpdateLessonRecord={data.updateLessonRecord}
           onAddLessonRecord={data.addLessonRecord}
           students={data.students}
+          meetings={data.meetings}
         />
       )}
       {isWorkLogFormOpen && (
@@ -533,6 +556,21 @@ function AppContent() {
             setEditingEvent(null);
           }}
           onCancel={() => { setIsEventFormOpen(false); setEditingEvent(null); }}
+        />
+      )}
+      {isTaskFormOpen && (
+        <TaskForm
+          task={editingTask}
+          onSave={(d) => {
+            if (editingTask) {
+              data.updateTask(editingTask.id, d);
+            } else {
+              data.addTask(d);
+            }
+            setIsTaskFormOpen(false);
+            setEditingTask(null);
+          }}
+          onCancel={() => { setIsTaskFormOpen(false); setEditingTask(null); }}
         />
       )}
       {genericFormConfig.isOpen && (

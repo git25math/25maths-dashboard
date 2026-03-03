@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, Edit3, CheckCircle2, Clock, FileText, Eye, EyeOff, Sparkles, CheckSquare, Square, Loader2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Idea } from '../types';
+import { Idea, Task } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { geminiService, ConsolidatedIdea } from '../services/geminiService';
 import { ConsolidatePreviewModal } from '../components/ConsolidatePreviewModal';
@@ -29,9 +29,10 @@ interface IdeasViewProps {
   onToggleStatus?: (id: string) => void;
   onToggleDashboard?: (id: string) => void;
   onConsolidate?: (selectedIds: string[], consolidated: { title: string; content: string; category: Idea['category']; priority: Idea['priority'] }) => Promise<void>;
+  onConvertToTask?: (idea: Idea) => void;
 }
 
-export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggleStatus, onToggleDashboard, onConsolidate }: IdeasViewProps) => {
+export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggleStatus, onToggleDashboard, onConsolidate, onConvertToTask }: IdeasViewProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -144,6 +145,15 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
               )}
               {!isSelectMode && (
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
+                  {onConvertToTask && (
+                    <button
+                      onClick={() => onConvertToTask(idea)}
+                      title="Convert to Task"
+                      className="text-slate-300 hover:text-cyan-500 transition-colors"
+                    >
+                      <CheckSquare size={14} />
+                    </button>
+                  )}
                   {onToggleDashboard && (
                     <button
                       onClick={() => onToggleDashboard(idea.id)}

@@ -1,9 +1,31 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, CalendarDays, AlertTriangle } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { SchoolEvent } from '../types';
+import { SchoolEvent, EventTimeMode } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { format } from 'date-fns';
+
+function formatEventDate(event: SchoolEvent): string {
+  const mode: EventTimeMode = event.time_mode || 'all-day';
+  const d = new Date(event.date);
+  switch (mode) {
+    case 'multi-day': {
+      const end = event.end_date ? new Date(event.end_date) : d;
+      if (d.getFullYear() === end.getFullYear()) {
+        return `${format(d, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
+      }
+      return `${format(d, 'MMM d, yyyy')} – ${format(end, 'MMM d, yyyy')}`;
+    }
+    case 'timed':
+      return `${format(d, 'EEEE, MMM d, yyyy')} · ${event.start_time || ''}–${event.end_time || ''}`;
+    case 'multi-day-timed': {
+      const end = event.end_date ? new Date(event.end_date) : d;
+      return `${format(d, 'MMM d')} ${event.start_time || ''} – ${format(end, 'MMM d')} ${event.end_time || ''}`;
+    }
+    default:
+      return format(d, 'EEEE, MMM d, yyyy');
+  }
+}
 
 interface SchoolEventsViewProps {
   schoolEvents: SchoolEvent[];
@@ -100,7 +122,7 @@ export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEd
 
                 <h3 className="font-bold text-slate-900">{event.title}</h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  {format(new Date(event.date), 'EEEE, MMM d, yyyy')}
+                  {formatEventDate(event)}
                 </p>
                 {event.description && (
                   <MarkdownRenderer content={event.description} className="text-sm text-slate-600 mt-2 line-clamp-2" />
