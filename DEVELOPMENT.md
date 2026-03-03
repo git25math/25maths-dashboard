@@ -462,7 +462,9 @@ Browser
         Write:  Service (Supabase) → State → localStorage (write-through cache)
 ```
 
-**Key UI Patterns**: glass-card, cn() utility, emerald HP theming, indigo class filters, fixed floating action bars
+**Key UI Patterns**: glass-card, cn() utility, emerald HP theming, indigo class filters, blue parent-comm theming, fixed floating action bars
+
+**Student Sub-record Forms**: GenericForm (status/request text), WeaknessForm (topic/level/notes), ParentCommForm (date/method/content/follow-up)
 
 **Supabase Tables** (14):
 students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records, hp_award_logs
@@ -658,23 +660,33 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Student Detail HP History section (最近 10 条 + View All 跳转)
 - [x] Settings Export/Import 支持 hpAwardLogs
 
-### Phase 28c — Student Requests CRUD + Parent Communication 家校沟通 (2026-03-03)
-- **Student Requests 全功能 CRUD**:
-  - `updateStudentRequest`: 编辑诉求内容（通过 GenericForm + initialValue）
-  - `deleteStudentRequest`: 删除诉求（confirm 确认）
-  - `toggleRequestStatus`: 点击状态 badge 切换 pending ↔ resolved
-  - StudentsView: 状态 badge 可点击切换；hover 显示编辑(Pencil)和删除(Trash2)图标；空状态提示
-- **Parent Communication 家校沟通**（新功能，与平时诉求完全同构）:
-  - 新增 `ParentCommunication` 接口（id, date, content, status: 'pending'|'resolved'）
-  - Student 接口新增 `parent_communications?: ParentCommunication[]` 字段
-  - useAppData: `addParentCommunication`, `updateParentCommunication`, `deleteParentCommunication`, `toggleParentCommunicationStatus` 四个 CRUD 函数
-  - StudentsView: 学生详情右侧新增 "家校沟通 (Parent Comm.)" 区块（MessageSquare 图标，蓝色主题）
-    - 与平时诉求相同的 UI: 状态 badge 可切换 + hover 编辑/删除 + 空状态 + "+ New Communication" 按钮
-  - App.tsx: `openParentCommForm` + 编辑回调通过 GenericForm 实现
+### Phase 28c — Student Sub-record CRUD 全维度增删改查 (2026-03-03)
 - **HP History 实时同步修复**:
   - `saveStudent` 中新增 HP 变化检测：当 `house_points` 直接编辑时自动创建 HPAwardLog
   - 增加 → reason: "Manual HP adjustment"；减少 → reason: "Manual HP deduction"
   - 确保无论通过哪种方式修改 HP（批量奖励、课堂记录、直接编辑），HP History 都实时同步
+- **Student Requests 平时诉求全功能 CRUD**:
+  - `updateStudentRequest` / `deleteStudentRequest` / `toggleRequestStatus`
+  - 状态 badge 可点击切换 pending ↔ resolved；hover 显示编辑/删除图标
+  - 新增 `resolved_date` 字段：标记 resolved 时自动记录解决时间，toggle 回 pending 时清空
+  - 诉求时间 (提出) 和解决时间 (解决) 均以内联日期选择器展示，支持手动更改
+- **Learning Status 学习状况记录 CRUD**:
+  - `updateStatusRecord` / `deleteStatusRecord`
+  - 记录卡片 hover 显示编辑(Pencil) + 删除(Trash2)，通过 GenericForm 编辑（Markdown + LaTeX 富文本）
+- **Weakness 薄弱环节 CRUD**:
+  - `addWeakness` / `updateWeakness` / `deleteWeakness`
+  - 新增 `WeaknessForm` 组件：Topic 输入 + Level 三色切换 (low/medium/high) + Notes 富文本
+  - 卡片 hover 编辑/删除 + "+ Add Weakness" 按钮；Notes 改用 MarkdownRenderer 渲染
+- **Parent Communication 家校沟通**（全新结构化系统）:
+  - `ParentCommunication` 接口升级：date, method (面谈/电话/微信/邮件/其他), content, status, resolved_date, needs_follow_up, follow_up_plan, follow_up_task_id, follow_ups[]
+  - 新增 `ParentCommMethod` / `ParentCommFollowUp` 类型
+  - 新增 `ParentCommForm` 专属表单组件：日期 + 沟通方式图标切换 + 内容富文本 + 跟进计划 checkbox + 计划输入
+  - useAppData: `addParentCommunication` / `updateParentCommunication` / `addParentCommFollowUp` / `deleteParentCommunication` / `toggleParentCommunicationStatus` / `updateParentCommDate`
+  - 勾选"需要后续跟进"→ 保存时自动创建 GTD Task（tag: 家校沟通, source_type: 'parent-comm', status: next）
+  - `TaskSource` 类型扩展 `'parent-comm'`
+  - 追加跟进记录：多次追加后续跟进状况（时间自动记录），以蓝色左边线时间线展示
+  - UI: 沟通方式蓝色 badge + 图标；跟进计划琥珀色卡片；跟进记录蓝色时间线；解决时间自动记录
+- New files (2): WeaknessForm.tsx, ParentCommForm.tsx
 - Modified files (4): types.ts, useAppData.ts, App.tsx, StudentsView.tsx
 
 ### Phase 29 — Analytics & Reports (Next)
@@ -683,13 +695,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
-- [ ] 家校沟通统计面板（沟通频率、待处理事项汇总）
+- [ ] 家校沟通统计面板（沟通频率、待处理跟进汇总、按沟通方式分类统计）
 
 ### Phase 30 — Student Reports & Communication
 - [ ] Generate Subject Report（基于 exam_records + weaknesses + status_records 自动生成学科报告）
-- [ ] Parent Meeting Notes（从家校沟通记录生成家长会备忘录）
-- [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息）
+- [ ] Parent Meeting Notes（从家校沟通记录 AI 生成家长会备忘录）
+- [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息：成绩、薄弱环节、学习状态、诉求、家校沟通）
 - [ ] 批量家长邮件通知（基于 parent_email 字段）
+- [ ] 家校沟通跟进提醒（Dashboard 显示待跟进事项，超期预警）
 
 ### Phase 31 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
@@ -698,3 +711,4 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] PWA support (offline mode + install)
 - [ ] Custom domain setup
 - [ ] House Point 批量导入/导出（CSV/Excel 格式，方便与学校系统对接）
+- [ ] 家校沟通附件上传（沟通截图、签字文件等）
