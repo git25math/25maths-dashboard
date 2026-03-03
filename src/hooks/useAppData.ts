@@ -189,8 +189,30 @@ export function useAppData() {
   const saveStudent = useCallback(async (studentData: Omit<Student, 'id'> | Student) => {
     try {
       if ('id' in studentData) {
+        // Detect direct HP edit → auto-create award log
+        const oldStudent = students.find(s => s.id === studentData.id);
+        const hpDelta = oldStudent ? studentData.house_points - oldStudent.house_points : 0;
+
         const updated = await studentService.updateStudent(studentData.id, studentData);
         setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
+
+        if (hpDelta !== 0 && oldStudent) {
+          try {
+            const logEntry = await hpAwardService.create({
+              date: format(new Date(), 'yyyy-MM-dd'),
+              student_id: updated.id,
+              student_name: updated.name,
+              class_name: updated.class_name,
+              points: hpDelta,
+              reason: hpDelta > 0 ? 'Manual HP adjustment' : 'Manual HP deduction',
+              source: 'batch' as const,
+            });
+            setHpAwardLogs(prev => [...prev, logEntry]);
+          } catch {
+            // silent — don't block save if log fails
+          }
+        }
+
         toast.success('Student updated');
       } else {
         const created = await studentService.createStudent(studentData);
@@ -201,7 +223,7 @@ export function useAppData() {
       toast.error('Failed to save student');
       throw error;
     }
-  }, [setStudents, toast]);
+  }, [setStudents, students, toast, setHpAwardLogs]);
 
   const deleteStudent = useCallback(async (id: string) => {
     try {
