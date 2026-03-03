@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus, EmailDigest } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -15,6 +15,7 @@ import { meetingService } from '../services/meetingService';
 import { lessonRecordService } from '../services/lessonRecordService';
 import { taskService } from '../services/taskService';
 import { hpAwardService } from '../services/hpAwardService';
+import { emailDigestService } from '../services/emailDigestService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { useLocalStorage } from './useLocalStorage';
@@ -37,6 +38,7 @@ export function useAppData() {
   const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
   const [tasks, setTasks] = useLocalStorage<Task[]>('dashboard-tasks', []);
   const [hpAwardLogs, setHpAwardLogs] = useLocalStorage<HPAwardLog[]>('dashboard-hp-award-logs', []);
+  const [emailDigests, setEmailDigests] = useLocalStorage<EmailDigest[]>('dashboard-email-digests', []);
 
   // --- Normalize localStorage data ---
   useEffect(() => {
@@ -124,6 +126,7 @@ export function useAppData() {
         fetchOrSync(lessonRecordService.getAll, setRecordsAndCapture, lessonRecords, 'lesson_records'),
         fetchOrSync(taskService.getAll, setTasks, tasks, 'tasks'),
         fetchOrSync(hpAwardService.getAll, setLogsAndCapture, hpAwardLogs, 'hp_award_logs'),
+        fetchOrSync(emailDigestService.getAll, setEmailDigests, emailDigests, 'email_digests'),
       ]);
 
       // --- One-time backfill: create HPAwardLogs for existing data ---
@@ -1037,6 +1040,42 @@ export function useAppData() {
     }
   }, [setMeetings, toast]);
 
+  // --- Email Digests ---
+
+  const addEmailDigest = useCallback(async (data: Omit<EmailDigest, 'id'>) => {
+    try {
+      const created = await emailDigestService.create(data);
+      setEmailDigests(prev => [...prev, created]);
+      toast.success('Email digest created');
+      return created;
+    } catch (error) {
+      toast.error('Failed to create email digest');
+      throw error;
+    }
+  }, [setEmailDigests, toast]);
+
+  const updateEmailDigest = useCallback(async (id: string, updates: Partial<EmailDigest>) => {
+    const existing = emailDigests.find(d => d.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
+    try {
+      const updated = await emailDigestService.update(id, merged);
+      setEmailDigests(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
+    } catch (error) {
+      toast.error('Failed to update email digest');
+    }
+  }, [emailDigests, setEmailDigests, toast]);
+
+  const deleteEmailDigest = useCallback(async (id: string) => {
+    try {
+      await emailDigestService.delete(id);
+      setEmailDigests(prev => prev.filter(d => d.id !== id));
+      toast.success('Email digest deleted');
+    } catch (error) {
+      toast.error('Failed to delete email digest');
+    }
+  }, [setEmailDigests, toast]);
+
   // --- House Point Delta Helper ---
 
   const computeHousePointDeltas = (
@@ -1297,6 +1336,7 @@ export function useAppData() {
       lessonRecords: (v) => setLessonRecords(v as LessonRecord[]),
       tasks: (v) => setTasks(v as Task[]),
       hpAwardLogs: (v) => setHpAwardLogs(v as HPAwardLog[]),
+      emailDigests: (v) => setEmailDigests(v as EmailDigest[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -1308,12 +1348,12 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, toast]);
+  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, toast]);
 
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests,
     toasts,
 
     // Student
@@ -1344,6 +1384,9 @@ export function useAppData() {
 
     // Meetings
     addMeeting, updateMeeting, deleteMeeting,
+
+    // Email Digests
+    addEmailDigest, updateEmailDigest, deleteEmailDigest,
 
     // Lesson Records
     addLessonRecord, updateLessonRecord, deleteLessonRecord,

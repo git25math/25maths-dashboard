@@ -60,6 +60,12 @@ export interface SmartTasksInput {
   participants: string[];
 }
 
+export interface EmailDigestResult {
+  subject: string;
+  chinese_translation: string;
+  items: { content: string; type: 'action' | 'memo' }[];
+}
+
 export interface ActionPlanInput {
   summary: AISummary;
   meetingTitle: string;
@@ -461,5 +467,45 @@ ${contextBlock}`,
     });
 
     return response.text ?? '';
+  },
+
+  async processEmailDigest(emailContent: string): Promise<EmailDigestResult> {
+    const ai = getClient();
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a school email digest assistant for a teacher. Analyze the following English school email and produce a structured JSON summary in Chinese.
+
+Return ONLY valid JSON with this exact structure (no markdown fences):
+{
+  "subject": "邮件主题（中文）",
+  "chinese_translation": "完整的中文翻译，保留原文结构和段落",
+  "items": [
+    { "content": "提取的要点（中文）", "type": "action" },
+    { "content": "提取的备忘（中文）", "type": "memo" }
+  ]
+}
+
+Rules:
+- "subject": Extract or infer the email subject, translate to Chinese
+- "chinese_translation": Full translation of the email into Chinese, preserving structure
+- "items": Extract key points as structured items
+  - type "action": items that require the teacher to DO something (deadlines, submissions, tasks, RSVPs)
+  - type "memo": informational items to be aware of (announcements, policy changes, FYI)
+- Keep each item concise (1-2 sentences)
+- Order items by importance (actions first, then memos)
+
+Email content:
+${emailContent}`,
+        }],
+      }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    return JSON.parse(jsonStr) as EmailDigestResult;
   },
 };

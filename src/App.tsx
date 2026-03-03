@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
+import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -37,6 +37,7 @@ import { GoalsView } from './views/GoalsView';
 import { SchoolEventsView } from './views/SchoolEventsView';
 import { TasksView } from './views/TasksView';
 import { HousePointHistoryView } from './views/HousePointHistoryView';
+import { EmailDigestView } from './views/EmailDigestView';
 import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
@@ -406,6 +407,18 @@ function AppContent() {
             onAddSOP={data.addSOP}
           />
         );
+      case 'email-digest':
+        return (
+          <EmailDigestView
+            emailDigests={data.emailDigests}
+            onAddEmailDigest={data.addEmailDigest}
+            onUpdateEmailDigest={data.updateEmailDigest}
+            onDeleteEmailDigest={data.deleteEmailDigest}
+            onAddTask={data.addTask}
+            tasks={data.tasks}
+            onCycleTaskStatus={data.cycleTaskStatus}
+          />
+        );
       case 'hp-history':
         return (
           <HousePointHistoryView
@@ -468,6 +481,7 @@ function AppContent() {
               lessonRecords: data.lessonRecords,
               tasks: data.tasks,
               hpAwardLogs: data.hpAwardLogs,
+              emailDigests: data.emailDigests,
             }}
             onImport={data.bulkImport}
           />
@@ -562,6 +576,7 @@ function AppContent() {
           classes: data.classes,
           timetable: data.timetable,
           tasks: data.tasks,
+          emailDigests: data.emailDigests,
         }}
         onNavigate={navigateTo}
       />

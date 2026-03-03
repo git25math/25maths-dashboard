@@ -447,14 +447,14 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, HPHistory, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, Settings
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, HPHistory, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, EmailDigest, SOP, Settings
   │     ├── useAppData hook (central state management + bulkImport)
   │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
-  │     ├── 13 Service files (Supabase API layer + Edge Function proxy for GitHub Actions)
+  │     ├── 14 Service files (Supabase API layer + Edge Function proxy for GitHub Actions)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
-  │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
+  │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation, email digest)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
   │
   └── Data Flow:
@@ -466,8 +466,8 @@ Browser
 
 **Student Sub-record Forms**: GenericForm (status/request text), WeaknessForm (topic/level/notes), ParentCommForm (date/method/content/follow-up)
 
-**Supabase Tables** (14):
-students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records, hp_award_logs
+**Supabase Tables** (15):
+students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records, hp_award_logs, email_digests
 
 ---
 
@@ -699,7 +699,35 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - `StudentForm` 不受影响：学生可属于任意班级组
 - Modified files (4): constants.ts, ClassForm.tsx, TeachingUnitForm.tsx, TeachingView.tsx
 
-### Phase 29 — Analytics & Reports (Next)
+### Phase 29 — Email Digest 学校邮件摘要 (2026-03-03)
+- **需求**: 教师每天收到大量英文学校邮件，需快速提取要点、翻译为中文、生成可勾选的备忘/待办事项
+- **数据模型**: 新增 `EmailDigest` + `EmailDigestItem` 接口
+  - EmailDigest: id, subject, original_content, chinese_translation, items[], created_at
+  - EmailDigestItem: id, content, type ('action'|'memo'), checked, task_id?
+  - `TaskSource` 扩展 `'email-digest'`
+- **Gemini AI**: `processEmailDigest()` — 输入英文邮件 → 输出 JSON（subject 中文主题、chinese_translation 全文翻译、items 结构化事项 action/memo 分类）
+- **emailDigestService.ts**: Supabase + localStorage CRUD（getAll/create/update/delete），ID 格式 `ed-{timestamp}-{random}`
+- **EmailDigestView.tsx**: 三模式视图（list/new/detail），遵循 MeetingsView 模式
+  - **List**: 卡片网格，显示 subject、日期、action/memo 数量 badge、完成进度条
+  - **New**: 大文本框粘贴邮件 + "Process with AI" 按钮（Loader2 spinner）
+  - **Detail**: 原文（英文，可折叠）+ 中文翻译（默认展开）+ 事项列表（checkbox 可勾选、type badge 琥珀/蓝色、勾选后划线）
+  - Action 事项 → "转为 Task" 按钮 → 创建 GTD Task（source_type: 'email-digest'）
+  - Related Tasks 面板：关联任务显示 + 状态循环
+- **useAppData**: emailDigests state + addEmailDigest/updateEmailDigest/deleteEmailDigest + bulkImport 支持
+- **Sidebar**: Mail 图标，位于 Meetings 之后
+- **GlobalSearch**: emailDigests 搜索（按 subject + original_content 匹配）
+- **SettingsView**: KNOWN_KEYS 增加 `'emailDigests'`（Export/Import 支持）
+- New files (2): emailDigestService.ts, EmailDigestView.tsx
+- Modified files (7): types.ts, geminiService.ts, useAppData.ts, sidebarConfig.ts, App.tsx, SettingsView.tsx, GlobalSearch.tsx
+
+### ~~Phase 29 — Email Digest 学校邮件摘要~~ ✅ Done
+- [x] EmailDigest + EmailDigestItem 数据模型，TaskSource 扩展 'email-digest'
+- [x] Gemini processEmailDigest：英文邮件 → 中文翻译 + action/memo 结构化事项
+- [x] emailDigestService CRUD 服务
+- [x] EmailDigestView 三模式视图（list/new/detail）+ AI 处理 + checkbox + Task 转换
+- [x] useAppData 集成 + Sidebar + GlobalSearch + Settings Export/Import
+
+### Phase 30 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -707,14 +735,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] 家校沟通统计面板（沟通频率、待处理跟进汇总、按沟通方式分类统计）
 
-### Phase 30 — Student Reports & Communication
+### Phase 32 — Student Reports & Communication
 - [ ] Generate Subject Report（基于 exam_records + weaknesses + status_records 自动生成学科报告）
 - [ ] Parent Meeting Notes（从家校沟通记录 AI 生成家长会备忘录）
 - [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息：成绩、薄弱环节、学习状态、诉求、家校沟通）
 - [ ] 批量家长邮件通知（基于 parent_email 字段）
 - [ ] 家校沟通跟进提醒（Dashboard 显示待跟进事项，超期预警）
 
-### Phase 31 — Advanced
+### Phase 33 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

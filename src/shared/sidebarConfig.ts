@@ -9,6 +9,7 @@ import {
   CheckSquare,
   Clock,
   Mic,
+  Mail,
   Settings,
   Target,
   CalendarDays,
@@ -27,6 +28,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'goals', icon: Target, label: 'Goals' },
   { key: 'events', icon: CalendarDays, label: 'School Events' },
   { key: 'meetings', icon: Mic, label: 'Meetings' },
+  { key: 'email-digest', icon: Mail, label: 'Email Digest' },
   { key: 'sop', icon: Settings, label: 'SOP Library' },
   { key: 'settings', icon: Settings, label: 'Settings' },
 ] as const;

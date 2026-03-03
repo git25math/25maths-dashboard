@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, FileText, Settings, GraduationCap } from 'lucide-react';
-import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry, Task, EventTimeMode } from '../types';
+import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, Mail, FileText, Settings, GraduationCap } from 'lucide-react';
+import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry, Task, EmailDigest, EventTimeMode } from '../types';
 
 interface GlobalSearchProps {
   data: {
@@ -16,6 +16,7 @@ interface GlobalSearchProps {
     classes: ClassProfile[];
     timetable: TimetableEntry[];
     tasks: Task[];
+    emailDigests: EmailDigest[];
   };
   onNavigate: (tabKey: string) => void;
 }
@@ -41,6 +42,7 @@ const ENTITY_CONFIG = [
   { key: 'classes', tabKey: 'students', label: 'Classes', icon: GraduationCap },
   { key: 'timetable', tabKey: 'timetable', label: 'Calendar', icon: Calendar },
   { key: 'tasks', tabKey: 'tasks', label: 'Tasks', icon: CheckSquare },
+  { key: 'emailDigests', tabKey: 'email-digest', label: 'Email Digests', icon: Mail },
 ] as const;
 
 function getSearchableText(item: Record<string, unknown>, entityKey: string): string {
@@ -93,6 +95,10 @@ function getSearchableText(item: Record<string, unknown>, entityKey: string): st
       const t = item as unknown as Task;
       return [t.title, t.description, t.assignee, ...(t.tags || [])].filter(Boolean).join(' ');
     }
+    case 'emailDigests': {
+      const ed = item as unknown as EmailDigest;
+      return [ed.subject, ed.original_content].filter(Boolean).join(' ');
+    }
     default:
       return '';
   }
@@ -112,6 +118,7 @@ function getDisplayTitle(item: Record<string, unknown>, entityKey: string): stri
     case 'classes': return (item as unknown as ClassProfile).name;
     case 'timetable': return `${(item as unknown as TimetableEntry).subject} — ${(item as unknown as TimetableEntry).class_name}`;
     case 'tasks': return (item as unknown as Task).title;
+    case 'emailDigests': return (item as unknown as EmailDigest).subject;
     default: return '';
   }
 }
@@ -145,6 +152,7 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
       return t.date ? `${t.room} \u00b7 ${t.date}` : t.room;
     }
     case 'tasks': return (item as unknown as Task).status;
+    case 'emailDigests': return new Date((item as unknown as EmailDigest).created_at).toLocaleDateString();
     default: return undefined;
   }
 }

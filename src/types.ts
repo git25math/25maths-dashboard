@@ -6,7 +6,7 @@ export type PrepStatus = 'not_prepared' | 'prepared' | 'finished' | 'recorded';
 // --- GTD Task types ---
 export type TaskStatus = 'inbox' | 'next' | 'waiting' | 'someday' | 'done';
 export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea' | 'parent-comm';
+export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea' | 'parent-comm' | 'email-digest';
 
 export interface Task {
   id: string;
@@ -304,6 +304,23 @@ export interface SmartTaskPreview {
   due_date?: string;
   tags: string[];
   source_section: 'action_item' | 'key_point' | 'decision' | 'summary';
+}
+
+export interface EmailDigestItem {
+  id: string;
+  content: string;
+  type: 'action' | 'memo';
+  checked: boolean;
+  task_id?: string;
+}
+
+export interface EmailDigest {
+  id: string;
+  subject: string;
+  original_content: string;
+  chinese_translation: string;
+  items: EmailDigestItem[];
+  created_at: string;
 }
 
 export interface MeetingRecord {
