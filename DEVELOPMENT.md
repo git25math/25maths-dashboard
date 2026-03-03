@@ -658,14 +658,40 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Student Detail HP History section (最近 10 条 + View All 跳转)
 - [x] Settings Export/Import 支持 hpAwardLogs
 
+### Phase 28c — Student Requests CRUD + Parent Communication 家校沟通 (2026-03-03)
+- **Student Requests 全功能 CRUD**:
+  - `updateStudentRequest`: 编辑诉求内容（通过 GenericForm + initialValue）
+  - `deleteStudentRequest`: 删除诉求（confirm 确认）
+  - `toggleRequestStatus`: 点击状态 badge 切换 pending ↔ resolved
+  - StudentsView: 状态 badge 可点击切换；hover 显示编辑(Pencil)和删除(Trash2)图标；空状态提示
+- **Parent Communication 家校沟通**（新功能，与平时诉求完全同构）:
+  - 新增 `ParentCommunication` 接口（id, date, content, status: 'pending'|'resolved'）
+  - Student 接口新增 `parent_communications?: ParentCommunication[]` 字段
+  - useAppData: `addParentCommunication`, `updateParentCommunication`, `deleteParentCommunication`, `toggleParentCommunicationStatus` 四个 CRUD 函数
+  - StudentsView: 学生详情右侧新增 "家校沟通 (Parent Comm.)" 区块（MessageSquare 图标，蓝色主题）
+    - 与平时诉求相同的 UI: 状态 badge 可切换 + hover 编辑/删除 + 空状态 + "+ New Communication" 按钮
+  - App.tsx: `openParentCommForm` + 编辑回调通过 GenericForm 实现
+- **HP History 实时同步修复**:
+  - `saveStudent` 中新增 HP 变化检测：当 `house_points` 直接编辑时自动创建 HPAwardLog
+  - 增加 → reason: "Manual HP adjustment"；减少 → reason: "Manual HP deduction"
+  - 确保无论通过哪种方式修改 HP（批量奖励、课堂记录、直接编辑），HP History 都实时同步
+- Modified files (4): types.ts, useAppData.ts, App.tsx, StudentsView.tsx
+
 ### Phase 29 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
+- [ ] 家校沟通统计面板（沟通频率、待处理事项汇总）
 
-### Phase 30 — Advanced
+### Phase 30 — Student Reports & Communication
+- [ ] Generate Subject Report（基于 exam_records + weaknesses + status_records 自动生成学科报告）
+- [ ] Parent Meeting Notes（从家校沟通记录生成家长会备忘录）
+- [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息）
+- [ ] 批量家长邮件通知（基于 parent_email 字段）
+
+### Phase 31 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
