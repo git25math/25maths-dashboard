@@ -82,8 +82,36 @@ export function useAppData() {
           return next.map(normalizeTeachingUnit);
         });
       };
+
+      // Collect resolved data for post-fetch backfill
+      let resolvedStudents: Student[] = [];
+      let resolvedLogs: HPAwardLog[] = [];
+      let resolvedRecords: LessonRecord[] = [];
+
+      const setStudentsAndCapture: React.Dispatch<React.SetStateAction<Student[]>> = (val) => {
+        setStudents(prev => {
+          const next = typeof val === 'function' ? val(prev) : val;
+          resolvedStudents = next;
+          return next;
+        });
+      };
+      const setLogsAndCapture: React.Dispatch<React.SetStateAction<HPAwardLog[]>> = (val) => {
+        setHpAwardLogs(prev => {
+          const next = typeof val === 'function' ? val(prev) : val;
+          resolvedLogs = next;
+          return next;
+        });
+      };
+      const setRecordsAndCapture: React.Dispatch<React.SetStateAction<LessonRecord[]>> = (val) => {
+        setLessonRecords(prev => {
+          const next = typeof val === 'function' ? val(prev) : val;
+          resolvedRecords = next;
+          return next;
+        });
+      };
+
       await Promise.all([
-        fetchOrSync(studentService.getAllStudents, setStudents, students, 'students'),
+        fetchOrSync(studentService.getAllStudents, setStudentsAndCapture, students, 'students'),
         fetchOrSync(teachingService.getAllUnits, normalizeAndSetUnits, teachingUnits, 'teaching_units'),
         fetchOrSync(classService.getAllClasses, setClasses, classes, 'classes'),
         fetchOrSync(ideaService.getAll, setIdeas, ideas, 'ideas'),
@@ -93,10 +121,65 @@ export function useAppData() {
         fetchOrSync(schoolEventService.getAll, setSchoolEvents, schoolEvents, 'school_events'),
         fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
         fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
-        fetchOrSync(lessonRecordService.getAll, setLessonRecords, lessonRecords, 'lesson_records'),
+        fetchOrSync(lessonRecordService.getAll, setRecordsAndCapture, lessonRecords, 'lesson_records'),
         fetchOrSync(taskService.getAll, setTasks, tasks, 'tasks'),
-        fetchOrSync(hpAwardService.getAll, setHpAwardLogs, hpAwardLogs, 'hp_award_logs'),
+        fetchOrSync(hpAwardService.getAll, setLogsAndCapture, hpAwardLogs, 'hp_award_logs'),
       ]);
+
+      // --- One-time backfill: create HPAwardLogs for existing data ---
+      if (resolvedLogs.length === 0) {
+        const backfillLogs: Omit<HPAwardLog, 'id'>[] = [];
+        const today = format(new Date(), 'yyyy-MM-dd');
+
+        // 1) Backfill from lesson records with house_point_awards
+        for (const record of resolvedRecords) {
+          const awards = record.house_point_awards || [];
+          for (const a of awards) {
+            backfillLogs.push({
+              date: record.date,
+              student_id: a.student_id,
+              student_name: a.student_name,
+              class_name: record.class_name,
+              points: a.points,
+              reason: a.reason || 'Lesson HP Award',
+              source: 'lesson',
+              source_id: record.id,
+            });
+          }
+        }
+
+        // 2) Backfill from students with house_points > 0 (batch awards with no other source)
+        const lessonLogStudentPoints = new Map<string, number>();
+        for (const log of backfillLogs) {
+          lessonLogStudentPoints.set(log.student_id, (lessonLogStudentPoints.get(log.student_id) || 0) + log.points);
+        }
+        for (const student of resolvedStudents) {
+          if (student.house_points > 0) {
+            const fromLessons = lessonLogStudentPoints.get(student.id) || 0;
+            const remainder = student.house_points - fromLessons;
+            if (remainder > 0) {
+              backfillLogs.push({
+                date: today,
+                student_id: student.id,
+                student_name: student.name,
+                class_name: student.class_name,
+                points: remainder,
+                reason: 'Historical HP (backfilled)',
+                source: 'batch',
+              });
+            }
+          }
+        }
+
+        if (backfillLogs.length > 0) {
+          try {
+            const created = await hpAwardService.createBatch(backfillLogs);
+            setHpAwardLogs(created);
+          } catch {
+            // silent fallback
+          }
+        }
+      }
     };
     fetchAll();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
