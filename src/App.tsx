@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
+import { Student, StudentWeakness, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -13,6 +13,7 @@ import { StudentForm } from './components/StudentForm';
 import { TeachingUnitForm } from './components/TeachingUnitForm';
 import { ClassForm } from './components/ClassForm';
 import { GenericForm } from './components/GenericForm';
+import { WeaknessForm } from './components/WeaknessForm';
 import { TimetableEntryForm } from './components/TimetableEntryForm';
 import { WorkLogForm } from './components/WorkLogForm';
 import { SOPForm } from './components/SOPForm';
@@ -73,6 +74,14 @@ function AppContent() {
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // WeaknessForm
+  const [weaknessFormConfig, setWeaknessFormConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    initialValue?: StudentWeakness;
+    onSave: (weakness: StudentWeakness) => void;
+  }>({ isOpen: false, title: '', onSave: () => {} });
 
   // GenericForm for student status/requests
   const [genericFormConfig, setGenericFormConfig] = useState<{
@@ -233,6 +242,28 @@ function AppContent() {
               });
             }}
             onDeleteStatusRecord={data.deleteStatusRecord}
+            onAddWeakness={(studentId) => {
+              setWeaknessFormConfig({
+                isOpen: true,
+                title: 'Add Weakness',
+                onSave: async (weakness) => {
+                  await data.addWeakness(studentId, weakness);
+                  setWeaknessFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onEditWeakness={(studentId, index, weakness) => {
+              setWeaknessFormConfig({
+                isOpen: true,
+                title: 'Edit Weakness',
+                initialValue: weakness,
+                onSave: async (updated) => {
+                  await data.updateWeakness(studentId, index, updated);
+                  setWeaknessFormConfig(prev => ({ ...prev, isOpen: false }));
+                }
+              });
+            }}
+            onDeleteWeakness={data.deleteWeakness}
             onAddRequest={openRequestForm}
             onEditRequest={(studentId, requestId, currentContent) => {
               setGenericFormConfig({
@@ -649,6 +680,14 @@ function AppContent() {
             setEditingTask(null);
           }}
           onCancel={() => { setIsTaskFormOpen(false); setEditingTask(null); }}
+        />
+      )}
+      {weaknessFormConfig.isOpen && (
+        <WeaknessForm
+          title={weaknessFormConfig.title}
+          initialValue={weaknessFormConfig.initialValue}
+          onSave={weaknessFormConfig.onSave}
+          onCancel={() => setWeaknessFormConfig(prev => ({ ...prev, isOpen: false }))}
         />
       )}
       {genericFormConfig.isOpen && (

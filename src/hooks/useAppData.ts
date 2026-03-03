@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -267,6 +267,38 @@ export function useAppData() {
       await saveStudent({
         ...student,
         status_records: (student.status_records || []).filter(r => r.id !== recordId),
+      });
+    }
+  }, [students, saveStudent]);
+
+  // --- Weakness CRUD ---
+
+  const addWeakness = useCallback(async (studentId: string, weakness: StudentWeakness) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        weaknesses: [...(student.weaknesses || []), weakness],
+      });
+    }
+  }, [students, saveStudent]);
+
+  const updateWeakness = useCallback(async (studentId: string, index: number, weakness: StudentWeakness) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        weaknesses: (student.weaknesses || []).map((w, i) => i === index ? weakness : w),
+      });
+    }
+  }, [students, saveStudent]);
+
+  const deleteWeakness = useCallback(async (studentId: string, index: number) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        weaknesses: (student.weaknesses || []).filter((_, i) => i !== index),
       });
     }
   }, [students, saveStudent]);
@@ -1177,7 +1209,7 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
+    saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addWeakness, updateWeakness, deleteWeakness, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
     addParentCommunication, updateParentCommunication, deleteParentCommunication, toggleParentCommunicationStatus,
     addExamRecord, batchAwardHP,
 

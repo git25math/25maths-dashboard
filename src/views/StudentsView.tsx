@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication } from '../types';
+import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication, StudentWeakness } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { geminiService } from '../services/geminiService';
@@ -22,6 +22,9 @@ interface StudentsViewProps {
   onAddStatusRecord: (studentId: string) => void;
   onEditStatusRecord?: (studentId: string, recordId: string, currentContent: string) => void;
   onDeleteStatusRecord?: (studentId: string, recordId: string) => void;
+  onAddWeakness?: (studentId: string) => void;
+  onEditWeakness?: (studentId: string, index: number, weakness: StudentWeakness) => void;
+  onDeleteWeakness?: (studentId: string, index: number) => void;
   onAddRequest: (studentId: string) => void;
   onEditRequest?: (studentId: string, requestId: string, currentContent: string) => void;
   onDeleteRequest?: (studentId: string, requestId: string) => void;
@@ -52,6 +55,9 @@ export const StudentsView = ({
   onAddStatusRecord,
   onEditStatusRecord,
   onDeleteStatusRecord,
+  onAddWeakness,
+  onEditWeakness,
+  onDeleteWeakness,
   onAddRequest,
   onEditRequest,
   onDeleteRequest,
@@ -369,19 +375,41 @@ export const StudentsView = ({
                     const isLoading = recommendationLoading === wKey;
                     const rec = recommendations[wKey];
                     return (
-                      <div key={i} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
+                      <div key={i} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2 group">
                         <div className="flex justify-between items-center">
                           <p className="font-bold text-slate-900">{w.topic}</p>
-                          <span className={cn(
-                            "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                            w.level === 'high' ? "bg-red-100 text-red-600" :
-                            w.level === 'medium' ? "bg-amber-100 text-amber-600" :
-                            "bg-blue-100 text-blue-600"
-                          )}>
-                            {w.level}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                              w.level === 'high' ? "bg-red-100 text-red-600" :
+                              w.level === 'medium' ? "bg-amber-100 text-amber-600" :
+                              "bg-blue-100 text-blue-600"
+                            )}>
+                              {w.level}
+                            </span>
+                            {onEditWeakness && (
+                              <button
+                                onClick={() => onEditWeakness(selectedStudent.id, i, w)}
+                                className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
+                                title="Edit"
+                              >
+                                <Pencil size={12} />
+                              </button>
+                            )}
+                            {onDeleteWeakness && (
+                              <button
+                                onClick={() => {
+                                  if (confirm('Delete this weakness?')) onDeleteWeakness(selectedStudent.id, i);
+                                }}
+                                className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                title="Delete"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-500">{w.notes}</p>
+                        {w.notes && <MarkdownRenderer content={w.notes} className="text-xs text-slate-500" />}
                         <button
                           disabled={isLoading}
                           onClick={async () => {
@@ -417,6 +445,17 @@ export const StudentsView = ({
                     );
                   })}
                 </div>
+                {(!selectedStudent.weaknesses || selectedStudent.weaknesses.length === 0) && (
+                  <p className="text-sm text-slate-400 italic">No weaknesses recorded.</p>
+                )}
+                {onAddWeakness && (
+                  <button
+                    onClick={() => onAddWeakness(selectedStudent.id)}
+                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                  >
+                    + Add Weakness
+                  </button>
+                )}
               </section>
 
               {/* HP History */}
