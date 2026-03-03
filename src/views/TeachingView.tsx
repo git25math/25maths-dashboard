@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
-import { YEAR_GROUPS } from '../shared/constants';
+import { TEACHING_YEAR_GROUPS } from '../shared/constants';
 
 interface TeachingViewProps {
   teachingUnits: TeachingUnit[];
@@ -659,7 +659,7 @@ export const TeachingView = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {YEAR_GROUPS.map(year => (
+        {TEACHING_YEAR_GROUPS.map(year => (
           <div
             key={year}
             onClick={() => setSelectedYear(year)}

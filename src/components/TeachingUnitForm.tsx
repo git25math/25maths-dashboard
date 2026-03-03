@@ -3,7 +3,7 @@ import { X, Save, Plus, Trash2 } from 'lucide-react';
 import { TeachingUnit, LessonPlanItem } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
-import { YEAR_GROUPS } from '../shared/constants';
+import { TEACHING_YEAR_GROUPS } from '../shared/constants';
 
 interface TeachingUnitFormProps {
   unit?: TeachingUnit | null;
@@ -77,7 +77,7 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
                 onChange={e => setFormData({ ...formData, year_group: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               >
-                {YEAR_GROUPS.map(y => (
+                {TEACHING_YEAR_GROUPS.map(y => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </select>

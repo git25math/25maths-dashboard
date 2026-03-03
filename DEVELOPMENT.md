@@ -689,6 +689,16 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - New files (2): WeaknessForm.tsx, ParentCommForm.tsx
 - Modified files (4): types.ts, useAppData.ts, App.tsx, StudentsView.tsx
 
+### Phase 28d — 班级组扩展 Mixed & Form Group (2026-03-03)
+- **YEAR_GROUPS 扩展**: 新增 `Mixed`、`Form` 两个班级组类型
+- **教学计划隔离**: Mixed Group 和 Form Group 不关联教学计划（Teaching Units）
+  - 新增 `TEACHING_YEAR_GROUPS` 常量（仅 Year 7-12）和 `NON_TEACHING_GROUPS` 集合
+  - `TeachingUnitForm`: 年级下拉仅显示 Year 7-12
+  - `TeachingView` 年级概览: 仅渲染有教学计划的年级卡片（Year 7-12）
+  - `ClassForm`: 选择 Mixed/Form 时自动隐藏 "Current Unit" 选择器
+- `StudentForm` 不受影响：学生可属于任意班级组
+- Modified files (4): constants.ts, ClassForm.tsx, TeachingUnitForm.tsx, TeachingView.tsx
+
 ### Phase 29 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)

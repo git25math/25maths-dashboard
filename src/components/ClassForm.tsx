@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { ClassProfile, TeachingUnit } from '../types';
-import { YEAR_GROUPS } from '../shared/constants';
+import { YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 
 interface ClassFormProps {
   classProfile?: ClassProfile | null;
@@ -73,9 +73,10 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
             </select>
           </div>
 
+          {!NON_TEACHING_GROUPS.has(formData.year_group) && (
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Current Unit</label>
-            <select 
+            <select
               value={formData.current_unit_id}
               onChange={e => setFormData({ ...formData, current_unit_id: e.target.value })}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -86,6 +87,7 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
               ))}
             </select>
           </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Description</label>
