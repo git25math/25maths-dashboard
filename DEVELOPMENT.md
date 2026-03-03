@@ -364,6 +364,11 @@
 - New files: HousePointAwardsEditor.tsx, migration SQL
 - Modified files (5): types.ts, useAppData.ts, LessonRecordsView.tsx, TimetableEntryForm.tsx, App.tsx
 
+### Hotfix — Work Logs 排序修复 (2026-03-03)
+- **WorkLogView**: `filteredLogs` 添加显式 `sort((a, b) => b.timestamp.localeCompare(a.timestamp))`，确保始终按 timestamp 倒序（最新在前）
+  - 之前仅依赖 `addWorkLog` 的 `[created, ...prev]` 插入顺序，Supabase 加载后顺序不保证
+- Modified files (1): WorkLogView.tsx
+
 ---
 
 ## Current Architecture
