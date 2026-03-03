@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, Task, PrepStatus } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HousePointAward, HPAwardLog, Task, PrepStatus } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -14,6 +14,7 @@ import { timetableService } from '../services/timetableService';
 import { meetingService } from '../services/meetingService';
 import { lessonRecordService } from '../services/lessonRecordService';
 import { taskService } from '../services/taskService';
+import { hpAwardService } from '../services/hpAwardService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { useLocalStorage } from './useLocalStorage';
@@ -35,6 +36,7 @@ export function useAppData() {
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
   const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
   const [tasks, setTasks] = useLocalStorage<Task[]>('dashboard-tasks', []);
+  const [hpAwardLogs, setHpAwardLogs] = useLocalStorage<HPAwardLog[]>('dashboard-hp-award-logs', []);
 
   // --- Normalize localStorage data ---
   useEffect(() => {
@@ -93,6 +95,7 @@ export function useAppData() {
         fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
         fetchOrSync(lessonRecordService.getAll, setLessonRecords, lessonRecords, 'lesson_records'),
         fetchOrSync(taskService.getAll, setTasks, tasks, 'tasks'),
+        fetchOrSync(hpAwardService.getAll, setHpAwardLogs, hpAwardLogs, 'hp_award_logs'),
       ]);
     };
     fetchAll();
@@ -723,6 +726,7 @@ export function useAppData() {
     awards: { student_id: string; points: number; reason: string }[]
   ) => {
     try {
+      const today = format(new Date(), 'yyyy-MM-dd');
       for (const award of awards) {
         const student = students.find(s => s.id === award.student_id);
         if (student) {
@@ -732,12 +736,28 @@ export function useAppData() {
           });
         }
       }
+      // Create HP award logs
+      const logEntries: Omit<HPAwardLog, 'id'>[] = awards.map(award => {
+        const student = students.find(s => s.id === award.student_id);
+        return {
+          date: today,
+          student_id: award.student_id,
+          student_name: student?.name || 'Unknown',
+          class_name: student?.class_name || '',
+          points: award.points,
+          reason: award.reason || 'House Points Award',
+          source: 'batch' as const,
+        };
+      });
+      const createdLogs = await hpAwardService.createBatch(logEntries);
+      setHpAwardLogs(prev => [...prev, ...createdLogs]);
+
       const totalPoints = awards.reduce((sum, a) => sum + a.points, 0);
       toast.success(`Awarded ${totalPoints} HP to ${awards.length} student${awards.length !== 1 ? 's' : ''}`);
     } catch (error) {
       toast.error('Failed to award house points');
     }
-  }, [students, saveStudent, toast]);
+  }, [students, saveStudent, toast, setHpAwardLogs]);
 
   // --- Lesson Records ---
 
@@ -750,12 +770,25 @@ export function useAppData() {
       if (awards.length > 0) {
         const deltas = computeHousePointDeltas([], awards);
         await applyHousePointDeltas(deltas);
+        // Create HP award logs
+        const logEntries: Omit<HPAwardLog, 'id'>[] = awards.map(a => ({
+          date: data.date || format(new Date(), 'yyyy-MM-dd'),
+          student_id: a.student_id,
+          student_name: a.student_name,
+          class_name: data.class_name,
+          points: a.points,
+          reason: a.reason || 'Lesson HP Award',
+          source: 'lesson' as const,
+          source_id: created.id,
+        }));
+        const createdLogs = await hpAwardService.createBatch(logEntries);
+        setHpAwardLogs(prev => [...prev, ...createdLogs]);
       }
       toast.success('Lesson record added');
     } catch (error) {
       toast.error('Failed to add lesson record');
     }
-  }, [setLessonRecords, toast, applyHousePointDeltas]);
+  }, [setLessonRecords, toast, applyHousePointDeltas, setHpAwardLogs]);
 
   const updateLessonRecord = useCallback(async (id: string, updates: Partial<LessonRecord>) => {
     const existing = lessonRecords.find(r => r.id === id);
@@ -770,12 +803,29 @@ export function useAppData() {
       if (oldAwards.length > 0 || newAwards.length > 0) {
         const deltas = computeHousePointDeltas(oldAwards, newAwards);
         await applyHousePointDeltas(deltas);
+        // Delete old HP logs for this lesson and recreate
+        await hpAwardService.deleteBySourceId(id);
+        setHpAwardLogs(prev => prev.filter(l => l.source_id !== id));
+        if (newAwards.length > 0) {
+          const logEntries: Omit<HPAwardLog, 'id'>[] = newAwards.map(a => ({
+            date: merged.date || format(new Date(), 'yyyy-MM-dd'),
+            student_id: a.student_id,
+            student_name: a.student_name,
+            class_name: merged.class_name,
+            points: a.points,
+            reason: a.reason || 'Lesson HP Award',
+            source: 'lesson' as const,
+            source_id: id,
+          }));
+          const createdLogs = await hpAwardService.createBatch(logEntries);
+          setHpAwardLogs(prev => [...prev, ...createdLogs]);
+        }
       }
       toast.success('Lesson record updated');
     } catch (error) {
       toast.error('Failed to update lesson record');
     }
-  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas]);
+  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas, setHpAwardLogs]);
 
   const deleteLessonRecord = useCallback(async (id: string) => {
     const existing = lessonRecords.find(r => r.id === id);
@@ -788,11 +838,14 @@ export function useAppData() {
         const deltas = computeHousePointDeltas(awards, []);
         await applyHousePointDeltas(deltas);
       }
+      // Delete associated HP award logs
+      await hpAwardService.deleteBySourceId(id);
+      setHpAwardLogs(prev => prev.filter(l => l.source_id !== id));
       toast.success('Lesson record deleted');
     } catch (error) {
       toast.error('Failed to delete lesson record');
     }
-  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas]);
+  }, [lessonRecords, setLessonRecords, toast, applyHousePointDeltas, setHpAwardLogs]);
 
   // --- Tasks (GTD) ---
 
@@ -856,6 +909,18 @@ export function useAppData() {
     await updateTask(id, { status: newStatus });
   }, [tasks, updateTask]);
 
+  // --- HP Award Logs ---
+
+  const deleteHPAwardLog = useCallback(async (id: string) => {
+    try {
+      await hpAwardService.delete(id);
+      setHpAwardLogs(prev => prev.filter(l => l.id !== id));
+      toast.success('HP award log deleted');
+    } catch (error) {
+      toast.error('Failed to delete HP award log');
+    }
+  }, [setHpAwardLogs, toast]);
+
   // --- QuickCapture ---
 
   const quickCapture = useCallback((text: string, category: 'work' | 'student' | 'startup' | 'task') => {
@@ -884,6 +949,7 @@ export function useAppData() {
       meetings: (v) => setMeetings(v as MeetingRecord[]),
       lessonRecords: (v) => setLessonRecords(v as LessonRecord[]),
       tasks: (v) => setTasks(v as Task[]),
+      hpAwardLogs: (v) => setHpAwardLogs(v as HPAwardLog[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -895,12 +961,12 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, toast]);
+  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, toast]);
 
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs,
     toasts,
 
     // Student
@@ -931,6 +997,9 @@ export function useAppData() {
 
     // Lesson Records
     addLessonRecord, updateLessonRecord, deleteLessonRecord,
+
+    // HP Award Logs
+    deleteHPAwardLog,
 
     // Tasks (GTD)
     addTask, updateTask, deleteTask, cycleTaskStatus,

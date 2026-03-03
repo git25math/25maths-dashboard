@@ -103,6 +103,18 @@ export interface HousePointAward {
   reason: string;
 }
 
+export interface HPAwardLog {
+  id: string;
+  date: string;
+  student_id: string;
+  student_name: string;
+  class_name: string;
+  points: number;
+  reason: string;
+  source: 'batch' | 'lesson';
+  source_id?: string;
+}
+
 export interface LessonRecord {
   id: string;
   date: string;

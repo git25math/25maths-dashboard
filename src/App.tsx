@@ -34,6 +34,7 @@ import { LessonRecordsView } from './views/LessonRecordsView';
 import { GoalsView } from './views/GoalsView';
 import { SchoolEventsView } from './views/SchoolEventsView';
 import { TasksView } from './views/TasksView';
+import { HousePointHistoryView } from './views/HousePointHistoryView';
 import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
@@ -47,6 +48,7 @@ function AppContent() {
   const [selectedTeachingUnitId, setSelectedTeachingUnitId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [hpHistoryStudentFilter, setHpHistoryStudentFilter] = useState<string | null>(null);
 
   // Form modals
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false);
@@ -207,6 +209,11 @@ function AppContent() {
             onAddRequest={openRequestForm}
             onAddExamRecord={data.addExamRecord}
             onBatchAwardHP={(awards) => data.batchAwardHP(awards)}
+            hpAwardLogs={data.hpAwardLogs}
+            onNavigateToHPHistory={(studentId) => {
+              setHpHistoryStudentFilter(studentId);
+              setActiveTab('hp-history');
+            }}
           />
         );
       case 'teaching':
@@ -291,6 +298,17 @@ function AppContent() {
             onAddSOP={data.addSOP}
           />
         );
+      case 'hp-history':
+        return (
+          <HousePointHistoryView
+            hpAwardLogs={data.hpAwardLogs}
+            students={data.students}
+            classes={data.classes}
+            onDeleteLog={data.deleteHPAwardLog}
+            initialStudentFilter={hpHistoryStudentFilter}
+            onClearInitialFilter={() => setHpHistoryStudentFilter(null)}
+          />
+        );
       case 'lessons':
         return (
           <LessonRecordsView
@@ -341,6 +359,7 @@ function AppContent() {
               meetings: data.meetings,
               lessonRecords: data.lessonRecords,
               tasks: data.tasks,
+              hpAwardLogs: data.hpAwardLogs,
             }}
             onImport={data.bulkImport}
           />

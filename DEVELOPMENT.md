@@ -447,12 +447,12 @@
 ```
 Browser
   ├── React App (Vite build)
-  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, DevConsole, Settings
+  │     ├── Views: Dashboard, Timetable, Students, Teaching, LessonRecords, HPHistory, Ideas, WorkLogs, Goals, SchoolEvents, Meetings, SOP, Settings
   │     ├── useAppData hook (central state management + bulkImport)
   │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
-  │     ├── 12 Service files (Supabase API layer + Edge Function proxy for GitHub Actions)
+  │     ├── 13 Service files (Supabase API layer + Edge Function proxy for GitHub Actions)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
   │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
@@ -464,8 +464,8 @@ Browser
 
 **Key UI Patterns**: glass-card, cn() utility, emerald HP theming, indigo class filters, fixed floating action bars
 
-**Supabase Tables** (13):
-students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records
+**Supabase Tables** (14):
+students, student_status_records, student_requests, teaching_units, classes, ideas, sops, work_logs, goals, school_events, timetable_entries, lesson_records, meeting_records, hp_award_logs
 
 ---
 
@@ -617,13 +617,53 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Select All / Deselect All 全选支持
 - [x] 切换 class filter 或 sub-tab 时自动清空选择
 
+### Phase 28b — HP Award History 积分历史追踪 (2026-03-03)
+- **需求**: batchAwardHP 和 LessonRecord 中的积分分配缺少审计日志，reason/date 被丢弃，无法回溯查询
+- **数据模型**: 新增 `HPAwardLog` 接口（append-only 审计日志）
+  - 字段: id, date, student_id, student_name, class_name, points, reason, source ('batch'|'lesson'), source_id?
+  - ID 格式: `hp-{timestamp}-{random}`
+- **新增 `hpAwardService.ts`**: CRUD 服务（getAll, create, createBatch, delete, deleteBySourceId），遵循 taskService 模式
+- **Supabase migration**: `20260308000000_hp_award_logs.sql` — `hp_award_logs` 表 + RLS policies
+- **useAppData 集成**:
+  - `hpAwardLogs` state（`useLocalStorage` + Supabase fetchOrSync）
+  - `batchAwardHP`: 积分更新后同时 `createBatch` HP logs（source='batch', date=today）
+  - `addLessonRecord`: awards 非空时创建 logs（source='lesson', source_id=record.id）
+  - `updateLessonRecord`: 删除旧 source_id logs → 重建新 logs（delta 替换）
+  - `deleteLessonRecord`: 删除关联 HP logs
+  - 新增 `deleteHPAwardLog` 函数
+  - `bulkImport` 支持 hpAwardLogs
+- **新增 `HousePointHistoryView.tsx`** (emerald 主题):
+  - Header: Award 图标 + "HP History"
+  - Class filter tabs（emerald active 样式）
+  - 筛选行: Student 下拉 + Date From/To + Clear filters
+  - Summary 统计卡片 (4个): Total HP / Students / From Lessons / Batch Awards
+  - Award 列表: glass-card 行 = 日期 | 学生名+class | reason | +N HP badge | source badge (lesson=indigo, batch=amber)
+  - 空状态引导
+  - 支持从 Student Detail 传入 `initialStudentFilter` 预筛选
+- **Sidebar**: Award 图标 + `hp-history` 入口（Lesson Records 之后）
+- **App.tsx**: 注册 HousePointHistoryView 路由；`hpHistoryStudentFilter` state；StudentsView 传 hpAwardLogs + onNavigateToHPHistory；SettingsView data 加 hpAwardLogs
+- **StudentsView Student Detail**: Weaknesses 后新增 "House Point History" section
+  - 按 student_id 过滤 + 日期倒序，显示最近 10 条
+  - 汇总：X HP from Y awards
+  - 超 10 条显示 "View All →" 跳转到 HP History 页面并按学生预筛选
+- **SettingsView**: KNOWN_KEYS 加 `'hpAwardLogs'`（Export/Import 支持）
+- New files (3): hpAwardService.ts, HousePointHistoryView.tsx, migration SQL
+- Modified files (6): types.ts, useAppData.ts, sidebarConfig.ts, App.tsx, StudentsView.tsx, SettingsView.tsx
+
+### ~~Phase 28b — HP Award History 积分历史追踪~~ ✅ Done
+- [x] HPAwardLog append-only 审计日志数据模型
+- [x] hpAwardService CRUD 服务 + Supabase 表
+- [x] batchAwardHP / addLessonRecord / updateLessonRecord / deleteLessonRecord 全流程写日志
+- [x] HousePointHistoryView: class filter + student dropdown + date range + summary cards + award list
+- [x] Student Detail HP History section (最近 10 条 + View All 跳转)
+- [x] Settings Export/Import 支持 hpAwardLogs
+
 ### Phase 29 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
-- [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
 ### Phase 30 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
