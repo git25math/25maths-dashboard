@@ -331,6 +331,14 @@
 - New file: `supabase/migrations/20260304000000_timetable_lesson_linkage.sql`
 - Modified files (6): types.ts, useAppData.ts, TimetableEntryForm.tsx, CalendarView.tsx, LessonRecordsView.tsx, App.tsx
 
+### Phase 24b — 上课记录富文本支持 (2026-03-03)
+- **LessonRecordsView**: notes 和 next_lesson_plan 字段全面升级为 Markdown + LaTeX 富文本
+  - 新建表单：`<textarea>` → `RichTextEditor`（带实时预览 + LaTeX 渲染）
+  - 编辑表单：`<textarea>` → `RichTextEditor`
+  - 展示模式：`<p>` → `MarkdownRenderer`（渲染 Markdown 格式 + KaTeX 公式）
+- **TimetableEntryForm 内联上课记录面板**: next_lesson_plan 字段 `<textarea>` → `RichTextEditor`
+- Modified files (2): LessonRecordsView.tsx, TimetableEntryForm.tsx
+
 ---
 
 ## Current Architecture
@@ -364,7 +372,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 上课时在 TimetableEntryForm 记录的 topic/notes 自动写入对应班级的 LessonRecord
 - [x] 每周自动新建 LessonRecord，不覆盖历史记录（按 date + class_name 去重）
 - [x] Lesson Records view: 按班级分组查看历史上课记录
-- [ ] LessonRecord 与 TimetableEntry 双向关联（timetable_entry_id）— deferred
+- [x] LessonRecord 与 TimetableEntry 双向关联（timetable_entry_id）— done in Phase 24
 
 ### ~~Phase 15 — Password Protection 增强安全性~~ ✅ Done
 - [x] Login gate with SHA-256 password authentication
@@ -445,6 +453,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] `addTimetableEntry` 自动创建 LessonRecord + `deleteTimetableEntry` 新增
 - [x] 上课记录页面 → 日历跳转（CalendarDays 图标 → 切换到对应日期）
 - [x] 日程卡片显示 lesson record 关联图标（teal FileText）
+- [x] 上课记录 notes / next_lesson_plan 支持 Markdown + LaTeX 富文本（RichTextEditor + MarkdownRenderer）
 
 ### Phase 25 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)

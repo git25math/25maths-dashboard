@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText, CalendarDays } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { LessonRecord, ClassProfile } from '../types';
+import { RichTextEditor, MarkdownRenderer } from '../components/RichTextEditor';
 
 interface LessonRecordsViewProps {
   lessonRecords: LessonRecord[];
@@ -181,23 +182,19 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-              <textarea
+              <RichTextEditor
+                label="Notes"
                 value={newForm.notes}
-                onChange={e => setNewForm({ ...newForm, notes: e.target.value })}
-                placeholder="Additional notes..."
-                rows={2}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
+                onChange={val => setNewForm({ ...newForm, notes: val })}
+                placeholder="Additional notes (supports Markdown and LaTeX)..."
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Next Lesson Plan</label>
-              <textarea
+              <RichTextEditor
+                label="Next Lesson Plan"
                 value={newForm.next_lesson_plan}
-                onChange={e => setNewForm({ ...newForm, next_lesson_plan: e.target.value })}
-                placeholder="Plan for next lesson..."
-                rows={2}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
+                onChange={val => setNewForm({ ...newForm, next_lesson_plan: val })}
+                placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
               />
             </div>
           </div>
@@ -305,21 +302,19 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Notes</label>
-                    <textarea
+                    <RichTextEditor
+                      label="Notes"
                       value={editForm.notes || ''}
-                      onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
-                      rows={2}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"
+                      onChange={val => setEditForm({ ...editForm, notes: val })}
+                      placeholder="Additional notes (supports Markdown and LaTeX)..."
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Next Lesson Plan</label>
-                    <textarea
+                    <RichTextEditor
+                      label="Next Lesson Plan"
                       value={editForm.next_lesson_plan || ''}
-                      onChange={e => setEditForm({ ...editForm, next_lesson_plan: e.target.value })}
-                      rows={2}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"
+                      onChange={val => setEditForm({ ...editForm, next_lesson_plan: val })}
+                      placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
                     />
                   </div>
                 </div>
@@ -363,13 +358,13 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
                   {record.notes && (
                     <div className="md:col-span-2">
                       <span className="text-xs font-bold text-slate-400 uppercase">Notes</span>
-                      <p className="text-slate-600">{record.notes}</p>
+                      <MarkdownRenderer content={record.notes} className="text-sm text-slate-600" />
                     </div>
                   )}
                   {record.next_lesson_plan && (
                     <div className="md:col-span-2">
                       <span className="text-xs font-bold text-slate-400 uppercase">Next Lesson Plan</span>
-                      <p className="text-slate-600">{record.next_lesson_plan}</p>
+                      <MarkdownRenderer content={record.next_lesson_plan} className="text-sm text-slate-600" />
                     </div>
                   )}
                 </div>

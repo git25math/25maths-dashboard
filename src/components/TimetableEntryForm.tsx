@@ -498,14 +498,12 @@ export const TimetableEntryForm = ({
                         placeholder="Homework details..."
                       />
                     </div>
-                    <div className="md:col-span-2 space-y-1">
-                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Next Lesson Plan</label>
-                      <textarea
+                    <div className="md:col-span-2">
+                      <RichTextEditor
+                        label="Next Lesson Plan"
                         value={lrForm.next_lesson_plan || ''}
-                        onChange={e => setLrForm(prev => ({ ...prev, next_lesson_plan: e.target.value }))}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
-                        placeholder="Plan for next lesson..."
+                        onChange={val => setLrForm(prev => ({ ...prev, next_lesson_plan: val }))}
+                        placeholder="Plan for next lesson (supports Markdown and LaTeX)..."
                       />
                     </div>
                   </div>
