@@ -739,6 +739,39 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - EmailDigestView 同步增加 `console.error` 日志输出
 - Modified files (2): MeetingsView.tsx, EmailDigestView.tsx
 
+### Phase 29a — Architecture Refactor (No Feature Change) 架构优化 (2026-03-04)
+- **目标**: 在保持现有功能与对外 API 不变的前提下，降低 `useAppData` 单文件复杂度，提升可维护性
+- **状态层模块化**:
+  - 新增 `src/hooks/appData/useProductivityActions.ts`，抽离 Ideas/SOP/WorkLogs/Goals/SchoolEvents/Meetings/EmailDigests/Tasks 的 CRUD 与状态机逻辑
+  - 新增 `src/hooks/appData/housePointUtils.ts`，抽离 `computeHousePointDeltas()` 纯函数
+  - `useAppData.ts` 改为编排层：负责跨域协作逻辑（如 timetable ↔ lessonRecords、student ↔ HP）并接线模块化 action
+- **基础工具统一**:
+  - 新增 `src/lib/id.ts` 的 `randomAlphaId()`，替换多处内联 `Math.random().toString(36).substr(2, 9)`
+- **结果**:
+  - `useAppData.ts` 从 1409 行下降到 1041 行（-368 行）
+  - 对外返回对象（hook API）保持不变，现有视图/组件调用无需改动
+  - `npm run lint` 通过，功能回归由 `npm run build` 验证
+- New files (3): `src/hooks/appData/useProductivityActions.ts`, `src/hooks/appData/housePointUtils.ts`, `src/lib/id.ts`
+- Modified files (1): `src/hooks/useAppData.ts`
+
+### Update Log — 2026-03-04
+- **本次发布类型**: 架构优化（无功能变更）
+- **核心变更**:
+  - `useAppData` 从“全量实现”调整为“编排层 + 领域模块”
+  - 业务动作抽离到 `useProductivityActions`，纯算法抽离到 `housePointUtils`
+  - 统一短 ID 生成函数 `randomAlphaId()`
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+  - 现有功能入口、页面行为、对外 hook API 保持兼容
+
+### Phase 29b — Architecture Refactor II (Planned, No Feature Change)
+- [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
+- [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
+- [ ] 增加 AppData Contract 文档：列出 `useAppData` 返回字段、依赖关系、跨域副作用边界
+- [ ] 引入最小测试骨架（Vitest）：先覆盖 `computeHousePointDeltas`、task status cycle、idea status cycle
+- [ ] CI 加质量门禁：在 deploy 前增加 `npm run lint`（后续接入测试后补 `npm run test`）
+
 ### Phase 30 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
