@@ -135,7 +135,7 @@ export function DevConsoleView() {
     }
   };
 
-  // --- Token not configured guard ---
+  // --- Supabase not configured guard ---
   if (!configured) {
     return (
       <div className="space-y-6">
@@ -146,16 +146,15 @@ export function DevConsoleView() {
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
             <AlertTriangle size={20} />
-            <span className="font-semibold">GitHub Token Not Configured</span>
+            <span className="font-semibold">Supabase Not Configured</span>
           </div>
           <p className="text-sm text-amber-600 dark:text-amber-400">
-            To use the Dev Console, configure a GitHub Personal Access Token:
+            To use the Dev Console, configure Supabase and deploy the <code>github-proxy</code> Edge Function:
           </p>
           <ol className="text-sm text-slate-600 dark:text-slate-300 space-y-2 list-decimal list-inside">
-            <li>Create a <strong>Fine-grained PAT</strong> on GitHub with <code>Actions (R/W)</code> and <code>Contents (R/W)</code> permissions for this repo</li>
-            <li>Add <code>VITE_GITHUB_TOKEN=github_pat_...</code> to your <code>.env.local</code></li>
-            <li>Add the same token as a GitHub Secret: <code>gh secret set VITE_GITHUB_TOKEN</code></li>
-            <li>Also add <code>ANTHROPIC_API_KEY</code> as a GitHub Secret for Claude support</li>
+            <li>Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env.local</code></li>
+            <li>Deploy the Edge Function: <code>supabase functions deploy github-proxy</code></li>
+            <li>Set the server-side secret: <code>supabase secrets set GITHUB_PAT=github_pat_...</code></li>
           </ol>
         </div>
       </div>

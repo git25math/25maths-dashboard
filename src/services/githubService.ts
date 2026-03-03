@@ -1,6 +1,4 @@
-const OWNER = 'git25math';
-const REPO = '25maths-dashboard';
-const WORKFLOW_FILE = 'self-evolve.yml';
+import { isSupabaseConfigured, requireSupabase } from '../lib/supabase';
 
 export interface WorkflowRun {
   id: number;
@@ -13,60 +11,35 @@ export interface WorkflowRun {
   display_title: string;
 }
 
-function getToken(): string {
-  const token = import.meta.env.VITE_GITHUB_TOKEN;
-  if (!token) throw new Error('VITE_GITHUB_TOKEN is not configured');
-  return token;
-}
-
-async function ghFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  const token = getToken();
-  const res = await fetch(`https://api.github.com${path}`, {
-    ...options,
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${token}`,
-      'X-GitHub-Api-Version': '2022-11-28',
-      ...options.headers,
-    },
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`GitHub API ${res.status}: ${body}`);
-  }
-  return res;
+async function invoke<T = unknown>(body: Record<string, unknown>): Promise<T> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.functions.invoke('github-proxy', { body });
+  if (error) throw new Error(error.message ?? 'Edge function error');
+  return data as T;
 }
 
 export const githubService = {
   isConfigured(): boolean {
-    try {
-      getToken();
-      return true;
-    } catch {
-      return false;
-    }
+    return isSupabaseConfigured;
   },
 
-  async triggerWorkflow(instruction: string, provider: 'claude' | 'gemini', apiKeySlot: 'auto' | '1' | '2' | '3' = 'auto'): Promise<void> {
-    await ghFetch(`/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW_FILE}/dispatches`, {
-      method: 'POST',
-      body: JSON.stringify({
-        ref: 'main',
-        inputs: { instruction, provider, api_key_slot: apiKeySlot },
-      }),
-    });
+  async triggerWorkflow(
+    instruction: string,
+    provider: 'claude' | 'gemini',
+    apiKeySlot: 'auto' | '1' | '2' | '3' = 'auto',
+  ): Promise<void> {
+    await invoke({ action: 'triggerWorkflow', instruction, provider, apiKeySlot });
   },
 
   async listRuns(perPage = 15): Promise<WorkflowRun[]> {
-    const res = await ghFetch(
-      `/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW_FILE}/runs?per_page=${perPage}`
-    );
-    const data = await res.json();
-    return (data.workflow_runs ?? []) as WorkflowRun[];
+    const data = await invoke<{ workflow_runs?: WorkflowRun[] }>({
+      action: 'listRuns',
+      perPage,
+    });
+    return data.workflow_runs ?? [];
   },
 
   async getRun(runId: number): Promise<WorkflowRun> {
-    const res = await ghFetch(`/repos/${OWNER}/${REPO}/actions/runs/${runId}`);
-    return (await res.json()) as WorkflowRun;
+    return invoke<WorkflowRun>({ action: 'getRun', runId });
   },
 };

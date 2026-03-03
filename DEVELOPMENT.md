@@ -401,6 +401,25 @@
   - 修复: 移除 `onNavigate` 中的表单自动打开逻辑，仅执行 `setActiveTab(tab)`
 - Modified files (1): App.tsx
 
+### Security — GitHub PAT 迁移至服务端 (2026-03-03)
+- **问题**: `VITE_GITHUB_TOKEN` 以 `VITE_` 前缀存在，被打包进前端 JS，浏览器 DevTools 可提取完整 PAT
+- **方案**: 新建 Supabase Edge Function `github-proxy` 作为服务端代理，前端不再持有 GitHub PAT
+- **Edge Function**: `supabase/functions/github-proxy/index.ts`
+  - 从 `Deno.env.get('GITHUB_PAT')` 读取服务端密钥
+  - 3 个操作: `triggerWorkflow` / `listRuns` / `getRun`
+  - 硬编码 OWNER/REPO/WORKFLOW（不暴露通用代理）
+  - CORS 头 + preflight 处理
+- **githubService.ts**: 完全重写
+  - 移除 `getToken()` / `ghFetch()` 直连 GitHub API
+  - 改为 `requireSupabase().functions.invoke('github-proxy', { body })` 调代理
+  - `isConfigured()` 改为检查 Supabase 是否可用
+- **DevConsoleView**: 守卫提示从 "GitHub Token Not Configured" 改为 "Supabase Not Configured"
+- **环境变量清理**:
+  - 移除 `VITE_GITHUB_TOKEN` 自 `vite-env.d.ts`, `.env.example`, `.env.local`, `deploy.yml`, `self-evolve.yml`
+  - GitHub PAT 改为 Supabase Edge Function 服务端密钥: `supabase secrets set GITHUB_PAT=...`
+- New files (2): `supabase/functions/_shared/cors.ts`, `supabase/functions/github-proxy/index.ts`
+- Modified files (7): githubService.ts, DevConsoleView.tsx, vite-env.d.ts, .env.example, .env.local, deploy.yml, self-evolve.yml
+
 ---
 
 ## Current Architecture
@@ -413,7 +432,7 @@ Browser
   │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
-  │     ├── 12 Service files (Supabase API layer + GitHub Actions API)
+  │     ├── 12 Service files (Supabase API layer + Edge Function proxy for GitHub Actions)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
   │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
@@ -526,6 +545,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Sidebar entry (Terminal icon), App.tsx routing, env var plumbing
 - [x] API key 3-slot 自动轮换（限速自动 fallback 到下一个 key）
 - [x] Dashboard "View History" 导航修复（不再弹出新建表单）
+- [x] **安全加固**: GitHub PAT 从前端 `VITE_GITHUB_TOKEN` 迁移至 Supabase Edge Function 服务端密钥，前端 bundle 不再泄露 PAT
 
 ### Phase 26 — Self-Evolve Enhancement 自进化增强 (Next)
 - [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
