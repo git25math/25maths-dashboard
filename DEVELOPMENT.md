@@ -586,6 +586,13 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 新增 `SmartTaskPreview` 类型、`generateSmartTasks()` + `generateActionPlan()` geminiService 方法
 - [x] App.tsx 传入 `tasks` + `onCycleTaskStatus` + `onAddSOP` 至 MeetingsView
 
+### ~~Phase 27.1 — Hotfix: Tasks 表缺失 + ID 碰撞 + 错误诊断~~ ✅ Done
+- [x] **根因修复**: 3 个 Supabase migration 未推送到生产库（`supabase db push`），tasks 表不存在导致所有任务操作 404
+- [x] **ID 碰撞修复**: `taskService.genId()` 加随机后缀，防止批量创建时 `Date.now()` 同毫秒主键冲突
+- [x] **错误诊断增强**: `addTask` toast 显示实际 Supabase 错误信息（替代笼统 "Failed to add task"），`taskService.create` 输出完整 error + payload 到控制台
+- [x] **数据清洗**: `addTask` 调用前 `Object.fromEntries` 过滤 `undefined` 字段，避免 PostgREST 序列化问题
+- [x] **批量创建健壮性**: `handleSmartExtractConfirm` 改为 `async/await` 顺序创建，每条独立 try-catch
+
 ### Phase 28 — Self-Evolve Enhancement 自进化增强 (Next)
 - [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
 - [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）
