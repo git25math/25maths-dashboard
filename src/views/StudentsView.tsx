@@ -609,6 +609,28 @@ export const StudentsView = ({
             ))}
           </div>
 
+          {/* Select All toolbar */}
+          {filteredStudents.length > 0 && (
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={filteredStudents.length > 0 && selectedStudentIds.size === filteredStudents.length}
+                  onChange={toggleAll}
+                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-slate-500">
+                  {selectedStudentIds.size === filteredStudents.length ? 'Deselect All' : 'Select All'}
+                </span>
+              </label>
+              {selectedStudentIds.size > 0 && (
+                <span className="text-xs text-emerald-600 font-medium">
+                  {selectedStudentIds.size} / {filteredStudents.length} selected
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Card View */}
           {viewMode === 'card' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
