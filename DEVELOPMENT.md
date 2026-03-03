@@ -593,6 +593,10 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] **数据清洗**: `addTask` 调用前 `Object.fromEntries` 过滤 `undefined` 字段，避免 PostgREST 序列化问题
 - [x] **批量创建健壮性**: `handleSmartExtractConfirm` 改为 `async/await` 顺序创建，每条独立 try-catch
 
+### ~~Phase 27.2 — Hotfix: 移动端侧边栏滚动~~ ✅ Done
+- [x] 移动端 + 桌面端侧边栏 `<nav>` 添加 `overflow-y-auto min-h-0`，14 个菜单项在小屏幕上可滚动
+- [x] 标题区域添加 `shrink-0` 防止被压缩
+
 ### Phase 28 — Self-Evolve Enhancement 自进化增强 (Next)
 - [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
 - [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）

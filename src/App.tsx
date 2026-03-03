@@ -362,11 +362,11 @@ function AppContent() {
     <div className="min-h-screen flex bg-slate-50">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-8">
-        <div className="flex items-center gap-3 px-2">
+        <div className="flex items-center gap-3 px-2 shrink-0">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">25</div>
           <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
         </div>
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 overflow-y-auto min-h-0">
           {SIDEBAR_ITEMS.map(item => (
             <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => setActiveTab(item.key)} />
           ))}
@@ -400,11 +400,11 @@ function AppContent() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden" />
             <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-64 bg-white z-50 p-6 flex flex-col lg:hidden">
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center mb-8 shrink-0">
                 <span className="font-bold text-xl">Menu</span>
                 <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
               </div>
-              <nav className="flex-1 space-y-2">
+              <nav className="flex-1 space-y-2 overflow-y-auto min-h-0">
                 {SIDEBAR_ITEMS.map(item => (
                   <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
                 ))}
