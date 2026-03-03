@@ -1,7 +1,7 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { Task } from '../types';
 
-const genId = () => `task-${Date.now()}`;
+const genId = () => `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const taskService = {
   async getAll(): Promise<Task[]> {
