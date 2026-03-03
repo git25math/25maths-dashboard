@@ -286,6 +286,9 @@ function AppContent() {
             onUpdateMeeting={data.updateMeeting}
             onDeleteMeeting={data.deleteMeeting}
             onAddTask={data.addTask}
+            tasks={data.tasks}
+            onCycleTaskStatus={data.cycleTaskStatus}
+            onAddSOP={data.addSOP}
           />
         );
       case 'lessons':

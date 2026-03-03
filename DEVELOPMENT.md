@@ -576,13 +576,23 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Supabase migration: 新增 4 列
 - [x] 向后兼容：`time_mode` 默认 `'all-day'`，旧数据无需迁移
 
-### Phase 27 — Self-Evolve Enhancement 自进化增强 (Next)
+### ~~Phase 27 — 会议记录行动方案闭环 Meeting-to-Action Pipeline~~ ✅ Done
+- [x] **AI Smart Extract**: 替代旧 Extract to Tasks，Gemini 分析完整 AISummary 4 板块 + 会议元数据，AI 判断优先级/描述/标签/来源
+- [x] **SmartExtractModal**: teal 主题预览弹窗，任务列表可 toggle 启用/禁用 + 展开编辑（priority/description/assignee/due_date/tags），来源板块彩色标签
+- [x] **Related Tasks Panel**: 会议详情页关联任务追踪面板，进度条 + X/Y completed，可点击 status 循环状态
+- [x] **Action Plan Generation**: 一键生成结构化 Markdown 行动方案（会议概要/关键决定/行动计划表格/时间线/风险跟进）
+- [x] **ActionPlanModal**: teal 主题展示弹窗，MarkdownRenderer 渲染 + Copy to Clipboard + Save as SOP
+- [x] **Per-Item Task Conversion**: Key Points / Decisions / Action Items 每条 hover 显示转换按钮，单条快捷转为任务，转换后图标变绿
+- [x] 新增 `SmartTaskPreview` 类型、`generateSmartTasks()` + `generateActionPlan()` geminiService 方法
+- [x] App.tsx 传入 `tasks` + `onCycleTaskStatus` + `onAddSOP` 至 MeetingsView
+
+### Phase 28 — Self-Evolve Enhancement 自进化增强 (Next)
 - [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
 - [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）
 - [ ] 指令模板/历史记录（常用指令一键复用）
 - [ ] 自动 PR 模式（AI 改动走 PR review 而非直接 push main）
 
-### Phase 28 — Analytics & Reports
+### Phase 29 — Analytics & Reports
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -590,7 +600,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 29 — Advanced
+### Phase 30 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

@@ -262,6 +262,16 @@ export interface AISummary {
   decisions: string[];
 }
 
+export interface SmartTaskPreview {
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  assignee?: string;
+  due_date?: string;
+  tags: string[];
+  source_section: 'action_item' | 'key_point' | 'decision' | 'summary';
+}
+
 export interface MeetingRecord {
   id: string;
   title: string;

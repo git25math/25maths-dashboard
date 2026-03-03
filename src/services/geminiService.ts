@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { AISummary, Idea, WorkLog, SOP } from '../types';
+import { AISummary, Idea, WorkLog, SOP, SmartTaskPreview } from '../types';
 
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -50,6 +50,23 @@ export interface WeaknessInput {
   level: 'low' | 'medium' | 'high';
   notes: string;
   studentYearGroup: string;
+}
+
+export interface SmartTasksInput {
+  summary: AISummary;
+  meetingTitle: string;
+  meetingDate: string;
+  meetingCategory: string;
+  participants: string[];
+}
+
+export interface ActionPlanInput {
+  summary: AISummary;
+  meetingTitle: string;
+  meetingDate: string;
+  meetingCategory: string;
+  participants: string[];
+  transcript?: string;
 }
 
 export const geminiService = {
@@ -339,5 +356,110 @@ ${sopsText}`,
     const raw = (response.text ?? '').trim();
     const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
     return JSON.parse(jsonStr) as ConsolidatedSOP;
+  },
+
+  async generateSmartTasks(input: SmartTasksInput): Promise<SmartTaskPreview[]> {
+    const ai = getClient();
+
+    const contextBlock = `Meeting: ${input.meetingTitle}
+Date: ${input.meetingDate}
+Category: ${input.meetingCategory}
+Participants: ${input.participants.join(', ') || 'Not specified'}
+
+Summary: ${input.summary.summary}
+
+Key Points:
+${input.summary.key_points.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+Action Items:
+${input.summary.action_items.map((a, i) => `${i + 1}. ${a.content} (assignee: ${a.assignee || 'N/A'}, deadline: ${a.deadline || 'N/A'}, status: ${a.status})`).join('\n')}
+
+Decisions:
+${input.summary.decisions.map((d, i) => `${i + 1}. ${d}`).join('\n')}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a task extraction assistant. Analyze the following meeting data and extract structured tasks from ALL sections (summary, key points, action items, decisions). Not every item needs a task — only extract actionable ones.
+
+For each task, determine:
+- title: concise action-oriented title
+- description: 1-2 sentences with meeting context
+- priority: "high" (urgent/critical decisions), "medium" (standard follow-ups), "low" (nice-to-have)
+- assignee: if mentioned in the meeting data, otherwise omit
+- due_date: if a deadline is mentioned, in YYYY-MM-DD format, otherwise omit
+- tags: relevant tags (e.g. "follow-up", "decision", "urgent", topic keywords)
+- source_section: which section this came from ("action_item", "key_point", "decision", "summary")
+
+Return ONLY valid JSON array (no markdown fences):
+[
+  { "title": "...", "description": "...", "priority": "high|medium|low", "assignee": "...", "due_date": "YYYY-MM-DD", "tags": ["..."], "source_section": "action_item|key_point|decision|summary" }
+]
+
+Meeting data:
+${contextBlock}`,
+        }],
+      }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    return JSON.parse(jsonStr) as SmartTaskPreview[];
+  },
+
+  async generateActionPlan(input: ActionPlanInput): Promise<string> {
+    const ai = getClient();
+
+    const contextBlock = `Meeting: ${input.meetingTitle}
+Date: ${input.meetingDate}
+Category: ${input.meetingCategory}
+Participants: ${input.participants.join(', ') || 'Not specified'}
+
+Summary: ${input.summary.summary}
+
+Key Points:
+${input.summary.key_points.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+Action Items:
+${input.summary.action_items.map((a, i) => `${i + 1}. ${a.content} (assignee: ${a.assignee || 'N/A'}, deadline: ${a.deadline || 'N/A'})`).join('\n')}
+
+Decisions:
+${input.summary.decisions.map((d, i) => `${i + 1}. ${d}`).join('\n')}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [{
+          text: `You are a meeting action plan generator. Based on the following meeting data, generate a comprehensive action plan document in Markdown format. Use the same language as the meeting content (Chinese, English, or mixed).
+
+Structure the document with these sections:
+
+## Meeting Overview
+Brief overview with date, participants, and purpose.
+
+## Key Decisions
+Numbered list of important decisions made.
+
+## Action Plan
+A Markdown table with columns: # | Task | Assignee | Priority | Deadline | Status
+
+## Timeline
+Key milestones and deadlines organized chronologically.
+
+## Risks & Follow-ups
+Potential risks and items that need follow-up attention.
+
+Keep it concise, professional, and actionable.
+
+Meeting data:
+${contextBlock}`,
+        }],
+      }],
+    });
+
+    return response.text ?? '';
   },
 };

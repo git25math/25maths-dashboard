@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Trash2, Edit3, ArrowLeft, Mic, Square, Pause, Play, RefreshCw, ChevronDown, ChevronUp, Users, Calendar, Tag, Clock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit3, ArrowLeft, Mic, Square, Pause, Play, RefreshCw, ChevronDown, ChevronUp, Users, Calendar, Tag, Clock, CheckCircle2, AlertCircle, Loader2, Sparkles, ArrowRightCircle, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { MeetingRecord, AISummary, Task } from '../types';
+import { MeetingRecord, AISummary, Task, SmartTaskPreview } from '../types';
 import { geminiService } from '../services/geminiService';
+import { SmartExtractModal } from '../components/SmartExtractModal';
+import { ActionPlanModal } from '../components/ActionPlanModal';
 
 type CategoryFilter = 'all' | MeetingRecord['category'];
 type ViewMode = 'list' | 'detail' | 'new';
@@ -38,15 +40,28 @@ const CATEGORY_COLORS: Record<MeetingRecord['category'], string> = {
   other: 'bg-slate-100 text-slate-500',
 };
 
+const TASK_STATUS_CYCLE: Task['status'][] = ['inbox', 'next', 'waiting', 'someday', 'done'];
+
+const TASK_STATUS_COLORS: Record<Task['status'], string> = {
+  inbox: 'bg-slate-100 text-slate-600',
+  next: 'bg-blue-50 text-blue-600',
+  waiting: 'bg-amber-50 text-amber-600',
+  someday: 'bg-purple-50 text-purple-600',
+  done: 'bg-emerald-50 text-emerald-600',
+};
+
 interface MeetingsViewProps {
   meetings: MeetingRecord[];
   onAddMeeting: (data: Omit<MeetingRecord, 'id'>) => Promise<MeetingRecord>;
   onUpdateMeeting: (id: string, updates: Partial<MeetingRecord>) => void;
   onDeleteMeeting: (id: string) => void;
   onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
+  tasks?: Task[];
+  onCycleTaskStatus?: (id: string) => void;
+  onAddSOP?: (data: { title: string; category: string; content: string }) => void;
 }
 
-export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDeleteMeeting, onAddTask }: MeetingsViewProps) => {
+export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDeleteMeeting, onAddTask, tasks, onCycleTaskStatus, onAddSOP }: MeetingsViewProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingRecord | null>(null);
@@ -253,6 +268,9 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
         onBack={() => { setViewMode('list'); setSelectedMeeting(null); }}
         onUpdate={(updates) => onUpdateMeeting(selectedMeeting.id, updates)}
         onAddTask={onAddTask}
+        tasks={tasks}
+        onCycleTaskStatus={onCycleTaskStatus}
+        onAddSOP={onAddSOP}
       />
     );
   }
@@ -267,9 +285,12 @@ interface MeetingDetailProps {
   onBack: () => void;
   onUpdate: (updates: Partial<MeetingRecord>) => void;
   onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
+  tasks?: Task[];
+  onCycleTaskStatus?: (id: string) => void;
+  onAddSOP?: (data: { title: string; category: string; content: string }) => void;
 }
 
-function MeetingDetail({ meeting, onBack, onUpdate, onAddTask }: MeetingDetailProps) {
+function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTaskStatus, onAddSOP }: MeetingDetailProps) {
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -285,6 +306,9 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask }: MeetingDetailPr
 
   // Collapsible sections
   const [showTranscript, setShowTranscript] = useState(true);
+
+  // Related tasks
+  const relatedTasks = (tasks || []).filter(t => t.source_type === 'meeting' && t.source_id === meeting.id);
 
   const startRecording = useCallback(async () => {
     try {
@@ -482,7 +506,23 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask }: MeetingDetailPr
 
       {/* AI Summary */}
       {meeting.ai_summary && (
-        <AISummaryPanel summary={meeting.ai_summary} onRegenerate={handleRegenerateSummary} isRegenerating={isSummarizing} onAddTask={onAddTask} meetingId={meeting.id} />
+        <AISummaryPanel
+          summary={meeting.ai_summary}
+          onRegenerate={handleRegenerateSummary}
+          isRegenerating={isSummarizing}
+          onAddTask={onAddTask}
+          meetingId={meeting.id}
+          meetingTitle={meeting.title}
+          meetingDate={meeting.date}
+          meetingCategory={meeting.category}
+          participants={meeting.participants}
+          onAddSOP={onAddSOP}
+        />
+      )}
+
+      {/* Related Tasks Panel */}
+      {relatedTasks.length > 0 && (
+        <RelatedTasksPanel tasks={relatedTasks} onCycleTaskStatus={onCycleTaskStatus} />
       )}
 
       {/* Regenerate button when transcript exists but no summary */}
@@ -497,24 +537,124 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask }: MeetingDetailPr
 
 // --- AI Summary Panel ---
 
-function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meetingId }: { summary: AISummary; onRegenerate: () => void; isRegenerating: boolean; onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void; meetingId?: string }) {
-  const [extracted, setExtracted] = useState(false);
+interface AISummaryPanelProps {
+  summary: AISummary;
+  onRegenerate: () => void;
+  isRegenerating: boolean;
+  onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
+  meetingId: string;
+  meetingTitle: string;
+  meetingDate: string;
+  meetingCategory: string;
+  participants: string[];
+  onAddSOP?: (data: { title: string; category: string; content: string }) => void;
+}
 
-  const handleExtractToTasks = () => {
+function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meetingId, meetingTitle, meetingDate, meetingCategory, participants, onAddSOP }: AISummaryPanelProps) {
+  // Smart Extract state
+  const [isSmartExtracting, setIsSmartExtracting] = useState(false);
+  const [smartExtractPreview, setSmartExtractPreview] = useState<SmartTaskPreview[] | null>(null);
+
+  // Action Plan state
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [actionPlanMarkdown, setActionPlanMarkdown] = useState<string | null>(null);
+
+  // Per-item conversion tracking
+  const [convertedItems, setConvertedItems] = useState<Set<string>>(new Set());
+
+  // Feature 1: AI Smart Extract
+  const handleSmartExtract = async () => {
     if (!onAddTask) return;
-    const pendingItems = summary.action_items.filter(item => item.status === 'pending');
-    for (const item of pendingItems) {
-      onAddTask({
-        title: item.content,
-        status: 'inbox',
-        priority: 'medium',
-        source_type: 'meeting',
-        source_id: meetingId,
-        assignee: item.assignee || undefined,
-        due_date: item.deadline || undefined,
+    setIsSmartExtracting(true);
+    try {
+      const tasks = await geminiService.generateSmartTasks({
+        summary,
+        meetingTitle,
+        meetingDate,
+        meetingCategory,
+        participants,
       });
+      setSmartExtractPreview(tasks);
+    } catch (err) {
+      console.error('Smart extract failed:', err);
     }
-    setExtracted(true);
+    setIsSmartExtracting(false);
+  };
+
+  const handleSmartExtractConfirm = (tasks: Omit<Task, 'id' | 'created_at'>[]) => {
+    if (!onAddTask) return;
+    for (const task of tasks) {
+      onAddTask(task);
+    }
+    setSmartExtractPreview(null);
+  };
+
+  // Feature 3: Generate Action Plan
+  const handleGenerateActionPlan = async () => {
+    setIsGeneratingPlan(true);
+    try {
+      const markdown = await geminiService.generateActionPlan({
+        summary,
+        meetingTitle,
+        meetingDate,
+        meetingCategory,
+        participants,
+      });
+      setActionPlanMarkdown(markdown);
+    } catch (err) {
+      console.error('Action plan generation failed:', err);
+    }
+    setIsGeneratingPlan(false);
+  };
+
+  // Feature 4: Per-item conversion
+  const convertKeyPoint = (point: string, idx: number) => {
+    if (!onAddTask) return;
+    const key = `kp-${idx}`;
+    if (convertedItems.has(key)) return;
+    onAddTask({
+      title: point.length > 80 ? point.slice(0, 80) + '...' : point,
+      description: point,
+      status: 'inbox',
+      priority: 'medium',
+      source_type: 'meeting',
+      source_id: meetingId,
+      tags: ['follow-up'],
+    });
+    setConvertedItems(prev => new Set(prev).add(key));
+  };
+
+  const convertDecision = (decision: string, idx: number) => {
+    if (!onAddTask) return;
+    const key = `dec-${idx}`;
+    if (convertedItems.has(key)) return;
+    const title = `执行决定: ${decision.length > 60 ? decision.slice(0, 60) + '...' : decision}`;
+    onAddTask({
+      title,
+      description: decision,
+      status: 'inbox',
+      priority: 'high',
+      source_type: 'meeting',
+      source_id: meetingId,
+      tags: ['decision'],
+    });
+    setConvertedItems(prev => new Set(prev).add(key));
+  };
+
+  const convertActionItem = (item: { content: string; assignee: string; deadline: string }, idx: number) => {
+    if (!onAddTask) return;
+    const key = `ai-${idx}`;
+    if (convertedItems.has(key)) return;
+    onAddTask({
+      title: item.content,
+      status: 'inbox',
+      priority: 'medium',
+      source_type: 'meeting',
+      source_id: meetingId,
+      assignee: item.assignee || undefined,
+      due_date: item.deadline || undefined,
+    });
+    setConvertedItems(prev => new Set(prev).add(key));
   };
 
   return (
@@ -523,9 +663,11 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-slate-900">Summary</h3>
-          <button onClick={onRegenerate} disabled={isRegenerating} className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-40">
-            <RefreshCw size={12} className={isRegenerating ? 'animate-spin' : ''} /> Regenerate
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={onRegenerate} disabled={isRegenerating} className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-40">
+              <RefreshCw size={12} className={isRegenerating ? 'animate-spin' : ''} /> Regenerate
+            </button>
+          </div>
         </div>
         <p className="text-sm text-slate-600 leading-relaxed">{summary.summary}</p>
       </div>
@@ -536,9 +678,27 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
           <h3 className="font-bold text-slate-900 mb-3">Key Points</h3>
           <ul className="space-y-2">
             {summary.key_points.map((point, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
-                {point}
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600 group/item">
+                {convertedItems.has(`kp-${i}`) ? (
+                  <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                ) : (
+                  <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                )}
+                <span className="flex-1">{point}</span>
+                {onAddTask && (
+                  <button
+                    onClick={() => convertKeyPoint(point, i)}
+                    className={cn(
+                      "shrink-0 mt-0.5 transition-all",
+                      convertedItems.has(`kp-${i}`)
+                        ? "text-emerald-500"
+                        : "opacity-0 group-hover/item:opacity-100 text-slate-300 hover:text-teal-600"
+                    )}
+                    title={convertedItems.has(`kp-${i}`) ? 'Converted to task' : 'Convert to task'}
+                  >
+                    {convertedItems.has(`kp-${i}`) ? <CheckCircle2 size={14} /> : <ArrowRightCircle size={14} />}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -550,25 +710,20 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
         <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-slate-900">Action Items</h3>
-            {onAddTask && summary.action_items.some(i => i.status === 'pending') && (
+            {onAddTask && (
               <button
-                onClick={handleExtractToTasks}
-                disabled={extracted}
-                className={cn(
-                  "flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg transition-all",
-                  extracted
-                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                    : "bg-cyan-50 text-cyan-600 border border-cyan-200 hover:bg-cyan-100"
-                )}
+                onClick={handleSmartExtract}
+                disabled={isSmartExtracting}
+                className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg transition-all bg-teal-50 text-teal-600 border border-teal-200 hover:bg-teal-100 disabled:opacity-40"
               >
-                <CheckCircle2 size={12} />
-                {extracted ? 'Extracted' : 'Extract to Tasks'}
+                {isSmartExtracting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {isSmartExtracting ? 'Analyzing...' : 'AI Smart Extract'}
               </button>
             )}
           </div>
           <div className="space-y-3">
             {summary.action_items.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+              <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl group/item">
                 <Tag size={14} className="text-indigo-500 mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-700">{item.content}</p>
@@ -580,6 +735,20 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
                     </span>
                   </div>
                 </div>
+                {onAddTask && (
+                  <button
+                    onClick={() => convertActionItem(item, i)}
+                    className={cn(
+                      "shrink-0 mt-0.5 transition-all",
+                      convertedItems.has(`ai-${i}`)
+                        ? "text-emerald-500"
+                        : "opacity-0 group-hover/item:opacity-100 text-slate-300 hover:text-teal-600"
+                    )}
+                    title={convertedItems.has(`ai-${i}`) ? 'Converted to task' : 'Convert to task'}
+                  >
+                    {convertedItems.has(`ai-${i}`) ? <CheckCircle2 size={14} /> : <ArrowRightCircle size={14} />}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -592,14 +761,120 @@ function AISummaryPanel({ summary, onRegenerate, isRegenerating, onAddTask, meet
           <h3 className="font-bold text-slate-900 mb-3">Decisions</h3>
           <ul className="space-y-2">
             {summary.decisions.map((decision, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-600 group/item">
                 <AlertCircle size={16} className="text-indigo-500 mt-0.5 shrink-0" />
-                {decision}
+                <span className="flex-1">{decision}</span>
+                {onAddTask && (
+                  <button
+                    onClick={() => convertDecision(decision, i)}
+                    className={cn(
+                      "shrink-0 mt-0.5 transition-all",
+                      convertedItems.has(`dec-${i}`)
+                        ? "text-emerald-500"
+                        : "opacity-0 group-hover/item:opacity-100 text-slate-300 hover:text-teal-600"
+                    )}
+                    title={convertedItems.has(`dec-${i}`) ? 'Converted to task' : 'Convert to task'}
+                  >
+                    {convertedItems.has(`dec-${i}`) ? <CheckCircle2 size={14} /> : <ArrowRightCircle size={14} />}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      {/* Action Plan Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleGenerateActionPlan}
+          disabled={isGeneratingPlan}
+          className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 text-white rounded-xl font-medium text-sm hover:bg-teal-700 transition-colors disabled:opacity-40 shadow-lg shadow-teal-200"
+        >
+          {isGeneratingPlan ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+          {isGeneratingPlan ? 'Generating Action Plan...' : 'Generate Action Plan'}
+        </button>
+      </div>
+
+      {/* Smart Extract Modal */}
+      {smartExtractPreview && (
+        <SmartExtractModal
+          tasks={smartExtractPreview}
+          meetingId={meetingId}
+          onConfirm={handleSmartExtractConfirm}
+          onCancel={() => setSmartExtractPreview(null)}
+        />
+      )}
+
+      {/* Action Plan Modal */}
+      {actionPlanMarkdown && (
+        <ActionPlanModal
+          markdown={actionPlanMarkdown}
+          meetingTitle={meetingTitle}
+          onSaveAsSOP={onAddSOP}
+          onClose={() => setActionPlanMarkdown(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- Related Tasks Panel ---
+
+function RelatedTasksPanel({ tasks, onCycleTaskStatus }: { tasks: Task[]; onCycleTaskStatus?: (id: string) => void }) {
+  const completedCount = tasks.filter(t => t.status === 'done').length;
+  const progressPercent = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+
+  return (
+    <div className="glass-card p-6">
+      <h3 className="font-bold text-slate-900 mb-3">Related Tasks</h3>
+
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-full bg-teal-500 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <span className="text-xs font-bold text-slate-500 whitespace-nowrap">{completedCount}/{tasks.length} completed</span>
+      </div>
+
+      {/* Task list */}
+      <div className="space-y-2">
+        {tasks.map(task => {
+          const isOverdue = task.due_date && task.status !== 'done' && new Date(task.due_date) < new Date();
+          return (
+            <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              {/* Status badge - clickable to cycle */}
+              <button
+                onClick={() => onCycleTaskStatus?.(task.id)}
+                className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shrink-0 transition-colors", TASK_STATUS_COLORS[task.status])}
+                title={`Click to cycle status (current: ${task.status})`}
+              >
+                {task.status}
+              </button>
+
+              {/* Priority dot */}
+              <span className={cn("w-2 h-2 rounded-full shrink-0", task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-400')} />
+
+              {/* Title */}
+              <span className={cn("text-sm flex-1 min-w-0 truncate", task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700')}>
+                {task.title}
+              </span>
+
+              {/* Assignee */}
+              {task.assignee && (
+                <span className="text-xs text-slate-400 shrink-0">{task.assignee}</span>
+              )}
+
+              {/* Due date */}
+              {task.due_date && (
+                <span className={cn("text-xs shrink-0", isOverdue ? 'text-red-500 font-bold' : 'text-slate-400')}>
+                  {task.due_date}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
