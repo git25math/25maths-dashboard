@@ -387,13 +387,15 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
           onAddTask({ title: `Review action items: ${meeting.title}`, status: 'inbox', priority: 'medium', source_type: 'meeting', source_id: meeting.id });
         }
       } catch (err) {
-        setError('Failed to generate summary. You can retry with the button below.');
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(`Failed to generate summary: ${msg}`);
         onUpdate({ status: 'draft' });
       }
       setIsSummarizing(false);
     } catch (err) {
       console.error('Transcription failed:', err);
-      setError('Failed to transcribe audio. Please try recording again.');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Failed to transcribe audio: ${msg}`);
       onUpdate({ status: 'draft' });
       setIsTranscribing(false);
     }

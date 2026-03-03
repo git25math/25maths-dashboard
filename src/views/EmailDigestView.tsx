@@ -70,8 +70,8 @@ export const EmailDigestView = ({
       setSelectedDigest(created);
       setViewMode('detail');
       setEmailContent('');
-    } catch {
-      // error handled by toast in parent
+    } catch (err) {
+      console.error('Email digest processing failed:', err);
     } finally {
       setIsProcessing(false);
     }
