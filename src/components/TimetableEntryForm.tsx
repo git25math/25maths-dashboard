@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle } from 'lucide-react';
-import { TimetableEntry, ClassProfile, TeachingUnit, LessonPlanItem } from '../types';
+import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus } from 'lucide-react';
+import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
 import { getISODay, format } from 'date-fns';
@@ -15,6 +15,12 @@ interface TimetableEntryFormProps {
   onSave: (entry: TimetableEntry) => void;
   onCancel: () => void;
   onUpdateClassProgress?: (classId: string, lessonId: string, completed: boolean) => void;
+  contextDate?: string;
+  onCreateOverride?: (entry: TimetableEntry) => void;
+  onDeleteOverride?: (id: string) => void;
+  lessonRecords?: LessonRecord[];
+  onUpdateLessonRecord?: (id: string, updates: Partial<LessonRecord>) => void;
+  onAddLessonRecord?: (data: Omit<LessonRecord, 'id'>) => void;
 }
 
 export const TimetableEntryForm = ({
@@ -24,25 +30,57 @@ export const TimetableEntryForm = ({
   allEntries,
   onSave,
   onCancel,
-  onUpdateClassProgress
+  onUpdateClassProgress,
+  contextDate,
+  onCreateOverride,
+  onDeleteOverride,
+  lessonRecords = [],
+  onUpdateLessonRecord,
+  onAddLessonRecord,
 }: TimetableEntryFormProps) => {
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isOverrideMode, setIsOverrideMode] = useState(false);
+
+  // Inline lesson record state
+  const [lrForm, setLrForm] = useState<Partial<LessonRecord>>({});
+  const [isCreatingLR, setIsCreatingLR] = useState(false);
 
   const conflicts = useMemo(
     () => detectConflicts(formData, allEntries),
     [formData.start_time, formData.end_time, formData.day, formData.date, allEntries]
   );
 
+  // Find matching lesson record
+  const effectiveDate = formData.date || contextDate;
+  const matchedLessonRecord = useMemo(() => {
+    if (!effectiveDate || formData.type !== 'lesson') return null;
+    // First try timetable_entry_id match
+    const byEntryId = lessonRecords.find(r => r.timetable_entry_id === formData.id);
+    if (byEntryId) return byEntryId;
+    // Fallback: date + class_name match
+    return lessonRecords.find(r => r.date === effectiveDate && r.class_name === formData.class_name) || null;
+  }, [lessonRecords, formData.id, formData.type, formData.class_name, effectiveDate]);
+
+  // Init lrForm when matchedLessonRecord changes
+  useEffect(() => {
+    if (matchedLessonRecord) {
+      setLrForm({
+        progress: matchedLessonRecord.progress,
+        homework_assigned: matchedLessonRecord.homework_assigned,
+        next_lesson_plan: matchedLessonRecord.next_lesson_plan,
+      });
+    }
+  }, [matchedLessonRecord]);
+
   useEffect(() => {
     if (formData.class_id) {
       const cls = classes.find(c => c.id === formData.class_id);
       setSelectedClass(cls || null);
-      
-      // If no unit is explicitly set on the entry, use the class's current unit
+
       if (!formData.unit_id && cls?.current_unit_id) {
         setFormData(prev => ({ ...prev, unit_id: cls.current_unit_id }));
       }
@@ -60,9 +98,56 @@ export const TimetableEntryForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    if (isOverrideMode && onCreateOverride) {
+      onCreateOverride(formData);
+    } else {
+      onSave(formData);
+    }
   };
 
+  const handleCreateOverride = () => {
+    if (!contextDate) return;
+    const newId = `tt-override-${Date.now()}`;
+    const isoDay = getISODay(new Date(contextDate + 'T12:00:00'));
+    setFormData(prev => ({
+      ...prev,
+      id: newId,
+      date: contextDate,
+      day: isoDay,
+      recurring_id: entry.id,
+    }));
+    setIsOverrideMode(true);
+  };
+
+  const handleDeleteOverride = () => {
+    if (onDeleteOverride && formData.recurring_id) {
+      onDeleteOverride(formData.id);
+    }
+  };
+
+  const handleSaveLessonRecord = () => {
+    if (matchedLessonRecord && onUpdateLessonRecord) {
+      onUpdateLessonRecord(matchedLessonRecord.id, lrForm);
+    }
+  };
+
+  const handleCreateLessonRecord = () => {
+    if (!onAddLessonRecord || !effectiveDate) return;
+    onAddLessonRecord({
+      date: effectiveDate,
+      class_name: formData.class_name,
+      topic: formData.topic || formData.subject || '',
+      progress: '',
+      homework_assigned: '',
+      notes: formData.notes || '',
+      next_lesson_plan: '',
+      timetable_entry_id: formData.id,
+    });
+    setIsCreatingLR(false);
+  };
+
+  const isRecurringEntry = !entry.date && !entry.recurring_id;
+  const isOverrideEntry = !!entry.recurring_id;
   const isMath = formData.subject.toLowerCase().includes('math');
 
   return (
@@ -74,7 +159,14 @@ export const TimetableEntryForm = ({
               <Clock size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Edit Schedule</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-slate-900">Edit Schedule</h2>
+                {(isOverrideEntry || isOverrideMode) && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                    Override
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-slate-500">{formData.start_time} - {formData.end_time} • {formData.class_name}</p>
             </div>
           </div>
@@ -84,11 +176,47 @@ export const TimetableEntryForm = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-8 overflow-y-auto flex-1">
+          {/* Single-day override banner */}
+          {isRecurringEntry && contextDate && !isOverrideMode && onCreateOverride && (
+            <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-2xl">
+              <div className="flex items-center gap-2">
+                <Copy size={16} className="text-amber-600" />
+                <span className="text-sm text-amber-700">This is a recurring entry. Changes will affect all weeks.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCreateOverride}
+                className="px-4 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-1"
+              >
+                <Copy size={12} />
+                Only modify {contextDate}
+              </button>
+            </div>
+          )}
+
+          {/* Override entry: show restore default button */}
+          {isOverrideEntry && onDeleteOverride && (
+            <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-2xl">
+              <div className="flex items-center gap-2">
+                <Copy size={16} className="text-amber-600" />
+                <span className="text-sm text-amber-700">This is a single-day override for {formData.date}.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDeleteOverride}
+                className="px-4 py-1.5 bg-slate-600 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-1"
+              >
+                <RotateCcw size={12} />
+                Restore Default
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Subject / Topic</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={formData.subject}
                 onChange={e => setFormData({ ...formData, subject: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -106,7 +234,7 @@ export const TimetableEntryForm = ({
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Linked Teaching Unit</label>
-              <select 
+              <select
                 value={formData.unit_id || ''}
                 onChange={e => setFormData({ ...formData, unit_id: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -122,8 +250,8 @@ export const TimetableEntryForm = ({
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Room</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={formData.room}
                 onChange={e => setFormData({ ...formData, room: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -131,8 +259,8 @@ export const TimetableEntryForm = ({
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Start Time</label>
-              <input 
-                type="time" 
+              <input
+                type="time"
                 value={formData.start_time}
                 onChange={e => setFormData({ ...formData, start_time: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -147,36 +275,38 @@ export const TimetableEntryForm = ({
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Schedule Type</label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, date: undefined })}
-                  className={cn(
-                    "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
-                    !formData.date
-                      ? "bg-indigo-100 text-indigo-700 border-indigo-200"
-                      : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                  )}
-                >
-                  Recurring Weekly
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, date: formData.date || format(new Date(), 'yyyy-MM-dd') })}
-                  className={cn(
-                    "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
-                    formData.date
-                      ? "bg-amber-100 text-amber-700 border-amber-200"
-                      : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                  )}
-                >
-                  Specific Date
-                </button>
+            {!isOverrideMode && (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Schedule Type</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, date: undefined })}
+                    className={cn(
+                      "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
+                      !formData.date
+                        ? "bg-indigo-100 text-indigo-700 border-indigo-200"
+                        : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                    )}
+                  >
+                    Recurring Weekly
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, date: formData.date || format(new Date(), 'yyyy-MM-dd') })}
+                    className={cn(
+                      "flex-1 px-4 py-3 rounded-xl text-xs font-bold transition-all border",
+                      formData.date
+                        ? "bg-amber-100 text-amber-700 border-amber-200"
+                        : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                    )}
+                  >
+                    Specific Date
+                  </button>
+                </div>
               </div>
-            </div>
-            {formData.date && (
+            )}
+            {formData.date && !isOverrideMode && (
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Date</label>
                 <input
@@ -196,13 +326,13 @@ export const TimetableEntryForm = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Preparation Status</label>
-              <button 
+              <button
                 type="button"
                 onClick={() => setFormData({ ...formData, is_prepared: !formData.is_prepared })}
                 className={cn(
                   "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
-                  formData.is_prepared 
-                    ? "bg-emerald-100 text-emerald-600 border border-emerald-200" 
+                  formData.is_prepared
+                    ? "bg-emerald-100 text-emerald-600 border border-emerald-200"
                     : "bg-red-100 text-red-600 border border-red-200"
                 )}
               >
@@ -231,7 +361,7 @@ export const TimetableEntryForm = ({
                   {selectedUnit.lessons.map((lesson, i) => {
                     const isCompleted = selectedClass.completed_lesson_ids?.includes(lesson.id);
                     return (
-                      <div 
+                      <div
                         key={lesson.id}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-xl border transition-all",
@@ -327,12 +457,79 @@ export const TimetableEntryForm = ({
             </div>
           )}
 
-          <RichTextEditor 
+          <RichTextEditor
             label="Lesson Notes / Remarks"
             value={formData.notes || ''}
             onChange={val => setFormData({ ...formData, notes: val })}
             placeholder="Add any specific notes for this lesson..."
           />
+
+          {/* Inline Lesson Record Panel */}
+          {formData.type === 'lesson' && effectiveDate && (onUpdateLessonRecord || onAddLessonRecord) && (
+            <div className="space-y-4 p-6 bg-teal-50/50 rounded-3xl border border-teal-100">
+              <div className="flex items-center gap-2 text-teal-600 font-bold text-sm uppercase tracking-widest">
+                <FileText size={16} />
+                <span>Lesson Record</span>
+                <span className="text-xs font-normal normal-case tracking-normal text-teal-500">
+                  {effectiveDate} &middot; {formData.class_name}
+                </span>
+              </div>
+
+              {matchedLessonRecord ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Progress</label>
+                      <textarea
+                        value={lrForm.progress || ''}
+                        onChange={e => setLrForm(prev => ({ ...prev, progress: e.target.value }))}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
+                        placeholder="What was covered..."
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Homework Assigned</label>
+                      <textarea
+                        value={lrForm.homework_assigned || ''}
+                        onChange={e => setLrForm(prev => ({ ...prev, homework_assigned: e.target.value }))}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
+                        placeholder="Homework details..."
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Next Lesson Plan</label>
+                      <textarea
+                        value={lrForm.next_lesson_plan || ''}
+                        onChange={e => setLrForm(prev => ({ ...prev, next_lesson_plan: e.target.value }))}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
+                        placeholder="Plan for next lesson..."
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveLessonRecord}
+                    className="px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-1"
+                  >
+                    <Save size={12} />
+                    Save Record
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCreateLessonRecord}
+                  className="px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-1"
+                >
+                  <Plus size={12} />
+                  Create Lesson Record
+                </button>
+              )}
+            </div>
+          )}
         </form>
 
         <div className="px-4 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4">
@@ -354,7 +551,7 @@ export const TimetableEntryForm = ({
               className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
             >
               <Save size={20} />
-              Save Changes
+              {isOverrideMode ? 'Save Override' : 'Save Changes'}
             </button>
           </div>
         </div>

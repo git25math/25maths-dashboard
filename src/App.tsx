@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent } from './types';
+import { Student, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord } from './types';
 import { useAppData } from './hooks/useAppData';
 import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
@@ -55,6 +55,8 @@ function AppContent() {
   const [editingClass, setEditingClass] = useState<ClassProfile | null>(null);
   const [isTimetableFormOpen, setIsTimetableFormOpen] = useState(false);
   const [editingTimetableEntry, setEditingTimetableEntry] = useState<TimetableEntry | null>(null);
+  const [editingContextDate, setEditingContextDate] = useState<string>('');
+  const [pendingCalendarDate, setPendingCalendarDate] = useState<string | undefined>(undefined);
   const [isWorkLogFormOpen, setIsWorkLogFormOpen] = useState(false);
   const [editingWorkLog, setEditingWorkLog] = useState<WorkLog | null>(null);
   const [isSOPFormOpen, setIsSOPFormOpen] = useState(false);
@@ -166,11 +168,17 @@ function AppContent() {
         return (
           <CalendarView
             timetable={data.timetable}
-            onEditEntry={(entry) => { setEditingTimetableEntry(entry); setIsTimetableFormOpen(true); }}
+            onEditEntry={(entry, contextDate) => {
+              setEditingTimetableEntry(entry);
+              setEditingContextDate(contextDate);
+              setIsTimetableFormOpen(true);
+            }}
             onAddEntry={data.addTimetableEntry}
             onUpdateEntry={data.updateTimetableEntry}
             classes={data.classes}
             teachingUnits={data.teachingUnits}
+            lessonRecords={data.lessonRecords}
+            initialDate={pendingCalendarDate}
           />
         );
       case 'students':
@@ -271,6 +279,10 @@ function AppContent() {
             onAdd={data.addLessonRecord}
             onUpdate={data.updateLessonRecord}
             onDelete={data.deleteLessonRecord}
+            onViewInCalendar={(date) => {
+              setPendingCalendarDate(date);
+              setActiveTab('timetable');
+            }}
           />
         );
       case 'goals':
@@ -439,6 +451,12 @@ function AppContent() {
           onSave={(e) => { data.updateTimetableEntry(e); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onCancel={() => { setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onUpdateClassProgress={data.updateClassProgress}
+          contextDate={editingContextDate}
+          onCreateOverride={(e) => { data.addTimetableEntry(e); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
+          onDeleteOverride={(id) => { data.deleteTimetableEntry(id); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
+          lessonRecords={data.lessonRecords}
+          onUpdateLessonRecord={data.updateLessonRecord}
+          onAddLessonRecord={data.addLessonRecord}
         />
       )}
       {isWorkLogFormOpen && (

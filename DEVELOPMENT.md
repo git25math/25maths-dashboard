@@ -303,6 +303,34 @@
 - **SubUnitForm upload error**: replaced `alert()` with inline `<p className="text-xs text-red-500">` error message
 - Modified files (2): TeachingView.tsx, SubUnitForm.tsx
 
+### Phase 24 — 日程管理增强 + 上课记录自然衔接 (2026-03-03)
+- **Data model**: `TimetableEntry` 新增 `recurring_id` 字段（单日覆盖指向原重复日程 ID）；`LessonRecord` 新增 `timetable_entry_id` 字段（反向关联日程条目）
+- **Supabase migration**: `20260304000000_timetable_lesson_linkage.sql` — 两个 ALTER TABLE
+- **单日覆盖 (Single-day override)**:
+  - TimetableEntryForm：编辑重复日程时顶部显示 amber 横幅 "Only modify {date}" 按钮
+  - 点击后克隆为新条目（设 `date` + `recurring_id`），保存为独立条目不影响模板
+  - 已覆盖条目显示 "Override" 标签 + "Restore Default" 按钮（删除覆盖恢复模板）
+  - CalendarView 日程卡片：覆盖条目显示 "OVR" amber 标签
+  - `getEntriesForDate()` 增强：通过 `recurring_id` 隐藏已被覆盖的重复日程
+- **QuickAdd 增强**:
+  - 5 个课程类型按钮（lesson / tutor / duty / meeting / break），默认 lesson
+  - 新增结束时间输入，与开始时间同行
+  - 班级改为下拉选择器（从 `classes` 填充），选中后自动设 `class_id`
+  - 勾选"Recurring"后显示周一～五 checkbox，支持多天批量创建
+  - "Full editor →" 链接：打开 TimetableEntryForm 并预填当前 QuickAdd 数据
+- **内联上课记录 (Inline Lesson Record)**:
+  - TimetableEntryForm 底部新增 teal 色 "Lesson Record" section（仅 `type=lesson` 时显示）
+  - 自动匹配记录：先按 `timetable_entry_id` 查，回退到 `date + class_name` 查
+  - 已有记录：展开 progress / homework_assigned / next_lesson_plan 三个可编辑字段 + "Save Record" 按钮
+  - 无记录：显示 "Create Lesson Record" 按钮，预填 date / class_name / topic
+- **Auto-record 修复**: `addTimetableEntry` 现在也自动创建 LessonRecord（之前仅 `updateTimetableEntry` 有此逻辑），并设 `timetable_entry_id`
+- **deleteTimetableEntry**: 新增删除日程函数（用于删除覆盖条目）
+- **上课记录 → 日历跳转**: LessonRecordsView 每条记录增加日历图标按钮，点击跳转到对应日期的日历视图
+- **CalendarView `initialDate` prop**: 支持从外部（LessonRecordsView）跳转到指定日期
+- **日程卡片上课记录图标**: lesson 类型卡片匹配到 LessonRecord 时右上角显示 teal 色 `FileText` 图标
+- New file: `supabase/migrations/20260304000000_timetable_lesson_linkage.sql`
+- Modified files (6): types.ts, useAppData.ts, TimetableEntryForm.tsx, CalendarView.tsx, LessonRecordsView.tsx, App.tsx
+
 ---
 
 ## Current Architecture
@@ -315,7 +343,7 @@ Browser
   │     ├── useDarkMode hook (theme toggle with localStorage persistence)
   │     ├── useLocalStorage (cache layer)
   │     ├── GlobalSearch (Cmd+K overlay, cross-entity search)
-  │     ├── 11 Service files (Supabase API layer)
+  │     ├── 11 Service files (Supabase API layer, with timetable_entry_id linkage)
   │     ├── @dnd-kit (drag-and-drop timetable grid)
   │     ├── geminiService (Gemini 2.5 Flash: transcription, meeting summary, lesson plans, categorization, practice recs, idea/worklog/SOP consolidation)
   │     └── timetableUtils (conflict detection for recurring/date-specific entries)
@@ -408,13 +436,23 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] Class Progress: color-coded progress bar (red/amber/emerald), LO count text
 - [x] SubUnitForm: numbered badges, icon button group for status, section dividers + icons, inline upload error
 
-### Phase 23 — Analytics & Reports (Next)
+### ~~Phase 24 — 日程管理增强 + 上课记录自然衔接~~ ✅ Done
+- [x] 单日覆盖：编辑重复日程时可"仅修改本日"，克隆为独立条目（`recurring_id` 关联）
+- [x] 覆盖条目可"恢复默认"（删除覆盖），日历卡片显示 OVR 标签
+- [x] QuickAdd 增强：课程类型选择 / 结束时间 / 班级下拉 / 多天重复 / 完整编辑入口
+- [x] 内联上课记录：TimetableEntryForm 内直接编辑 progress / homework / next plan
+- [x] LessonRecord ↔ TimetableEntry 双向关联（`timetable_entry_id` + `recurring_id`）
+- [x] `addTimetableEntry` 自动创建 LessonRecord + `deleteTimetableEntry` 新增
+- [x] 上课记录页面 → 日历跳转（CalendarDays 图标 → 切换到对应日期）
+- [x] 日程卡片显示 lesson record 关联图标（teal FileText）
+
+### Phase 25 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
 - [ ] Exportable reports (PDF)
 
-### Phase 24 — Advanced
+### Phase 26 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText } from 'lucide-react';
+import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText, CalendarDays } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { LessonRecord, ClassProfile } from '../types';
 
@@ -9,9 +9,10 @@ interface LessonRecordsViewProps {
   onAdd: (data: Omit<LessonRecord, 'id'>) => void;
   onUpdate: (id: string, updates: Partial<LessonRecord>) => void;
   onDelete: (id: string) => void;
+  onViewInCalendar?: (date: string) => void;
 }
 
-export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onDelete }: LessonRecordsViewProps) => {
+export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onDelete, onViewInCalendar }: LessonRecordsViewProps) => {
   const [classFilter, setClassFilter] = useState<string>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -226,6 +227,15 @@ export const LessonRecordsView = ({ lessonRecords, classes, onAdd, onUpdate, onD
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
               {editingId !== record.id && (
                 <>
+                  {onViewInCalendar && (
+                    <button
+                      onClick={() => onViewInCalendar(record.date)}
+                      className="text-slate-300 hover:text-teal-500 transition-colors"
+                      title="View in Calendar"
+                    >
+                      <CalendarDays size={14} />
+                    </button>
+                  )}
                   <button
                     onClick={() => startEdit(record)}
                     className="text-slate-300 hover:text-indigo-500 transition-colors"

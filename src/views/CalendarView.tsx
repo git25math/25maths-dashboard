@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, ChevronLeft, ChevronRight, FileText, ArrowRight } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { TimetableEntry, ClassProfile, TeachingUnit } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord } from '../types';
 import { DndContext, useDraggable, useDroppable, PointerSensor, useSensors, useSensor, DragEndEvent } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { detectConflicts } from '../lib/timetableUtils';
@@ -27,13 +27,17 @@ const TIME_SLOTS = [
   '11:15', '12:05', '12:50', '13:35', '13:50', '14:40', '15:25', '15:30', '16:20', '16:30', '17:20'
 ];
 
+const ENTRY_TYPES: TimetableEntry['type'][] = ['lesson', 'tutor', 'duty', 'meeting', 'break'];
+
 interface CalendarViewProps {
   timetable: TimetableEntry[];
-  onEditEntry: (entry: TimetableEntry) => void;
+  onEditEntry: (entry: TimetableEntry, contextDate: string) => void;
   onAddEntry: (entry: TimetableEntry) => void;
   onUpdateEntry?: (entry: TimetableEntry) => void;
   classes: ClassProfile[];
   teachingUnits: TeachingUnit[];
+  lessonRecords?: LessonRecord[];
+  initialDate?: string;
 }
 
 function getEntryColorClasses(type: string) {
@@ -106,9 +110,11 @@ function getEntriesForDate(date: Date, timetable: TimetableEntry[]): TimetableEn
 
   // Date-specific entries override recurring at the same start_time
   const overriddenTimes = new Set(dateSpecific.map(e => e.start_time));
+  // Also hide recurring entries that have been overridden by recurring_id
+  const overriddenIds = new Set(dateSpecific.filter(e => e.recurring_id).map(e => e.recurring_id!));
   const merged = [
     ...dateSpecific,
-    ...recurring.filter(e => !overriddenTimes.has(e.start_time)),
+    ...recurring.filter(e => !overriddenTimes.has(e.start_time) && !overriddenIds.has(e.id)),
   ];
 
   return merged.sort((a, b) => a.start_time.localeCompare(b.start_time));
@@ -121,11 +127,21 @@ function countEntriesForDate(date: Date, timetable: TimetableEntry[]): { total: 
   const recurring = timetable.filter(e => !e.date && e.day === isoWeekday);
   const dateSpecific = timetable.filter(e => e.date === dateStr);
   const overriddenTimes = new Set(dateSpecific.map(e => e.start_time));
-  const total = dateSpecific.length + recurring.filter(e => !overriddenTimes.has(e.start_time)).length;
+  const overriddenIds = new Set(dateSpecific.filter(e => e.recurring_id).map(e => e.recurring_id!));
+  const total = dateSpecific.length + recurring.filter(e => !overriddenTimes.has(e.start_time) && !overriddenIds.has(e.id)).length;
   return { total, hasDateSpecific: dateSpecific.length > 0 };
 }
 
-export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry, classes, teachingUnits }: CalendarViewProps) => {
+export const CalendarView = ({
+  timetable,
+  onEditEntry,
+  onAddEntry,
+  onUpdateEntry,
+  classes,
+  teachingUnits,
+  lessonRecords = [],
+  initialDate,
+}: CalendarViewProps) => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(today));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -135,10 +151,23 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
   const [quickClass, setQuickClass] = useState('');
   const [quickRoom, setQuickRoom] = useState('');
   const [quickTime, setQuickTime] = useState('');
+  const [quickEndTime, setQuickEndTime] = useState('');
+  const [quickType, setQuickType] = useState<TimetableEntry['type']>('lesson');
   const [quickRecurring, setQuickRecurring] = useState(false);
+  const [quickRecurringDays, setQuickRecurringDays] = useState<number[]>([]);
+  const [showFullQuickAdd, setShowFullQuickAdd] = useState(false);
 
   // DnD sensors
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Handle initialDate prop
+  useEffect(() => {
+    if (initialDate) {
+      const d = new Date(initialDate + 'T12:00:00');
+      setSelectedDate(d);
+      setCurrentMonth(startOfMonth(d));
+    }
+  }, [initialDate]);
 
   // Entries for selected date
   const dayEntries = useMemo(() => getEntriesForDate(selectedDate, timetable), [selectedDate, timetable]);
@@ -161,23 +190,56 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
 
   const handleQuickAdd = () => {
     if (!quickSubject || !quickTime) return;
-    const isoWeekday = getISODay(selectedDate);
-    const newEntry: TimetableEntry = {
-      id: `custom-${Date.now()}`,
-      day: isoWeekday,
-      start_time: quickTime,
-      end_time: quickTime,
-      subject: quickSubject,
-      class_name: quickClass || '-',
-      room: quickRoom || '-',
-      type: 'lesson',
-      ...(quickRecurring ? {} : { date: format(selectedDate, 'yyyy-MM-dd') }),
-    };
-    onAddEntry(newEntry);
+    const endTime = quickEndTime || quickTime;
+
+    // Find class_id from selected class name
+    const matchedClass = classes.find(c => c.name === quickClass);
+
+    if (quickRecurring && quickRecurringDays.length > 0) {
+      // Create one entry per selected day
+      for (const day of quickRecurringDays) {
+        const newEntry: TimetableEntry = {
+          id: `custom-${Date.now()}-${day}`,
+          day,
+          start_time: quickTime,
+          end_time: endTime,
+          subject: quickSubject,
+          class_name: quickClass || '-',
+          class_id: matchedClass?.id,
+          room: quickRoom || '-',
+          type: quickType,
+        };
+        onAddEntry(newEntry);
+      }
+    } else {
+      const isoWeekday = getISODay(selectedDate);
+      const newEntry: TimetableEntry = {
+        id: `custom-${Date.now()}`,
+        day: isoWeekday,
+        start_time: quickTime,
+        end_time: endTime,
+        subject: quickSubject,
+        class_name: quickClass || '-',
+        class_id: matchedClass?.id,
+        room: quickRoom || '-',
+        type: quickType,
+        ...(quickRecurring ? {} : { date: format(selectedDate, 'yyyy-MM-dd') }),
+      };
+      onAddEntry(newEntry);
+    }
+
     setQuickSubject('');
     setQuickClass('');
     setQuickRoom('');
     setQuickTime('');
+    setQuickEndTime('');
+    setQuickRecurringDays([]);
+  };
+
+  const toggleRecurringDay = (day: number) => {
+    setQuickRecurringDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -207,36 +269,51 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     });
   };
 
-  const renderEntryCard = (entry: TimetableEntry, hasConflict = false) => (
-    <div
-      onClick={() => onEditEntry(entry)}
-      className={cn(
-        "p-2 rounded-lg text-[10px] border shadow-sm transition-all hover:scale-[1.02] cursor-pointer relative",
-        getEntryColorClasses(entry.type)
-      )}
-    >
-      {hasConflict && (
-        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" title="Schedule conflict" />
-      )}
-      <div className="flex justify-between items-start">
-        <p className="font-bold truncate">
-          <span className="opacity-60 mr-1">{entry.start_time}</span>
-          {entry.subject}
-        </p>
-        <div className="flex items-center gap-1 shrink-0">
-          {entry.date && (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Date-specific" />
-          )}
-          {entry.is_prepared !== undefined && (
-            <div className={cn("w-1.5 h-1.5 rounded-full", entry.is_prepared ? "bg-emerald-500" : "bg-red-500")} />
-          )}
+  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+  const renderEntryCard = (entry: TimetableEntry, hasConflict = false) => {
+    // Check if this entry has a matching lesson record
+    const hasLessonRecord = entry.type === 'lesson' && lessonRecords.some(
+      r => r.timetable_entry_id === entry.id || (r.date === selectedDateStr && r.class_name === entry.class_name)
+    );
+
+    return (
+      <div
+        onClick={() => onEditEntry(entry, selectedDateStr)}
+        className={cn(
+          "p-2 rounded-lg text-[10px] border shadow-sm transition-all hover:scale-[1.02] cursor-pointer relative",
+          getEntryColorClasses(entry.type)
+        )}
+      >
+        {hasConflict && (
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" title="Schedule conflict" />
+        )}
+        <div className="flex justify-between items-start">
+          <p className="font-bold truncate">
+            <span className="opacity-60 mr-1">{entry.start_time}</span>
+            {entry.subject}
+          </p>
+          <div className="flex items-center gap-1 shrink-0">
+            {hasLessonRecord && (
+              <span title="Has lesson record"><FileText size={10} className="text-teal-500" /></span>
+            )}
+            {entry.recurring_id && (
+              <span className="text-[8px] font-bold px-1 rounded bg-amber-200 text-amber-700" title="Single-day override">OVR</span>
+            )}
+            {!entry.recurring_id && entry.date && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Date-specific" />
+            )}
+            {entry.is_prepared !== undefined && (
+              <div className={cn("w-1.5 h-1.5 rounded-full", entry.is_prepared ? "bg-emerald-500" : "bg-red-500")} />
+            )}
+          </div>
         </div>
+        <p className="opacity-80 truncate">{entry.class_name}</p>
+        <p className="opacity-60 truncate">{entry.room}</p>
+        {entry.topic && <p className="mt-1 font-medium text-[8px] italic truncate">Topic: {entry.topic}</p>}
       </div>
-      <p className="opacity-80 truncate">{entry.class_name}</p>
-      <p className="opacity-60 truncate">{entry.room}</p>
-      {entry.topic && <p className="mt-1 font-medium text-[8px] italic truncate">Topic: {entry.topic}</p>}
-    </div>
-  );
+    );
+  };
 
   // --- Sub-components ---
 
@@ -415,6 +492,8 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
     </div>
   );
 
+  const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -431,6 +510,29 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
         <h3 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
           <Plus size={16} /> Quick Add / Customize Event
         </h3>
+
+        {/* Entry type selector */}
+        <div className="flex gap-1 mb-3">
+          {ENTRY_TYPES.map(t => (
+            <button
+              key={t}
+              onClick={() => setQuickType(t)}
+              className={cn(
+                "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all",
+                quickType === t
+                  ? t === 'lesson' ? "bg-indigo-100 text-indigo-700 border-indigo-200"
+                    : t === 'tutor' ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                    : t === 'duty' ? "bg-amber-100 text-amber-700 border-amber-200"
+                    : t === 'meeting' ? "bg-purple-100 text-purple-700 border-purple-200"
+                    : "bg-slate-100 text-slate-700 border-slate-200"
+                  : "bg-white text-slate-400 border-slate-200 hover:bg-slate-50"
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           <input
             type="text"
@@ -439,13 +541,16 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
             value={quickSubject}
             onChange={(e) => setQuickSubject(e.target.value)}
           />
-          <input
-            type="text"
-            placeholder="Class"
+          <select
             className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
             value={quickClass}
             onChange={(e) => setQuickClass(e.target.value)}
-          />
+          >
+            <option value="">Class...</option>
+            {classes.map(c => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
+          </select>
           <input
             type="text"
             placeholder="Room"
@@ -453,23 +558,99 @@ export const CalendarView = ({ timetable, onEditEntry, onAddEntry, onUpdateEntry
             value={quickRoom}
             onChange={(e) => setQuickRoom(e.target.value)}
           />
-          <input
-            type="time"
-            className="text-xs p-2 rounded-lg border border-indigo-100 bg-white"
-            value={quickTime}
-            onChange={(e) => setQuickTime(e.target.value)}
-          />
+          <div className="flex gap-1 items-center">
+            <input
+              type="time"
+              className="text-xs p-2 rounded-lg border border-indigo-100 bg-white flex-1"
+              value={quickTime}
+              onChange={(e) => setQuickTime(e.target.value)}
+            />
+            <span className="text-xs text-slate-400">-</span>
+            <input
+              type="time"
+              className="text-xs p-2 rounded-lg border border-indigo-100 bg-white flex-1"
+              value={quickEndTime}
+              onChange={(e) => setQuickEndTime(e.target.value)}
+              placeholder="End"
+            />
+          </div>
           <label className="flex items-center gap-2 text-xs text-slate-600">
             <input
               type="checkbox"
               checked={quickRecurring}
-              onChange={(e) => setQuickRecurring(e.target.checked)}
+              onChange={(e) => {
+                setQuickRecurring(e.target.checked);
+                if (!e.target.checked) setQuickRecurringDays([]);
+              }}
               className="rounded border-slate-300"
             />
             Recurring
           </label>
           <button onClick={handleQuickAdd} className="btn-primary text-xs py-2 bg-indigo-600 border-none">Add</button>
         </div>
+
+        {/* Multi-day recurring selector */}
+        {quickRecurring && (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-slate-500">Repeat on:</span>
+            <div className="flex gap-1">
+              {DAY_LABELS.map((label, i) => {
+                const day = i + 1;
+                const selected = quickRecurringDays.includes(day);
+                return (
+                  <button
+                    key={day}
+                    onClick={() => toggleRecurringDay(day)}
+                    className={cn(
+                      "w-8 h-8 rounded-lg text-[10px] font-bold border transition-all",
+                      selected
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-white text-slate-400 border-slate-200 hover:bg-slate-50"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setShowFullQuickAdd(true)}
+              className="ml-auto text-xs text-indigo-600 hover:underline flex items-center gap-1"
+            >
+              Full editor <ArrowRight size={12} />
+            </button>
+          </div>
+        )}
+
+        {!quickRecurring && (
+          <div className="mt-2 flex justify-end">
+            <button
+              onClick={() => {
+                // Open the full form with pre-filled data from QuickAdd
+                if (quickSubject || quickTime) {
+                  const isoWeekday = getISODay(selectedDate);
+                  const matchedClass = classes.find(c => c.name === quickClass);
+                  const prefilled: TimetableEntry = {
+                    id: `custom-${Date.now()}`,
+                    day: isoWeekday,
+                    start_time: quickTime || '08:00',
+                    end_time: quickEndTime || quickTime || '09:00',
+                    subject: quickSubject || '',
+                    class_name: quickClass || '-',
+                    class_id: matchedClass?.id,
+                    room: quickRoom || '-',
+                    type: quickType,
+                    date: format(selectedDate, 'yyyy-MM-dd'),
+                  };
+                  onEditEntry(prefilled, format(selectedDate, 'yyyy-MM-dd'));
+                }
+              }}
+              className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+            >
+              Full editor <ArrowRight size={12} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile View */}

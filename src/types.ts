@@ -68,6 +68,7 @@ export interface TimetableEntry {
   unit_id?: string; // Link to TeachingUnit
   lesson_id?: string; // Link to specific LessonPlanItem
   date?: string; // ISO 'YYYY-MM-DD'. If set, date-specific (non-recurring). If absent, recurring weekly.
+  recurring_id?: string; // If this is a single-day override, points to the original recurring entry's id
 }
 
 export interface LessonRecord {
@@ -79,6 +80,7 @@ export interface LessonRecord {
   homework_assigned: string;
   notes: string;
   next_lesson_plan: string;
+  timetable_entry_id?: string; // Back-reference to linked timetable entry
 }
 
 export interface Idea {

@@ -262,6 +262,7 @@ export function useAppData() {
               progress: '',
               homework_assigned: '',
               next_lesson_plan: '',
+              timetable_entry_id: updatedEntry.id,
             });
             setLessonRecords(prev => [...prev, created]);
           } catch {
@@ -279,8 +280,43 @@ export function useAppData() {
       const created = await timetableService.create(newEntry);
       setTimetable(prev => [...prev, created]);
       toast.success('Entry added to schedule');
+
+      // Auto-create LessonRecord for lesson entries with topic or notes
+      if (created.type === 'lesson' && (created.topic || created.notes)) {
+        const recordDate = created.date || format(new Date(), 'yyyy-MM-dd');
+        const existing = lessonRecords.find(
+          r => r.date === recordDate && r.class_name === created.class_name
+        );
+        if (!existing) {
+          try {
+            const lr = await lessonRecordService.create({
+              date: recordDate,
+              class_name: created.class_name,
+              topic: created.topic || '',
+              notes: created.notes || '',
+              progress: '',
+              homework_assigned: '',
+              next_lesson_plan: '',
+              timetable_entry_id: created.id,
+            });
+            setLessonRecords(prev => [...prev, lr]);
+          } catch {
+            // silent fallback
+          }
+        }
+      }
     } catch (error) {
       toast.error('Failed to add timetable entry');
+    }
+  }, [setTimetable, toast, lessonRecords, setLessonRecords]);
+
+  const deleteTimetableEntry = useCallback(async (id: string) => {
+    try {
+      await timetableService.delete(id);
+      setTimetable(prev => prev.filter(e => e.id !== id));
+      toast.success('Entry removed from schedule');
+    } catch (error) {
+      toast.error('Failed to delete timetable entry');
     }
   }, [setTimetable, toast]);
 
@@ -677,7 +713,7 @@ export function useAppData() {
     saveClass, deleteClass, updateClassProgress,
 
     // Timetable
-    updateTimetableEntry, addTimetableEntry,
+    updateTimetableEntry, addTimetableEntry, deleteTimetableEntry,
 
     // Ideas / SOPs / WorkLogs
     addIdea, updateIdea, deleteIdea, toggleIdeaStatus, toggleIdeaDashboard, consolidateIdeas,
