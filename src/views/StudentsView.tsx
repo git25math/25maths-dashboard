@@ -29,10 +29,12 @@ interface StudentsViewProps {
   onEditRequest?: (studentId: string, requestId: string, currentContent: string) => void;
   onDeleteRequest?: (studentId: string, requestId: string) => void;
   onToggleRequestStatus?: (studentId: string, requestId: string) => void;
+  onUpdateRequestDate?: (studentId: string, requestId: string, field: 'date' | 'resolved_date', value: string) => void;
   onAddParentComm: (studentId: string) => void;
   onEditParentComm?: (studentId: string, commId: string, currentContent: string) => void;
   onDeleteParentComm?: (studentId: string, commId: string) => void;
   onToggleParentCommStatus?: (studentId: string, commId: string) => void;
+  onUpdateParentCommDate?: (studentId: string, commId: string, field: 'date' | 'resolved_date', value: string) => void;
   onAddExamRecord: (studentId: string, record: Omit<ExamRecord, 'id'>) => void;
   onBatchAwardHP: (awards: { student_id: string; points: number; reason: string }[]) => void;
   hpAwardLogs?: HPAwardLog[];
@@ -62,10 +64,12 @@ export const StudentsView = ({
   onEditRequest,
   onDeleteRequest,
   onToggleRequestStatus,
+  onUpdateRequestDate,
   onAddParentComm,
   onEditParentComm,
   onDeleteParentComm,
   onToggleParentCommStatus,
+  onUpdateParentCommDate,
   onAddExamRecord,
   onBatchAwardHP,
   hpAwardLogs,
@@ -513,9 +517,36 @@ export const StudentsView = ({
                 {selectedStudent.requests?.map(req => (
                   <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
                     <MarkdownRenderer content={req.content} className="text-xs text-slate-700" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-slate-400">{req.date}</span>
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <span>提出:</span>
+                        {onUpdateRequestDate ? (
+                          <input
+                            type="date"
+                            value={req.date}
+                            onChange={e => onUpdateRequestDate(selectedStudent.id, req.id, 'date', e.target.value)}
+                            className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
+                          />
+                        ) : (
+                          <span>{req.date}</span>
+                        )}
+                      </div>
+                      {req.status === 'resolved' && (
+                        <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+                          <span>解决:</span>
+                          {onUpdateRequestDate ? (
+                            <input
+                              type="date"
+                              value={req.resolved_date || ''}
+                              onChange={e => onUpdateRequestDate(selectedStudent.id, req.id, 'resolved_date', e.target.value)}
+                              className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
+                            />
+                          ) : (
+                            <span>{req.resolved_date || '—'}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 ml-auto">
                         {onToggleRequestStatus && (
                           <button
                             onClick={() => onToggleRequestStatus(selectedStudent.id, req.id)}
@@ -583,9 +614,36 @@ export const StudentsView = ({
                 {selectedStudent.parent_communications?.map(comm => (
                   <div key={comm.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
                     <MarkdownRenderer content={comm.content} className="text-xs text-slate-700" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-slate-400">{comm.date}</span>
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <span>提出:</span>
+                        {onUpdateParentCommDate ? (
+                          <input
+                            type="date"
+                            value={comm.date}
+                            onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'date', e.target.value)}
+                            className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
+                          />
+                        ) : (
+                          <span>{comm.date}</span>
+                        )}
+                      </div>
+                      {comm.status === 'resolved' && (
+                        <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+                          <span>解决:</span>
+                          {onUpdateParentCommDate ? (
+                            <input
+                              type="date"
+                              value={comm.resolved_date || ''}
+                              onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'resolved_date', e.target.value)}
+                              className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
+                            />
+                          ) : (
+                            <span>{comm.resolved_date || '—'}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 ml-auto">
                         {onToggleParentCommStatus && (
                           <button
                             onClick={() => onToggleParentCommStatus(selectedStudent.id, comm.id)}

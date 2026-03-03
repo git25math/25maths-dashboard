@@ -280,6 +280,7 @@ function AppContent() {
             }}
             onDeleteRequest={data.deleteStudentRequest}
             onToggleRequestStatus={data.toggleRequestStatus}
+            onUpdateRequestDate={data.updateRequestDate}
             onAddParentComm={openParentCommForm}
             onEditParentComm={(studentId, commId, currentContent) => {
               setGenericFormConfig({
@@ -296,6 +297,7 @@ function AppContent() {
             }}
             onDeleteParentComm={data.deleteParentCommunication}
             onToggleParentCommStatus={data.toggleParentCommunicationStatus}
+            onUpdateParentCommDate={data.updateParentCommDate}
             onAddExamRecord={data.addExamRecord}
             onBatchAwardHP={(awards) => data.batchAwardHP(awards)}
             hpAwardLogs={data.hpAwardLogs}

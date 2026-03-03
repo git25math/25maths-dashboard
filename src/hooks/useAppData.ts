@@ -329,6 +329,18 @@ export function useAppData() {
     }
   }, [students, saveStudent]);
 
+  const updateRequestDate = useCallback(async (studentId: string, requestId: string, field: 'date' | 'resolved_date', value: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        requests: (student.requests || []).map(r =>
+          r.id === requestId ? { ...r, [field]: value || undefined } : r
+        ),
+      });
+    }
+  }, [students, saveStudent]);
+
   const deleteStudentRequest = useCallback(async (studentId: string, requestId: string) => {
     const student = students.find(s => s.id === studentId);
     if (student) {
@@ -342,10 +354,15 @@ export function useAppData() {
   const toggleRequestStatus = useCallback(async (studentId: string, requestId: string) => {
     const student = students.find(s => s.id === studentId);
     if (student) {
+      const today = format(new Date(), 'yyyy-MM-dd');
       await saveStudent({
         ...student,
         requests: (student.requests || []).map(r =>
-          r.id === requestId ? { ...r, status: r.status === 'pending' ? 'resolved' as const : 'pending' as const } : r
+          r.id === requestId ? {
+            ...r,
+            status: r.status === 'pending' ? 'resolved' as const : 'pending' as const,
+            resolved_date: r.status === 'pending' ? today : undefined,
+          } : r
         ),
       });
     }
@@ -379,6 +396,18 @@ export function useAppData() {
     }
   }, [students, saveStudent]);
 
+  const updateParentCommDate = useCallback(async (studentId: string, commId: string, field: 'date' | 'resolved_date', value: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      await saveStudent({
+        ...student,
+        parent_communications: (student.parent_communications || []).map(c =>
+          c.id === commId ? { ...c, [field]: value || undefined } : c
+        ),
+      });
+    }
+  }, [students, saveStudent]);
+
   const deleteParentCommunication = useCallback(async (studentId: string, commId: string) => {
     const student = students.find(s => s.id === studentId);
     if (student) {
@@ -392,10 +421,15 @@ export function useAppData() {
   const toggleParentCommunicationStatus = useCallback(async (studentId: string, commId: string) => {
     const student = students.find(s => s.id === studentId);
     if (student) {
+      const today = format(new Date(), 'yyyy-MM-dd');
       await saveStudent({
         ...student,
         parent_communications: (student.parent_communications || []).map(c =>
-          c.id === commId ? { ...c, status: c.status === 'pending' ? 'resolved' as const : 'pending' as const } : c
+          c.id === commId ? {
+            ...c,
+            status: c.status === 'pending' ? 'resolved' as const : 'pending' as const,
+            resolved_date: c.status === 'pending' ? today : undefined,
+          } : c
         ),
       });
     }
@@ -1209,8 +1243,9 @@ export function useAppData() {
     toasts,
 
     // Student
-    saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addWeakness, updateWeakness, deleteWeakness, addStudentRequest, updateStudentRequest, deleteStudentRequest, toggleRequestStatus,
-    addParentCommunication, updateParentCommunication, deleteParentCommunication, toggleParentCommunicationStatus,
+    saveStudent, deleteStudent, addStatusRecord, updateStatusRecord, deleteStatusRecord, addWeakness, updateWeakness, deleteWeakness,
+    addStudentRequest, updateStudentRequest, updateRequestDate, deleteStudentRequest, toggleRequestStatus,
+    addParentCommunication, updateParentCommunication, updateParentCommDate, deleteParentCommunication, toggleParentCommunicationStatus,
     addExamRecord, batchAwardHP,
 
     // Teaching

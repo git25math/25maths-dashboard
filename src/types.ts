@@ -68,6 +68,7 @@ export interface StudentRequest {
   date: string;
   content: string;
   status: 'pending' | 'resolved';
+  resolved_date?: string;
 }
 
 export interface ParentCommunication {
@@ -75,6 +76,7 @@ export interface ParentCommunication {
   date: string;
   content: string;
   status: 'pending' | 'resolved';
+  resolved_date?: string;
 }
 
 export interface StudentWeakness {
