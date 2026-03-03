@@ -23,9 +23,10 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog, onCons
   const [isConsolidating, setIsConsolidating] = useState(false);
   const [consolidatePreview, setConsolidatePreview] = useState<ConsolidatedWorkLog | null>(null);
 
-  const filteredLogs = activeFilter === 'All'
+  const filteredLogs = [...(activeFilter === 'All'
     ? workLogs
-    : workLogs.filter(log => log.category === activeFilter);
+    : workLogs.filter(log => log.category === activeFilter)
+  )].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
