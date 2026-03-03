@@ -557,15 +557,10 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 上课记录 notes / next_lesson_plan 支持 Markdown + LaTeX 富文本（RichTextEditor + MarkdownRenderer）
 - [x] HousePoint 积分分配：LessonRecord 中记录学生积分 awards，自动同步到学生 house_points 总数，支持新建/编辑/删除时的 delta 计算
 
-### ~~Phase 25 — Self-Evolve Dev Console 自进化开发控制台~~ ✅ Done
-- [x] Self-Evolve GitHub Actions workflow (workflow_dispatch, Claude/Gemini provider, build verification, auto-commit)
-- [x] GitHub REST API service (trigger workflow, list/get runs, token check)
-- [x] Dev Console view (instruction input, provider selection, run history with auto-polling)
-- [x] Token guard: unconfigured state shows setup instructions
-- [x] Sidebar entry (Terminal icon), App.tsx routing, env var plumbing
-- [x] API key 3-slot 自动轮换（限速自动 fallback 到下一个 key）
-- [x] Dashboard "View History" 导航修复（不再弹出新建表单）
-- [x] **安全加固**: GitHub PAT 从前端 `VITE_GITHUB_TOKEN` 迁移至 Supabase Edge Function 服务端密钥，前端 bundle 不再泄露 PAT
+### ~~Phase 25 — Self-Evolve Dev Console 自进化开发控制台~~ ❌ Removed
+- 已下架：Self-Evolve 依赖 Anthropic API 按量付费，实际使用中本地 Claude Code（订阅制）更高效
+- 删除：DevConsoleView、githubService、github-proxy Edge Function、self-evolve.yml workflow、侧边栏入口
+- Dashboard "View History" 导航修复保留（不依赖 Self-Evolve）
 
 ### ~~Phase 26 — SchoolEvent 多模式时间支持~~ ✅ Done
 - [x] 新增 `EventTimeMode` 类型 + SchoolEvent 4 个时间字段 (end_date, start_time, end_time, time_mode)
@@ -597,13 +592,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 移动端 + 桌面端侧边栏 `<nav>` 添加 `overflow-y-auto min-h-0`，14 个菜单项在小屏幕上可滚动
 - [x] 标题区域添加 `shrink-0` 防止被压缩
 
-### Phase 28 — Self-Evolve Enhancement 自进化增强 (Next)
-- [ ] Gemini CLI 集成（当前仅 Claude，Gemini provider 需接入）
-- [ ] Dev Console 显示 workflow 日志输出（当前仅状态，无详细 log）
-- [ ] 指令模板/历史记录（常用指令一键复用）
-- [ ] 自动 PR 模式（AI 改动走 PR review 而非直接 push main）
-
-### Phase 29 — Analytics & Reports
+### Phase 28 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -611,7 +600,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] House Point 历史记录查询（按学生查看所有积分来源 LessonRecord）
 
-### Phase 30 — Advanced
+### Phase 29 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
