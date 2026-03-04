@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
-import { TEACHING_YEAR_GROUPS } from '../shared/constants';
+import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 
 interface TeachingViewProps {
   teachingUnits: TeachingUnit[];
@@ -40,6 +40,7 @@ export const TeachingView = ({
   const [selectedSubUnit, setSelectedSubUnit] = useState<SubUnit | null>(null);
   const [isSubUnitFormOpen, setIsSubUnitFormOpen] = useState(false);
   const [editingSubUnit, setEditingSubUnit] = useState<SubUnit | null>(null);
+  const teachingClasses = classes.filter(cls => !NON_TEACHING_GROUPS.has(cls.year_group));
 
   // Keep selectedUnit in sync with teachingUnits changes
   useEffect(() => {
@@ -681,7 +682,7 @@ export const TeachingView = ({
       <div className="glass-card p-6">
         <h3 className="font-bold text-lg mb-4">Class Progress Tracking</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {classes.map(cls => {
+          {teachingClasses.map(cls => {
             const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
             const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
             const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);

@@ -786,6 +786,15 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - 现有导入链路（`import-to-supabase.mjs` 读取 `teaching-units-all.json`）保持不变
 - Modified files (1): `.gitignore`
 
+### Hotfix — Teaching Class Progress 排除 Form / Mixed (2026-03-04)
+- **需求**: Class Progress Tracking 中不显示非教学班级 `Form`、`Mixed`
+- **实现**:
+  - `TeachingView` 在渲染前过滤 `NON_TEACHING_GROUPS`，仅保留教学班级卡片
+  - 进度计算、`Change Unit`/`View Unit` 交互保持不变
+- **回归结果**:
+  - `npm run lint` ✅
+- Modified files (1): `src/views/TeachingView.tsx`
+
 ### Phase 29b — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
