@@ -776,6 +776,16 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `npm run build` ✅
 - Modified files (1): `src/views/DashboardView.tsx`
 
+### Maintenance — Teaching Data Artifact Hygiene (2026-03-04)
+- **背景**: 工作区仅剩 `scripts/output/teaching-units-y7~y11.json` 未跟踪文件；这些文件由增量脚本生成，用于中断恢复和失败重试
+- **治理策略**:
+  - `.gitignore` 忽略 `scripts/output/teaching-units-*.json` 中间缓存
+  - 通过反向规则保留 `scripts/output/teaching-units-all.json` 继续受版本管理（作为导入基线）
+- **结果**:
+  - Git 工作区不再因本地缓存持续变脏
+  - 现有导入链路（`import-to-supabase.mjs` 读取 `teaching-units-all.json`）保持不变
+- Modified files (1): `.gitignore`
+
 ### Phase 29b — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`

@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Teaching data artifacts: keep combined import file tracked, ignore per-year caches
+scripts/output/teaching-units-*.json
+!scripts/output/teaching-units-all.json
