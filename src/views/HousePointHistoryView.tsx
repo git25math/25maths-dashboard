@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Award, Users, BookOpen, Zap, Calendar, X, ChevronRight, List, LayoutGrid } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { HPAwardLog, Student, ClassProfile } from '../types';
+import { FilterChip } from '../components/FilterChip';
 
 interface HousePointHistoryViewProps {
   hpAwardLogs: HPAwardLog[];
@@ -147,30 +148,22 @@ export const HousePointHistoryView = ({
 
       {/* Class filter tabs */}
       <div className="flex flex-wrap gap-2">
-        <button
+        <FilterChip
           onClick={() => { setClassFilter('all'); setStudentFilter('all'); }}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-            classFilter === 'all'
-              ? "bg-emerald-50 border-emerald-200 text-emerald-600"
-              : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-          )}
+          active={classFilter === 'all'}
+          tone="emerald"
         >
           All Classes
-        </button>
+        </FilterChip>
         {classNames.map(name => (
-          <button
+          <FilterChip
             key={name}
             onClick={() => { setClassFilter(name); setStudentFilter('all'); }}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              classFilter === name
-                ? "bg-emerald-50 border-emerald-200 text-emerald-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
+            active={classFilter === name}
+            tone="emerald"
           >
             {name}
-          </button>
+          </FilterChip>
         ))}
       </div>
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Edit3, Save, X, Calendar, BookOpen, FileText, CalendarDays, Award, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { LessonRecord, ClassProfile, Student, HousePointAward } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { RichTextEditor, MarkdownRenderer } from '../components/RichTextEditor';
 import { HousePointAwardsEditor } from '../components/HousePointAwardsEditor';
 
@@ -118,30 +119,22 @@ export const LessonRecordsView = ({ lessonRecords, classes, students, onAdd, onU
 
       {/* Class filter tabs */}
       <div className="flex flex-wrap gap-2">
-        <button
+        <FilterChip
           onClick={() => setClassFilter('all')}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-            classFilter === 'all'
-              ? "bg-teal-50 border-teal-200 text-teal-600"
-              : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-          )}
+          active={classFilter === 'all'}
+          tone="teal"
         >
           All Classes
-        </button>
+        </FilterChip>
         {classNames.map(name => (
-          <button
+          <FilterChip
             key={name}
             onClick={() => setClassFilter(name)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              classFilter === name
-                ? "bg-teal-50 border-teal-200 text-teal-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
+            active={classFilter === name}
+            tone="teal"
           >
             {name}
-          </button>
+          </FilterChip>
         ))}
       </div>
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Edit3, CheckCircle2, Clock, FileText, Eye, EyeOff, Sparkles, CheckSquare, Square, Loader2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Idea, Task } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { geminiService, ConsolidatedIdea } from '../services/geminiService';
 import { ConsolidatePreviewModal } from '../components/ConsolidatePreviewModal';
@@ -105,18 +106,13 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
 
       <div className="flex flex-wrap gap-2">
         {(['all', 'note', 'pending', 'processed'] as const).map(filter => (
-          <button
+          <FilterChip
             key={filter}
             onClick={() => setStatusFilter(filter)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              statusFilter === filter
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
+            active={statusFilter === filter}
           >
             {FILTER_LABELS[filter]}
-          </button>
+          </FilterChip>
         ))}
       </div>
 

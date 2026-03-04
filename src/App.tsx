@@ -176,6 +176,9 @@ function AppContent() {
     setIsSidebarOpen(false);
   };
 
+  const activeSidebarItem = SIDEBAR_ITEMS.find(item => item.key === activeTab);
+  const MobileTabIcon = activeSidebarItem?.icon || Settings;
+
   // --- Content Renderer ---
   const renderContent = () => {
     switch (activeTab) {
@@ -525,7 +528,8 @@ function AppContent() {
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-40 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">25</div>
-          <span className="font-bold">Dashboard</span>
+          <MobileTabIcon size={16} className="text-indigo-600" />
+          <span className="font-bold">{activeSidebarItem?.label || 'Dashboard'}</span>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, Target } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Goal } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { format } from 'date-fns';
 
 interface GoalsViewProps {
@@ -71,34 +72,24 @@ export const GoalsView = ({ goals, onAddGoal, onDeleteGoal, onEditGoal, onUpdate
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex flex-wrap gap-1.5">
           {CATEGORY_FILTERS.map(f => (
-            <button
+            <FilterChip
               key={f}
               onClick={() => setCategoryFilter(f)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                categoryFilter === f
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-              )}
+              active={categoryFilter === f}
             >
               {f}
-            </button>
+            </FilterChip>
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {STATUS_FILTERS.map(f => (
-            <button
+            <FilterChip
               key={f}
               onClick={() => setStatusFilter(f)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                statusFilter === f
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-              )}
+              active={statusFilter === f}
             >
               {f}
-            </button>
+            </FilterChip>
           ))}
         </div>
       </div>

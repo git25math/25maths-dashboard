@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, CalendarDays, AlertTriangle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SchoolEvent, EventTimeMode } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { format } from 'date-fns';
 
@@ -79,18 +80,13 @@ export const SchoolEventsView = ({ schoolEvents, onAddEvent, onDeleteEvent, onEd
       {/* Category Filter */}
       <div className="flex flex-wrap gap-1.5">
         {CATEGORY_FILTERS.map(f => (
-          <button
+          <FilterChip
             key={f}
             onClick={() => setCategoryFilter(f)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              categoryFilter === f
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
+            active={categoryFilter === f}
           >
             {f}
-          </button>
+          </FilterChip>
         ))}
       </div>
 

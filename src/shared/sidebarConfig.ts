@@ -10,6 +10,7 @@ import {
   Clock,
   Mic,
   Mail,
+  BookText,
   Settings,
   Target,
   CalendarDays,
@@ -29,6 +30,6 @@ export const SIDEBAR_ITEMS = [
   { key: 'events', icon: CalendarDays, label: 'School Events' },
   { key: 'meetings', icon: Mic, label: 'Meetings' },
   { key: 'email-digest', icon: Mail, label: 'Email Digest' },
-  { key: 'sop', icon: Settings, label: 'SOP Library' },
+  { key: 'sop', icon: BookText, label: 'SOP Library' },
   { key: 'settings', icon: Settings, label: 'Settings' },
 ] as const;

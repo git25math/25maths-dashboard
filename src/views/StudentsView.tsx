@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare, Phone, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication, StudentWeakness } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { geminiService } from '../services/geminiService';
@@ -919,30 +920,20 @@ export const StudentsView = ({
         <div className="space-y-4">
           {/* Class filter tabs */}
           <div className="flex flex-wrap gap-2">
-            <button
+            <FilterChip
               onClick={() => setClassFilter('all')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                classFilter === 'all'
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-              )}
+              active={classFilter === 'all'}
             >
               All Classes
-            </button>
+            </FilterChip>
             {classNames.map(name => (
-              <button
+              <FilterChip
                 key={name}
                 onClick={() => setClassFilter(name)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                  classFilter === name
-                    ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                    : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-                )}
+                active={classFilter === name}
               >
                 {name}
-              </button>
+              </FilterChip>
             ))}
           </div>
 

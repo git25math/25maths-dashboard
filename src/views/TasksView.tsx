@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Edit3, Inbox, ArrowRight, Clock, Archive, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Task, TaskStatus } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 
 type StatusFilter = 'all' | TaskStatus;
@@ -65,15 +66,11 @@ export const TasksView = ({ tasks, onAddTask, onEditTask, onDeleteTask, onCycleS
         {(['all', 'inbox', 'next', 'waiting', 'someday', 'done'] as const).map(filter => {
           const isInbox = filter === 'inbox';
           return (
-            <button
+            <FilterChip
               key={filter}
               onClick={() => setStatusFilter(filter)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1",
-                statusFilter === filter
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-              )}
+              active={statusFilter === filter}
+              className="flex items-center gap-1"
             >
               {filter === 'all' ? 'All' : STATUS_CONFIG[filter].label}
               {isInbox && inboxCount > 0 && (
@@ -81,7 +78,7 @@ export const TasksView = ({ tasks, onAddTask, onEditTask, onDeleteTask, onCycleS
                   {inboxCount}
                 </span>
               )}
-            </button>
+            </FilterChip>
           );
         })}
       </div>

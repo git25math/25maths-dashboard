@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Edit3, CheckSquare, Square, Sparkles, Loader2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { WorkLog } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { geminiService, ConsolidatedWorkLog } from '../services/geminiService';
 import { ConsolidateWorkLogPreviewModal } from '../components/ConsolidateWorkLogPreviewModal';
 
@@ -89,18 +90,13 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog, onCons
 
       <div className="flex flex-wrap gap-2">
         {CATEGORY_FILTERS.map(filter => (
-          <button
+          <FilterChip
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              activeFilter === filter
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
+            active={activeFilter === filter}
           >
             {filter === 'All' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
-          </button>
+          </FilterChip>
         ))}
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Edit3, ArrowLeft, Mic, Square, Pause, Play, RefreshCw, ChevronDown, ChevronUp, Users, Calendar, Tag, Clock, CheckCircle2, AlertCircle, Loader2, Sparkles, ArrowRightCircle, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { MeetingRecord, AISummary, Task, SmartTaskPreview } from '../types';
+import { FilterChip } from '../components/FilterChip';
 import { geminiService } from '../services/geminiService';
 import { SmartExtractModal } from '../components/SmartExtractModal';
 import { ActionPlanModal } from '../components/ActionPlanModal';
@@ -145,18 +146,13 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
 
         <div className="flex flex-wrap gap-2">
           {(['all', ...CATEGORIES.map(c => c.value)] as const).map(filter => (
-            <button
+            <FilterChip
               key={filter}
               onClick={() => setCategoryFilter(filter as CategoryFilter)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                categoryFilter === filter
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-              )}
+              active={categoryFilter === filter}
             >
               {filter === 'all' ? 'All' : CATEGORIES.find(c => c.value === filter)?.label}
-            </button>
+            </FilterChip>
           ))}
         </div>
 
