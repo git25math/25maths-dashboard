@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
+import { CheckCircle2, Menu, X, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
@@ -49,6 +49,14 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const toggleGroup = (key: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
   const [selectedTeachingUnitId, setSelectedTeachingUnitId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -524,7 +532,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="h-screen flex bg-slate-50 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-6">
         <div className="flex items-center gap-3 px-2 shrink-0">
@@ -535,18 +543,26 @@ function AppContent() {
           {SIDEBAR_GROUPS.map(group => {
             const items = SIDEBAR_ITEMS.filter(i => i.group === group.key);
             if (!items.length) return null;
+            const hasActiveItem = items.some(i => i.key === activeTab);
+            const isCollapsed = group.label && collapsedGroups.has(group.key) && !hasActiveItem;
             return (
               <div key={group.key}>
-                {group.label && (
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1">
+                {group.label ? (
+                  <button
+                    onClick={() => toggleGroup(group.key)}
+                    className="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1 hover:text-slate-600 transition-colors"
+                  >
                     {group.label}
-                  </p>
+                    <ChevronDown size={12} className={`transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+                  </button>
+                ) : null}
+                {!isCollapsed && (
+                  <div className="space-y-1">
+                    {items.map(item => (
+                      <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
+                    ))}
+                  </div>
                 )}
-                <div className="space-y-1">
-                  {items.map(item => (
-                    <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
-                  ))}
-                </div>
               </div>
             );
           })}
@@ -589,18 +605,26 @@ function AppContent() {
                 {SIDEBAR_GROUPS.map(group => {
                   const items = SIDEBAR_ITEMS.filter(i => i.group === group.key);
                   if (!items.length) return null;
+                  const hasActiveItem = items.some(i => i.key === activeTab);
+                  const isCollapsed = group.label && collapsedGroups.has(group.key) && !hasActiveItem;
                   return (
                     <div key={group.key}>
-                      {group.label && (
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1">
+                      {group.label ? (
+                        <button
+                          onClick={() => toggleGroup(group.key)}
+                          className="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1 hover:text-slate-600 transition-colors"
+                        >
                           {group.label}
-                        </p>
+                          <ChevronDown size={12} className={`transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+                        </button>
+                      ) : null}
+                      {!isCollapsed && (
+                        <div className="space-y-1">
+                          {items.map(item => (
+                            <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
+                          ))}
+                        </div>
                       )}
-                      <div className="space-y-1">
-                        {items.map(item => (
-                          <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
-                        ))}
-                      </div>
                     </div>
                   );
                 })}
