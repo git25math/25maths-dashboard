@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
-import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest } from './types';
+import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
 import { useAppData } from './hooks/useAppData';
-import { SIDEBAR_ITEMS } from './shared/sidebarConfig';
+import { SIDEBAR_ITEMS, SIDEBAR_GROUPS } from './shared/sidebarConfig';
 import { SidebarItem } from './components/SidebarItem';
 import { QuickCapture } from './components/QuickCapture';
 import { SyllabusModal } from './components/SyllabusModal';
@@ -22,6 +22,7 @@ import { IdeaForm } from './components/IdeaForm';
 import { GoalForm } from './components/GoalForm';
 import { SchoolEventForm } from './components/SchoolEventForm';
 import { TaskForm } from './components/TaskForm';
+import { ProjectForm } from './components/ProjectForm';
 import { LoginGate, useAuth } from './components/LoginGate';
 import { GlobalSearch } from './components/GlobalSearch';
 import { DashboardView } from './views/DashboardView';
@@ -38,6 +39,7 @@ import { SchoolEventsView } from './views/SchoolEventsView';
 import { TasksView } from './views/TasksView';
 import { HousePointHistoryView } from './views/HousePointHistoryView';
 import { EmailDigestView } from './views/EmailDigestView';
+import { ProjectsView } from './views/ProjectsView';
 import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
@@ -77,6 +79,8 @@ function AppContent() {
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // ParentCommForm
   const [parentCommFormConfig, setParentCommFormConfig] = useState<{
@@ -200,6 +204,8 @@ function AppContent() {
             workLogs={data.workLogs}
             ideas={data.ideas}
             tasks={data.tasks}
+            projects={data.projects}
+            students={data.students}
             onNavigate={(tab) => {
               setActiveTab(tab);
             }}
@@ -394,6 +400,7 @@ function AppContent() {
         return (
           <TasksView
             tasks={data.tasks}
+            projects={data.projects}
             onAddTask={() => { setEditingTask(null); setIsTaskFormOpen(true); }}
             onEditTask={(task) => { setEditingTask(task); setIsTaskFormOpen(true); }}
             onDeleteTask={data.deleteTask}
@@ -471,6 +478,17 @@ function AppContent() {
             onEditEvent={(event) => { setEditingEvent(event); setIsEventFormOpen(true); }}
           />
         );
+      case 'projects':
+        return (
+          <ProjectsView
+            projects={data.projects}
+            tasks={data.tasks}
+            onAddProject={() => { setEditingProject(null); setIsProjectFormOpen(true); }}
+            onEditProject={(project) => { setEditingProject(project); setIsProjectFormOpen(true); }}
+            onDeleteProject={data.deleteProject}
+            onUpdateProject={(id, updates) => data.updateProject(id, updates)}
+          />
+        );
       case 'settings':
         return (
           <SettingsView
@@ -489,6 +507,7 @@ function AppContent() {
               tasks: data.tasks,
               hpAwardLogs: data.hpAwardLogs,
               emailDigests: data.emailDigests,
+              projects: data.projects,
             }}
             onImport={data.bulkImport}
           />
@@ -512,10 +531,25 @@ function AppContent() {
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">25</div>
           <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
         </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto min-h-0 pr-1">
-          {SIDEBAR_ITEMS.map(item => (
-            <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
-          ))}
+        <nav className="flex-1 overflow-y-auto min-h-0 pr-1">
+          {SIDEBAR_GROUPS.map(group => {
+            const items = SIDEBAR_ITEMS.filter(i => i.group === group.key);
+            if (!items.length) return null;
+            return (
+              <div key={group.key}>
+                {group.label && (
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1">
+                    {group.label}
+                  </p>
+                )}
+                <div className="space-y-1">
+                  {items.map(item => (
+                    <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </nav>
         <div className="p-4 bg-gradient-to-br from-slate-50 to-indigo-50/30 border border-slate-100 rounded-2xl shrink-0">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Current Role</p>
@@ -551,10 +585,25 @@ function AppContent() {
                 <span className="font-bold text-xl">Menu</span>
                 <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
               </div>
-              <nav className="flex-1 space-y-2 overflow-y-auto min-h-0">
-                {SIDEBAR_ITEMS.map(item => (
-                  <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
-                ))}
+              <nav className="flex-1 overflow-y-auto min-h-0">
+                {SIDEBAR_GROUPS.map(group => {
+                  const items = SIDEBAR_ITEMS.filter(i => i.group === group.key);
+                  if (!items.length) return null;
+                  return (
+                    <div key={group.key}>
+                      {group.label && (
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1">
+                          {group.label}
+                        </p>
+                      )}
+                      <div className="space-y-1">
+                        {items.map(item => (
+                          <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </nav>
               <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2 py-3">
                 <LogOut size={16} /> Logout
@@ -585,6 +634,7 @@ function AppContent() {
           timetable: data.timetable,
           tasks: data.tasks,
           emailDigests: data.emailDigests,
+          projects: data.projects,
         }}
         onNavigate={navigateTo}
       />
@@ -726,6 +776,7 @@ function AppContent() {
       {isTaskFormOpen && (
         <TaskForm
           task={editingTask}
+          projects={data.projects}
           onSave={(d) => {
             if (editingTask) {
               data.updateTask(editingTask.id, d);
@@ -736,6 +787,21 @@ function AppContent() {
             setEditingTask(null);
           }}
           onCancel={() => { setIsTaskFormOpen(false); setEditingTask(null); }}
+        />
+      )}
+      {isProjectFormOpen && (
+        <ProjectForm
+          project={editingProject}
+          onSave={(d) => {
+            if (editingProject) {
+              data.updateProject(editingProject.id, d);
+            } else {
+              data.addProject({ ...d, created_at: new Date().toISOString() });
+            }
+            setIsProjectFormOpen(false);
+            setEditingProject(null);
+          }}
+          onCancel={() => { setIsProjectFormOpen(false); setEditingProject(null); }}
         />
       )}
       {parentCommFormConfig.isOpen && (

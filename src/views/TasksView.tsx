@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, Edit3, Inbox, ArrowRight, Clock, Archive, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Task, TaskStatus } from '../types';
+import { Task, TaskStatus, Project } from '../types';
 import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 
@@ -23,6 +23,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 interface TasksViewProps {
   tasks: Task[];
+  projects?: Project[];
   onAddTask: () => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
@@ -30,7 +31,7 @@ interface TasksViewProps {
   onNavigate?: (tab: string) => void;
 }
 
-export const TasksView = ({ tasks, onAddTask, onEditTask, onDeleteTask, onCycleStatus, onNavigate }: TasksViewProps) => {
+export const TasksView = ({ tasks, projects, onAddTask, onEditTask, onDeleteTask, onCycleStatus, onNavigate }: TasksViewProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('inbox');
 
   const filteredTasks = (statusFilter === 'all'
@@ -89,6 +90,7 @@ export const TasksView = ({ tasks, onAddTask, onEditTask, onDeleteTask, onCycleS
           const cfg = STATUS_CONFIG[task.status];
           const StatusIcon = cfg.icon;
           const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
+          const project = task.project_id ? projects?.find(p => p.id === task.project_id) : undefined;
 
           return (
             <div
@@ -144,6 +146,15 @@ export const TasksView = ({ tasks, onAddTask, onEditTask, onDeleteTask, onCycleS
                   >
                     {task.source_type}
                   </button>
+                )}
+                {project && (
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1"
+                    style={{ backgroundColor: project.color + '20', color: project.color }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: project.color }} />
+                    {project.name}
+                  </span>
                 )}
               </div>
 

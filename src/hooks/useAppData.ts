@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, PrepStatus, EmailDigest } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, PrepStatus, EmailDigest, Project } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -16,6 +16,7 @@ import { lessonRecordService } from '../services/lessonRecordService';
 import { taskService } from '../services/taskService';
 import { hpAwardService } from '../services/hpAwardService';
 import { emailDigestService } from '../services/emailDigestService';
+import { projectService } from '../services/projectService';
 import { randomAlphaId } from '../lib/id';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
@@ -42,6 +43,7 @@ export function useAppData() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('dashboard-tasks', []);
   const [hpAwardLogs, setHpAwardLogs] = useLocalStorage<HPAwardLog[]>('dashboard-hp-award-logs', []);
   const [emailDigests, setEmailDigests] = useLocalStorage<EmailDigest[]>('dashboard-email-digests', []);
+  const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
 
   // --- Normalize localStorage data ---
   useEffect(() => {
@@ -130,6 +132,7 @@ export function useAppData() {
         fetchOrSync(taskService.getAll, setTasks, tasks, 'tasks'),
         fetchOrSync(hpAwardService.getAll, setLogsAndCapture, hpAwardLogs, 'hp_award_logs'),
         fetchOrSync(emailDigestService.getAll, setEmailDigests, emailDigests, 'email_digests'),
+        fetchOrSync(projectService.getAll, setProjects, projects, 'projects'),
       ]);
 
       // --- One-time backfill: create HPAwardLogs for existing data ---
@@ -731,6 +734,9 @@ export function useAppData() {
   }, [setTimetable, toast]);
 
   const {
+    addProject,
+    updateProject,
+    deleteProject,
     addIdea,
     updateIdea,
     deleteIdea,
@@ -778,6 +784,8 @@ export function useAppData() {
     setEmailDigests,
     tasks,
     setTasks,
+    projects,
+    setProjects,
     toast,
   });
 
@@ -960,6 +968,7 @@ export function useAppData() {
       tasks: (v) => setTasks(v as Task[]),
       hpAwardLogs: (v) => setHpAwardLogs(v as HPAwardLog[]),
       emailDigests: (v) => setEmailDigests(v as EmailDigest[]),
+      projects: (v) => setProjects(v as Project[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -971,12 +980,12 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, toast]);
+  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, toast]);
 
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects,
     toasts,
 
     // Student
@@ -1016,6 +1025,9 @@ export function useAppData() {
 
     // HP Award Logs
     deleteHPAwardLog,
+
+    // Projects
+    addProject, updateProject, deleteProject,
 
     // Tasks (GTD)
     addTask, updateTask, deleteTask, cycleTaskStatus,

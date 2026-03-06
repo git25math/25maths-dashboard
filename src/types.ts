@@ -16,11 +16,23 @@ export interface Task {
   priority: TaskPriority;
   source_type?: TaskSource;
   source_id?: string;
+  project_id?: string;
   assignee?: string;
   due_date?: string;
   tags?: string[];
   created_at: string;
   completed_at?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  status: 'active' | 'paused' | 'completed';
+  url?: string;
+  repo_url?: string;
+  created_at: string;
 }
 
 export interface Student {

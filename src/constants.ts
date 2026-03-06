@@ -1,5 +1,7 @@
-import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord } from './types';
+import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord, Project } from './types';
 // Note: learning_objectives, lessons, core_vocabulary removed from TeachingUnit; completed_lesson_ids removed from ClassProfile
+
+export const MOCK_PROJECTS: Project[] = [];
 
 export const MOCK_LESSON_RECORDS: LessonRecord[] = [];
 

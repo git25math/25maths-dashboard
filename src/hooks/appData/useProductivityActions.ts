@@ -8,7 +8,8 @@ import { schoolEventService } from '../../services/schoolEventService';
 import { meetingService } from '../../services/meetingService';
 import { emailDigestService } from '../../services/emailDigestService';
 import { taskService } from '../../services/taskService';
-import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest } from '../../types';
+import { projectService } from '../../services/projectService';
+import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project } from '../../types';
 
 interface ToastApi {
   success: (message: string) => void;
@@ -32,6 +33,8 @@ interface UseProductivityActionsParams {
   setEmailDigests: Dispatch<SetStateAction<EmailDigest[]>>;
   tasks: Task[];
   setTasks: Dispatch<SetStateAction<Task[]>>;
+  projects: Project[];
+  setProjects: Dispatch<SetStateAction<Project[]>>;
   toast: ToastApi;
 }
 
@@ -52,6 +55,8 @@ export function useProductivityActions({
   setEmailDigests,
   tasks,
   setTasks,
+  projects,
+  setProjects,
   toast,
 }: UseProductivityActionsParams) {
   const addIdea = useCallback(async (data: { title: string; content: string; category: Idea['category']; priority: Idea['priority']; show_on_dashboard?: boolean }) => {
@@ -438,7 +443,43 @@ export function useProductivityActions({
     await updateTask(id, { status: newStatus });
   }, [tasks, updateTask]);
 
+  const addProject = useCallback(async (data: Omit<Project, 'id'>) => {
+    try {
+      const created = await projectService.create(data);
+      setProjects(prev => [...prev, created]);
+      toast.success('Project added');
+    } catch (error) {
+      toast.error('Failed to add project');
+    }
+  }, [setProjects, toast]);
+
+  const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
+    const existing = projects.find(p => p.id === id);
+    if (!existing) return;
+    const merged = { ...existing, ...updates };
+    try {
+      const updated = await projectService.update(id, merged);
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
+      toast.success('Project updated');
+    } catch (error) {
+      toast.error('Failed to update project');
+    }
+  }, [projects, setProjects, toast]);
+
+  const deleteProject = useCallback(async (id: string) => {
+    try {
+      await projectService.delete(id);
+      setProjects(prev => prev.filter(p => p.id !== id));
+      toast.success('Project deleted');
+    } catch (error) {
+      toast.error('Failed to delete project');
+    }
+  }, [setProjects, toast]);
+
   return {
+    addProject,
+    updateProject,
+    deleteProject,
     addIdea,
     updateIdea,
     deleteIdea,
