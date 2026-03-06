@@ -665,11 +665,11 @@ export const CalendarView = ({
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="hidden md:grid md:grid-cols-5 gap-6">
+        <div className="md:col-span-3">
           <MonthGrid />
         </div>
-        <div className="lg:col-span-1">
+        <div className="md:col-span-2">
           <DaySchedule />
         </div>
       </div>
