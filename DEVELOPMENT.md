@@ -834,21 +834,52 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - Modified files (24): `src/types.ts`, `src/constants.ts`, `src/App.tsx`, `src/views/TeachingView.tsx`, `src/views/DashboardView.tsx`, `src/views/MeetingsView.tsx`, `src/components/TimetableEntryForm.tsx`, `src/components/SyllabusModal.tsx`, `src/components/TeachingUnitForm.tsx`, `src/components/ToastContainer.tsx`, `src/components/FilterChip.tsx`, `src/components/GlobalSearch.tsx`, `src/components/IdeaForm.tsx`, `src/components/ParentCommForm.tsx`, `src/components/QuickCapture.tsx`, `src/components/SchoolEventForm.tsx`, `src/components/SidebarItem.tsx`, `src/components/WeaknessForm.tsx`, `src/hooks/useAppData.ts`, `src/index.css`, `src/lib/teachingAdapter.ts`, `src/services/geminiService.ts`, `package.json`, `package-lock.json`
 - New files (3): `src/components/TipTapEditor.tsx`, `src/components/ToggleSwitch.tsx`, `src/lib/htmlUtils.ts`
 
-### Phase 29c — Architecture Refactor II (Planned, No Feature Change)
+### Phase 30 — Sidebar Grouping + Projects Entity + Dashboard Restructure (2026-03-06) ✅
+
+- **侧边栏分组**:
+  - 15 个平级 tab 按角色分为 6 组：overview / teaching / tutor / projects / productivity / reference
+  - `SIDEBAR_GROUPS` 数组 + 每个 item 加 `group` 字段
+  - 桌面端 & 移动端均按分组渲染，组标题以小号大写文字显示
+- **Project 实体**:
+  - 新增 `Project` 接口（id, name, description, color, status, url, repo_url, created_at）
+  - `projectService.ts` — 完整 CRUD，照抄 ideaService 模式
+  - `ProjectForm.tsx` — 创建/编辑 modal（预设颜色选择器 + 状态切换）
+  - `ProjectsView.tsx` — 项目卡片网格 + 关联 Task 统计
+  - Supabase migration: `projects` 表 + RLS policy
+- **Task ↔ Project 关联**:
+  - `Task.project_id` 字段 + Supabase migration
+  - `TaskForm.tsx` 加 project 下拉选择
+  - `TasksView.tsx` 显示 project 色标 badge
+- **Dashboard 重构**:
+  - 按角色分为 4 区块：Teaching / Tutor & Admin / Projects / Productivity
+  - 每区块独立卡片 + 图标标题
+- **GlobalSearch 扩展**: 搜索范围加入 projects
+- **SettingsView**: `KNOWN_KEYS` 加 `'projects'`
+- **Hotfix — Supabase 迁移补漏**:
+  - `students.parent_communications` JSONB 列从未创建 → 导致家校沟通记录无法保存
+  - 新增 `20260306200000_student_parent_comms.sql` 迁移
+  - 3 个迁移一次性推送：parent_comms + projects + tasks.project_id
+- **回归结果**:
+  - GitHub Actions deploy ✅ (2 commits both succeeded)
+  - Supabase migrations applied ✅
+- Modified files (11): `src/App.tsx`, `src/components/GlobalSearch.tsx`, `src/components/TaskForm.tsx`, `src/constants.ts`, `src/hooks/appData/useProductivityActions.ts`, `src/hooks/useAppData.ts`, `src/shared/sidebarConfig.ts`, `src/types.ts`, `src/views/DashboardView.tsx`, `src/views/SettingsView.tsx`, `src/views/TasksView.tsx`
+- New files (6): `src/components/ProjectForm.tsx`, `src/services/projectService.ts`, `src/views/ProjectsView.tsx`, `supabase/migrations/20260306200000_student_parent_comms.sql`, `supabase/migrations/20260310000000_projects.sql`, `supabase/migrations/20260310100000_tasks_project_id.sql`
+
+### Phase 30a — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
 - [ ] 增加 AppData Contract 文档：列出 `useAppData` 返回字段、依赖关系、跨域副作用边界
 - [ ] 引入最小测试骨架（Vitest）：先覆盖 `computeHousePointDeltas`、task status cycle、idea status cycle
 - [ ] CI 加质量门禁：在 deploy 前增加 `npm run lint`（后续接入测试后补 `npm run test`）
 
-### Phase 29d — Dashboard Progress Hardening (Planned)
+### Phase 30b — Dashboard Progress Hardening (Planned)
 - [x] 首页固定显示 Year 7 / 8 / 10 / 11 / 12 教学进度卡片
 - [ ] Year 级别聚合：同年级多班时显示加权总进度（按 LO 总数汇总）
 - [ ] 空态增强：无班级/无单元时提供引导入口（跳转 Students / Teaching）
 - [ ] 交互增强：点击年级标题可快速切换到 Teaching 对应年级
 - [ ] 增加 Dashboard progress 映射单测（固定年级、缺失数据、同年级多班）
 
-### Phase 30 — Analytics & Reports (Next)
+### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
 - [ ] Work log time summary (weekly/monthly)
@@ -856,14 +887,14 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] House Point 积分排行榜 & 趋势图表（按 House 分组 / 按班级 / 按学生）
 - [ ] 家校沟通统计面板（沟通频率、待处理跟进汇总、按沟通方式分类统计）
 
-### Phase 31 — Student Reports & Communication
+### Phase 32 — Student Reports & Communication
 - [ ] Generate Subject Report（基于 exam_records + weaknesses + status_records 自动生成学科报告）
 - [ ] Parent Meeting Notes（从家校沟通记录 AI 生成家长会备忘录）
 - [ ] 学生画像导出（PDF/Markdown，汇总该生所有维度信息：成绩、薄弱环节、学习状态、诉求、家校沟通）
 - [ ] 批量家长邮件通知（基于 parent_email 字段）
 - [ ] 家校沟通跟进提醒（Dashboard 显示待跟进事项，超期预警）
 
-### Phase 32 — Advanced
+### Phase 33 — Advanced
 - [ ] Real-time sync (Supabase Realtime subscriptions)
 - [ ] Multi-user support with Supabase Auth
 - [x] File attachments (Supabase Storage — done in Phase 11)
