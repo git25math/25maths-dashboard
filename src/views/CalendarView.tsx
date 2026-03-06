@@ -666,10 +666,10 @@ export const CalendarView = ({
 
       {/* Desktop View */}
       <div className="hidden md:grid md:grid-cols-5 gap-6">
-        <div className="md:col-span-3">
+        <div className="md:col-span-4">
           <DaySchedule />
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-1">
           <MonthGrid />
         </div>
       </div>
