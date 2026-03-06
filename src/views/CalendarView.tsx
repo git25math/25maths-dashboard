@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, ChevronLeft, ChevronRight, FileText, ArrowRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ChevronDown, FileText, ArrowRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord } from '../types';
 import { DndContext, useDraggable, useDroppable, PointerSensor, useSensors, useSensor, DragEndEvent } from '@dnd-kit/core';
@@ -62,6 +62,38 @@ function addMinutesToTime(time: string, minutes: number): string {
   const nh = Math.floor(total / 60) % 24;
   const nm = total % 60;
   return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`;
+}
+
+function getEffectiveEndTime(entry: TimetableEntry): string {
+  if (entry.end_time && entry.end_time !== entry.start_time) return entry.end_time;
+  return addMinutesToTime(entry.start_time, 45);
+}
+
+function classifyEntries(
+  entries: TimetableEntry[], now: string
+): { past: TimetableEntry[]; current: TimetableEntry | null; upcoming: TimetableEntry[] } {
+  const past: TimetableEntry[] = [];
+  let current: TimetableEntry | null = null;
+  const upcoming: TimetableEntry[] = [];
+
+  for (const entry of entries) {
+    const end = getEffectiveEndTime(entry);
+    if (end <= now) {
+      past.push(entry);
+    } else if (entry.start_time <= now && now < end) {
+      if (current && entry.start_time > current.start_time) {
+        past.push(current);
+        current = entry;
+      } else if (current) {
+        past.push(entry);
+      } else {
+        current = entry;
+      }
+    } else {
+      upcoming.push(entry);
+    }
+  }
+  return { past, current, upcoming };
 }
 
 // --- DnD Wrappers ---
@@ -159,6 +191,21 @@ export const CalendarView = ({
 
   // DnD sensors
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Current time tracking (for today's smart schedule)
+  const [currentTime, setCurrentTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
+
+  useEffect(() => {
+    if (!isToday(selectedDate)) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [selectedDate]);
 
   // Handle initialDate prop
   useEffect(() => {
@@ -320,6 +367,94 @@ export const CalendarView = ({
     );
   };
 
+  const renderCurrentEntryCard = (entry: TimetableEntry, hasConflict = false) => {
+    const hasLessonRecord = entry.type === 'lesson' && lessonRecords.some(
+      r => r.timetable_entry_id === entry.id || (r.date === selectedDateStr && r.class_name === entry.class_name)
+    );
+    const endTime = getEffectiveEndTime(entry);
+    const isPrepared = entry.prep_status === 'prepared' || entry.prep_status === 'finished' || entry.prep_status === 'recorded' || (!entry.prep_status && entry.is_prepared);
+    const showPrepWarning = entry.type === 'lesson' && !isPrepared && (entry.prep_status !== undefined || entry.is_prepared !== undefined);
+
+    return (
+      <div
+        onClick={() => onEditEntry(entry, selectedDateStr)}
+        className={cn(
+          "p-4 rounded-xl border-2 shadow-md transition-all hover:scale-[1.01] cursor-pointer relative",
+          "ring-2 ring-offset-2",
+          entry.type === 'lesson' ? "bg-indigo-50 border-indigo-300 text-indigo-700 ring-indigo-300" :
+          entry.type === 'tutor' ? "bg-emerald-50 border-emerald-300 text-emerald-700 ring-emerald-300" :
+          entry.type === 'duty' ? "bg-amber-50 border-amber-300 text-amber-700 ring-amber-300" :
+          entry.type === 'meeting' ? "bg-purple-50 border-purple-300 text-purple-700 ring-purple-300" :
+          "bg-slate-50 border-slate-300 text-slate-700 ring-slate-300"
+        )}
+      >
+        {hasConflict && (
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" title="Schedule conflict" />
+        )}
+        {/* Now badge */}
+        <span className="absolute -top-2 -left-2 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          Now
+        </span>
+
+        <div className="flex justify-between items-start mt-1">
+          <div>
+            <p className="text-sm font-bold">{entry.subject}</p>
+            <p className="text-xs opacity-80">{entry.class_name} · {entry.room}</p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {hasLessonRecord && (
+              <span title="Has lesson record"><FileText size={12} className="text-teal-500" /></span>
+            )}
+            {entry.recurring_id && (
+              <span className="text-[8px] font-bold px-1 rounded bg-amber-200 text-amber-700" title="Single-day override">OVR</span>
+            )}
+            {!entry.recurring_id && entry.date && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Date-specific" />
+            )}
+          </div>
+        </div>
+
+        {/* Time range */}
+        <p className="text-xs font-medium mt-2 opacity-70">{entry.start_time} – {endTime}</p>
+
+        {/* Topic highlight */}
+        {entry.topic && (
+          <div className="mt-2 p-2 rounded-lg bg-white/80 border border-current/10 text-xs font-medium">
+            Topic: {entry.topic}
+          </div>
+        )}
+
+        {/* Notes */}
+        {entry.notes && (
+          <div className="mt-2 p-2 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-800">
+            {entry.notes}
+          </div>
+        )}
+
+        {/* Prep status */}
+        {showPrepWarning && (
+          <div className="mt-2 p-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium">
+            ⚠ Not prepared
+          </div>
+        )}
+        {isPrepared && (entry.prep_status || entry.is_prepared !== undefined) && (
+          <div className="mt-2 flex items-center gap-1.5 text-xs">
+            <span className={cn("w-2 h-2 rounded-full",
+              entry.prep_status === 'recorded' ? "bg-slate-400" :
+              entry.prep_status === 'finished' ? "bg-blue-500" :
+              "bg-emerald-500"
+            )} />
+            <span className="opacity-70">
+              {entry.prep_status === 'recorded' ? 'Recorded' :
+               entry.prep_status === 'finished' ? 'Finished' : 'Prepared'}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // --- Sub-components ---
 
   const CalendarHeader = () => (
@@ -404,6 +539,8 @@ export const CalendarView = ({
   );
 
   const DaySchedule = () => {
+    const [pastExpanded, setPastExpanded] = useState(false);
+
     const conflictSet = useMemo(() => {
       const ids = new Set<string>();
       for (const entry of dayEntries) {
@@ -412,6 +549,35 @@ export const CalendarView = ({
       }
       return ids;
     }, [dayEntries]);
+
+    const { past, current, upcoming } = useMemo(() => {
+      if (!isToday(selectedDate)) return { past: [] as TimetableEntry[], current: null, upcoming: dayEntries };
+      return classifyEntries(dayEntries, currentTime);
+    }, [dayEntries, currentTime, selectedDate]);
+
+    const isTodayView = isToday(selectedDate);
+
+    const renderEntryList = (entries: TimetableEntry[], dimmed = false) => (
+      <div className={cn("space-y-1", dimmed && "opacity-60")}>
+        {entries.map(entry => {
+          const cellId = `slot-${entry.start_time}`;
+          return (
+            <DroppableCell key={cellId} id={cellId}>
+              <DraggableEntry entry={entry}>
+                {renderEntryCard(entry, conflictSet.has(entry.id))}
+              </DraggableEntry>
+            </DroppableCell>
+          );
+        })}
+      </div>
+    );
+
+    // Non-today: original flat rendering
+    const renderFlatList = () => {
+      const standardEntries = TIME_SLOTS.map(time => dayEntries.find(e => e.start_time === time)).filter(Boolean) as TimetableEntry[];
+      const nonStandard = dayEntries.filter(e => !TIME_SLOTS.includes(e.start_time));
+      return renderEntryList([...standardEntries, ...nonStandard]);
+    };
 
     return (
       <div className="space-y-3">
@@ -423,33 +589,57 @@ export const CalendarView = ({
             <div className="text-center py-12 text-slate-400 text-sm">
               No entries for this day
             </div>
+          ) : !isTodayView ? (
+            renderFlatList()
           ) : (
-            <div className="space-y-1">
-              {TIME_SLOTS.map(time => {
-                const entry = dayEntries.find(e => e.start_time === time);
-                if (!entry) return null;
-                const cellId = `slot-${time}`;
-                return (
-                  <DroppableCell key={cellId} id={cellId}>
-                    <DraggableEntry entry={entry}>
-                      {renderEntryCard(entry, conflictSet.has(entry.id))}
+            <div className="space-y-3">
+              {/* Past entries (collapsible) */}
+              {past.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setPastExpanded(p => !p)}
+                    className="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700 transition-colors py-1"
+                  >
+                    <ChevronDown size={14} className={cn("transition-transform", !pastExpanded && "-rotate-90")} />
+                    <span className="font-medium">
+                      {past.length} completed {past.length === 1 ? 'entry' : 'entries'}
+                    </span>
+                    <span className="opacity-60">
+                      · {past[0].start_time} – {getEffectiveEndTime(past[past.length - 1])}
+                    </span>
+                  </button>
+                  {pastExpanded && renderEntryList(past, true)}
+                </div>
+              )}
+
+              {/* Current entry (focus) */}
+              {current ? (
+                <div>
+                  <DroppableCell id={`slot-${current.start_time}`}>
+                    <DraggableEntry entry={current}>
+                      {renderCurrentEntryCard(current, conflictSet.has(current.id))}
                     </DraggableEntry>
                   </DroppableCell>
-                );
-              })}
-              {/* Entries at non-standard times */}
-              {dayEntries
-                .filter(e => !TIME_SLOTS.includes(e.start_time))
-                .map(entry => {
-                  const cellId = `slot-${entry.start_time}`;
-                  return (
-                    <DroppableCell key={cellId} id={cellId}>
-                      <DraggableEntry entry={entry}>
-                        {renderEntryCard(entry, conflictSet.has(entry.id))}
-                      </DraggableEntry>
-                    </DroppableCell>
-                  );
-                })}
+                </div>
+              ) : upcoming.length > 0 ? (
+                /* No current class — gap between classes */
+                <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center text-sm text-slate-400">
+                  No class in session · Next: {upcoming[0].subject} at {upcoming[0].start_time}
+                </div>
+              ) : (
+                /* All done */
+                <div className="text-center py-6 text-slate-400 text-sm font-medium">
+                  All done for today
+                </div>
+              )}
+
+              {/* Upcoming entries */}
+              {upcoming.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Upcoming</p>
+                  {renderEntryList(upcoming)}
+                </div>
+              )}
             </div>
           )}
         </DndContext>
