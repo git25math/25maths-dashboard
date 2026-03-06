@@ -587,15 +587,6 @@ export function useAppData() {
     }
   }, [setClasses, toast]);
 
-  const updateClassProgress = useCallback(async (classId: string, lessonId: string, completed: boolean) => {
-    const cls = classes.find(c => c.id === classId);
-    if (!cls) return;
-    const newCompletedIds = completed
-      ? [...(cls.completed_lesson_ids || []), lessonId]
-      : (cls.completed_lesson_ids || []).filter(id => id !== lessonId);
-    await saveClass({ ...cls, completed_lesson_ids: newCompletedIds });
-  }, [classes, saveClass]);
-
   // --- Timetable ---
 
   const updateTimetableEntry = useCallback(async (updatedEntry: TimetableEntry) => {
@@ -998,7 +989,7 @@ export function useAppData() {
     saveTeachingUnit, deleteTeachingUnit,
 
     // Class
-    saveClass, deleteClass, updateClassProgress,
+    saveClass, deleteClass,
 
     // Timetable
     updateTimetableEntry, addTimetableEntry, deleteTimetableEntry,

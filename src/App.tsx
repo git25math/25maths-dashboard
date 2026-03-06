@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Menu, X, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
@@ -52,6 +52,7 @@ function AppContent() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [hpHistoryStudentFilter, setHpHistoryStudentFilter] = useState<string | null>(null);
+  const [pendingNewUnitData, setPendingNewUnitData] = useState<{ year_group: string; title: string } | null>(null);
 
   // Form modals
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false);
@@ -170,10 +171,14 @@ function AppContent() {
     });
   };
 
+  // --- Scroll ref ---
+  const mainRef = useRef<HTMLElement>(null);
+
   // --- Sidebar navigation helper ---
   const navigateTo = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
+    mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const activeSidebarItem = SIDEBAR_ITEMS.find(item => item.key === activeTab);
@@ -335,7 +340,7 @@ function AppContent() {
             onOpenSyllabus={() => setIsSyllabusModalOpen(true)}
             initialUnitId={selectedTeachingUnitId}
             onClearInitialUnit={() => setSelectedTeachingUnitId(null)}
-            onAddUnit={() => { setEditingTeachingUnit(null); setIsTeachingUnitFormOpen(true); }}
+            onAddUnit={() => { setEditingTeachingUnit(null); setPendingNewUnitData(null); setIsTeachingUnitFormOpen(true); }}
             onUpdateUnit={(id) => {
               const u = data.teachingUnits.find(u => u.id === id);
               if (u) { setEditingTeachingUnit(u); setIsTeachingUnitFormOpen(true); }
@@ -343,7 +348,6 @@ function AppContent() {
             onDeleteUnit={data.deleteTeachingUnit}
             onSaveUnit={(unit) => data.saveTeachingUnit(unit)}
             classes={data.classes}
-            onUpdateClassProgress={data.updateClassProgress}
             onUpdateClass={(id) => {
               const c = data.classes.find(c => c.id === id);
               if (c) { setEditingClass(c); setIsClassFormOpen(true); }
@@ -503,29 +507,29 @@ function AppContent() {
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-8">
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 space-y-6">
         <div className="flex items-center gap-3 px-2 shrink-0">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">25</div>
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">25</div>
           <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
         </div>
-        <nav className="flex-1 space-y-2 overflow-y-auto min-h-0">
+        <nav className="flex-1 space-y-1 overflow-y-auto min-h-0 pr-1">
           {SIDEBAR_ITEMS.map(item => (
-            <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => setActiveTab(item.key)} />
+            <SidebarItem key={item.key} icon={item.icon} label={item.label} active={activeTab === item.key} onClick={() => navigateTo(item.key)} />
           ))}
         </nav>
-        <div className="p-4 bg-slate-50 rounded-2xl">
+        <div className="p-4 bg-gradient-to-br from-slate-50 to-indigo-50/30 border border-slate-100 rounded-2xl shrink-0">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Current Role</p>
           <div className="flex items-center gap-2 text-indigo-600 font-medium text-sm">
             <CheckCircle2 size={16} /> Math Teacher
           </div>
         </div>
-        <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2">
+        <button onClick={logout} className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors px-2 shrink-0">
           <LogOut size={16} /> Logout
         </button>
       </aside>
 
       {/* Mobile Nav Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-40 px-4 py-3 flex justify-between items-center">
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-40 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">25</div>
           <MobileTabIcon size={16} className="text-indigo-600" />
@@ -541,8 +545,8 @@ function AppContent() {
       <AnimatePresence>
         {isSidebarOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden" />
-            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-64 bg-white z-50 p-6 flex flex-col lg:hidden">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 lg:hidden" />
+            <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="fixed inset-y-0 left-0 w-72 bg-white z-50 p-6 flex flex-col shadow-2xl lg:hidden">
               <div className="flex justify-between items-center mb-8 shrink-0">
                 <span className="font-bold text-xl">Menu</span>
                 <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
@@ -561,8 +565,8 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8 overflow-y-auto">
-        <div className="max-w-5xl mx-auto space-y-8">{renderContent()}</div>
+      <main ref={mainRef} className="flex-1 p-4 md:p-6 lg:p-8 pt-20 lg:pt-8 overflow-y-auto">
+        <div key={activeTab} className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">{renderContent()}</div>
       </main>
 
       {/* Floating & Global UI */}
@@ -586,7 +590,20 @@ function AppContent() {
       />
       <QuickCapture onSave={data.quickCapture} />
       <ToastContainer toasts={data.toasts} />
-      <SyllabusModal isOpen={isSyllabusModalOpen} onClose={() => setIsSyllabusModalOpen(false)} />
+      <SyllabusModal
+        isOpen={isSyllabusModalOpen}
+        onClose={() => setIsSyllabusModalOpen(false)}
+        teachingUnits={data.teachingUnits}
+        onNavigateToUnit={(unitId) => {
+          setSelectedTeachingUnitId(unitId);
+          setActiveTab('teaching');
+        }}
+        onCreateUnit={(yearGroup, title) => {
+          setPendingNewUnitData({ year_group: yearGroup, title });
+          setEditingTeachingUnit(null);
+          setIsTeachingUnitFormOpen(true);
+        }}
+      />
 
       {/* Form Modals */}
       {isStudentFormOpen && (
@@ -599,8 +616,9 @@ function AppContent() {
       {isTeachingUnitFormOpen && (
         <TeachingUnitForm
           unit={editingTeachingUnit}
-          onSave={async (u) => { await data.saveTeachingUnit(u); setIsTeachingUnitFormOpen(false); setEditingTeachingUnit(null); }}
-          onCancel={() => { setIsTeachingUnitFormOpen(false); setEditingTeachingUnit(null); }}
+          onSave={async (u) => { await data.saveTeachingUnit(u); setIsTeachingUnitFormOpen(false); setEditingTeachingUnit(null); setPendingNewUnitData(null); }}
+          onCancel={() => { setIsTeachingUnitFormOpen(false); setEditingTeachingUnit(null); setPendingNewUnitData(null); }}
+          initialData={pendingNewUnitData}
         />
       )}
       {isClassFormOpen && (
@@ -619,7 +637,6 @@ function AppContent() {
           allEntries={data.timetable}
           onSave={(e) => { data.updateTimetableEntry(e); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onCancel={() => { setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
-          onUpdateClassProgress={data.updateClassProgress}
           contextDate={editingContextDate}
           onCreateOverride={(e) => { data.addTimetableEntry(e); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
           onDeleteOverride={(id) => { data.deleteTimetableEntry(id); setIsTimetableFormOpen(false); setEditingTimetableEntry(null); }}
@@ -628,6 +645,7 @@ function AppContent() {
           onAddLessonRecord={data.addLessonRecord}
           students={data.students}
           meetings={data.meetings}
+          onSaveUnit={(unit) => data.saveTeachingUnit(unit)}
         />
       )}
       {isWorkLogFormOpen && (

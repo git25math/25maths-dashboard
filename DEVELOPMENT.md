@@ -795,14 +795,53 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `npm run lint` ✅
 - Modified files (1): `src/views/TeachingView.tsx`
 
-### Phase 29b — Architecture Refactor II (Planned, No Feature Change)
+### Phase 29b — LO ↔ Lesson 映射系统 (2026-03-06)
+- **目标**: 建立 Learning Objective 与课堂授课的双向映射，实现精细化进度追踪
+- **数据模型**:
+  - `LearningObjective.covered_lesson_dates: string[]` — 记录每个 LO 被哪些课覆盖
+  - 移除 `TeachingUnit` 废弃字段 (`learning_objectives`, `lessons`, `core_vocabulary`)
+  - 移除 `ClassProfile.completed_lesson_ids`
+  - `normalizeTeachingUnit()` 重写：自动剥离废弃字段 + 确保 `covered_lesson_dates` 初始化
+- **TimetableEntryForm — LO 覆盖勾选**:
+  - 展开 SubUnit → LO checkbox 勾选当前日期覆盖
+  - 保存时写入 `covered_lesson_dates`，去重保护 `[...new Set(dates)]`
+  - 日期 pill 显示每个覆盖日期（MM-DD），hover 显示完整 ISO 日期
+  - Select All / Clear toggle 按钮（每个 SubUnit 展开区顶部）
+  - `aria-expanded` + `aria-controls` 无障碍增强
+- **TeachingView — 进度统计 & 自动推断**:
+  - `computeUnitLOStats()` 新增 `lessonsCovered`（去重日期数）
+  - `LOStatusPills` 显示 `· X lessons`
+  - `SegmentedProgressBar` 三色进度条（completed/in_progress/not_started）
+  - LO 过滤器（All / Not Started / In Progress / Completed）
+  - Auto-status 按钮：按覆盖次数 vs periods 自动推断 LO 状态，用 toast 反馈
+  - SubUnit 拖拽排序
+  - 选中 SubUnit 与 teachingUnits 数据变更自动同步
+- **SyllabusModal — 课纲覆盖映射**:
+  - 每个课纲条目自动匹配已有 TeachingUnit（模糊匹配标题）
+  - 已匹配 → 显示绿色✓ + 点击导航到该 Unit
+  - 未匹配 → 显示 "Create Unit" 按钮一键创建
+  - 年级覆盖率统计 (X/Y covered · Z%)
+- **UI 优化**:
+  - 侧边栏样式精修（shadow、间距、渐变背景）
+  - 导航自动 scroll-to-top
+  - 按钮 active:scale 微交互
+  - `glass-card-interactive` CSS 类
+  - TipTap 富文本编辑器样式
+  - `ToastContainer` 布局调整
+- **回归结果**:
+  - `npx tsc --noEmit` ✅ 0 errors
+  - `npm run build` ✅
+- Modified files (24): `src/types.ts`, `src/constants.ts`, `src/App.tsx`, `src/views/TeachingView.tsx`, `src/views/DashboardView.tsx`, `src/views/MeetingsView.tsx`, `src/components/TimetableEntryForm.tsx`, `src/components/SyllabusModal.tsx`, `src/components/TeachingUnitForm.tsx`, `src/components/ToastContainer.tsx`, `src/components/FilterChip.tsx`, `src/components/GlobalSearch.tsx`, `src/components/IdeaForm.tsx`, `src/components/ParentCommForm.tsx`, `src/components/QuickCapture.tsx`, `src/components/SchoolEventForm.tsx`, `src/components/SidebarItem.tsx`, `src/components/WeaknessForm.tsx`, `src/hooks/useAppData.ts`, `src/index.css`, `src/lib/teachingAdapter.ts`, `src/services/geminiService.ts`, `package.json`, `package-lock.json`
+- New files (3): `src/components/TipTapEditor.tsx`, `src/components/ToggleSwitch.tsx`, `src/lib/htmlUtils.ts`
+
+### Phase 29c — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
 - [ ] 增加 AppData Contract 文档：列出 `useAppData` 返回字段、依赖关系、跨域副作用边界
 - [ ] 引入最小测试骨架（Vitest）：先覆盖 `computeHousePointDeltas`、task status cycle、idea status cycle
 - [ ] CI 加质量门禁：在 deploy 前增加 `npm run lint`（后续接入测试后补 `npm run test`）
 
-### Phase 29c — Dashboard Progress Hardening (Planned)
+### Phase 29d — Dashboard Progress Hardening (Planned)
 - [x] 首页固定显示 Year 7 / 8 / 10 / 11 / 12 教学进度卡片
 - [ ] Year 级别聚合：同年级多班时显示加权总进度（按 LO 总数汇总）
 - [ ] 空态增强：无班级/无单元时提供引导入口（跳转 Students / Teaching）

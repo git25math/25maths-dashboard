@@ -218,9 +218,9 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-start justify-center pt-[15vh]" onClick={() => setIsOpen(false)}>
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
+        className="relative w-full max-w-2xl mx-4 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Search Input */}

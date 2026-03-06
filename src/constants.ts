@@ -1,4 +1,5 @@
 import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord } from './types';
+// Note: learning_objectives, lessons, core_vocabulary removed from TeachingUnit; completed_lesson_ids removed from ClassProfile
 
 export const MOCK_LESSON_RECORDS: LessonRecord[] = [];
 
@@ -148,7 +149,6 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 10',
     description: 'A motivated group of Year 10 students focusing on IGCSE Mathematics.',
     current_unit_id: 'u1',
-    completed_lesson_ids: ['l1'],
     student_ids: ['s1']
   },
   {
@@ -157,7 +157,6 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 12',
     description: 'Advanced Year 12 class working on Pure Mathematics.',
     current_unit_id: 'u-y12-1',
-    completed_lesson_ids: ['l1', 'l2'],
     student_ids: ['s2']
   },
   {
@@ -166,7 +165,6 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 8',
     description: 'Year 8 Mathematics class.',
     current_unit_id: 'u-y8-1',
-    completed_lesson_ids: [],
     student_ids: ['s4']
   },
   {
@@ -175,7 +173,6 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 11',
     description: 'Year 11 Mathematics class.',
     current_unit_id: 'u-y11-1',
-    completed_lesson_ids: [],
     student_ids: []
   },
   {
@@ -184,7 +181,6 @@ export const MOCK_CLASSES: ClassProfile[] = [
     year_group: 'Year 7',
     description: 'Year 7 Mathematics class.',
     current_unit_id: 'u-y7-1',
-    completed_lesson_ids: [],
     student_ids: []
   }
 ];
@@ -311,27 +307,7 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u-y7-1',
     year_group: 'Year 7',
     title: 'Multiplication of Fractions',
-    learning_objectives: [
-      'Understand the concept of multiplying a fraction by a whole number.',
-      'Multiply two proper fractions using area models.',
-      'Solve real-world problems involving fraction multiplication.'
-    ],
-    lessons: [
-      {
-        id: 'l1',
-        title: 'Lesson 1: Visualizing Fraction Multiplication',
-        objectives: ['Use area models to represent multiplication.'],
-        activities: ['Introduction with paper folding.', 'Drawing area models for 1/2 * 1/3.'],
-        resources: ['Grid paper', 'Colored pencils']
-      },
-      {
-        id: 'l2',
-        title: 'Lesson 2: Multiplying Fractions by Integers',
-        objectives: ['Apply the rule for multiplying a fraction by a whole number.'],
-        activities: ['Number line demonstrations.', 'Practice set 1.'],
-        resources: ['Worksheet A']
-      }
-    ],
+    sub_units: [],
     typical_examples: [
       { question: 'Calculate 2/3 * 4/5', solution: 'Multiply numerators: 2*4=8. Multiply denominators: 3*5=15. Result: 8/15' },
       { question: 'Calculate 3 * 1/4', solution: '3 is 3/1. 3/1 * 1/4 = 3/4' }
@@ -341,7 +317,6 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     online_practice_url: 'https://www.ixl.com/math/grade-7/multiply-fractions',
     kahoot_url: 'https://create.kahoot.it/details/fraction-multiplication/123',
     vocab_practice_url: 'https://quizlet.com/888/fractions-vocab',
-    core_vocabulary: ['Numerator', 'Denominator', 'Product', 'Simplify', 'Mixed Number'],
     prep_material_template: 'Use area models to demonstrate multiplication. Ensure students understand why the product of two proper fractions is smaller than both.',
     ai_prompt_template: 'Create a set of 10 word problems for Year 7 students involving multiplication of fractions in real-life contexts like cooking or measurements.',
     teaching_summary: 'Students found the area model very helpful. Next time, spend more time on simplifying the results.'
@@ -350,12 +325,8 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u-y8-1',
     year_group: 'Year 8',
     title: 'Review of Numbers',
-    learning_objectives: ['Review basic operations.', 'Understand number properties.'],
-    lessons: [
-      { id: 'l1', title: 'Lesson 1: Operations Review', objectives: ['Perform basic operations.'], activities: ['Mental math starter.', 'Review worksheet.'] }
-    ],
+    sub_units: [],
     typical_examples: [{ question: 'Calculate 12 * 13', solution: '156' }],
-    core_vocabulary: ['Integer', 'Rational', 'Irrational'],
     prep_material_template: 'Focus on common misconceptions in arithmetic.',
     ai_prompt_template: 'Generate a review quiz for Year 8 numbers.'
   },
@@ -363,27 +334,13 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u1',
     year_group: 'Year 10',
     title: 'Quadratic Equations',
-    learning_objectives: [
-      'Solve quadratic equations by factoring.',
-      'Solve quadratic equations by completing the square.',
-      'Apply the quadratic formula to solve any quadratic equation.'
-    ],
-    lessons: [
-      {
-        id: 'l1',
-        title: 'Lesson 1: Factoring Quadratics',
-        objectives: ['Factorize quadratic expressions of the form x^2 + bx + c.'],
-        activities: ['Review of expansion.', 'Factoring puzzles.'],
-        resources: ['Factoring worksheet']
-      }
-    ],
+    sub_units: [],
     typical_examples: [
       { question: 'Solve x^2 - 5x + 6 = 0', solution: '(x-2)(x-3)=0, so x=2 or x=3' },
       { question: 'Find the vertex of y = x^2 + 4x + 7', solution: 'x = -b/2a = -4/2 = -2. y = (-2)^2 + 4(-2) + 7 = 3. Vertex is (-2, 3)' }
     ],
     worksheet_url: 'https://drive.google.com/file/d/example-worksheet',
     homework_url: 'https://drive.google.com/file/d/example-homework',
-    core_vocabulary: ['Parabola', 'Vertex', 'Discriminant', 'Roots', 'Coefficient'],
     prep_material_template: 'Focus on the visual representation of the parabola. Use Desmos to show how changing coefficients affects the graph.',
     ai_prompt_template: 'Act as a bilingual math teacher. Create 5 challenging problems on quadratic equations for Year 10 students, including one real-world application involving projectile motion.'
   },
@@ -391,12 +348,8 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u-y11-1',
     year_group: 'Year 11',
     title: 'Estimation & Bounds',
-    learning_objectives: ['Understand upper and lower bounds.', 'Estimate results of calculations.'],
-    lessons: [
-      { id: 'l1', title: 'Lesson 1: Upper and Lower Bounds', objectives: ['Calculate bounds for rounded numbers.'], activities: ['Measurement activity.', 'Bounds practice.'] }
-    ],
+    sub_units: [],
     typical_examples: [{ question: 'Find the bounds for 5.4 rounded to 1dp.', solution: 'LB: 5.35, UB: 5.45' }],
-    core_vocabulary: ['Upper Bound', 'Lower Bound', 'Significant Figures'],
     prep_material_template: 'Use real-life measurement examples.',
     ai_prompt_template: 'Create a lesson on bounds for Year 11.'
   },
@@ -404,18 +357,11 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u-y12-1',
     year_group: 'Year 12',
     title: 'Pure 1 - 1. Algebraic Expressions',
-    learning_objectives: ['Index laws', 'Expanding brackets', 'Factorising', 'Negative and fractional indices', 'Surds', 'Rationalising denominators'],
-    lessons: [
-      { id: 'l1', title: 'Lesson 1: Index Laws and Expanding Brackets', objectives: ['Simplify expressions using index laws', 'Expand brackets'], activities: ['Review IGCSE index laws', 'Practice expanding double and triple brackets'] },
-      { id: 'l2', title: 'Lesson 2: Factorising', objectives: ['Factorise quadratic and cubic expressions'], activities: ['Factorising by grouping', 'Difference of two squares'] },
-      { id: 'l3', title: 'Lesson 3: Negative and Fractional Indices', objectives: ['Evaluate and simplify expressions with negative and fractional indices'], activities: ['Matching activity with index forms', 'Problem solving'] },
-      { id: 'l4', title: 'Lesson 4: Surds and Rationalising', objectives: ['Simplify surds', 'Rationalise denominators'], activities: ['Surd manipulation practice', 'Rationalising complex denominators'] }
-    ],
+    sub_units: [],
     typical_examples: [
       { question: 'Simplify (2x^2 y^3)^4', solution: '16x^8 y^12' },
       { question: 'Rationalise the denominator of 5 / (3 - √2)', solution: '5(3 + √2) / 7' }
     ],
-    core_vocabulary: ['Index', 'Base', 'Exponent', 'Surd', 'Rationalise', 'Denominator', 'Factorise'],
     prep_material_template: 'Review IGCSE algebra basics. Ensure students are comfortable with basic index laws before introducing fractional indices.',
     ai_prompt_template: 'Create a worksheet with 10 progressively harder questions on rationalising denominators, including cases with a binomial denominator.'
   },
@@ -423,17 +369,11 @@ export const MOCK_TEACHING_UNITS: TeachingUnit[] = [
     id: 'u-y12-2',
     year_group: 'Year 12',
     title: 'Pure 1 - 2. Quadratics',
-    learning_objectives: ['Solving quadratic equations', 'Completing the square', 'Functions', 'Quadratic graphs', 'The discriminant'],
-    lessons: [
-      { id: 'l1', title: 'Lesson 1: Solving Quadratics', objectives: ['Solve quadratics by factorising and using the formula'], activities: ['Speed factoring', 'Deriving the quadratic formula'] },
-      { id: 'l2', title: 'Lesson 2: Completing the Square', objectives: ['Complete the square to find the vertex'], activities: ['Visualizing completing the square', 'Finding turning points'] },
-      { id: 'l3', title: 'Lesson 3: The Discriminant', objectives: ['Use the discriminant to find the number of roots'], activities: ['Graphing quadratics and calculating discriminants', 'Solving inequalities involving the discriminant'] }
-    ],
+    sub_units: [],
     typical_examples: [
       { question: 'Find the roots of x^2 + 5x + 6 = 0', solution: 'x = -2, x = -3' },
       { question: 'Find the range of values for k for which x^2 + kx + 9 = 0 has no real roots', solution: 'k^2 - 36 < 0 => -6 < k < 6' }
     ],
-    core_vocabulary: ['Quadratic', 'Root', 'Vertex', 'Discriminant', 'Completing the square', 'Parabola'],
     prep_material_template: 'Use Desmos to demonstrate how changing the coefficients a, b, and c affects the shape and position of the parabola.',
     ai_prompt_template: 'Generate a quiz on using the discriminant to determine the nature of roots for quadratic equations.'
   }

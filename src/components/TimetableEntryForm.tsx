@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus } from 'lucide-react';
+import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus, ChevronDown } from 'lucide-react';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord, Student, HousePointAward, MeetingRecord, PrepStatus } from '../types';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
@@ -15,7 +15,7 @@ interface TimetableEntryFormProps {
   allEntries: TimetableEntry[];
   onSave: (entry: TimetableEntry) => void;
   onCancel: () => void;
-  onUpdateClassProgress?: (classId: string, lessonId: string, completed: boolean) => void;
+  // onUpdateClassProgress removed — class progress is now tracked via SubUnit LOs
   contextDate?: string;
   onCreateOverride?: (entry: TimetableEntry) => void;
   onDeleteOverride?: (id: string) => void;
@@ -24,6 +24,7 @@ interface TimetableEntryFormProps {
   onAddLessonRecord?: (data: Omit<LessonRecord, 'id'>) => void;
   students?: Student[];
   meetings?: MeetingRecord[];
+  onSaveUnit?: (unit: TeachingUnit) => void;
 }
 
 const PREP_STATUS_CONFIG: Record<PrepStatus, { label: string; color: string; next: PrepStatus }> = {
@@ -40,7 +41,6 @@ export const TimetableEntryForm = ({
   allEntries,
   onSave,
   onCancel,
-  onUpdateClassProgress,
   contextDate,
   onCreateOverride,
   onDeleteOverride,
@@ -49,6 +49,7 @@ export const TimetableEntryForm = ({
   onAddLessonRecord,
   students = [],
   meetings = [],
+  onSaveUnit,
 }: TimetableEntryFormProps) => {
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
@@ -62,6 +63,10 @@ export const TimetableEntryForm = ({
   const [isCreatingLR, setIsCreatingLR] = useState(false);
   const [lrAwards, setLrAwards] = useState<HousePointAward[]>([]);
 
+  // LO coverage tracking
+  const [coveredLOIds, setCoveredLOIds] = useState<Set<string>>(new Set());
+  const [expandedSubUnits, setExpandedSubUnits] = useState<Set<string>>(new Set());
+
   const conflicts = useMemo(
     () => detectConflicts(formData, allEntries),
     [formData.start_time, formData.end_time, formData.day, formData.date, allEntries]
@@ -69,6 +74,20 @@ export const TimetableEntryForm = ({
 
   // Find matching lesson record
   const effectiveDate = formData.date || contextDate;
+
+  // Init LO coverage from unit data
+  useEffect(() => {
+    if (!selectedUnit || !effectiveDate) { setCoveredLOIds(new Set()); return; }
+    const date = effectiveDate;
+    const ids = new Set<string>();
+    selectedUnit.sub_units.forEach(su => {
+      su.learning_objectives.forEach(lo => {
+        if (lo.covered_lesson_dates?.includes(date)) ids.add(lo.id);
+      });
+    });
+    setCoveredLOIds(ids);
+  }, [selectedUnit, effectiveDate]);
+
   const matchedLessonRecord = useMemo(() => {
     if (!effectiveDate || formData.type !== 'lesson') return null;
     // First try timetable_entry_id match
@@ -116,6 +135,27 @@ export const TimetableEntryForm = ({
       onCreateOverride(formData);
     } else {
       onSave(formData);
+    }
+    // Save LO coverage changes
+    if (onSaveUnit && selectedUnit && effectiveDate) {
+      const date = effectiveDate;
+      const updatedUnit = {
+        ...selectedUnit,
+        sub_units: selectedUnit.sub_units.map(su => ({
+          ...su,
+          learning_objectives: su.learning_objectives.map(lo => {
+            const wasChecked = lo.covered_lesson_dates?.includes(date);
+            const isChecked = coveredLOIds.has(lo.id);
+            if (wasChecked === isChecked) return lo;
+            const dates = [...(lo.covered_lesson_dates || [])];
+            if (isChecked && !wasChecked) dates.push(date);
+            if (!isChecked && wasChecked) dates.splice(dates.indexOf(date), 1);
+            const uniqueDates = [...new Set(dates)].sort();
+            return { ...lo, covered_lesson_dates: uniqueDates };
+          }),
+        })),
+      };
+      onSaveUnit(updatedUnit);
     }
   };
 
@@ -370,45 +410,138 @@ export const TimetableEntryForm = ({
               </div>
 
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-slate-900">Current Unit: {selectedUnit.title}</h3>
-                  <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-lg">
-                    {Math.round(((selectedClass.completed_lesson_ids?.length || 0) / selectedUnit.lessons.length) * 100)}% Complete
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  {selectedUnit.lessons.map((lesson, i) => {
-                    const isCompleted = selectedClass.completed_lesson_ids?.includes(lesson.id);
-                    return (
-                      <div
-                        key={lesson.id}
-                        className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border transition-all",
-                          isCompleted ? "bg-white border-indigo-200" : "bg-slate-50 border-slate-200 opacity-70"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => onUpdateClassProgress?.(selectedClass.id, lesson.id, !isCompleted)}
-                            className={cn(
-                              "w-5 h-5 rounded border flex items-center justify-center transition-all",
-                              isCompleted ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-slate-300"
-                            )}
-                          >
-                            {isCompleted && <CheckCircle2 size={12} />}
-                          </button>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900">L{i+1}: {lesson.title}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                        </div>
+                {(() => {
+                  const allLOs = selectedUnit.sub_units.flatMap(su => su.learning_objectives);
+                  const totalLOs = allLOs.length;
+                  const completedLOs = allLOs.filter(lo => lo.status === 'completed').length;
+                  const pct = totalLOs > 0 ? Math.round((completedLOs / totalLOs) * 100) : 0;
+                  return (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-slate-900">Current Unit: {selectedUnit.title}</h3>
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-lg">
+                          {pct}% Complete ({completedLOs}/{totalLOs} LOs)
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
+                      {/* SubUnit LO checklist */}
+                      <div className="grid grid-cols-1 gap-2">
+                        {selectedUnit.sub_units.map(su => {
+                          const suTotal = su.learning_objectives.length;
+                          const suCompleted = su.learning_objectives.filter(lo => lo.status === 'completed').length;
+                          const suCoveredThisLesson = su.learning_objectives.filter(lo => coveredLOIds.has(lo.id)).length;
+                          const isExpanded = expandedSubUnits.has(su.id);
+                          return (
+                            <div key={su.id} className="rounded-xl border bg-white border-indigo-200 overflow-hidden">
+                              <button
+                                type="button"
+                                aria-expanded={isExpanded}
+                                aria-controls={`lo-list-${su.id}`}
+                                onClick={() => setExpandedSubUnits(prev => {
+                                  const next = new Set(prev);
+                                  next.has(su.id) ? next.delete(su.id) : next.add(su.id);
+                                  return next;
+                                })}
+                                className="w-full flex items-center justify-between p-3 hover:bg-indigo-50/50 transition-colors"
+                              >
+                                <div className="text-left">
+                                  <p className="text-sm font-bold text-slate-900">{su.title}</p>
+                                  <p className="text-[10px] text-slate-500">
+                                    {suCompleted}/{suTotal} completed
+                                    {effectiveDate && <span className="text-indigo-500 ml-1">· {suCoveredThisLesson} covered this lesson</span>}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {suTotal > 0 && (
+                                    <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                      <div className="h-full bg-emerald-500 transition-all" style={{ width: `${Math.round((suCompleted / suTotal) * 100)}%` }} />
+                                    </div>
+                                  )}
+                                  <ChevronDown size={14} className={cn("text-slate-400 transition-transform", isExpanded && "rotate-180")} />
+                                </div>
+                              </button>
+                              {isExpanded && su.learning_objectives.length > 0 && (
+                                <div id={`lo-list-${su.id}`} className="px-3 pb-3 space-y-1 border-t border-indigo-100">
+                                  {effectiveDate && (() => {
+                                    const allChecked = su.learning_objectives.every(lo => coveredLOIds.has(lo.id));
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setCoveredLOIds(prev => {
+                                            const next = new Set(prev);
+                                            if (allChecked) {
+                                              su.learning_objectives.forEach(lo => next.delete(lo.id));
+                                            } else {
+                                              su.learning_objectives.forEach(lo => next.add(lo.id));
+                                            }
+                                            return next;
+                                          });
+                                        }}
+                                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 py-1 transition-colors"
+                                      >
+                                        {allChecked ? 'Clear all' : 'Select all'}
+                                      </button>
+                                    );
+                                  })()}
+                                  {su.learning_objectives.map(lo => {
+                                    const isChecked = coveredLOIds.has(lo.id);
+                                    const canInteract = !!effectiveDate;
+                                    return (
+                                      <label
+                                        key={lo.id}
+                                        className={cn(
+                                          "flex items-start gap-2 p-2 rounded-lg text-xs transition-colors",
+                                          canInteract ? "cursor-pointer hover:bg-indigo-50" : "cursor-default opacity-70",
+                                          isChecked && "bg-indigo-50"
+                                        )}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          disabled={!canInteract}
+                                          onChange={() => {
+                                            setCoveredLOIds(prev => {
+                                              const next = new Set(prev);
+                                              next.has(lo.id) ? next.delete(lo.id) : next.add(lo.id);
+                                              return next;
+                                            });
+                                          }}
+                                          className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <div className="flex-1">
+                                          <span className="text-slate-700">{lo.objective}</span>
+                                          <div className="flex items-center gap-2 mt-0.5">
+                                            <span className={cn(
+                                              "text-[9px] font-bold px-1.5 py-0.5 rounded",
+                                              lo.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                                              lo.status === 'in_progress' ? 'bg-amber-100 text-amber-600' :
+                                              'bg-slate-100 text-slate-500'
+                                            )}>
+                                              {lo.status.replace('_', ' ')}
+                                            </span>
+                                            <span className="text-[9px] text-slate-400">{lo.periods}p</span>
+                                            {(lo.covered_lesson_dates || []).map(d => (
+                                              <span key={d} title={d} className="text-[9px] px-1 py-0.5 rounded bg-indigo-50 text-indigo-500">
+                                                {d.slice(5)}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {selectedUnit.sub_units.length === 0 && (
+                          <p className="text-xs text-slate-400 italic p-3">No sub-units defined yet.</p>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               <div className="pt-4 border-t border-indigo-100">
@@ -421,6 +554,7 @@ export const TimetableEntryForm = ({
                       setIsGenerating(true);
                       setAiError(null);
                       try {
+                        const allLOs = selectedUnit.sub_units.flatMap(su => su.learning_objectives);
                         const plan = await geminiService.generateLessonPlan({
                           aiPromptTemplate: selectedUnit.ai_prompt_template || 'Generate a lesson plan for this topic.',
                           subject: formData.subject,
@@ -428,13 +562,9 @@ export const TimetableEntryForm = ({
                           className: selectedClass?.name || formData.class_name,
                           yearGroup: selectedClass?.year_group || '',
                           unitTitle: selectedUnit.title,
-                          unitObjectives: selectedUnit.learning_objectives,
-                          subUnits: selectedUnit.sub_units?.map(s => ({ title: s.title, objectives: (s.learning_objectives || []).map(lo => lo.objective) })),
-                          completedLessons: selectedClass?.completed_lesson_ids
-                            ? selectedUnit.lessons
-                                .filter(l => selectedClass.completed_lesson_ids!.includes(l.id))
-                                .map(l => l.title)
-                            : [],
+                          unitObjectives: allLOs.map(lo => lo.objective),
+                          subUnits: selectedUnit.sub_units.map(s => ({ title: s.title, objectives: s.learning_objectives.map(lo => lo.objective) })),
+                          completedObjectives: allLOs.filter(lo => lo.status === 'completed').map(lo => lo.objective),
                         });
                         setFormData(prev => ({
                           ...prev,

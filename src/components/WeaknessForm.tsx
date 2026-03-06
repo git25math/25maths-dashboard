@@ -40,7 +40,7 @@ export const WeaknessForm = ({ title, initialValue, onSave, onCancel }: Weakness
               value={topic}
               onChange={e => setTopic(e.target.value)}
               placeholder="e.g. Algebra, Trigonometry, Fractions..."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               autoFocus
             />
           </div>

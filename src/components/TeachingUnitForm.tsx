@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Plus, Trash2 } from 'lucide-react';
-import { TeachingUnit, LessonPlanItem } from '../types';
-import { cn } from '../lib/utils';
+import { TeachingUnit } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { TEACHING_YEAR_GROUPS } from '../shared/constants';
 
@@ -9,16 +8,15 @@ interface TeachingUnitFormProps {
   unit?: TeachingUnit | null;
   onSave: (unit: Omit<TeachingUnit, 'id'> | TeachingUnit) => void;
   onCancel: () => void;
+  initialData?: { year_group: string; title: string } | null;
 }
 
-export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormProps) => {
+export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: TeachingUnitFormProps) => {
   const [formData, setFormData] = useState<Omit<TeachingUnit, 'id'>>({
     year_group: 'Year 7',
     title: '',
-    learning_objectives: [''],
-    lessons: [],
+    sub_units: [],
     typical_examples: [{ question: '', solution: '' }],
-    core_vocabulary: [''],
     prep_material_template: '',
     ai_prompt_template: '',
     teaching_summary: ''
@@ -28,8 +26,14 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
     if (unit) {
       const { id, ...rest } = unit;
       setFormData(rest);
+    } else if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        year_group: initialData.year_group,
+        title: initialData.title,
+      }));
     }
-  }, [unit]);
+  }, [unit, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +43,6 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
       onSave(formData);
     }
   };
-
-  const addObjective = () => setFormData({ ...formData, learning_objectives: [...formData.learning_objectives, ''] });
-  const updateObjective = (index: number, value: string) => {
-    const newObjs = [...formData.learning_objectives];
-    newObjs[index] = value;
-    setFormData({ ...formData, learning_objectives: newObjs });
-  };
-  const removeObjective = (index: number) => setFormData({ ...formData, learning_objectives: formData.learning_objectives.filter((_, i) => i !== index) });
 
   const addExample = () => setFormData({ ...formData, typical_examples: [...formData.typical_examples, { question: '', solution: '' }] });
   const updateExample = (index: number, field: 'question' | 'solution', value: string) => {
@@ -72,7 +68,7 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Year Group</label>
-              <select 
+              <select
                 value={formData.year_group}
                 onChange={e => setFormData({ ...formData, year_group: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -85,9 +81,9 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Unit Title</label>
-              <input 
+              <input
                 required
-                type="text" 
+                type="text"
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
@@ -95,31 +91,6 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
               />
             </div>
           </div>
-
-          <section className="space-y-4">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Learning Objectives</label>
-              <button type="button" onClick={addObjective} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
-                <Plus size={14} /> Add Objective
-              </button>
-            </div>
-            <div className="space-y-2">
-              {formData.learning_objectives.map((obj, i) => (
-                <div key={i} className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={obj}
-                    onChange={e => updateObjective(i, e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
-                    placeholder={`Objective ${i + 1}`}
-                  />
-                  <button type="button" onClick={() => removeObjective(i)} className="p-2 text-red-400 hover:text-red-600">
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
 
           <section className="space-y-4">
             <div className="flex justify-between items-center">
@@ -137,13 +108,13 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  <RichTextEditor 
+                  <RichTextEditor
                     label="Question"
                     value={ex.question}
                     onChange={val => updateExample(i, 'question', val)}
                     placeholder="Question (supports LaTeX)..."
                   />
-                  <RichTextEditor 
+                  <RichTextEditor
                     label="Solution"
                     value={ex.solution}
                     onChange={val => updateExample(i, 'solution', val)}
@@ -156,7 +127,7 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel }: TeachingUnitFormPro
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">AI Prompt Template</label>
-            <textarea 
+            <textarea
               value={formData.ai_prompt_template}
               onChange={e => setFormData({ ...formData, ai_prompt_template: e.target.value })}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-32 resize-none font-mono text-xs"

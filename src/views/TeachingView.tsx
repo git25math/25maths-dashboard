@@ -1,10 +1,71 @@
-import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, ChevronRight, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
 import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
+
+// --- Helpers ---
+
+function computeUnitLOStats(unit: TeachingUnit) {
+  const allLOs = unit.sub_units.flatMap(su => su.learning_objectives);
+  const allDates = new Set<string>();
+  allLOs.forEach(lo => lo.covered_lesson_dates?.forEach(d => allDates.add(d)));
+  return {
+    total: allLOs.length,
+    completed: allLOs.filter(lo => lo.status === 'completed').length,
+    inProgress: allLOs.filter(lo => lo.status === 'in_progress').length,
+    notStarted: allLOs.filter(lo => lo.status === 'not_started').length,
+    totalPeriods: allLOs.reduce((sum, lo) => sum + lo.periods, 0),
+    lessonsCovered: allDates.size,
+  };
+}
+
+function SegmentedProgressBar({ completed, inProgress, total, className }: { completed: number; inProgress: number; total: number; className?: string }) {
+  if (total === 0) return null;
+  const completedPct = (completed / total) * 100;
+  const inProgressPct = (inProgress / total) * 100;
+  return (
+    <div className={cn("w-full h-2 bg-slate-200 rounded-full overflow-hidden flex", className)}>
+      {completedPct > 0 && (
+        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${completedPct}%` }} />
+      )}
+      {inProgressPct > 0 && (
+        <div className="h-full bg-amber-400 transition-all duration-500" style={{ width: `${inProgressPct}%` }} />
+      )}
+    </div>
+  );
+}
+
+function LOStatusPills({ completed, inProgress, notStarted, total, totalPeriods, lessonsCovered }: ReturnType<typeof computeUnitLOStats>) {
+  if (total === 0) return <p className="text-xs text-slate-400 italic">No learning objectives defined yet.</p>;
+  const pct = Math.round((completed / total) * 100);
+  return (
+    <div className="space-y-3">
+      <SegmentedProgressBar completed={completed} inProgress={inProgress} total={total} />
+      <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+        <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          {completed} Completed
+        </span>
+        <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+          {inProgress} In Progress
+        </span>
+        <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+          {notStarted} Not Started
+        </span>
+        <span className="text-slate-400 ml-auto">
+          {pct}% Complete ({completed}/{total} LOs) &middot; {totalPeriods} periods &middot; {lessonsCovered} lessons
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// --- Types ---
+
+type LOFilterStatus = 'all' | 'not_started' | 'in_progress' | 'completed';
 
 interface TeachingViewProps {
   teachingUnits: TeachingUnit[];
@@ -16,7 +77,6 @@ interface TeachingViewProps {
   onDeleteUnit: (id: string) => void;
   onSaveUnit: (unit: TeachingUnit) => void;
   classes: ClassProfile[];
-  onUpdateClassProgress: (classId: string, lessonId: string, completed: boolean) => void;
   onUpdateClass: (id: string) => void;
   onToast?: (message: string) => void;
 }
@@ -31,7 +91,6 @@ export const TeachingView = ({
   onDeleteUnit,
   onSaveUnit,
   classes,
-  onUpdateClassProgress,
   onUpdateClass,
   onToast
 }: TeachingViewProps) => {
@@ -40,13 +99,29 @@ export const TeachingView = ({
   const [selectedSubUnit, setSelectedSubUnit] = useState<SubUnit | null>(null);
   const [isSubUnitFormOpen, setIsSubUnitFormOpen] = useState(false);
   const [editingSubUnit, setEditingSubUnit] = useState<SubUnit | null>(null);
+  const [loFilter, setLoFilter] = useState<LOFilterStatus>('all');
   const teachingClasses = classes.filter(cls => !NON_TEACHING_GROUPS.has(cls.year_group));
+
+  // Drag state
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Keep selectedUnit in sync with teachingUnits changes
   useEffect(() => {
     if (selectedUnit) {
       const updated = teachingUnits.find(u => u.id === selectedUnit.id);
       if (updated) setSelectedUnit(updated);
+    }
+  }, [teachingUnits]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep selectedSubUnit in sync
+  useEffect(() => {
+    if (selectedSubUnit && selectedUnit) {
+      const updatedUnit = teachingUnits.find(u => u.id === selectedUnit.id);
+      if (updatedUnit) {
+        const updatedSu = updatedUnit.sub_units.find(su => su.id === selectedSubUnit.id);
+        if (updatedSu) setSelectedSubUnit(updatedSu);
+      }
     }
   }, [teachingUnits]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -70,7 +145,7 @@ export const TeachingView = ({
   // --- Sub-Unit CRUD ---
   const handleSaveSubUnit = (subUnit: SubUnit) => {
     if (!selectedUnit) return;
-    const existing = selectedUnit.sub_units || [];
+    const existing = selectedUnit.sub_units;
     const idx = existing.findIndex(s => s.id === subUnit.id);
     const newSubUnits = idx >= 0
       ? existing.map(s => s.id === subUnit.id ? subUnit : s)
@@ -83,17 +158,63 @@ export const TeachingView = ({
   const handleDeleteSubUnit = (subUnitId: string) => {
     if (!selectedUnit) return;
     if (!confirm('Delete this sub-unit?')) return;
-    const newSubUnits = (selectedUnit.sub_units || []).filter(s => s.id !== subUnitId);
+    const newSubUnits = selectedUnit.sub_units.filter(s => s.id !== subUnitId);
     onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
     setSelectedSubUnit(null);
   };
 
+  // --- Drag-and-drop handlers for LOs ---
+  const handleLODragStart = (index: number) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleLODragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleLODrop = (index: number) => {
+    const fromIndex = dragIndexRef.current;
+    if (fromIndex === null || fromIndex === index || !selectedSubUnit || !selectedUnit) return;
+    const los = [...selectedSubUnit.learning_objectives];
+    const [moved] = los.splice(fromIndex, 1);
+    los.splice(index, 0, moved);
+    const newSubUnit = { ...selectedSubUnit, learning_objectives: los };
+    const newSubUnits = selectedUnit.sub_units.map(s =>
+      s.id === selectedSubUnit.id ? newSubUnit : s
+    );
+    onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+    setSelectedSubUnit(newSubUnit);
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+
+  const handleLODragEnd = () => {
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+
   // ===== Sub-Unit Detail View =====
   if (selectedSubUnit && selectedUnit) {
+    const los = selectedSubUnit.learning_objectives || [];
+    const completedCount = los.filter(lo => lo.status === 'completed').length;
+    const inProgressCount = los.filter(lo => lo.status === 'in_progress').length;
+    const notStartedCount = los.filter(lo => lo.status === 'not_started').length;
+    const totalCount = los.length;
+
+    const filteredLOs = loFilter === 'all' ? los : los.filter(lo => lo.status === loFilter);
+
+    const filterCounts: Record<LOFilterStatus, number> = {
+      all: totalCount,
+      not_started: notStartedCount,
+      in_progress: inProgressCount,
+      completed: completedCount,
+    };
+
     return (
       <div className="space-y-6">
         <button
-          onClick={() => setSelectedSubUnit(null)}
+          onClick={() => { setSelectedSubUnit(null); setLoFilter('all'); }}
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
         >
           <ChevronRight size={20} className="rotate-180" /> Back to {selectedUnit.title}
@@ -128,78 +249,161 @@ export const TeachingView = ({
               </div>
 
               {/* Learning Objectives */}
-              {(selectedSubUnit.learning_objectives || []).length > 0 && (() => {
-                const los = selectedSubUnit.learning_objectives || [];
-                const completedCount = los.filter(lo => lo.status === 'completed').length;
-                const totalCount = los.length;
-                const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-                return (
-                  <section className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-lg flex items-center gap-2">
-                        <CheckCircle2 size={20} className="text-emerald-500" />
-                        教学目标 Learning Objectives
-                      </h3>
-                      <span className="text-xs font-bold text-slate-500">
-                        {completedCount}/{totalCount} completed ({pct}%)
-                      </span>
-                    </div>
-                    {/* Progress bar */}
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-emerald-500 transition-all duration-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 gap-2">
-                      {los.map(lo => {
-                        const statusColors = {
-                          not_started: 'bg-slate-100 text-slate-600 border-slate-200',
-                          in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
-                          completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        };
-                        const StatusIcon = lo.status === 'completed' ? CheckCircle2 : lo.status === 'in_progress' ? Clock : Circle;
-                        const iconColor = lo.status === 'completed' ? 'text-emerald-500' : lo.status === 'in_progress' ? 'text-amber-500' : 'text-slate-400';
-                        const cycleStatus = (current: LearningObjective['status']): LearningObjective['status'] => {
-                          const cycle: Record<string, LearningObjective['status']> = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' };
-                          return cycle[current];
-                        };
-                        return (
-                          <div key={lo.id} className={cn("p-3 rounded-xl border transition-all", statusColors[lo.status])}>
-                            <div className="flex items-start gap-3">
-                              <button
-                                title="Click to change status"
-                                onClick={() => {
-                                  if (!selectedUnit) return;
-                                  const newLOs = (selectedSubUnit.learning_objectives || []).map(l =>
-                                    l.id === lo.id ? { ...l, status: cycleStatus(l.status) } : l
-                                  );
-                                  const newSubUnit = { ...selectedSubUnit, learning_objectives: newLOs };
-                                  const newSubUnits = (selectedUnit.sub_units || []).map(s =>
-                                    s.id === selectedSubUnit.id ? newSubUnit : s
-                                  );
-                                  onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
-                                  setSelectedSubUnit(newSubUnit);
-                                }}
-                                className={cn("mt-0.5 shrink-0 transition-all hover:scale-110", iconColor)}
-                              >
-                                <StatusIcon size={20} />
-                              </button>
-                              <div className="flex-1 space-y-1">
-                                <MarkdownRenderer content={lo.objective} className="text-sm" />
-                                <div className="flex items-center gap-3">
-                                  <span className="text-[10px] font-bold text-slate-400">{lo.periods} periods</span>
-                                  {lo.notes && <p className="text-xs text-slate-500 italic">{lo.notes}</p>}
-                                </div>
+              {totalCount > 0 && (
+                <section className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <CheckCircle2 size={20} className="text-emerald-500" />
+                      教学目标 Learning Objectives
+                    </h3>
+                    <button
+                      onClick={() => {
+                        if (!selectedUnit || !selectedSubUnit) return;
+                        const newLOs = selectedSubUnit.learning_objectives.map(lo => {
+                          const coveredCount = lo.covered_lesson_dates?.length || 0;
+                          let status: LearningObjective['status'];
+                          if (coveredCount === 0) status = 'not_started';
+                          else if (coveredCount >= lo.periods) status = 'completed';
+                          else status = 'in_progress';
+                          return { ...lo, status };
+                        });
+                        const newSubUnit = { ...selectedSubUnit, learning_objectives: newLOs };
+                        const newSubUnits = selectedUnit.sub_units.map(s =>
+                          s.id === selectedSubUnit.id ? newSubUnit : s
+                        );
+                        onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+                        setSelectedSubUnit(newSubUnit);
+                        onToast?.('LO statuses updated from coverage');
+                      }}
+                      className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                      title="Infer LO status from covered lesson count"
+                    >
+                      <Zap size={12} />
+                      Auto-status
+                    </button>
+                  </div>
+
+                  {/* Summary stats */}
+                  <div className="flex items-center gap-4 text-xs font-bold">
+                    <span className="flex items-center gap-1 text-emerald-600">
+                      <CheckCircle2 size={14} /> {completedCount} completed
+                    </span>
+                    <span className="flex items-center gap-1 text-amber-600">
+                      <Clock size={14} /> {inProgressCount} in progress
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-500">
+                      <Circle size={14} /> {notStartedCount} not started
+                    </span>
+                  </div>
+
+                  {/* Segmented progress bar */}
+                  <SegmentedProgressBar completed={completedCount} inProgress={inProgressCount} total={totalCount} />
+
+                  {/* Filter buttons */}
+                  <div className="flex items-center gap-2">
+                    <Filter size={14} className="text-slate-400" />
+                    {(['all', 'not_started', 'in_progress', 'completed'] as LOFilterStatus[]).map(status => {
+                      const labels: Record<LOFilterStatus, string> = {
+                        all: 'All',
+                        not_started: 'Not Started',
+                        in_progress: 'In Progress',
+                        completed: 'Completed',
+                      };
+                      const colors: Record<LOFilterStatus, string> = {
+                        all: loFilter === status ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                        not_started: loFilter === status ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                        in_progress: loFilter === status ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100',
+                        completed: loFilter === status ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+                      };
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => setLoFilter(status)}
+                          className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold transition-all", colors[status])}
+                        >
+                          {labels[status]} ({filterCounts[status]})
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* LO list with drag-and-drop */}
+                  <div className="grid grid-cols-1 gap-2">
+                    {filteredLOs.map((lo, displayIdx) => {
+                      const realIndex = los.indexOf(lo);
+                      const statusColors = {
+                        not_started: 'bg-slate-100 text-slate-600 border-slate-200',
+                        in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
+                        completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                      };
+                      const StatusIcon = lo.status === 'completed' ? CheckCircle2 : lo.status === 'in_progress' ? Clock : Circle;
+                      const iconColor = lo.status === 'completed' ? 'text-emerald-500' : lo.status === 'in_progress' ? 'text-amber-500' : 'text-slate-400';
+                      const cycleStatus = (current: LearningObjective['status']): LearningObjective['status'] => {
+                        const cycle: Record<string, LearningObjective['status']> = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' };
+                        return cycle[current];
+                      };
+                      const isDragging = dragIndexRef.current === realIndex;
+                      const isDragOver = dragOverIndex === realIndex;
+                      return (
+                        <div
+                          key={lo.id}
+                          draggable={loFilter === 'all'}
+                          onDragStart={() => handleLODragStart(realIndex)}
+                          onDragOver={(e) => handleLODragOver(e, realIndex)}
+                          onDrop={() => handleLODrop(realIndex)}
+                          onDragEnd={handleLODragEnd}
+                          className={cn(
+                            "p-3 rounded-xl border transition-all",
+                            statusColors[lo.status],
+                            isDragging && "opacity-50",
+                            isDragOver && "ring-2 ring-indigo-400",
+                            loFilter === 'all' && "cursor-grab active:cursor-grabbing"
+                          )}
+                        >
+                          <div className="flex items-start gap-3">
+                            <button
+                              title="Click to change status"
+                              onClick={() => {
+                                if (!selectedUnit) return;
+                                const newLOs = (selectedSubUnit.learning_objectives || []).map(l =>
+                                  l.id === lo.id ? { ...l, status: cycleStatus(l.status) } : l
+                                );
+                                const newSubUnit = { ...selectedSubUnit, learning_objectives: newLOs };
+                                const newSubUnits = selectedUnit.sub_units.map(s =>
+                                  s.id === selectedSubUnit.id ? newSubUnit : s
+                                );
+                                onSaveUnit({ ...selectedUnit, sub_units: newSubUnits });
+                                setSelectedSubUnit(newSubUnit);
+                              }}
+                              className={cn("mt-0.5 shrink-0 transition-all hover:scale-110", iconColor)}
+                            >
+                              <StatusIcon size={20} />
+                            </button>
+                            <div className="flex-1 space-y-1">
+                              <MarkdownRenderer content={lo.objective} className="text-sm" />
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-bold text-slate-400">
+                                  {lo.periods} periods · {lo.covered_lesson_dates?.length || 0} covered
+                                </span>
+                                {lo.notes && <p className="text-xs text-slate-500 italic">{lo.notes}</p>}
                               </div>
+                              {lo.covered_lesson_dates && lo.covered_lesson_dates.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {lo.covered_lesson_dates.map(d => (
+                                    <span key={d} className="text-[9px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-md font-mono">
+                                      {format(new Date(d + 'T00:00:00'), 'dd MMM')}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </section>
-                );
-              })()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               {/* Periods */}
               <section className="flex items-center gap-3">
@@ -383,7 +587,8 @@ export const TeachingView = ({
 
   // ===== Unit Detail View =====
   if (selectedUnit) {
-    const subUnits = selectedUnit.sub_units || [];
+    const subUnits = selectedUnit.sub_units;
+    const loStats = computeUnitLOStats(selectedUnit);
     return (
       <div className="space-y-6">
         <button
@@ -424,16 +629,10 @@ export const TeachingView = ({
                 </div>
               </div>
 
+              {/* LO Progress Summary (replaces old learning_objectives text list) */}
               <section className="space-y-4">
-                <h3 className="font-bold text-lg">教学目标 (Learning Objectives)</h3>
-                <ul className="space-y-2">
-                  {selectedUnit.learning_objectives.map((obj, i) => (
-                    <li key={i} className="flex items-start gap-2 text-slate-600">
-                      <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <MarkdownRenderer content={obj} />
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="font-bold text-lg">教学目标进度 (Learning Objectives Progress)</h3>
+                <LOStatusPills {...loStats} />
               </section>
 
               {/* Sub-Units Section */}
@@ -451,8 +650,8 @@ export const TeachingView = ({
                   {subUnits.map(su => {
                     const suLOs = su.learning_objectives || [];
                     const suCompleted = suLOs.filter(lo => lo.status === 'completed').length;
+                    const suInProgress = suLOs.filter(lo => lo.status === 'in_progress').length;
                     const suTotal = suLOs.length;
-                    const suPct = suTotal > 0 ? Math.round((suCompleted / suTotal) * 100) : 0;
                     return (
                       <div
                         key={su.id}
@@ -479,11 +678,9 @@ export const TeachingView = ({
                           </div>
                           <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1 shrink-0 mt-1" />
                         </div>
-                        {/* Mini progress bar */}
+                        {/* Segmented mini progress bar */}
                         {suTotal > 0 && (
-                          <div className="mt-3 w-full h-1 bg-slate-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${suPct}%` }} />
-                          </div>
+                          <SegmentedProgressBar completed={suCompleted} inProgress={suInProgress} total={suTotal} className="mt-3 h-1" />
                         )}
                       </div>
                     );
@@ -619,24 +816,32 @@ export const TeachingView = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {yearUnits.map(unit => (
-            <div
-              key={unit.id}
-              onClick={() => setSelectedUnit(unit)}
-              className="glass-card p-6 hover:border-indigo-400 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div className="space-y-2">
-                <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{unit.title}</h4>
-                <p className="text-sm text-slate-500 line-clamp-2">{unit.learning_objectives[0]}</p>
+          {yearUnits.map(unit => {
+            const stats = computeUnitLOStats(unit);
+            const completedPct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+            return (
+              <div
+                key={unit.id}
+                onClick={() => setSelectedUnit(unit)}
+                className="glass-card p-6 hover:border-indigo-400 transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div className="space-y-2">
+                  <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{unit.title}</h4>
+                  <p className="text-sm text-slate-500 line-clamp-2">
+                    {unit.sub_units.length} sub-units &middot; {stats.total} LOs &middot; {completedPct}% done
+                  </p>
+                </div>
+                <div className="mt-4">
+                  {stats.total > 0 && (
+                    <SegmentedProgressBar completed={stats.completed} inProgress={stats.inProgress} total={stats.total} className="h-1.5" />
+                  )}
+                </div>
+                <div className="mt-3 flex items-center justify-end">
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
-              <div className="mt-6 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  {(unit.sub_units || []).length} Sub-Units · {(unit.sub_units || []).reduce((sum, su) => sum + (su.learning_objectives || []).length, 0)} LOs
-                </span>
-                <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {yearUnits.length === 0 && (
             <div className="col-span-full p-12 text-center glass-card border-dashed">
               <BookOpen size={48} className="mx-auto text-slate-300 mb-4" />
@@ -684,9 +889,9 @@ export const TeachingView = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {teachingClasses.map(cls => {
             const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
-            const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
-            const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (cls.completed_lesson_ids?.length || 0);
-            const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
+            const totalLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.length, 0) || 0;
+            const completedLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || 0;
+            const progress = totalLOs > 0 ? Math.round((completedLOs / totalLOs) * 100) : 0;
             return (
               <div key={cls.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                 <div>

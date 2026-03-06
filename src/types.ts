@@ -212,6 +212,7 @@ export interface LearningObjective {
   status: 'not_started' | 'in_progress' | 'completed';
   periods: number;
   notes?: string;
+  covered_lesson_dates?: string[];  // ISO dates of lessons that covered this LO
 }
 
 export interface SubUnit {
@@ -235,21 +236,19 @@ export interface TeachingUnit {
   id: string;
   year_group: string;
   title: string;
-  learning_objectives: string[];
-  lessons: LessonPlanItem[];
-  sub_units?: SubUnit[];
+  sub_units: SubUnit[];
   typical_examples: { question: string; solution: string }[];
   worksheet_url?: string;
   homework_url?: string;
   online_practice_url?: string;
   kahoot_url?: string;
   vocab_practice_url?: string;
-  core_vocabulary: string[];
   prep_material_template: string;
   ai_prompt_template: string;
   teaching_summary?: string;
 }
 
+/** @deprecated Retained only for TimetableEntry.lesson_id back-compat. */
 export interface LessonPlanItem {
   id: string;
   title: string;
@@ -264,7 +263,6 @@ export interface ClassProfile {
   year_group: string;
   description: string;
   current_unit_id?: string;
-  completed_lesson_ids?: string[]; // Track progress in current unit
   student_ids: string[];
 }
 

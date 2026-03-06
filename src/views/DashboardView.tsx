@@ -164,8 +164,8 @@ export const DashboardView = ({
               const currentUnit = primaryClass
                 ? teachingUnits.find(u => u.id === primaryClass.current_unit_id)
                 : teachingUnits.find(u => u.year_group === year);
-              const totalLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).length, 0) || currentUnit?.lessons.length || 1;
-              const completedLOs = currentUnit?.sub_units?.reduce((sum, su) => sum + (su.learning_objectives || []).filter(lo => lo.status === 'completed').length, 0) || (primaryClass?.completed_lesson_ids?.length || 0);
+              const totalLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.length, 0) || 0;
+              const completedLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || 0;
               const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
               return (
                 <div key={year} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">

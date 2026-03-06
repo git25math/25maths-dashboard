@@ -6,6 +6,8 @@ import { FilterChip } from '../components/FilterChip';
 import { geminiService } from '../services/geminiService';
 import { SmartExtractModal } from '../components/SmartExtractModal';
 import { ActionPlanModal } from '../components/ActionPlanModal';
+import { TipTapEditor } from '../components/TipTapEditor';
+import { ensureHtml, stripHtml } from '../lib/htmlUtils';
 
 type CategoryFilter = 'all' | MeetingRecord['category'];
 type ViewMode = 'list' | 'detail' | 'new';
@@ -368,14 +370,14 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
     // Transcribe
     setIsTranscribing(true);
     try {
-      const transcript = await geminiService.transcribeAudio(audioBlob);
-      onUpdate({ transcript, status: 'summarizing' });
+      const rawTranscript = await geminiService.transcribeAudio(audioBlob);
+      onUpdate({ transcript: ensureHtml(rawTranscript), status: 'summarizing' });
       setIsTranscribing(false);
 
-      // Generate summary
+      // Generate summary (use raw plain text for Gemini)
       setIsSummarizing(true);
       try {
-        const summary = await geminiService.generateMeetingSummary(transcript);
+        const summary = await geminiService.generateMeetingSummary(rawTranscript);
         onUpdate({ ai_summary: summary, status: 'completed' });
         // Auto-create post-meeting tasks
         if (onAddTask) {
@@ -403,7 +405,8 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
     setIsSummarizing(true);
     onUpdate({ status: 'summarizing' });
     try {
-      const summary = await geminiService.generateMeetingSummary(meeting.transcript);
+      const plainText = stripHtml(meeting.transcript);
+      const summary = await geminiService.generateMeetingSummary(plainText);
       onUpdate({ ai_summary: summary, status: 'completed' });
     } catch (err) {
       setError('Failed to generate summary.');
@@ -497,7 +500,15 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
             {showTranscript ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
           </button>
           {showTranscript && (
-            <p className="mt-4 text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{meeting.transcript}</p>
+            <div className="mt-4">
+              <TipTapEditor
+                content={meeting.transcript}
+                onUpdate={(html) => onUpdate({ transcript: html })}
+                editable={meeting.status !== 'transcribing' && meeting.status !== 'summarizing'}
+                placeholder="Transcript will appear here..."
+                debounceMs={1000}
+              />
+            </div>
           )}
         </div>
       )}

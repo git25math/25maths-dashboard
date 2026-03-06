@@ -12,15 +12,18 @@ body {
 }
 
 .glass-card {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl;
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl transition-shadow duration-200;
+}
+.glass-card-interactive {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
 }
 
 .btn-primary {
-  @apply bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-colors font-medium;
+  @apply bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 active:scale-[0.98] shadow-sm transition-all duration-150 font-medium;
 }
 
 .btn-secondary {
-  @apply bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors font-medium;
+  @apply bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 active:scale-[0.98] shadow-sm transition-all duration-150 font-medium;
 }
 
 .markdown-content {
@@ -55,4 +58,132 @@ body {
   @apply bg-slate-100 px-1 rounded font-mono text-xs;
 }
 
+/* TipTap Editor */
+.tiptap .ProseMirror {
+  @apply p-4 text-sm leading-relaxed text-slate-700 outline-none min-h-[8rem];
+}
 
+.tiptap .ProseMirror p {
+  @apply mb-2;
+}
+
+.tiptap .ProseMirror h1 {
+  @apply text-xl font-bold text-slate-900 mb-3 mt-4 first:mt-0;
+}
+
+.tiptap .ProseMirror h2 {
+  @apply text-lg font-bold text-slate-900 mb-2 mt-3 first:mt-0;
+}
+
+.tiptap .ProseMirror h3 {
+  @apply text-base font-bold text-slate-900 mb-2 mt-3 first:mt-0;
+}
+
+.tiptap .ProseMirror ul {
+  @apply list-disc list-inside mb-2;
+}
+
+.tiptap .ProseMirror ol {
+  @apply list-decimal list-inside mb-2;
+}
+
+.tiptap .ProseMirror blockquote {
+  @apply border-l-4 border-indigo-200 pl-4 italic text-slate-500 my-2;
+}
+
+.tiptap .ProseMirror code {
+  @apply bg-slate-100 px-1 rounded font-mono text-xs;
+}
+
+.tiptap .ProseMirror mark {
+  @apply bg-yellow-200 rounded px-0.5;
+}
+
+.tiptap .ProseMirror hr {
+  @apply border-slate-200 my-4;
+}
+
+.tiptap .ProseMirror strong {
+  @apply font-bold text-slate-900;
+}
+
+.tiptap .ProseMirror em {
+  @apply italic;
+}
+
+.tiptap .ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-slate-400 italic;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* TipTap Link */
+.tiptap .ProseMirror a {
+  @apply text-indigo-600 hover:underline cursor-pointer;
+}
+
+/* Menu animations */
+.tiptap-bubble-menu { animation: tiptap-menu-in 120ms ease; }
+.tiptap-floating-menu { animation: tiptap-menu-in 150ms ease; }
+
+@keyframes tiptap-menu-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Global UI Enhancements --- */
+
+/* Smooth scroll + reduced motion */
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus-visible keyboard ring (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid theme(--color-indigo-500);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* Unified modal overlay */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+}
+
+/* Shared form field styles */
+.form-label {
+  @apply text-sm font-bold text-slate-700 uppercase tracking-wider;
+}
+.form-input {
+  @apply w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all;
+}
+
+/* Skeleton loading placeholders */
+.skeleton { @apply bg-slate-200 rounded-lg animate-pulse; }
+.skeleton-text { @apply bg-slate-200 rounded-lg animate-pulse h-4 w-full; }
+.skeleton-text-sm { @apply bg-slate-200 rounded-lg animate-pulse h-3 w-3/4; }
+.skeleton-circle { @apply bg-slate-200 animate-pulse rounded-full; }
+.skeleton-card { @apply bg-slate-200 animate-pulse rounded-2xl h-32; }
+
+/* Page transition animation */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 300ms ease-out both;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+* { scrollbar-width: thin; scrollbar-color: theme(--color-slate-300) transparent; }

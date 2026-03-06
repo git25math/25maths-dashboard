@@ -16,7 +16,7 @@ export interface LessonPlanContext {
   unitTitle: string;
   unitObjectives: string[];
   subUnits?: { title: string; objectives: string[] }[];
-  completedLessons: string[];
+  completedObjectives: string[];
 }
 
 export interface CategorizationResult {
@@ -149,9 +149,9 @@ ${transcript}`,
   async generateLessonPlan(context: LessonPlanContext): Promise<string> {
     const ai = getClient();
 
-    const completedInfo = context.completedLessons.length > 0
-      ? `\nCompleted lessons so far: ${context.completedLessons.join(', ')}`
-      : '\nNo lessons completed yet in this unit.';
+    const completedInfo = context.completedObjectives.length > 0
+      ? `\nCompleted objectives so far: ${context.completedObjectives.join(', ')}`
+      : '\nNo objectives completed yet in this unit.';
 
     const subUnitsInfo = context.subUnits?.length
       ? `\nSub-units:\n${context.subUnits.map(s => `- ${s.title}: ${s.objectives.join('; ')}`).join('\n')}`

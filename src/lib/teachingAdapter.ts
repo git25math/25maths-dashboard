@@ -3,30 +3,42 @@ import { TeachingUnit, LearningObjective } from '../types';
 const genId = () => Math.random().toString(36).substr(2, 9);
 
 /**
- * Normalize a TeachingUnit to ensure sub_units use the new
- * learning_objectives: LearningObjective[] format.
- * Converts old `objectives: string[]` data if detected.
+ * Normalize a TeachingUnit:
+ * 1. Strip deprecated fields (learning_objectives, lessons, core_vocabulary)
+ * 2. Ensure sub_units defaults to []
+ * 3. Convert old `objectives: string[]` sub-unit format to LearningObjective[]
  */
-export function normalizeTeachingUnit(raw: TeachingUnit): TeachingUnit {
-  if (!raw.sub_units || raw.sub_units.length === 0) return raw;
+export function normalizeTeachingUnit(raw: any): TeachingUnit {
+  // Strip deprecated top-level fields
+  const { learning_objectives, lessons, core_vocabulary, ...rest } = raw;
 
-  const normalizedSubUnits = raw.sub_units.map(su => {
-    // Already in new format
-    if (Array.isArray(su.learning_objectives)) return su;
+  const rawSubUnits = rest.sub_units || [];
+
+  const normalizedSubUnits = rawSubUnits.map((su: any) => {
+    if (Array.isArray(su.learning_objectives)) {
+      // Ensure covered_lesson_dates exists on each LO
+      return {
+        ...su,
+        learning_objectives: su.learning_objectives.map((lo: any) => ({
+          ...lo,
+          covered_lesson_dates: lo.covered_lesson_dates || [],
+        })),
+      };
+    }
 
     // Old format: objectives is string[]
-    const oldObjectives: string[] = (su as unknown as { objectives?: string[] }).objectives || [];
-    const learning_objectives: LearningObjective[] = oldObjectives.map(text => ({
+    const oldObjectives: string[] = su.objectives || [];
+    const newLOs: LearningObjective[] = oldObjectives.map((text: string) => ({
       id: genId(),
       objective: text,
       status: 'not_started' as const,
       periods: 1,
+      covered_lesson_dates: [],
     }));
 
-    // Remove old field, add new
-    const { objectives: _, ...rest } = su as unknown as Record<string, unknown>;
-    return { ...rest, learning_objectives } as typeof su;
+    const { objectives: _, ...suRest } = su;
+    return { ...suRest, learning_objectives: newLOs };
   });
 
-  return { ...raw, sub_units: normalizedSubUnits };
+  return { ...rest, sub_units: normalizedSubUnits };
 }

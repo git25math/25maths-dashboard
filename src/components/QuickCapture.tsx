@@ -50,7 +50,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
           >
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-semibold text-slate-900">Quick Capture</h3>
+                <h3 className="text-sm font-bold text-slate-900">Quick Capture</h3>
                 <button type="button" onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
                   <X size={16} />
                 </button>

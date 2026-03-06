@@ -38,11 +38,11 @@ export function FilterChip({
       type="button"
       onClick={onClick}
       className={cn(
-        'rounded-lg font-bold border transition-all',
+        'rounded-lg font-bold border transition-all active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-indigo-500',
         SIZE_STYLES[size],
         active
-          ? ACTIVE_STYLES[tone]
-          : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600',
+          ? cn(ACTIVE_STYLES[tone], 'shadow-sm')
+          : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300',
         className,
       )}
     >

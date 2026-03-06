@@ -57,7 +57,7 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -73,7 +73,7 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all",
                     method === opt.value
-                      ? "bg-blue-50 border-blue-300 text-blue-600"
+                      ? "bg-indigo-50 border-indigo-300 text-indigo-600"
                       : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
                   )}
                 >
@@ -98,7 +98,7 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
                 type="checkbox"
                 checked={needsFollowUp}
                 onChange={e => setNeedsFollowUp(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
               />
               <span className="text-sm font-bold text-slate-700">需要后续跟进</span>
             </label>
@@ -111,7 +111,7 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
                   onChange={e => setFollowUpPlan(e.target.value)}
                   placeholder="描述下一步跟进计划..."
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all text-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                 />
                 <p className="text-[10px] text-slate-400">保存后将自动创建待办事项（标签: 家校沟通）</p>
               </div>
@@ -128,7 +128,7 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
             </button>
             <button
               type="submit"
-              className="px-8 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
+              className="px-8 py-2 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
             >
               Save
             </button>

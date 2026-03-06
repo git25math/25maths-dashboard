@@ -3,6 +3,7 @@ import { X, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Idea } from '../types';
 import { RichTextEditor } from './RichTextEditor';
+import { ToggleSwitch } from './ToggleSwitch';
 
 interface IdeaFormProps {
   idea?: Idea | null;
@@ -97,19 +98,7 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
               {showOnDashboard ? <Eye size={16} className="text-indigo-500" /> : <EyeOff size={16} className="text-slate-400" />}
               Show on Dashboard
             </div>
-            <button
-              type="button"
-              onClick={() => setShowOnDashboard(!showOnDashboard)}
-              className={cn(
-                "relative w-10 h-6 rounded-full transition-colors",
-                showOnDashboard ? "bg-indigo-600" : "bg-slate-300"
-              )}
-            >
-              <span className={cn(
-                "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform",
-                showOnDashboard ? "translate-x-[18px]" : "translate-x-0.5"
-              )} />
-            </button>
+            <ToggleSwitch checked={showOnDashboard} onChange={setShowOnDashboard} />
           </div>
 
           <RichTextEditor
