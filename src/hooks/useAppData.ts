@@ -325,8 +325,24 @@ export function useAppData() {
         ...student,
         requests: [...(student.requests || []), newRequest],
       });
+      // Auto-create GTD Task for student request
+      try {
+        const task = await taskService.create({
+          title: `[学生诉求] ${student.name}: ${content.slice(0, 60)}`,
+          status: 'inbox',
+          priority: 'medium',
+          source_type: 'student-request',
+          source_id: `${student.id}:${newRequest.id}`,
+          tags: ['学生诉求'],
+          created_at: new Date().toISOString(),
+        });
+        setTasks(prev => [...prev, task]);
+        toast.success('已创建待办事项');
+      } catch {
+        // silent — don't block request creation if task fails
+      }
     }
-  }, [students, saveStudent]);
+  }, [students, saveStudent, setTasks, toast]);
 
   const updateStudentRequest = useCallback(async (studentId: string, requestId: string, content: string) => {
     const student = students.find(s => s.id === studentId);

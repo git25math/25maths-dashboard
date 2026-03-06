@@ -138,7 +138,7 @@ export const TasksView = ({ tasks, projects, onAddTask, onEditTask, onDeleteTask
                   <button
                     onClick={() => {
                       if (onNavigate) {
-                        const sourceTab: Record<string, string> = { meeting: 'meetings', calendar: 'timetable', idea: 'ideas' };
+                        const sourceTab: Record<string, string> = { meeting: 'meetings', calendar: 'timetable', idea: 'ideas', 'parent-comm': 'students', 'student-request': 'students', 'school-event': 'school-events', 'email-digest': 'email-digest' };
                         onNavigate(sourceTab[task.source_type!] || 'tasks');
                       }
                     }}

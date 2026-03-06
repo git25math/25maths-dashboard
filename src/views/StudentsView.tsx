@@ -6,6 +6,7 @@ import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { geminiService } from '../services/geminiService';
+import { ActionPlanModal } from '../components/ActionPlanModal';
 
 interface StudentsViewProps {
   students: Student[];
@@ -90,6 +91,10 @@ export const StudentsView = ({
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [batchPoints, setBatchPoints] = useState(1);
   const [batchReason, setBatchReason] = useState('');
+  const [subjectReportLoading, setSubjectReportLoading] = useState(false);
+  const [subjectReportMarkdown, setSubjectReportMarkdown] = useState<string | null>(null);
+  const [parentNotesLoading, setParentNotesLoading] = useState(false);
+  const [parentNotesMarkdown, setParentNotesMarkdown] = useState<string | null>(null);
 
   // Derived data
   const classNames = Array.from(new Set(students.map(s => s.class_name).filter(Boolean))).sort();
@@ -124,11 +129,56 @@ export const StudentsView = ({
     clearSelection();
   };
 
+  const handleGenerateSubjectReport = async (student: Student) => {
+    setSubjectReportLoading(true);
+    try {
+      const result = await geminiService.generateSubjectReport({
+        studentName: student.name,
+        chineseName: student.chinese_name,
+        yearGroup: student.year_group,
+        className: student.class_name,
+        examRecords: (student.exam_records ?? []).map(e => ({ exam_name: e.exam_name, date: e.date, score: e.score, total_score: e.total_score })),
+        weaknesses: (student.weaknesses ?? []).map(w => ({ topic: w.topic, level: w.level, notes: w.notes })),
+        statusRecords: (student.status_records ?? []).map(s => ({ content: s.content, timestamp: s.date })),
+        requests: (student.requests ?? []).map(r => ({ content: r.content, timestamp: r.date })),
+      });
+      setSubjectReportMarkdown(result);
+    } catch (err) {
+      console.error('Failed to generate subject report:', err);
+      alert('Failed to generate subject report. Please try again.');
+    } finally {
+      setSubjectReportLoading(false);
+    }
+  };
+
+  const handleGenerateParentNotes = async (student: Student) => {
+    setParentNotesLoading(true);
+    try {
+      const result = await geminiService.generateParentMeetingNotes({
+        studentName: student.name,
+        chineseName: student.chinese_name,
+        yearGroup: student.year_group,
+        className: student.class_name,
+        examRecords: (student.exam_records ?? []).map(e => ({ exam_name: e.exam_name, date: e.date, score: e.score, total_score: e.total_score })),
+        weaknesses: (student.weaknesses ?? []).map(w => ({ topic: w.topic, level: w.level, notes: w.notes })),
+        statusRecords: (student.status_records ?? []).map(s => ({ content: s.content, timestamp: s.date })),
+        parentCommunications: (student.parent_communications ?? []).map(c => ({ type: c.method, content: c.content, timestamp: c.date })),
+      });
+      setParentNotesMarkdown(result);
+    } catch (err) {
+      console.error('Failed to generate parent meeting notes:', err);
+      alert('Failed to generate parent meeting notes. Please try again.');
+    } finally {
+      setParentNotesLoading(false);
+    }
+  };
+
   const selectedStudent = students.find(s => s.id === selectedStudentId);
   const selectedClass = classes.find(c => c.id === selectedClassId);
 
   if (selectedStudent) {
     return (
+      <>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <button
@@ -751,17 +801,42 @@ export const StudentsView = ({
                 >
                   <AlertCircle size={16} /> Report Missing
                 </button>
-                <button disabled className="w-full py-3 bg-indigo-50 text-indigo-400 text-xs font-bold rounded-xl cursor-not-allowed" title="Coming Soon">
-                  Generate Subject Report
+                <button
+                  onClick={() => handleGenerateSubjectReport(selectedStudent)}
+                  disabled={subjectReportLoading}
+                  className="w-full py-3 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-xl hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {subjectReportLoading ? <><Loader2 size={14} className="animate-spin" /> 生成中...</> : 'Generate Subject Report'}
                 </button>
-                <button disabled className="w-full py-3 bg-slate-50 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed" title="Coming Soon">
-                  Parent Meeting Notes
+                <button
+                  onClick={() => handleGenerateParentNotes(selectedStudent)}
+                  disabled={parentNotesLoading}
+                  className="w-full py-3 bg-slate-50 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {parentNotesLoading ? <><Loader2 size={14} className="animate-spin" /> 生成中...</> : 'Parent Meeting Notes'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {subjectReportMarkdown && (
+        <ActionPlanModal
+          title="Subject Report"
+          meetingTitle={`${selectedStudent.name}${selectedStudent.chinese_name ? ` (${selectedStudent.chinese_name})` : ''}`}
+          markdown={subjectReportMarkdown}
+          onClose={() => setSubjectReportMarkdown(null)}
+        />
+      )}
+      {parentNotesMarkdown && (
+        <ActionPlanModal
+          title="Parent Meeting Notes"
+          meetingTitle={`${selectedStudent.name}${selectedStudent.chinese_name ? ` (${selectedStudent.chinese_name})` : ''}`}
+          markdown={parentNotesMarkdown}
+          onClose={() => setParentNotesMarkdown(null)}
+        />
+      )}
+      </>
     );
   }
 

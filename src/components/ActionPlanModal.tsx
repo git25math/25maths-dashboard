@@ -5,11 +5,12 @@ import { MarkdownRenderer } from './RichTextEditor';
 interface ActionPlanModalProps {
   markdown: string;
   meetingTitle: string;
+  title?: string;
   onSaveAsSOP?: (data: { title: string; category: string; content: string }) => void;
   onClose: () => void;
 }
 
-export const ActionPlanModal = ({ markdown, meetingTitle, onSaveAsSOP, onClose }: ActionPlanModalProps) => {
+export const ActionPlanModal = ({ markdown, meetingTitle, title = 'Action Plan', onSaveAsSOP, onClose }: ActionPlanModalProps) => {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -39,7 +40,7 @@ export const ActionPlanModal = ({ markdown, meetingTitle, onSaveAsSOP, onClose }
               <FileText size={16} className="text-teal-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Action Plan</h2>
+              <h2 className="text-xl font-bold text-slate-900">{title}</h2>
               <p className="text-xs text-teal-500 font-medium">{meetingTitle}</p>
             </div>
           </div>

@@ -288,10 +288,30 @@ export function useProductivityActions({
       const created = await schoolEventService.create(data);
       setSchoolEvents(prev => [...prev, created]);
       toast.success('Event added');
+      // Auto-create GTD Task when action is required
+      if (data.is_action_required) {
+        try {
+          const task = await taskService.create({
+            title: `[校历] ${data.title}`,
+            description: data.description,
+            status: 'inbox',
+            priority: 'medium',
+            source_type: 'school-event',
+            source_id: created.id,
+            due_date: data.date,
+            tags: ['校历'],
+            created_at: new Date().toISOString(),
+          });
+          setTasks(prev => [...prev, task]);
+          toast.success('已创建待办事项');
+        } catch {
+          // silent — don't block event creation if task fails
+        }
+      }
     } catch (error) {
       toast.error('Failed to add event');
     }
-  }, [setSchoolEvents, toast]);
+  }, [setSchoolEvents, setTasks, toast]);
 
   const updateSchoolEvent = useCallback(async (id: string, updates: Partial<SchoolEvent>) => {
     const existing = schoolEvents.find(e => e.id === id);

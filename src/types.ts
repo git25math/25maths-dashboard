@@ -6,7 +6,7 @@ export type PrepStatus = 'not_prepared' | 'prepared' | 'finished' | 'recorded';
 // --- GTD Task types ---
 export type TaskStatus = 'inbox' | 'next' | 'waiting' | 'someday' | 'done';
 export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea' | 'parent-comm' | 'email-digest';
+export type TaskSource = 'meeting' | 'calendar' | 'manual' | 'idea' | 'parent-comm' | 'email-digest' | 'student-request' | 'school-event';
 
 export interface Task {
   id: string;
