@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2, Gauge, GraduationCap } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
-import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
+import { TeachingUnit, ClassProfile, SubUnit, LearningObjective, PrepResource } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
 import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
-import { getObjectivePrepMetrics, getSharedPrepResources } from '../lib/objectivePrep';
+import { getObjectivePrepMetrics, getSharedPrepResources, getTeachingUnitResources } from '../lib/objectivePrep';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { PrepCompletenessSummary, getPrepCoverageLevel, summarizeClassPrep, summarizeUnitPrep, summarizeYearPrep } from '../lib/prepCompleteness';
 
@@ -96,6 +96,54 @@ function PrepCoverageBreakdown({ summary }: { summary: PrepCompletenessSummary }
       <span className="px-2 py-1 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-700 border border-emerald-100">
         Resources {summary.resourcesReady}/{summary.objectivesTotal}
       </span>
+    </div>
+  );
+}
+
+function ResourceBankList({ resources, emptyLabel }: { resources: PrepResource[]; emptyLabel: string }) {
+  if (resources.length === 0) {
+    return <p className="text-xs text-slate-500 italic">{emptyLabel}</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {resources.map((resource, index) => (
+        resource.url ? (
+          <a
+            key={`${resource.title}-${resource.url}-${index}`}
+            href={resource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-3 rounded-xl border bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm transition-all"
+          >
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
+              {(resource.kind || resource.note) && (
+                <p className="text-[11px] text-slate-400">
+                  {[resource.kind, resource.note].filter(Boolean).join(' · ')}
+                </p>
+              )}
+            </div>
+            <ExternalLink size={14} className="text-slate-400" />
+          </a>
+        ) : (
+          <div key={`${resource.title}-${index}`} className="p-3 rounded-xl border bg-white border-slate-200">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
+                {(resource.kind || resource.note) && (
+                  <p className="text-[11px] text-slate-400">
+                    {[resource.kind, resource.note].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+              </div>
+              <span className="px-2 py-1 rounded-full bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                Note
+              </span>
+            </div>
+          </div>
+        )
+      ))}
     </div>
   );
 }
@@ -412,6 +460,7 @@ export const TeachingView = ({
   // ===== Sub-Unit Detail View =====
   if (selectedSubUnit && selectedUnit) {
     const los = selectedSubUnit.learning_objectives || [];
+    const subUnitResourceBank = getSharedPrepResources(selectedSubUnit);
     const completedCount = los.filter(lo => lo.status === 'completed').length;
     const inProgressCount = los.filter(lo => lo.status === 'in_progress').length;
     const notStartedCount = los.filter(lo => lo.status === 'not_started').length;
@@ -790,34 +839,7 @@ export const TeachingView = ({
           <div className="space-y-6">
             <div className="glass-card p-6 space-y-4">
               <h3 className="font-bold text-lg">资源链接 Resources</h3>
-              <div className="space-y-2">
-                {[
-                  { label: '练习单 Worksheet', url: selectedSubUnit.worksheet_url, icon: BookOpen },
-                  { label: '线上练习 Online Practice', url: selectedSubUnit.online_practice_url, icon: ExternalLink },
-                  { label: 'Kahoot 练习', url: selectedSubUnit.kahoot_url, icon: Lightbulb },
-                  { label: '课后作业 Homework', url: selectedSubUnit.homework_url, icon: CheckCircle2 },
-                ].map((res, i) => (
-                  <a
-                    key={i}
-                    href={res.url || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border transition-all",
-                      res.url
-                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm"
-                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={res.url ? undefined : (e) => e.preventDefault()}
-                  >
-                    <div className="flex items-center gap-3">
-                      <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
-                      <span className="text-sm font-medium">{res.label}</span>
-                    </div>
-                    {res.url && <ExternalLink size={14} className="text-slate-400" />}
-                  </a>
-                ))}
-              </div>
+              <ResourceBankList resources={subUnitResourceBank} emptyLabel="No sub-unit resources linked yet." />
             </div>
           </div>
         </div>
@@ -837,6 +859,7 @@ export const TeachingView = ({
   if (selectedUnit) {
     const subUnits = selectedUnit.sub_units;
     const loStats = computeUnitLOStats(selectedUnit);
+    const unitResourceBank = getTeachingUnitResources(selectedUnit);
     return (
       <div className="space-y-6">
         <button
@@ -1072,35 +1095,7 @@ export const TeachingView = ({
           <div className="space-y-6">
             <div className="glass-card p-6 space-y-4">
               <h3 className="font-bold text-lg">资料库 (Resources)</h3>
-              <div className="space-y-2">
-                {[
-                  { label: '练习单 (Worksheet)', url: selectedUnit.worksheet_url, icon: BookOpen },
-                  { label: '作业单 (Homework)', url: selectedUnit.homework_url, icon: CheckCircle2 },
-                  { label: '线上练习 (Online)', url: selectedUnit.online_practice_url, icon: ExternalLink },
-                  { label: 'Kahoot链接', url: selectedUnit.kahoot_url, icon: Lightbulb },
-                  { label: '词汇练习 (Vocab)', url: selectedUnit.vocab_practice_url, icon: Settings },
-                ].map((res, i) => (
-                  <a
-                    key={i}
-                    href={res.url || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border transition-all",
-                      res.url
-                        ? "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm"
-                        : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={res.url ? undefined : (e) => e.preventDefault()}
-                  >
-                    <div className="flex items-center gap-3">
-                      <res.icon size={16} className={res.url ? "text-indigo-600" : "text-slate-400"} />
-                      <span className="text-sm font-medium">{res.label}</span>
-                    </div>
-                    {res.url && <ExternalLink size={14} className="text-slate-400" />}
-                  </a>
-                ))}
-              </div>
+              <ResourceBankList resources={unitResourceBank} emptyLabel="No unit-level resources linked yet." />
             </div>
 
             <div className="glass-card p-6 space-y-4">

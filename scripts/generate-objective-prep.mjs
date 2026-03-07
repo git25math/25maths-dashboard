@@ -156,13 +156,27 @@ function callGeminiSync(prompt, maxTokens = 32768, retries = 3) {
 }
 
 function buildSharedPrepResources(subUnit) {
-  return [
+  const resources = [
     { title: 'Worksheet', url: subUnit.worksheet_url || '', kind: 'worksheet' },
     { title: 'Online Practice', url: subUnit.online_practice_url || '', kind: 'practice' },
     { title: 'Kahoot', url: subUnit.kahoot_url || '', kind: 'kahoot' },
     { title: 'Homework', url: subUnit.homework_url || '', kind: 'homework' },
     { title: 'Vocabulary Practice', url: subUnit.vocab_practice_url || '', kind: 'vocab' },
-  ].filter(resource => resource.url);
+    ...(Array.isArray(subUnit.shared_resources) ? subUnit.shared_resources : []),
+  ].filter(resource => resource && (resource.url || resource.title || resource.note));
+
+  const seen = new Set();
+  return resources.filter(resource => {
+    const key = [
+      resource.kind || '',
+      String(resource.title || '').trim().toLowerCase(),
+      String(resource.url || '').trim().toLowerCase(),
+      String(resource.note || '').trim().toLowerCase(),
+    ].join('::');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function needsObjectivePrep(subUnit) {

@@ -3,6 +3,8 @@ import { X, Save, Plus, Trash2, Paperclip, Loader2, Circle, Clock, CheckCircle2,
 import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective, PrepResource, TypicalExample } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { uploadFile } from '../services/storageService';
+import { ResourceBankEditor } from './ResourceBankEditor';
+import { PREP_RESOURCE_KIND_OPTIONS, dedupePrepResources, emptyPrepResource, isPrepResourceFilled } from '../lib/prepResourceCatalog';
 
 interface SubUnitFormProps {
   subUnit?: SubUnit | null;
@@ -80,7 +82,6 @@ const emptyReflection: TeachingReflection = {
 
 const emptyVocabularyItem = (): VocabularyItem => ({ english: '', chinese: '' });
 const emptyTypicalExample = (): TypicalExample => ({ question: '', solution: '' });
-const emptyPrepResource = (): PrepResource => ({ title: '', url: '', kind: 'link', note: '' });
 
 export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => {
   const emptyLO = (): LearningObjective => ({
@@ -104,6 +105,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   const [kahootUrl, setKahootUrl] = useState('');
   const [homeworkUrl, setHomeworkUrl] = useState('');
   const [vocabPracticeUrl, setVocabPracticeUrl] = useState('');
+  const [sharedResources, setSharedResources] = useState<PrepResource[]>([]);
   const [homeworkContent, setHomeworkContent] = useState('');
   const [reflection, setReflection] = useState<TeachingReflection>(emptyReflection);
   const [aiSummary, setAiSummary] = useState('');
@@ -129,9 +131,25 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
       setKahootUrl(subUnit.kahoot_url || '');
       setHomeworkUrl(subUnit.homework_url || '');
       setVocabPracticeUrl(subUnit.vocab_practice_url || '');
+      setSharedResources(subUnit.shared_resources || []);
       setHomeworkContent(subUnit.homework_content || '');
       setReflection(subUnit.reflection || emptyReflection);
       setAiSummary(subUnit.ai_summary || '');
+    } else {
+      setTitle('');
+      setLearningObjectives([emptyLO()]);
+      setPeriods(1);
+      setVocabulary([emptyVocabularyItem()]);
+      setClassroomExercises('');
+      setWorksheetUrl('');
+      setOnlinePracticeUrl('');
+      setKahootUrl('');
+      setHomeworkUrl('');
+      setVocabPracticeUrl('');
+      setSharedResources([]);
+      setHomeworkContent('');
+      setReflection(emptyReflection);
+      setAiSummary('');
     }
   }, [subUnit]);
 
@@ -148,7 +166,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           core_vocabulary: (lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()),
           concept_explanation: lo.concept_explanation || '',
           typical_examples: (lo.typical_examples || []).filter(ex => ex.question.trim() || ex.solution.trim()),
-          prep_resources: (lo.prep_resources || []).filter(res => res.title.trim() || res.url.trim() || (res.note || '').trim()),
+          prep_resources: (lo.prep_resources || []).filter(isPrepResourceFilled),
         })),
       periods,
       vocabulary: vocabulary.filter(v => v.english.trim() || v.chinese.trim()),
@@ -158,6 +176,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
       kahoot_url: kahootUrl || undefined,
       homework_url: homeworkUrl || undefined,
       vocab_practice_url: vocabPracticeUrl || undefined,
+      shared_resources: sharedResources.filter(isPrepResourceFilled),
       homework_content: homeworkContent || undefined,
       reflection: reflection,
       ai_summary: aiSummary || undefined,
@@ -235,7 +254,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
     setLearningObjectives(arr);
   };
 
-  const buildSharedPrepResourcesDraft = (): PrepResource[] => ([
+  const buildSharedPrepResourcesDraft = (): PrepResource[] => dedupePrepResources([
     {
       title: 'Worksheet',
       url: worksheetUrl.trim(),
@@ -298,9 +317,10 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           note: 'Use the sub-unit AI summary as a concise explanation scaffold and misconception check.',
         }
       : null,
-  ] as Array<PrepResource | null>).filter((resource): resource is PrepResource =>
-    !!resource && !!(resource.title.trim() || resource.url.trim() || (resource.note || '').trim())
-  );
+    ...sharedResources,
+  ].filter((resource): resource is PrepResource =>
+    !!resource && isPrepResourceFilled(resource)
+  ));
 
   const seedLOVocabulary = (loIndex: number) => {
     const sharedVocabulary = vocabulary.filter(v => v.english.trim() || v.chinese.trim());
@@ -593,13 +613,9 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                                   onChange={e => updateLOResource(i, resourceIndex, 'kind', e.target.value)}
                                   className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
                                 >
-                                  <option value="link">General Link</option>
-                                  <option value="worksheet">Worksheet</option>
-                                  <option value="practice">Practice</option>
-                                  <option value="kahoot">Kahoot</option>
-                                  <option value="homework">Homework</option>
-                                  <option value="vocab">Vocabulary</option>
-                                  <option value="other">Other</option>
+                                  {PREP_RESOURCE_KIND_OPTIONS.map(option => (
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                  ))}
                                 </select>
                                 <input
                                   type="text"
@@ -612,7 +628,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                             </div>
                           ))}
                           {(lo.prep_resources || []).length === 0 && (
-                            <p className="text-xs text-slate-400 italic">No objective-specific resources yet. Shared sub-unit links can still be used.</p>
+                            <p className="text-xs text-slate-400 italic">No objective-specific resources yet. The shared sub-unit resource bank can still be reused.</p>
                           )}
                         </div>
                       </section>
@@ -682,7 +698,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
           <section className="space-y-4 border-t border-slate-100 pt-8">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
               <Link size={16} className="text-blue-500" />
-              资源链接 Resource Links
+              快速资源入口 Quick Links
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UrlWithUpload label="练习单 Worksheet URL" value={worksheetUrl} onChange={setWorksheetUrl} />
@@ -691,6 +707,13 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
               <UrlWithUpload label="课后作业 Homework URL" value={homeworkUrl} onChange={setHomeworkUrl} />
               <UrlWithUpload label="核心词汇练习 Vocab Practice URL" value={vocabPracticeUrl} onChange={setVocabPracticeUrl} />
             </div>
+            <ResourceBankEditor
+              label="共享资料库 Shared Resource Bank"
+              resources={sharedResources}
+              onChange={setSharedResources}
+              emptyText="No extra shared resources yet. Use this area for slides, videos, textbook pages, assessments, answer keys, simulations, past papers, and printable materials."
+              description="These entries are reused by objective prep packs and displayed in the sub-unit resource sidebar."
+            />
           </section>
 
           {/* Homework Content */}

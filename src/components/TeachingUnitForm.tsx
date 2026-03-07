@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
-import { TeachingUnit } from '../types';
+import { X, Save, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
+import { PrepResource, TeachingUnit } from '../types';
 import { RichTextEditor } from './RichTextEditor';
+import { ResourceBankEditor } from './ResourceBankEditor';
 import { TEACHING_YEAR_GROUPS } from '../shared/constants';
+import { isPrepResourceFilled } from '../lib/prepResourceCatalog';
 
 interface TeachingUnitFormProps {
   unit?: TeachingUnit | null;
@@ -17,30 +19,60 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: Teachi
     title: '',
     sub_units: [],
     typical_examples: [{ question: '', solution: '' }],
+    worksheet_url: '',
+    homework_url: '',
+    online_practice_url: '',
+    kahoot_url: '',
+    vocab_practice_url: '',
+    shared_resources: [],
     prep_material_template: '',
     ai_prompt_template: '',
     teaching_summary: ''
   });
+  const [sharedResources, setSharedResources] = useState<PrepResource[]>([]);
 
   useEffect(() => {
     if (unit) {
       const { id, ...rest } = unit;
       setFormData(rest);
+      setSharedResources(unit.shared_resources || []);
     } else if (initialData) {
       setFormData(prev => ({
         ...prev,
         year_group: initialData.year_group,
         title: initialData.title,
       }));
+      setSharedResources([]);
+    } else {
+      setFormData({
+        year_group: 'Year 7',
+        title: '',
+        sub_units: [],
+        typical_examples: [{ question: '', solution: '' }],
+        worksheet_url: '',
+        homework_url: '',
+        online_practice_url: '',
+        kahoot_url: '',
+        vocab_practice_url: '',
+        shared_resources: [],
+        prep_material_template: '',
+        ai_prompt_template: '',
+        teaching_summary: ''
+      });
+      setSharedResources([]);
     }
   }, [unit, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...formData,
+      shared_resources: sharedResources.filter(isPrepResourceFilled),
+    };
     if (unit) {
-      onSave({ ...formData, id: unit.id } as TeachingUnit);
+      onSave({ ...payload, id: unit.id } as TeachingUnit);
     } else {
-      onSave(formData);
+      onSave(payload);
     }
   };
 
@@ -93,6 +125,60 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: Teachi
           </div>
 
           <section className="space-y-4">
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <LinkIcon size={16} className="text-emerald-500" />
+                Unit Resource Hub
+              </label>
+              <p className="text-xs text-slate-500">
+                Add unit-wide resource entry points here. These links and notes are shown on the unit detail page and can be reused across sub-units.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="url"
+                  value={formData.worksheet_url || ''}
+                  onChange={e => setFormData({ ...formData, worksheet_url: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Worksheet URL"
+                />
+                <input
+                  type="url"
+                  value={formData.homework_url || ''}
+                  onChange={e => setFormData({ ...formData, homework_url: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Homework URL"
+                />
+                <input
+                  type="url"
+                  value={formData.online_practice_url || ''}
+                  onChange={e => setFormData({ ...formData, online_practice_url: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Online Practice URL"
+                />
+                <input
+                  type="url"
+                  value={formData.kahoot_url || ''}
+                  onChange={e => setFormData({ ...formData, kahoot_url: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Kahoot / Quiz URL"
+                />
+                <input
+                  type="url"
+                  value={formData.vocab_practice_url || ''}
+                  onChange={e => setFormData({ ...formData, vocab_practice_url: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Vocabulary Practice URL"
+                />
+              </div>
+              <ResourceBankEditor
+                label="Shared Unit Resources"
+                resources={sharedResources}
+                onChange={setSharedResources}
+                emptyText="No extra unit resources yet. Use the quick links above or add custom resource entries."
+                description="Use this for slides, videos, textbooks, assessments, answer keys, past papers, simulations, and any other reusable unit-level materials."
+              />
+            </div>
+
             <div className="flex justify-between items-center">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Typical Examples</label>
               <button type="button" onClick={addExample} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">

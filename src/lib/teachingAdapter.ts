@@ -19,6 +19,7 @@ export function normalizeTeachingUnit(raw: any): TeachingUnit {
       // Ensure covered_lesson_dates exists on each LO
       return {
         ...su,
+        shared_resources: su.shared_resources || [],
         learning_objectives: su.learning_objectives.map((lo: any) => ({
           ...lo,
           covered_lesson_dates: lo.covered_lesson_dates || [],
@@ -45,8 +46,8 @@ export function normalizeTeachingUnit(raw: any): TeachingUnit {
     }));
 
     const { objectives: _, ...suRest } = su;
-    return { ...suRest, learning_objectives: newLOs };
+    return { ...suRest, shared_resources: su.shared_resources || [], learning_objectives: newLOs };
   });
 
-  return { ...rest, sub_units: normalizedSubUnits };
+  return { ...rest, shared_resources: rest.shared_resources || [], sub_units: normalizedSubUnits };
 }

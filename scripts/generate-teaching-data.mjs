@@ -310,6 +310,7 @@ function buildTeachingUnit(parsedUnit, contents, yearTag, unitIndex, yearGroup) 
         prep_resources: [],
       })),
       vocabulary: Array.isArray(c.vocabulary) ? c.vocabulary : [],
+      shared_resources: [],
       classroom_exercises: c.classroom_exercises || '',
       homework_content: c.homework_content || '',
     };
@@ -329,6 +330,7 @@ function buildTeachingUnit(parsedUnit, contents, yearTag, unitIndex, yearGroup) 
     lessons: [],
     sub_units: subUnits,
     typical_examples: [],
+    shared_resources: [],
     core_vocabulary: [],
     prep_material_template: '',
     ai_prompt_template: '',

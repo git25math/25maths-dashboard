@@ -218,7 +218,7 @@ export interface TypicalExample {
 export interface PrepResource {
   title: string;
   url: string;
-  kind?: 'worksheet' | 'practice' | 'kahoot' | 'homework' | 'vocab' | 'link' | 'other';
+  kind?: 'worksheet' | 'practice' | 'kahoot' | 'homework' | 'vocab' | 'slides' | 'video' | 'textbook' | 'assessment' | 'answers' | 'simulation' | 'past_paper' | 'manipulative' | 'link' | 'other';
   note?: string;
 }
 
@@ -255,6 +255,7 @@ export interface SubUnit {
   kahoot_url?: string;
   homework_url?: string;
   vocab_practice_url?: string;
+  shared_resources?: PrepResource[];
   homework_content?: string;
   reflection?: TeachingReflection;
   ai_summary?: string;
@@ -271,6 +272,7 @@ export interface TeachingUnit {
   online_practice_url?: string;
   kahoot_url?: string;
   vocab_practice_url?: string;
+  shared_resources?: PrepResource[];
   prep_material_template: string;
   ai_prompt_template: string;
   teaching_summary?: string;

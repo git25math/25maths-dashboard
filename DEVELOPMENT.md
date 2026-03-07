@@ -978,10 +978,19 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - 输出文件：
     - `scripts/output/prep-completeness-report.json`
     - `scripts/output/prep-completeness-report.md`
+- **资源入口扩展**:
+  - `PrepResource.kind` 扩展为更完整的资料类型：`slides`、`video`、`textbook`、`assessment`、`answers`、`simulation`、`past_paper`、`manipulative`
+  - 新增 `prepResourceCatalog.ts` 统一资源类型、模板和去重口径
+  - 新增 `ResourceBankEditor`，统一支持 `Sub-Unit` / `Unit` 层级的资料库编辑
+  - `SubUnitForm` 在保留原有 quick links 的同时，新增 `Shared Resource Bank`
+  - `TeachingUnitForm` 新增 `Unit Resource Hub`，补上此前缺失的 unit-level 资料入口
+  - `objectivePrep.ts` / `TeachingView.tsx` 改为合并旧 quick links、自定义 resource bank、自动派生 note resources，详情页直接展示完整资源库而非固定 4-5 个链接
+  - 生成与规范化脚本同步兼容 `shared_resources`
 - **稳健性补充**:
   - `DashboardView` 修复无 LO 单元时的除零风险，避免出现 `NaN%`
   - `objectivePrep.ts` 对 shared field 的非字符串内容做安全转换，避免 report 脚本遍历时崩溃
 - **回归结果**:
+  - `npm run prep:report` ✅
   - `npm run lint` ✅
   - `npm run build` ✅
 

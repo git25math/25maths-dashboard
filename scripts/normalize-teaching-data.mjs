@@ -57,6 +57,7 @@ function normalizeSubUnit(subUnit) {
     periods: typeof subUnit.periods === 'number' ? subUnit.periods : 1,
     learning_objectives: learningObjectives,
     vocabulary: Array.isArray(subUnit.vocabulary) ? subUnit.vocabulary : [],
+    shared_resources: Array.isArray(subUnit.shared_resources) ? subUnit.shared_resources : [],
     classroom_exercises: subUnit.classroom_exercises || '',
     homework_content: subUnit.homework_content || '',
   };
@@ -73,6 +74,7 @@ function normalizeUnit(unit) {
     lessons: Array.isArray(unit.lessons) ? unit.lessons : [],
     sub_units: normalizedSubUnits,
     typical_examples: Array.isArray(unit.typical_examples) ? unit.typical_examples : [],
+    shared_resources: Array.isArray(unit.shared_resources) ? unit.shared_resources : [],
     core_vocabulary: Array.isArray(unit.core_vocabulary) ? unit.core_vocabulary : [],
     prep_material_template: unit.prep_material_template || '',
     ai_prompt_template: unit.ai_prompt_template || '',

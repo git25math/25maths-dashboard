@@ -1,8 +1,5 @@
-import { LearningObjective, PrepResource, SubUnit, VocabularyItem } from '../types';
-
-function hasPrepResourceContent(resource: PrepResource) {
-  return !!(resource.title.trim() || resource.url.trim() || (resource.note || '').trim());
-}
+import { LearningObjective, PrepResource, SubUnit, TeachingUnit, VocabularyItem } from '../types';
+import { dedupePrepResources, isPrepResourceFilled } from './prepResourceCatalog';
 
 function asTrimmedString(value: unknown) {
   if (typeof value === 'string') return value.trim();
@@ -10,40 +7,48 @@ function asTrimmedString(value: unknown) {
   return String(value).trim();
 }
 
-export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
-  const linkedResources: PrepResource[] = [
+function buildLegacyLinkedResources(source: {
+  worksheet_url?: string;
+  online_practice_url?: string;
+  kahoot_url?: string;
+  homework_url?: string;
+  vocab_practice_url?: string;
+}): PrepResource[] {
+  return dedupePrepResources([
     {
       title: 'Worksheet',
-      url: subUnit.worksheet_url || '',
-      kind: 'worksheet' as const,
+      url: source.worksheet_url || '',
+      kind: 'worksheet',
       note: 'Use as the shared fluency or consolidation worksheet after teacher modelling.',
     },
     {
       title: 'Online Practice',
-      url: subUnit.online_practice_url || '',
-      kind: 'practice' as const,
+      url: source.online_practice_url || '',
+      kind: 'practice',
       note: 'Use for paced independent practice once the worked example is secure.',
     },
     {
       title: 'Kahoot',
-      url: subUnit.kahoot_url || '',
-      kind: 'kahoot' as const,
+      url: source.kahoot_url || '',
+      kind: 'kahoot',
       note: 'Use as a retrieval or hinge-check activity at the start or end of the lesson.',
     },
     {
       title: 'Homework',
-      url: subUnit.homework_url || '',
-      kind: 'homework' as const,
+      url: source.homework_url || '',
+      kind: 'homework',
       note: 'Set as independent follow-up practice after the objective has been introduced.',
     },
     {
       title: 'Vocabulary Practice',
-      url: subUnit.vocab_practice_url || '',
-      kind: 'vocab' as const,
+      url: source.vocab_practice_url || '',
+      kind: 'vocab',
       note: 'Use to rehearse the bilingual vocabulary before or after the main explanation.',
     },
-  ].filter(resource => resource.url.trim());
+  ]);
+}
 
+function buildDerivedSubUnitResources(subUnit: SubUnit): PrepResource[] {
   const noteResources: PrepResource[] = [];
   const vocabularyTerms = (subUnit.vocabulary || [])
     .map(item => item.english.trim())
@@ -86,7 +91,22 @@ export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
     });
   }
 
-  return [...linkedResources, ...noteResources].filter(hasPrepResourceContent);
+  return dedupePrepResources(noteResources);
+}
+
+export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
+  return dedupePrepResources([
+    ...(subUnit.shared_resources || []).filter(isPrepResourceFilled),
+    ...buildLegacyLinkedResources(subUnit),
+    ...buildDerivedSubUnitResources(subUnit),
+  ]);
+}
+
+export function getTeachingUnitResources(unit: TeachingUnit): PrepResource[] {
+  return dedupePrepResources([
+    ...(unit.shared_resources || []).filter(isPrepResourceFilled),
+    ...buildLegacyLinkedResources(unit),
+  ]);
 }
 
 export function getObjectiveVocabulary(objective: LearningObjective, subUnit: SubUnit): VocabularyItem[] {
@@ -97,7 +117,7 @@ export function getObjectiveVocabulary(objective: LearningObjective, subUnit: Su
 
 export function getObjectiveResources(objective: LearningObjective, subUnit: SubUnit): PrepResource[] {
   return (objective.prep_resources && objective.prep_resources.length > 0)
-    ? objective.prep_resources.filter(hasPrepResourceContent)
+    ? dedupePrepResources(objective.prep_resources.filter(isPrepResourceFilled))
     : getSharedPrepResources(subUnit);
 }
 
