@@ -53,6 +53,13 @@ export function useAppData() {
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', MOCK_KAHOOT_ITEMS);
 
+  // One-time migration: replace stale mock kahoot data with full 202-item seed
+  useEffect(() => {
+    if (kahootItems.length < MOCK_KAHOOT_ITEMS.length) {
+      setKahootItems(MOCK_KAHOOT_ITEMS);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // --- Normalize localStorage data ---
   useEffect(() => {
     setTeachingUnits(prev => normalizeAndSortUnits(prev));
