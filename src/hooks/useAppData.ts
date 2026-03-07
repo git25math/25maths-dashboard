@@ -20,6 +20,7 @@ import { projectService } from '../services/projectService';
 import { randomAlphaId } from '../lib/id';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { computeHousePointDeltas } from './appData/housePointUtils';
 import { useProductivityActions } from './appData/useProductivityActions';
 import { useLocalStorage } from './useLocalStorage';
@@ -27,6 +28,10 @@ import { useToast } from './useToast';
 
 export function useAppData() {
   const { toasts, toast } = useToast();
+
+  const normalizeAndSortUnits = useCallback((units: TeachingUnit[]) => {
+    return sortTeachingUnits(units.map(normalizeTeachingUnit));
+  }, []);
 
   // --- State ---
   const [timetable, setTimetable] = useLocalStorage<TimetableEntry[]>('dashboard-timetable', MOCK_TIMETABLE);
@@ -47,7 +52,7 @@ export function useAppData() {
 
   // --- Normalize localStorage data ---
   useEffect(() => {
-    setTeachingUnits(prev => prev.map(normalizeTeachingUnit));
+    setTeachingUnits(prev => normalizeAndSortUnits(prev));
     // Migrate is_prepared → prep_status
     setTimetable(prev => prev.map(entry => {
       if (entry.prep_status) return entry;
@@ -56,7 +61,7 @@ export function useAppData() {
       }
       return entry;
     }));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [normalizeAndSortUnits]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Data Fetching ---
 
@@ -86,7 +91,7 @@ export function useAppData() {
       const normalizeAndSetUnits: React.Dispatch<React.SetStateAction<TeachingUnit[]>> = (val) => {
         setTeachingUnits(prev => {
           const next = typeof val === 'function' ? val(prev) : val;
-          return next.map(normalizeTeachingUnit);
+          return normalizeAndSortUnits(next);
         });
       };
 
@@ -554,18 +559,18 @@ export function useAppData() {
     try {
       if ('id' in unitData) {
         const updated = await teachingService.updateUnit(unitData.id, unitData);
-        setTeachingUnits(prev => prev.map(u => u.id === updated.id ? updated : u));
+        setTeachingUnits(prev => normalizeAndSortUnits(prev.map(u => u.id === updated.id ? updated : u)));
         toast.success('Unit updated');
       } else {
         const created = await teachingService.createUnit(unitData);
-        setTeachingUnits(prev => [...prev, created]);
+        setTeachingUnits(prev => normalizeAndSortUnits([...prev, created]));
         toast.success('Unit added');
       }
     } catch (error) {
       toast.error('Failed to save teaching unit');
       throw error;
     }
-  }, [setTeachingUnits, toast]);
+  }, [normalizeAndSortUnits, setTeachingUnits, toast]);
 
   const deleteTeachingUnit = useCallback(async (id: string) => {
     try {
@@ -971,7 +976,7 @@ export function useAppData() {
   const bulkImport = useCallback((imported: Record<string, unknown>) => {
     const keyMap: Record<string, (val: unknown) => void> = {
       students: (v) => setStudents(v as Student[]),
-      teachingUnits: (v) => setTeachingUnits(v as TeachingUnit[]),
+      teachingUnits: (v) => setTeachingUnits(normalizeAndSortUnits(v as TeachingUnit[])),
       classes: (v) => setClasses(v as ClassProfile[]),
       timetable: (v) => setTimetable(v as TimetableEntry[]),
       ideas: (v) => setIdeas(v as Idea[]),
@@ -996,7 +1001,7 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, toast]);
+  }, [normalizeAndSortUnits, setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, toast]);
 
   return {
     // State

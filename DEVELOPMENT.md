@@ -763,6 +763,11 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - **回归结果**:
   - `npm run lint` ✅
   - `npm run build` ✅
+- **Follow-up — Unit Order Consistency**:
+  - 新增 `teachingUnitOrder` helper，以 `SYLLABUS` 为主排序依据、unit id 数字为兜底
+  - `TeachingView`、`ClassForm`、`TimetableEntryForm` 统一按教学计划顺序显示单元
+  - `useAppData` / `teachingService` 在加载、创建、更新、导入后统一做 `normalize + sort`
+  - 结果：单元顺序不再依赖 Supabase 返回顺序或本地数组写入顺序
   - 现有功能入口、页面行为、对外 hook API 保持兼容
 
 ### Hotfix — Dashboard Class Progress 年级固定显示 (2026-03-04)

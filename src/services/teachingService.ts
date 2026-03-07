@@ -1,6 +1,7 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { TeachingUnit } from '../types';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 
 const genId = () => Math.random().toString(36).substr(2, 9);
 
@@ -9,22 +10,22 @@ export const teachingService = {
     if (!isSupabaseConfigured) return [];
     const { data, error } = await supabase!.from('teaching_units').select('*');
     if (error) throw error;
-    return (data || []).map(normalizeTeachingUnit);
+    return sortTeachingUnits((data || []).map(normalizeTeachingUnit));
   },
 
   async createUnit(unit: Omit<TeachingUnit, 'id'>): Promise<TeachingUnit> {
     const newUnit = { ...unit, id: genId() };
-    if (!isSupabaseConfigured) return newUnit;
+    if (!isSupabaseConfigured) return normalizeTeachingUnit(newUnit);
     const { data, error } = await supabase!.from('teaching_units').insert([newUnit]).select().single();
     if (error) throw error;
-    return data;
+    return normalizeTeachingUnit(data);
   },
 
   async updateUnit(id: string, updates: Partial<TeachingUnit>): Promise<TeachingUnit> {
-    if (!isSupabaseConfigured) return { ...updates, id } as TeachingUnit;
+    if (!isSupabaseConfigured) return normalizeTeachingUnit({ ...updates, id });
     const { data, error } = await supabase!.from('teaching_units').upsert({ ...updates, id }).select().single();
     if (error) throw error;
-    return data;
+    return normalizeTeachingUnit(data);
   },
 
   async deleteUnit(id: string): Promise<void> {
