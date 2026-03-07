@@ -12,6 +12,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.1 Types of number is a Core-track practice set. This 15-question exam-style Kahoot targets core fluency and common mistakes, and is suitable for lesson starters, mixed-ability teaching, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/09800136",
     "page_url": "https://payhip.com/b/vknup",
+    "creator_url": "https://create.kahoot.it/creator/5a08312e-b4c4-4ecd-bbf4-52c587c0f6b3",
     "website_link_id": "cie0580:number-c1:c1-01-types-of-number",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-01/C1.1-Listing.md",
     "tags": [
@@ -41,6 +42,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.2 Sets is a Core-track practice set. This exam-style Kahoot targets core fluency and common mistakes, and is suitable for lesson starters, mixed-ability teaching, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/001645722",
     "page_url": "https://payhip.com/b/fgJ9w",
+    "creator_url": "https://create.kahoot.it/creator/b49b9bd3-5aed-411b-9963-44a6f1e3ecb0",
     "website_link_id": "cie0580:number-c1:c1-02-sets",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-02/C1.2-Listing.md",
     "tags": [
@@ -71,6 +73,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "These C1.3 Powers and Roots questions aim to test understanding of powers, square roots, cube roots, and how to apply these concepts in mathematical problems. This quiz is designed for building confidence, ensuring students master essential mathematical skills. #CIE0580 #IGCSEMaths #KahootMaths #PowersAndRoots #CoreTrack #MathConfidence #MathQuiz #LessonStarter #MixedAbilityTeaching #MathConcepts #SquareRoots #CubeRoots",
     "challenge_url": "https://kahoot.it/challenge/002319794",
     "page_url": "https://payhip.com/b/vcAzs",
+    "creator_url": "https://create.kahoot.it/creator/b9971aa4-9715-443c-b174-70a7c61bcbd5",
     "website_link_id": "cie0580:number-c1:c1-03-powers-and-roots",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-03/C1.3-Listing.md",
     "tags": [],
@@ -93,6 +96,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "Here is a set of C1-04 Fractions, Decimals, and Percentages Kahoot-style questions, designed for students at an extended level. This quiz focuses on fluency, accurate conversions between fractions, decimals, and percentages, and helps address common mistakes. #CIE0580 #IGCSEMaths #KahootMaths #Fractions #Decimals #Percentages #CoreTrack #MathConfidence #MathQuiz #LessonStarter #MixedAbilityTeaching #MathConcepts #Conversions",
     "challenge_url": "https://kahoot.it/challenge/001663605",
     "page_url": "https://payhip.com/b/rPFUm",
+    "creator_url": "https://create.kahoot.it/creator/8be0fba3-cfd0-4f22-8773-c2f7878999b2",
     "website_link_id": "cie0580:number-c1:c1-04-fractions-decimals-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-04/C1.4-Listing.md",
     "tags": [],
@@ -115,6 +119,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.5 Ordering is a Core-track practice set. This 15-question exam-style Kahoot focuses on ordering integers, decimals, fractions, and negative numbers, including placing values on a number line and comparing mixed forms. It targets core fluency, tricky comparisons, and common mistakes, making it ideal for lesson starters, mixed-ability teaching, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/009869350",
     "page_url": "https://payhip.com/b/O3WfI",
+    "creator_url": "https://create.kahoot.it/creator/55e3a0b5-88d6-45a6-8195-9c9e1ba52815",
     "website_link_id": "cie0580:number-c1:c1-05-ordering",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-05/C1.5-Listing.md",
     "tags": [
@@ -150,6 +155,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.6 The four operations is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in addition, subtraction, multiplication, and division (including with integers and decimals), with a strong focus on accuracy, order of operations, and common exam-style traps. Ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/004598004",
     "page_url": "https://payhip.com/b/rURBl",
+    "creator_url": "https://create.kahoot.it/creator/73b6cc34-5bbb-4ca1-abe4-90302576a06d",
     "website_link_id": "cie0580:number-c1:c1-06-four-operations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-06/C1.6-Listing.md",
     "tags": [
@@ -186,6 +192,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.7 Indices I is a Core-track practice set. This 15-question exam-style Kahoot builds fluency with basic index laws, including multiplying/dividing powers with the same base, raising a power to a power, and working confidently with zero and negative indices (at Core level). It targets accuracy, tidy algebraic notation, and common exam traps—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/005291713",
     "page_url": "https://payhip.com/b/Hq7Jc",
+    "creator_url": "https://create.kahoot.it/creator/13a1e81a-5d69-4021-936c-716e1e5247da",
     "website_link_id": "cie0580:number-c1:c1-07-indices-i",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-07/C1.7-Listing.md",
     "tags": [
@@ -221,6 +228,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.8 Standard Form is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in writing numbers in standard form (scientific notation), converting between ordinary form and standard form, and performing simple calculations in standard form at Core level. It targets accuracy with powers of 10, calculator-ready thinking, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/0094408887",
     "page_url": "https://payhip.com/b/xHNkh",
+    "creator_url": "https://create.kahoot.it/creator/67c484fa-e09a-4593-b7af-5b6873295e9a",
     "website_link_id": "cie0580:number-c1:c1-08-standard-form",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-08/C1.8-Listing.md",
     "tags": [
@@ -256,6 +264,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.9 Estimation and Approximation is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in rounding (to decimal places and significant figures), estimating calculations, choosing sensible approximations, and checking reasonableness of answers. It targets accuracy, efficient mental strategies, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/009841916",
     "page_url": "https://payhip.com/b/GHgD3",
+    "creator_url": "https://create.kahoot.it/creator/efa31ca1-295d-40b2-b327-c544a5e6ae1d",
     "website_link_id": "cie0580:number-c1:c1-09-estimation-and-approximation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-09/C1.9-Listing.md",
     "tags": [
@@ -292,6 +301,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.10 Limits of Accuracy is a Core-track practice set. This 15-question exam-style Kahoot develops confidence with rounding bounds (upper/lower bounds), interpreting degrees of accuracy (e.g., nearest whole number, 1 d.p., 2 s.f.), and applying bounds to simple measures such as length, mass, and time. It targets precise notation, correct inequality statements, and common exam pitfalls—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/007732782",
     "page_url": "https://payhip.com/b/qIndv",
+    "creator_url": "https://create.kahoot.it/creator/a5a3f1d4-c900-40fc-9764-9d62fe274ec6",
     "website_link_id": "cie0580:number-c1:c1-10-limits-of-accuracy",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-10/C1.10-Listing.md",
     "tags": [
@@ -328,6 +338,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.11 Ratio and Proportion is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in simplifying ratios, sharing amounts in a given ratio, using ratio tables, forming and using proportions, and solving simple real-life problems (recipes, maps, scale, best buys). It targets clear method, accuracy with units, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/007462881",
     "page_url": "https://payhip.com/b/2DnTA",
+    "creator_url": "https://create.kahoot.it/creator/0101f1d2-4e1d-4e5f-9773-c44fbd108266",
     "website_link_id": "cie0580:number-c1:c1-11-ratio-and-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-11/C1.11-Listing.md",
     "tags": [
@@ -364,6 +375,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.12 Rates is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in working with rates such as speed, unit rate, cost per item, and simple conversions (e.g., minutes to hours, cm to m) in real-life contexts. It targets clear method, correct units, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/008788201",
     "page_url": "https://payhip.com/b/c7hZG",
+    "creator_url": "https://create.kahoot.it/creator/25250381-2e69-490d-9e80-18ab332a0d26",
     "website_link_id": "cie0580:number-c1:c1-12-rates",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-12/C1.12-Listing.md",
     "tags": [
@@ -400,6 +412,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.13 Percentages is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in percentage increase/decrease, finding a percentage of an amount, reverse percentages (original value), and interpreting percentage change in real-life contexts (discounts, profit/loss, simple interest style). It targets accurate method, smart calculator use, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/0045499538",
     "page_url": "https://payhip.com/b/iQz60",
+    "creator_url": "https://create.kahoot.it/creator/ce16cc65-9a49-4f1f-aae3-432fe84068f7",
     "website_link_id": "cie0580:number-c1:c1-13-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-13/C1.13-Listing.md",
     "tags": [
@@ -436,6 +449,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.14 Using a Calculator is a Core-track practice set. This 15-question exam-style Kahoot builds confidence with efficient calculator use, including correct key sequences, rounding to decimal places/significant figures, using brackets, squares/square roots, and interpreting calculator display in exam-style questions. It targets accuracy, avoiding input errors, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/003149596",
     "page_url": "https://payhip.com/b/BJHGu",
+    "creator_url": "https://create.kahoot.it/creator/df602856-59fe-4e4b-88ff-159bbacbe01f",
     "website_link_id": "cie0580:number-c1:c1-14-using-a-calculator",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-14/C1.14-Listing.md",
     "tags": [
@@ -472,6 +486,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.15 Time is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in reading and interpreting time (12/24-hour clock), converting between units of time, calculating time intervals, and solving simple real-life time problems (timetables, journeys, start/finish times). It targets accurate method, careful unit handling, and common exam mistakes - ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/009272012",
     "page_url": "https://payhip.com/b/iOtHy",
+    "creator_url": "https://create.kahoot.it/creator/5bd60382-6ac2-453f-bcf0-5abd80cb05cb",
     "website_link_id": "cie0580:number-c1:c1-15-time",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-15/C1.15-Listing.md",
     "tags": [
@@ -508,6 +523,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C1.16 Money is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in money calculations, including working with decimals in currency, calculating totals and change, comparing costs, and solving real-life problems such as bills, shopping, and simple budgeting. It targets accuracy, sensible rounding, and common exam mistakes—ideal for lesson starters, mixed-ability teaching, revision warm-ups, and confidence building.",
     "challenge_url": "https://kahoot.it/challenge/008996820",
     "page_url": "https://payhip.com/b/Rvpbi",
+    "creator_url": "https://create.kahoot.it/creator/62610ec0-a313-42f1-a335-cea66c5578fc",
     "website_link_id": "cie0580:number-c1:c1-16-money",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c1-16/C1.16-Listing.md",
     "tags": [
@@ -544,6 +560,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.1 Introduction to Algebra is a Core-track practice set. This 15-question exam-style Kahoot focuses on basic algebraic concepts, such as simplifying expressions, understanding variables, and solving simple equations. It helps build a strong foundation for more complex algebra topics. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001392493",
     "page_url": "https://payhip.com/b/J3iK4",
+    "creator_url": "https://create.kahoot.it/creator/1e302bff-f181-4e11-8871-458eb50c40de",
     "website_link_id": "cie0580:algebra-c2:c2-01-introduction-to-algebra",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-01/C2.1-Listing.md",
     "tags": [
@@ -579,6 +596,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.2 Algebraic Manipulation is a Core-track practice set. This 15-question exam-style Kahoot focuses on manipulating algebraic expressions, including expanding brackets, factoring, simplifying expressions, and rearranging formulas. It targets building fluency in algebraic techniques, reducing errors, and strengthening algebraic problem-solving skills. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003756015",
     "page_url": "https://payhip.com/b/oyXVL",
+    "creator_url": "https://create.kahoot.it/creator/97ac5eeb-bb42-4368-88bb-fcfe4613475e",
     "website_link_id": "cie0580:algebra-c2:c2-02-algebraic-manipulation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-02/C2.2-Listing.md",
     "tags": [
@@ -616,6 +634,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.4 Indices II is a Core-track practice set. This 15-question exam-style Kahoot builds fluency with advanced index laws, including fractional indices, negative indices, and simplifying expressions with powers. It targets deeper understanding of index rules, helping students avoid common mistakes in exam contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00659781",
     "page_url": "https://payhip.com/b/6DEsU",
+    "creator_url": "https://create.kahoot.it/creator/0e4eeda7-8d18-430f-8783-d203ec6d7c73",
     "website_link_id": "cie0580:algebra-c2:c2-04-indices-ii",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-04/C2.4-Listing.md",
     "tags": [
@@ -652,6 +671,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.5 Equations is a Core-track practice set. This 15-question exam-style Kahoot focuses on solving linear equations, rearranging formulas, and understanding the properties of equations. It targets building fluency in solving for unknowns and applying algebraic manipulation in real-world contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0056744036",
     "page_url": "https://payhip.com/b/R6qT5",
+    "creator_url": "https://create.kahoot.it/creator/bc8aed71-aeb9-4a2b-a7c9-d26c7186dd42",
     "website_link_id": "cie0580:algebra-c2:c2-05-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-05/C2.5-Listing.md",
     "tags": [
@@ -687,6 +707,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.6 Inequalities is a Core-track practice set. This 15-question exam-style Kahoot focuses on solving and graphing linear inequalities, interpreting inequality symbols, and solving real-life problems that involve inequalities. It targets building fluency in handling inequalities, graphing solutions, and understanding how inequalities apply in various contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006817429",
     "page_url": "https://payhip.com/b/obXDj",
+    "creator_url": "https://create.kahoot.it/creator/cb97b3c6-ef0f-460c-8764-9289a00ac12f",
     "website_link_id": "cie0580:algebra-c2:c2-06-inequalities",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-06/C2.6-Listing.md",
     "tags": [
@@ -723,6 +744,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.7 Sequences is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding arithmetic and geometric sequences, finding nth terms, and solving real-life problems that involve sequences. It targets fluency in sequence-related concepts, the ability to derive patterns, and avoid common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00647259",
     "page_url": "https://payhip.com/b/xblgS",
+    "creator_url": "https://create.kahoot.it/creator/b4d7c3cf-4a5a-4236-a49c-bbe35e3265e4",
     "website_link_id": "cie0580:algebra-c2:c2-07-sequences",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-07/C2.7-Listing.md",
     "tags": [
@@ -759,6 +781,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.9 Graphs in Practical Situations is a Core-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing graphs in real-life contexts, such as distance-time graphs, cost graphs, and others. It targets fluency in reading graphs, understanding their practical applications, and solving problems based on graphical data. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00411912",
     "page_url": "https://payhip.com/b/zhucq",
+    "creator_url": "https://create.kahoot.it/creator/a3490bbe-fcfb-4bf7-b972-42f7f78360d6",
     "website_link_id": "cie0580:algebra-c2:c2-09-graphs-in-practical-situations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-09/C2.9-Listing.md",
     "tags": [
@@ -795,6 +818,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.10 Graphs of Functions is a Core-track practice set. This 15-question exam-style Kahoot focuses on plotting and interpreting graphs of functions, including linear, quadratic, and simple non-linear functions. It targets building fluency in understanding graph shapes, identifying key features such as intercepts, and solving problems involving graphical data. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0019160051",
     "page_url": "https://payhip.com/b/IQ9nf",
+    "creator_url": "https://create.kahoot.it/creator/480b00cb-1ada-49a4-9296-3562144edbb1",
     "website_link_id": "cie0580:algebra-c2:c2-10-graphs-of-functions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-10/C2.10-Listing.md",
     "tags": [
@@ -831,6 +855,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C2.11 Sketching Curves is a Core-track practice set. This 15-question exam-style Kahoot focuses on sketching various types of curves, including quadratic, cubic, and simple trigonometric curves, identifying key features such as intercepts, turning points, and asymptotes. It targets building fluency in curve sketching and understanding the relationship between equations and their graphical representations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0066400214",
     "page_url": "https://payhip.com/b/WilUf",
+    "creator_url": "https://create.kahoot.it/creator/97475fa4-9692-4f0b-9467-8843a13c047e",
     "website_link_id": "cie0580:algebra-c2:c2-11-sketching-curves",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c2-11/C2.11-Listing.md",
     "tags": [
@@ -867,6 +892,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C3.1 Coordinates is a Core-track practice set. This 15-question exam-style Kahoot builds fluency in plotting and interpreting points on the coordinate plane, understanding the distance formula, midpoint formula, and solving real-life problems involving coordinates. It targets accuracy in graphing, coordinate geometry concepts, and common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009120552",
     "page_url": "https://payhip.com/b/DGFaq",
+    "creator_url": "https://create.kahoot.it/creator/9dbe6a6d-f899-4142-8dcc-7fef4f3dd415",
     "website_link_id": "cie0580:coordinate-c3:c3-01-coordinates",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c3-01/C3.1-Listing.md",
     "tags": [
@@ -903,6 +929,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C3.2 Drawing Linear Graphs is a Core-track practice set. This 15-question exam-style Kahoot focuses on plotting and interpreting linear graphs, understanding the slope-intercept form, and solving real-life problems that require drawing or interpreting straight-line graphs. It targets fluency in graphing techniques, understanding gradients and intercepts, and avoiding common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004185272",
     "page_url": "https://payhip.com/b/rC9AT",
+    "creator_url": "https://create.kahoot.it/creator/4883e31b-608b-4773-ade2-dcc3795b3ede",
     "website_link_id": "cie0580:coordinate-c3:c3-02-drawing-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c3-02/C3.2-Listing.md",
     "tags": [
@@ -938,6 +965,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C3.3 Gradient of Linear Graphs is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating the gradient (slope) of linear graphs, interpreting the gradient from equations, and applying it in real-world contexts (such as rates of change). It targets fluency in gradient calculations, interpreting graphs, and avoiding common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003233542",
     "page_url": "https://payhip.com/b/r473G",
+    "creator_url": "https://create.kahoot.it/creator/b70a0834-dd5c-48b4-a6af-d7f464045908",
     "website_link_id": "cie0580:coordinate-c3:c3-03-gradient-of-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c3-03/C3.3-Listing.md",
     "tags": [
@@ -974,6 +1002,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C3.5 Equations of Linear Graphs is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and writing equations of linear graphs, including using the slope-intercept form and point-slope form, interpreting the relationship between the equation and the graph, and solving real-life problems that involve linear equations. It targets fluency in translating between equations and graphs, and avoiding common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001304784",
     "page_url": "https://payhip.com/b/JdSkO",
+    "creator_url": "https://create.kahoot.it/creator/71d1d59a-dcb3-4241-8f78-1adb408fba55",
     "website_link_id": "cie0580:coordinate-c3:c3-05-equations-of-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c3-05/C3.5-Listing.md",
     "tags": [
@@ -1010,6 +1039,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C3.6 Parallel Lines is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of parallel lines, including identifying parallel lines in geometric contexts, using the concept of gradients for parallelism, and solving related real-life problems. It targets fluency in recognizing and working with parallel lines and their equations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0068397684",
     "page_url": "https://payhip.com/b/zrOUv",
+    "creator_url": "https://create.kahoot.it/creator/3b302eff-0ebf-4658-afb2-dd7252d10869",
     "website_link_id": "cie0580:coordinate-c3:c3-06-parallel-lines",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c3-06/C3.6-Listing.md",
     "tags": [
@@ -1046,6 +1076,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.1 Geometrical Terms is a Core-track practice set. This 15-question exam-style Kahoot focuses on fundamental geometrical terms and concepts, including points, lines, angles, planes, and basic shapes. It helps build a strong understanding of key terms used in geometry and prepares students for more complex geometric reasoning. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004255590",
     "page_url": "https://payhip.com/b/w1Zjk",
+    "creator_url": "https://create.kahoot.it/creator/6483945d-bc86-4bf5-bdb7-0096ec973f1e",
     "website_link_id": "cie0580:geometry-c4:c4-01-geometrical-terms",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-01/C4.1-Listing.md",
     "tags": [
@@ -1080,6 +1111,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.2 Geometrical Constructions is a Core-track practice set. This 15-question exam-style Kahoot focuses on constructing geometric shapes and figures using a compass and ruler, including bisecting angles, constructing perpendicular lines, and creating specific polygons. It targets developing precise construction techniques and understanding geometric properties. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/005421109",
     "page_url": "https://payhip.com/b/Mw3bE",
+    "creator_url": "https://create.kahoot.it/creator/4619ade9-1366-49f0-851f-4089bd4fbb96",
     "website_link_id": "cie0580:geometry-c4:c4-02-geometrical-constructions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-02/C4.2-Listing.md",
     "tags": [
@@ -1115,6 +1147,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.3 Scale Drawings is a Core-track practice set. This 15-question exam-style Kahoot focuses on interpreting and creating scale drawings, including understanding scale factors, calculating actual measurements from scaled drawings, and drawing objects to scale. It targets fluency in applying scale ratios, converting between real and scaled measurements, and avoiding common exam mistakes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002613986",
     "page_url": "https://payhip.com/b/SpE83",
+    "creator_url": "https://create.kahoot.it/creator/caaeb2bc-942a-4273-a979-c840d813c1e7",
     "website_link_id": "cie0580:geometry-c4:c4-03-scale-drawings",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-03/C4.3-Listing.md",
     "tags": [
@@ -1150,6 +1183,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.4 Similarity is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the concepts of similarity in geometry, including similar triangles, scale factors, and proportional reasoning. It targets fluency in solving problems related to similarity, using proportional relationships, and understanding corresponding sides and angles. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007401932",
     "page_url": "https://payhip.com/b/gmjbq",
+    "creator_url": "https://create.kahoot.it/creator/ce7513ca-429e-4aa4-91df-5bc097776f60",
     "website_link_id": "cie0580:geometry-c4:c4-04-similarity",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-04/C4.4-Listing.md",
     "tags": [
@@ -1185,6 +1219,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.5 Symmetry is a Core-track practice set. This 15-question exam-style Kahoot focuses on identifying and applying various types of symmetry, including reflection symmetry, rotational symmetry, and symmetry in geometric figures. It helps develop fluency in recognizing symmetrical patterns, constructing symmetric shapes, and solving symmetry-related problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009228466",
     "page_url": "https://payhip.com/b/ntyMB",
+    "creator_url": "https://create.kahoot.it/creator/1ab132d1-ee4b-4cd2-953f-368e1eab3386",
     "website_link_id": "cie0580:geometry-c4:c4-05-symmetry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-05/C4.5-Listing.md",
     "tags": [
@@ -1220,6 +1255,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.6 Angles is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating angles, including interior and exterior angles of polygons, angles on a straight line, angles at a point, and angles formed by parallel lines. It targets fluency in applying angle properties and solving geometric problems related to angles. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007142301",
     "page_url": "https://payhip.com/b/do27l",
+    "creator_url": "https://create.kahoot.it/creator/0bb294e9-adfa-4518-a89e-e99cc7c00c5f",
     "website_link_id": "cie0580:geometry-c4:c4-06-angles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-06/C4.6-Listing.md",
     "tags": [
@@ -1256,6 +1292,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C4.7 Circle Theorems is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying key circle theorems, including angles at the center, inscribed angles, cyclic quadrilaterals, and the relationship between tangents and chords. It helps build fluency in identifying and proving circle properties. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/005654099",
     "page_url": "https://payhip.com/b/Bqjs6",
+    "creator_url": "https://create.kahoot.it/creator/dc8ecdc7-e657-4259-9d69-f0346f840a8c",
     "website_link_id": "cie0580:geometry-c4:c4-07-circle-theorems",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c4-07/C4.7-Listing.md",
     "tags": [
@@ -1292,6 +1329,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C5.1 Units of Measure is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and converting between different units of measurement, including length, mass, volume, and time. It also covers converting within metric and imperial systems, and applying measurement conversions to solve real-world problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0062314848",
     "page_url": "https://payhip.com/b/9f5zw",
+    "creator_url": "https://create.kahoot.it/creator/e13532bd-ea7a-41d1-9273-2a62ed63c8b3",
     "website_link_id": "cie0580:mensuration-c5:c5-01-units-of-measure",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c5-01/C5.1-Listing.md",
     "tags": [
@@ -1327,6 +1365,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C5.2 Area and Perimeter is a Core-track practice set. This 15-question exam-style Kahoot focuses on calculating the area and perimeter of various shapes, including rectangles, triangles, circles, and composite shapes. It also covers real-life applications and solving word problems related to area and perimeter. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004641493",
     "page_url": "https://payhip.com/b/VAQ18",
+    "creator_url": "https://create.kahoot.it/creator/760a2a89-7b9c-4fe6-9c52-badc7abcbb68",
     "website_link_id": "cie0580:mensuration-c5:c5-02-area-and-perimeter",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c5-02/C5.2-Listing.md",
     "tags": [
@@ -1361,6 +1400,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C5.3 Circles, Arcs, and Sectors is a Core-track practice set. This 15-question exam-style Kahoot focuses on calculating the area and circumference of circles, as well as the area of sectors and the length of arcs. It covers key concepts related to circular geometry and helps students apply these concepts in real-life contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001754789",
     "page_url": "https://payhip.com/b/EGPIX",
+    "creator_url": "https://create.kahoot.it/creator/a9bacd6c-81b9-4b82-8202-34241fd7b3eb",
     "website_link_id": "cie0580:mensuration-c5:c5-03-circles-arcs-and-sectors",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c5-03/C5.3-Listing.md",
     "tags": [
@@ -1397,6 +1437,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C5.4 Surface Area and Volume is a Core-track exam-style Kahoot for CIE 0580. This 15-question set targets formulas for cubes, cuboids, cylinders, spheres, and cones. Good for lesson starters, retrieval checks, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008698269",
     "page_url": "https://payhip.com/b/V9aT3",
+    "creator_url": "https://create.kahoot.it/creator/d77828db-578f-4ac3-b602-6a7a939cfc29",
     "website_link_id": "cie0580:mensuration-c5:c5-04-surface-area-and-volume",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c5-04/C5.4-Listing.md",
     "tags": [
@@ -1429,6 +1470,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C5.5 Compound Shapes and Parts of Shapes is a Core-track practice set. This 15-question exam-style Kahoot focuses on calculating the area and perimeter of compound shapes, including shapes made up of rectangles, triangles, circles, and sectors. It also covers breaking down complex shapes into simpler components and applying geometric formulas. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0011343169",
     "page_url": "https://payhip.com/b/mDFP9",
+    "creator_url": "https://create.kahoot.it/creator/0ef00ee1-fe54-40c0-9dfd-775202b334a0",
     "website_link_id": "cie0580:mensuration-c5:c5-05-compound-shapes-and-parts-of-shapes",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c5-05/C5.5-Listing.md",
     "tags": [
@@ -1464,6 +1506,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C6.1 Pythagoras' Theorem is a Core-track practice set. This 15-question exam-style Kahoot focuses on applying Pythagoras' theorem to find the lengths of sides in right-angled triangles, including real-life applications and problem-solving. It also covers identifying and using the theorem to solve geometric problems involving distances and areas. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008575629",
     "page_url": "https://payhip.com/b/oxjvS",
+    "creator_url": "https://create.kahoot.it/creator/765f9dfd-2498-40e7-9060-5580148394bb",
     "website_link_id": "cie0580:trigonometry-c6:c6-01-pythagoras-theorem",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c6-01/C6.1-Listing.md",
     "tags": [
@@ -1498,6 +1541,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C6.2 Right-Angled Triangles is a Core-track exam-style Kahoot for CIE 0580. This 15-question set focuses on Pythagoras theorem, sine, cosine, and tangent to solve missing sides and angles. Good for lesson starters, retrieval checks, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0061329052",
     "page_url": "https://payhip.com/b/CRsZ3",
+    "creator_url": "https://create.kahoot.it/creator/a8a3ec1c-056f-4504-bae3-ff71bedee5dd",
     "website_link_id": "cie0580:trigonometry-c6:c6-02-right-angled-triangles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c6-02/C6.2-Listing.md",
     "tags": [
@@ -1530,6 +1574,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C7.1 Transformations is a Core-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying geometric transformations such as translations, rotations, reflections, and enlargements. It helps students apply these transformations to solve geometric problems and understand their properties. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003411886",
     "page_url": "https://payhip.com/b/x2QpY",
+    "creator_url": "https://create.kahoot.it/creator/52b7e8b1-59ec-4b37-a0cf-5033d757a7b3",
     "website_link_id": "cie0580:transformations-c7:c7-01-transformations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c7-01/C7.1-Listing.md",
     "tags": [
@@ -1566,6 +1611,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C8.1 Introduction to Probability is a Core-track practice set. This 15-question exam-style Kahoot introduces fundamental concepts of probability, including calculating probabilities of simple events, using the probability scale, and understanding basic probability terms such as sample space and favorable outcomes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008055390",
     "page_url": "https://payhip.com/b/ghMbm",
+    "creator_url": "https://create.kahoot.it/creator/45f03302-e2ec-498c-b7c8-a47b3c2390a1",
     "website_link_id": "cie0580:probability-c8:c8-01-introduction-to-probability",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c8-01/C8.1-Listing.md",
     "tags": [
@@ -1601,6 +1647,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C8.2 Relative and Expected Frequencies is a Core-track practice set. This 15-question exam-style Kahoot focuses on calculating and interpreting relative and expected frequencies, including the use of frequency tables and probability distributions. It helps students develop fluency in interpreting data, making predictions, and understanding the relationship between theoretical and experimental probability. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001848339",
     "page_url": "https://payhip.com/b/KyDO7",
+    "creator_url": "https://create.kahoot.it/creator/408cb4f5-347b-44c1-ae07-cd65fe9f48dd",
     "website_link_id": "cie0580:probability-c8:c8-02-relative-and-expected-frequencies",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c8-02/C8.2-Listing.md",
     "tags": [
@@ -1636,6 +1683,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C8.3 Probability of Combined Events is a Core-track exam-style Kahoot for CIE 0580. This 15-question set focuses on independent and dependent events, probability trees, and Venn diagram reasoning. Good for lesson starters, retrieval checks, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009122562",
     "page_url": "https://payhip.com/b/wcWyN",
+    "creator_url": "https://create.kahoot.it/creator/1db8582c-e34b-4210-9eb0-5bac9c5c1e1c",
     "website_link_id": "cie0580:probability-c8:c8-03-probability-of-combined-events",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c8-03/C8.3-Listing.md",
     "tags": [
@@ -1668,6 +1716,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C9.1 Classifying Statistical Data is a Core-track practice set. This 15-question exam-style Kahoot focuses on organizing and classifying data, including categorizing data into qualitative and quantitative types, and understanding different data distributions (e.g., frequency tables, bar charts, histograms). It helps students build skills in interpreting data and drawing conclusions from categorized data. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0095480577",
     "page_url": "https://payhip.com/b/JGliu",
+    "creator_url": "https://create.kahoot.it/creator/59e40b7c-f32a-41ae-8529-08472bd599db",
     "website_link_id": "cie0580:statistics-c9:c9-01-classifying-statistical-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c9-01/C9.1-Listing.md",
     "tags": [
@@ -1703,6 +1752,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C9.2 Interpreting Statistical Data is a Core-track practice set. This 15-question exam-style Kahoot focuses on interpreting and analyzing statistical data, including reading and understanding frequency tables, bar charts, histograms, pie charts, and line graphs. It helps students develop the skills to extract meaningful insights from data and make informed decisions based on statistical information. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0022240353",
     "page_url": "https://payhip.com/b/l3p0d",
+    "creator_url": "https://create.kahoot.it/creator/4a50be5a-37f6-4dba-940a-e3ba2b5efb58",
     "website_link_id": "cie0580:statistics-c9:c9-02-interpreting-statistical-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c9-02/C9.2-Listing.md",
     "tags": [
@@ -1740,6 +1790,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C9.3 Averages and Range is a Core-track practice set. This 15-question exam-style Kahoot focuses on calculating and interpreting measures of central tendency (mean, median, mode) and range, and using them to analyze data. It helps students develop skills in summarizing and interpreting statistical data through averages and range. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/005611902",
     "page_url": "https://payhip.com/b/VGFqu",
+    "creator_url": "https://create.kahoot.it/creator/edfa1b5e-f9dd-4f77-b7cf-8045479d386f",
     "website_link_id": "cie0580:statistics-c9:c9-03-averages-and-range",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c9-03/C9.3-Listing.md",
     "tags": [
@@ -1776,6 +1827,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "C9.4 Statistical Charts and Diagrams is a Core-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing various statistical charts and diagrams, including bar charts, pie charts, histograms, and frequency polygons. It helps students develop the ability to read and create visual data representations, and solve problems based on these charts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007048237",
     "page_url": "https://payhip.com/b/nN6Db",
+    "creator_url": "https://create.kahoot.it/creator/013eb431-5529-41e1-abbb-26345fab163f",
     "website_link_id": "cie0580:statistics-c9:c9-04-statistical-charts-and-diagrams",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-c9-04/C9.4-Listing.md",
     "tags": [
@@ -1812,6 +1864,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.1 Types of Number is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and categorizing different types of numbers, including natural numbers, integers, rational numbers, irrational numbers, and real numbers. It helps students develop a strong foundation in number theory and classification, essential for more advanced mathematics. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0062164091",
     "page_url": "https://payhip.com/b/Injxw",
+    "creator_url": "https://create.kahoot.it/creator/5f73e6b0-29a0-4c45-beb8-31281e02a5d4",
     "website_link_id": "cie0580:number-e1:e1-01-types-of-number",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-01/E1.1-Listing.md",
     "tags": [
@@ -1849,6 +1902,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.2 Sets is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with sets, including set notation, Venn diagrams, unions, intersections, and complements. It helps students develop a strong foundation in set theory and its applications, essential for more advanced mathematics. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009357799",
     "page_url": "https://payhip.com/b/5jHCx",
+    "creator_url": "https://create.kahoot.it/creator/f6ffba92-94ef-4449-8712-5289a20d1710",
     "website_link_id": "cie0580:number-e1:e1-02-sets",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-02/E1.2-Listing.md",
     "tags": [
@@ -1886,6 +1940,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.3 Powers and Roots is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying powers and roots, including square roots, cube roots, and integer powers, as well as simplifying expressions involving these operations. It helps students strengthen their understanding of exponents and roots, essential for solving more complex algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003909014",
     "page_url": "https://payhip.com/b/WO4rz",
+    "creator_url": "https://create.kahoot.it/creator/94b87c48-b060-4460-9919-56b3a3ae372d",
     "website_link_id": "cie0580:number-e1:e1-03-powers-and-roots",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-03/E1.3-Listing.md",
     "tags": [
@@ -1922,6 +1977,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.4 Fractions, Decimals, Percentages is an Extended-track practice set. This 15-question exam-style Kahoot focuses on converting between fractions, decimals, and percentages, performing operations with these forms, and solving problems related to these concepts. It helps students gain fluency in working with fractions, decimals, and percentages and apply them to real-world scenarios. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002840502",
     "page_url": "https://payhip.com/b/WCG9i",
+    "creator_url": "https://create.kahoot.it/creator/5f6de73c-202c-4806-80ac-46271138a705",
     "website_link_id": "cie0580:number-e1:e1-04-fractions-decimals-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-04/E1.4-Listing.md",
     "tags": [
@@ -1957,6 +2013,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.5 Ordering is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the principles of ordering numbers, including ordering fractions, decimals, and percentages, as well as working with negative numbers and large numbers. It helps students build fluency in comparing and ordering numbers in different forms. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007589383",
     "page_url": "https://payhip.com/b/L5WJy",
+    "creator_url": "https://create.kahoot.it/creator/6049f766-f4a5-4a8e-b7f7-47e7315fffda",
     "website_link_id": "cie0580:number-e1:e1-05-ordering",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-05/E1.5-Listing.md",
     "tags": [
@@ -1993,6 +2050,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.6 Four Operations is an Extended-track practice set. This 15-question exam-style Kahoot focuses on mastering the four fundamental operations: addition, subtraction, multiplication, and division, including their application in real-world problems and more complex algebraic expressions. It helps students develop fluency and efficiency in applying these operations across different types of numbers. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0043610340",
     "page_url": "https://payhip.com/b/LvHkw",
+    "creator_url": "https://create.kahoot.it/creator/5d048283-749f-42f7-bc57-349ab7ad68b9",
     "website_link_id": "cie0580:number-e1:e1-06-four-operations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-06/E1.6-Listing.md",
     "tags": [
@@ -2029,6 +2087,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.7 Indices I is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the laws of indices (exponents), including working with integer powers, multiplying and dividing powers, and simplifying expressions involving indices. It helps students develop a strong foundation in working with exponents and preparing for more complex algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008430678",
     "page_url": "https://payhip.com/b/WuOCw",
+    "creator_url": "https://create.kahoot.it/creator/4afa4a8f-e6b0-4d87-86be-2f2718073e13",
     "website_link_id": "cie0580:number-e1:e1-07-indices-i",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-07/E1.7-Listing.md",
     "tags": [
@@ -2064,6 +2123,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.8 Standard Form is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with standard form (scientific notation), including converting numbers into standard form, performing calculations with numbers in standard form, and solving real-world problems using standard form. It helps students develop fluency in handling large and small numbers, preparing them for advanced mathematical applications. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007043957",
     "page_url": "https://payhip.com/b/m0Avw",
+    "creator_url": "https://create.kahoot.it/creator/36aaabd1-41a9-4f99-9785-34395aede8f7",
     "website_link_id": "cie0580:number-e1:e1-08-standard-form",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-08/E1.8-Listing.md",
     "tags": [
@@ -2098,6 +2158,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.9 Estimation and Approximation is an Extended-track practice set. This 15-question exam-style Kahoot focuses on estimating and approximating values, including rounding numbers to a given degree of accuracy, using significant figures, and performing estimations in real-world contexts. It helps students develop the ability to simplify calculations and make reasonable approximations for practical problem-solving. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002068847",
     "page_url": "https://payhip.com/b/oeXPw",
+    "creator_url": "https://create.kahoot.it/creator/3bdb1eec-2a4b-41e7-ba94-d72d132ccef1",
     "website_link_id": "cie0580:number-e1:e1-09-estimation-and-approximation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-09/E1.9-Listing.md",
     "tags": [
@@ -2132,6 +2193,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.10 Limits of Accuracy is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying limits of accuracy, including rounding to specified degrees, estimating ranges of values, and working with absolute and relative errors. It helps students understand the impact of accuracy on measurements and calculations in real-world scenarios. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003032276",
     "page_url": "https://payhip.com/b/S3vB4",
+    "creator_url": "https://create.kahoot.it/creator/2fd62e19-9f0b-44b6-bb1c-154336411a99",
     "website_link_id": "cie0580:number-e1:e1-10-limits-of-accuracy",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-10/E1.10-Listing.md",
     "tags": [
@@ -2166,6 +2228,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.11 Ratio and Proportion is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving ratios and proportions, including direct and inverse proportions, scaling problems, and using ratios in real-life contexts. It helps students develop strong problem-solving skills by applying proportional reasoning to both abstract and practical situations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00522232",
     "page_url": "https://payhip.com/b/uvc81",
+    "creator_url": "https://create.kahoot.it/creator/516a12f0-f7f2-452e-b902-ae324aafd219",
     "website_link_id": "cie0580:number-e1:e1-11-ratio-and-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-11/E1.11-Listing.md",
     "tags": [
@@ -2201,6 +2264,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.12 Rates is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating rates, including speed, density, and unit costs, and solving problems involving direct and inverse variation. It helps students develop skills to apply rate concepts in real-world situations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/005819799",
     "page_url": "https://payhip.com/b/5iP4L",
+    "creator_url": "https://create.kahoot.it/creator/0a30f985-1b1d-4a30-b1d0-325334a25d1b",
     "website_link_id": "cie0580:number-e1:e1-12-rates",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-12/E1.12-Listing.md",
     "tags": [
@@ -2237,6 +2301,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.13 Percentages is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating percentages, including percentage increase and decrease, percentage of quantities, and real-life applications of percentages in financial contexts. It helps students develop fluency in working with percentages and solving problems involving discounts, profit margins, and other practical scenarios. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0010807773",
     "page_url": "https://payhip.com/b/Awakv",
+    "creator_url": "https://create.kahoot.it/creator/ad5fed60-aff3-4b47-a4d3-793421f8dd36",
     "website_link_id": "cie0580:number-e1:e1-13-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-13/E1.13-Listing.md",
     "tags": [
@@ -2271,6 +2336,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.14 Using a Calculator is an Extended-track exam-style Kahoot for CIE 0580. This 15-question set covers roots, percentages, powers, and multi-step calculator operations for faster and more accurate problem solving. Good for lesson starters, retrieval checks, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00678732",
     "page_url": "https://payhip.com/b/WElfF",
+    "creator_url": "https://create.kahoot.it/creator/a6a3d427-812a-4025-8532-f790931cd37b",
     "website_link_id": "cie0580:number-e1:e1-14-using-a-calculator",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-14/E1.14-Listing.md",
     "tags": [
@@ -2303,6 +2369,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.15 Time is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding time-related calculations, including converting between time units, calculating durations, solving problems involving time in real-life contexts, and using time-based formulas. It helps students improve their ability to solve time-related problems accurately. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008523019",
     "page_url": "https://payhip.com/b/FS2n8",
+    "creator_url": "https://create.kahoot.it/creator/207b4a30-f408-4e7c-8c54-c720a50237d3",
     "website_link_id": "cie0580:number-e1:e1-15-time",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-15/E1.15-Listing.md",
     "tags": [
@@ -2338,6 +2405,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.16 Money is an Extended-track practice set. This 15-question exam-style Kahoot focuses on solving problems involving money, including conversions between currencies, calculating percentages, tax, discounts, and financial transactions. It helps students build practical skills in handling money-related problems and prepares them for real-life financial decision-making. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0075655377",
     "page_url": "https://payhip.com/b/Wqj0N",
+    "creator_url": "https://create.kahoot.it/creator/5ef6fabe-ced9-40c7-bd14-1dcf99c70670",
     "website_link_id": "cie0580:number-e1:e1-16-money",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-16/E1.16-Listing.md",
     "tags": [
@@ -2374,6 +2442,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.17 Exponential Growth and Decay is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving exponential growth and decay, including applications to population growth, radioactive decay, and compound interest. It helps students develop fluency in applying exponential models to real-life situations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007334341",
     "page_url": "https://payhip.com/b/I6AvU",
+    "creator_url": "https://create.kahoot.it/creator/cea8c93e-5430-461d-b58f-59a29bede752",
     "website_link_id": "cie0580:number-e1:e1-17-exponential-growth-decay",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-17/E1.17-Listing.md",
     "tags": [
@@ -2409,6 +2478,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E1.18 Surds is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and simplifying surds, including operations with surds, rationalizing the denominator, and solving problems involving square roots and cube roots. It helps students build fluency in manipulating surds and applying them in algebraic expressions. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/005946841",
     "page_url": "https://payhip.com/b/4ImLD",
+    "creator_url": "https://create.kahoot.it/creator/a48e4a39-76d7-42bf-b847-c44b26f434dd",
     "website_link_id": "cie0580:number-e1:e1-18-surds",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e1-18/E1.18-Listing.md",
     "tags": [
@@ -2443,6 +2513,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.1 Introduction to Algebra is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding basic algebraic concepts, including simplifying algebraic expressions, using variables, and solving simple linear equations. It helps students build a strong foundation in algebra, which is essential for tackling more advanced algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004171335",
     "page_url": "https://payhip.com/b/8uBvQ",
+    "creator_url": "https://create.kahoot.it/creator/cad154be-6b28-454c-b383-cf61daf75d61",
     "website_link_id": "cie0580:algebra-e2:e2-01-introduction-to-algebra",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-01/E2.1-Listing.md",
     "tags": [
@@ -2477,6 +2548,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.2 Algebraic Manipulation is an Extended-track practice set. This 15-question exam-style Kahoot focuses on simplifying and manipulating algebraic expressions, including expanding brackets, factorizing, and collecting like terms. It helps students strengthen their skills in handling algebraic operations and prepares them for more complex algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006960647",
     "page_url": "https://payhip.com/b/kdCbX",
+    "creator_url": "https://create.kahoot.it/creator/94c792b0-0cc2-4429-bb57-54554bba4321",
     "website_link_id": "cie0580:algebra-e2:e2-02-algebraic-manipulation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-02/E2.2-Listing.md",
     "tags": [
@@ -2512,6 +2584,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.3 Algebraic Fractions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on simplifying algebraic fractions, performing operations such as addition, subtraction, multiplication, and division of algebraic fractions, and solving problems involving rational expressions. It helps students develop advanced algebraic skills and prepares them for more complex algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00922493",
     "page_url": "https://payhip.com/b/FNdGQ",
+    "creator_url": "https://create.kahoot.it/creator/4bd31067-cd41-41f6-95ab-fa334b361c7b",
     "website_link_id": "cie0580:algebra-e2:e2-03-algebraic-fractions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-03/E2.3-Listing.md",
     "tags": [
@@ -2546,6 +2619,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.4 Indices II is an Extended-track practice set. This 15-question exam-style Kahoot focuses on advanced exponent rules, including fractional indices, negative indices, and simplifying expressions involving these rules. It helps students deepen their understanding of indices and apply them to more complex algebraic expressions. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002775907",
     "page_url": "https://payhip.com/b/0vKcu",
+    "creator_url": "https://create.kahoot.it/creator/e8d30685-5955-4ef5-a77f-350c5d81890f",
     "website_link_id": "cie0580:algebra-e2:e2-04-indices-ii",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-04/E2.4-Listing.md",
     "tags": [
@@ -2581,6 +2655,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.5 Equations is an Extended-track practice set. This 15-question exam-style Kahoot focuses on solving linear and quadratic equations, as well as manipulating algebraic expressions to solve for unknowns. It covers techniques for solving equations with one or more variables, using substitution, factorization, and other methods. It helps students strengthen their problem-solving abilities and prepares them for more complex algebraic problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004319124",
     "page_url": "https://payhip.com/b/KjnkU",
+    "creator_url": "https://create.kahoot.it/creator/421fe062-3e4e-4c37-9596-df5da4056eac",
     "website_link_id": "cie0580:algebra-e2:e2-05-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-05/E2.5-Listing.md",
     "tags": [
@@ -2617,6 +2692,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.6 Inequalities is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving linear inequalities, including representing inequalities on number lines, solving compound inequalities, and using inequalities in real-world problems. It helps students develop fluency in handling inequalities and applying them in algebraic contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002556660",
     "page_url": "https://payhip.com/b/5KVav",
+    "creator_url": "https://create.kahoot.it/creator/bd862c2c-354b-4e59-8753-122c589c4d55",
     "website_link_id": "cie0580:algebra-e2:e2-06-inequalities",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-06/E2.6-Listing.md",
     "tags": [
@@ -2651,6 +2727,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.7 Sequences is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving arithmetic sequences, geometric sequences, and finding general terms. It also covers concepts such as common differences, common ratios, and applying sequence formulas. It helps students strengthen their skills in recognizing patterns and solving problems related to sequences. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001363367",
     "page_url": "https://payhip.com/b/zALRG",
+    "creator_url": "https://create.kahoot.it/creator/48a49dea-54fb-4630-bb7e-a12768e912fb",
     "website_link_id": "cie0580:algebra-e2:e2-07-sequences",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-07/E2.7-Listing.md",
     "tags": [
@@ -2687,6 +2764,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.8 Proportion is an Extended-track practice set. This 15-question exam-style Kahoot focuses on solving problems involving direct and inverse proportion, including real-world applications of proportions such as scale, recipes, and financial calculations. It helps students develop strong problem-solving skills in proportion and prepares them for more complex proportional reasoning. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007718433",
     "page_url": "https://payhip.com/b/uGaDh",
+    "creator_url": "https://create.kahoot.it/creator/4434c472-7dea-42c1-ab1e-1f508bc8c29f",
     "website_link_id": "cie0580:algebra-e2:e2-08-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-08/E2.8-Listing.md",
     "tags": [
@@ -2722,6 +2800,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.9 Graphs in Practical Situations is an Extended-track practice set. This 15-question exam-style Kahoot focuses on using graphs to represent real-life situations, such as distance-time graphs, velocity-time graphs, and cost graphs. It helps students develop the ability to interpret and create graphs to solve practical problems, applying mathematical concepts to real-world data. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002843176",
     "page_url": "https://payhip.com/b/KArGe",
+    "creator_url": "https://create.kahoot.it/creator/50bc0758-3812-415a-b794-40142e24f453",
     "website_link_id": "cie0580:algebra-e2:e2-09-graphs-in-practical-situations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-09/E2.9-Listing.md",
     "tags": [
@@ -2758,6 +2837,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.10 Graphs of Functions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on graphing various types of functions, including linear, quadratic, and cubic functions, and interpreting their properties. Students will also explore transformations such as translations, reflections, and scaling. It helps students develop a strong understanding of how to plot and analyze different types of functions. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0054638382",
     "page_url": "https://payhip.com/b/YAVdb",
+    "creator_url": "https://create.kahoot.it/creator/85621a47-51ee-43b1-862d-068529222ec9",
     "website_link_id": "cie0580:algebra-e2:e2-10-graphs-of-functions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-10/E2.10-Listing.md",
     "tags": [
@@ -2794,6 +2874,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.11 Sketching Curves is an Extended-track practice set. This 15-question exam-style Kahoot focuses on sketching the graphs of various types of functions, including quadratic, cubic, and reciprocal functions. It emphasizes understanding the key features of these curves, such as intercepts, turning points, and asymptotes, and how to sketch them accurately. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001130459",
     "page_url": "https://payhip.com/b/JCKwT",
+    "creator_url": "https://create.kahoot.it/creator/3fd07f59-587c-48bb-bf9c-4de1e32f3554",
     "website_link_id": "cie0580:algebra-e2:e2-11-sketching-curves",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-11/E2.11-Listing.md",
     "tags": [
@@ -2829,6 +2910,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.12 Differentiation is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding the concepts of differentiation, including finding the derivatives of functions, using differentiation rules (product rule, quotient rule, chain rule), and solving problems involving rates of change. It helps students develop a strong foundation in calculus, which is essential for more advanced topics in mathematics. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008871201",
     "page_url": "https://payhip.com/b/ZLedt",
+    "creator_url": "https://create.kahoot.it/creator/b646cac1-ee25-4505-b275-df5901fb6460",
     "website_link_id": "cie0580:algebra-e2:e2-12-differentiation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-12/E2.12-Listing.md",
     "tags": [
@@ -2865,6 +2947,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E2.13 Functions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with functions, including function notation, domain and range, evaluating and simplifying functions, and using composite and inverse functions. It helps students strengthen their conceptual understanding of functions and prepares them for solving more complex problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008963719",
     "page_url": "https://payhip.com/b/BGoH5",
+    "creator_url": "https://create.kahoot.it/creator/00443d48-4dc8-4f89-9aa3-2ee1f8b00367",
     "website_link_id": "cie0580:algebra-e2:e2-13-functions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e2-13/E2.13-Listing.md",
     "tags": [
@@ -2901,6 +2984,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.1 Coordinates is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with coordinates in the Cartesian plane, including plotting points, finding distances between points, and using the midpoint formula. It also includes applications of coordinates in geometric shapes and real-life contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003707846",
     "page_url": "https://payhip.com/b/GsRvW",
+    "creator_url": "https://create.kahoot.it/creator/d8b7cb2b-6530-407e-80d7-2656bbb9b512",
     "website_link_id": "cie0580:coordinate-e3:e3-01-coordinates",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-01/E3.1-Listing.md",
     "tags": [
@@ -2936,6 +3020,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.2 Drawing Linear Graphs is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and drawing linear graphs, including plotting points, identifying the slope and y-intercept, and using the equation of a line to graph it. It helps students strengthen their graphing skills and apply their knowledge to solve problems in algebra and geometry. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/007744750",
     "page_url": "https://payhip.com/b/F2N4B",
+    "creator_url": "https://create.kahoot.it/creator/2d4af5b5-3427-4425-8dd8-5c2ff5cb13fe",
     "website_link_id": "cie0580:coordinate-e3:e3-02-drawing-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-02/E3.2-Listing.md",
     "tags": [
@@ -2972,6 +3057,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.3 Gradient of Linear Graphs is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating the gradient (slope) of linear graphs, using the formula ( \\text{Gradient} = \\frac{\\text{change in y}}{\\text{change in x}} ), and applying it to solve problems involving parallel and perpendicular lines. It helps students develop a solid understanding of gradients and how to use them in real-world contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004467342",
     "page_url": "https://payhip.com/b/cp50t",
+    "creator_url": "https://create.kahoot.it/creator/f7667b05-f57a-455f-9fdb-661ba74bf132",
     "website_link_id": "cie0580:coordinate-e3:e3-03-gradient-of-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-03/E3.3-Listing.md",
     "tags": [
@@ -3006,6 +3092,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.4 Length and Midpoint is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating the distance between two points in the coordinate plane, as well as finding the midpoint of a line segment. It also covers applying these concepts to solve geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006651887",
     "page_url": "https://payhip.com/b/yd5lz",
+    "creator_url": "https://create.kahoot.it/creator/4b76cb5d-32b4-411f-b934-a21a95cb8e87",
     "website_link_id": "cie0580:coordinate-e3:e3-04-length-and-midpoint",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-04/E3.4-Listing.md",
     "tags": [
@@ -3042,6 +3129,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.5 Equations of Linear Graphs is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving the equations of straight lines, including converting from general form to slope-intercept form and vice versa. It also covers finding the equation of a line from two points and using it to plot linear graphs. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002186511",
     "page_url": "https://payhip.com/b/tnho2",
+    "creator_url": "https://create.kahoot.it/creator/b7fb07f8-77f0-47a8-aa7b-ac4ddd9f7871",
     "website_link_id": "cie0580:coordinate-e3:e3-05-equations-of-linear-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-05/E3.5-Listing.md",
     "tags": [
@@ -3077,6 +3165,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.6 Parallel Lines is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of parallel lines, including how to determine if two lines are parallel by comparing their slopes, and applying these properties to solve geometric and algebraic problems. It also covers finding equations of parallel lines. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002764485",
     "page_url": "https://payhip.com/b/DP8Uh",
+    "creator_url": "https://create.kahoot.it/creator/948bc9d5-c05f-4371-9ee2-44eef3069ccc",
     "website_link_id": "cie0580:coordinate-e3:e3-06-parallel-lines",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-06/E3.6-Listing.md",
     "tags": [
@@ -3111,6 +3200,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E3.7 Perpendicular Lines is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of perpendicular lines, including how to determine if two lines are perpendicular by comparing their slopes and applying these properties to solve geometric and algebraic problems. It also covers finding equations of perpendicular lines and solving problems involving right angles. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006039381",
     "page_url": "https://payhip.com/b/1paP7",
+    "creator_url": "https://create.kahoot.it/creator/fe10cf4f-6f3d-40e1-af90-e4b6f11cf2c9",
     "website_link_id": "cie0580:coordinate-e3:e3-07-perpendicular-lines",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e3-07/E3.7-Listing.md",
     "tags": [
@@ -3145,6 +3235,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.1 Geometrical Terms is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding key geometric terms, including points, lines, angles, polygons, and 3D shapes. It helps students build a solid foundation in geometry by familiarizing them with the basic concepts and terminology that are essential for solving geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009154424",
     "page_url": "https://payhip.com/b/4x3Gv",
+    "creator_url": "https://create.kahoot.it/creator/dd8ab4b6-215d-4b41-8498-61813942aa99",
     "website_link_id": "cie0580:geometry-e4:e4-01-geometrical-terms",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-01/E4.1-Listing.md",
     "tags": [
@@ -3182,6 +3273,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.2 Geometrical Constructions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and performing geometric constructions, including constructing bisectors, angles, perpendicular lines, and using a compass and ruler to solve geometric problems. It helps students develop practical skills in geometry and prepares them for constructing precise geometric figures. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0067902555",
     "page_url": "https://payhip.com/b/u2H86",
+    "creator_url": "https://create.kahoot.it/creator/eca2665d-ba2f-4892-9e42-ea996688c893",
     "website_link_id": "cie0580:geometry-e4:e4-02-geometrical-constructions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-02/E4.2-Listing.md",
     "tags": [
@@ -3218,6 +3310,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.3 Scale Drawings is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and creating scale drawings, including interpreting scale factors, converting between real-life measurements and scaled dimensions, and applying these concepts to solve geometric and practical problems. It helps students develop a strong understanding of scale in both mathematical and real-world contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003610253",
     "page_url": "https://payhip.com/b/vIitL",
+    "creator_url": "https://create.kahoot.it/creator/3b510f37-1943-4161-8709-4ae93bda8b3d",
     "website_link_id": "cie0580:geometry-e4:e4-03-scale-drawings",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-03/E4.3-Listing.md",
     "tags": [
@@ -3252,6 +3345,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.4 Similarity is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding the concept of similarity in geometry, including the criteria for similar triangles, scale factors, and proportionality. It helps students apply similarity properties to solve real-world problems and geometric proofs. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003471593",
     "page_url": "https://payhip.com/b/L6Nac",
+    "creator_url": "https://create.kahoot.it/creator/a72342fe-885f-4399-9d0c-11aa62c3868c",
     "website_link_id": "cie0580:geometry-e4:e4-04-similarity",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-04/E4.4-Listing.md",
     "tags": [
@@ -3287,6 +3381,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.5 Symmetry is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the concepts of symmetry, including reflection symmetry, rotational symmetry, and the use of symmetry in geometric shapes. It helps students develop the ability to identify and analyze symmetrical properties in both 2D and 3D shapes. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006476657",
     "page_url": "https://payhip.com/b/Ynfjg",
+    "creator_url": "https://create.kahoot.it/creator/c97396c1-373d-46fd-b530-64e26940a032",
     "website_link_id": "cie0580:geometry-e4:e4-05-symmetry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-05/E4.5-Listing.md",
     "tags": [
@@ -3322,6 +3417,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.6 Angles is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the properties of angles, including complementary and supplementary angles, vertically opposite angles, and angles in parallel lines. It also covers angle sum properties in polygons and solving problems involving angles. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009114134",
     "page_url": "https://payhip.com/b/biQZE",
+    "creator_url": "https://create.kahoot.it/creator/a3cdc0cd-5ca1-4a5f-bc47-4ff20a77d245",
     "website_link_id": "cie0580:geometry-e4:e4-06-angles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-06/E4.6-Listing.md",
     "tags": [
@@ -3359,6 +3455,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.7 Circle Theorems I is an Extended-track practice set. This 15-question exam-style Kahoot focuses on key circle theorems, including the angle at the center, angles subtended by a chord, cyclic quadrilaterals, and tangents. It helps students understand and apply fundamental circle theorems to solve geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002095948",
     "page_url": "https://payhip.com/b/nHbYt",
+    "creator_url": "https://create.kahoot.it/creator/b656b0f2-a627-4239-a7ad-de54eb61e231",
     "website_link_id": "cie0580:geometry-e4:e4-07-circle-theorems-i",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-07/E4.7-Listing.md",
     "tags": [
@@ -3394,6 +3491,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E4.8 Circle Theorems II is an Extended-track practice set. This 15-question exam-style Kahoot focuses on advanced circle theorems, including the alternate segment theorem, the angle in a semicircle, and the properties of tangents and secants. It helps students deepen their understanding of circle geometry and apply these theorems to solve complex geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006445387",
     "page_url": "https://payhip.com/b/GZz3t",
+    "creator_url": "https://create.kahoot.it/creator/99658699-72fd-47c7-b838-ec40b7252685",
     "website_link_id": "cie0580:geometry-e4:e4-08-circle-theorems-ii",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e4-08/E4.8-Listing.md",
     "tags": [
@@ -3429,6 +3527,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E5.1 Units of Measure is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and converting between different units of measurement, including length, area, volume, mass, and time. It helps students develop fluency in working with various units and applying them in real-world situations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0035410480",
     "page_url": "https://payhip.com/b/ZxrRJ",
+    "creator_url": "https://create.kahoot.it/creator/b031431c-0fb3-4aea-980f-879efb79e0aa",
     "website_link_id": "cie0580:mensuration-e5:e5-01-units-of-measure",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e5-01/E5.1-Listing.md",
     "tags": [
@@ -3467,6 +3566,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E5.2 Area and Perimeter is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating the area and perimeter of various shapes, including rectangles, triangles, circles, and composite shapes. It helps students understand how to apply area and perimeter formulas in both two-dimensional geometry and real-world applications. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/00677467",
     "page_url": "https://payhip.com/b/D0Iof",
+    "creator_url": "https://create.kahoot.it/creator/e00835db-76bc-4399-abbb-324ca71a3dc2",
     "website_link_id": "cie0580:mensuration-e5:e5-02-area-and-perimeter",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e5-02/E5.2-Listing.md",
     "tags": [
@@ -3501,6 +3601,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E5.3 Circles, Arcs, and Sectors is an Extended-track practice set. This 15-question exam-style Kahoot focuses on solving problems related to circles, including calculating the length of arcs, the area of sectors, and applying formulas in real-life contexts. It helps students understand and apply concepts of circular geometry to solve practical and geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/001399418",
     "page_url": "https://payhip.com/b/3fLuE",
+    "creator_url": "https://create.kahoot.it/creator/39179d59-a9c0-4fed-9cc3-e473fbe41c92",
     "website_link_id": "cie0580:mensuration-e5:e5-03-circles-arcs-and-sectors",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e5-03/E5.3-Listing.md",
     "tags": [
@@ -3537,6 +3638,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E5.4 Surface Area and Volume is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating the surface area and volume of various 3D shapes, including prisms, pyramids, spheres, cones, and cylinders. It helps students understand how to apply the surface area and volume formulas to solve real-life and geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009674414",
     "page_url": "https://payhip.com/b/sMzK7",
+    "creator_url": "https://create.kahoot.it/creator/7db661a7-8383-4da8-a802-539bc0076c87",
     "website_link_id": "cie0580:mensuration-e5:e5-04-surface-area-and-volume",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e5-04/E5.4-Listing.md",
     "tags": [
@@ -3576,6 +3678,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E5.5 Compound Shapes and Parts of Shapes is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating the area and perimeter of compound shapes, including shapes formed by combining rectangles, triangles, circles, and other basic geometric shapes. It also covers breaking down complex shapes into simpler parts and applying the appropriate formulas. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003856517",
     "page_url": "https://payhip.com/b/zES0n",
+    "creator_url": "https://create.kahoot.it/creator/129e49f3-37c6-4708-abac-433358fc9ff0",
     "website_link_id": "cie0580:mensuration-e5:e5-05-compound-shapes-and-parts-of-shapes",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e5-05/E5.5-Listing.md",
     "tags": [
@@ -3610,6 +3713,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.1 Pythagoras’ Theorem is an Extended-track practice set. This 15-question exam-style Kahoot focuses on applying Pythagoras' Theorem to solve problems involving right-angled triangles. It covers calculating the lengths of sides, using the theorem in real-life situations, and understanding its geometric applications. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003507491",
     "page_url": "https://payhip.com/b/mOZWF",
+    "creator_url": "https://create.kahoot.it/creator/7f98542c-e527-40f2-84b5-427d83eeca3a",
     "website_link_id": "cie0580:trigonometry-e6:e6-01-pythagoras-theorem",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-01/E6.1-Listing.md",
     "tags": [
@@ -3643,6 +3747,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.2 Right-Angled Triangles is an Extended-track practice set. This 15-question exam-style Kahoot focuses on applying the properties of right-angled triangles, including using Pythagoras' Theorem to find missing sides and applying trigonometric ratios (sine, cosine, and tangent) to solve problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003822230",
     "page_url": "https://payhip.com/b/smgf9",
+    "creator_url": "https://create.kahoot.it/creator/738cacfc-e643-4e14-a62e-41ced9e3d8a1",
     "website_link_id": "cie0580:trigonometry-e6:e6-02-right-angled-triangles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-02/E6.2-Listing.md",
     "tags": [
@@ -3680,6 +3785,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.3 Exact Trigonometric Values is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating the exact values of trigonometric functions (sine, cosine, and tangent) for key angles (0°, 30°, 45°, 60°, 90°) and applying them in geometric problems. It helps students strengthen their trigonometric skills and prepares them for more advanced trigonometry concepts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003707087",
     "page_url": "https://payhip.com/b/f0qYv",
+    "creator_url": "https://create.kahoot.it/creator/4b1f13f5-58e7-417c-9d28-0f2801ca6829",
     "website_link_id": "cie0580:trigonometry-e6:e6-03-exact-trigonometric-values",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-03/E6.3-Listing.md",
     "tags": [
@@ -3716,6 +3822,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.4 Trigonometric Functions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the six trigonometric functions (sine, cosine, tangent, cosecant, secant, and cotangent), including their graphs, identities, and applications in solving real-world problems. It helps students deepen their understanding of trigonometric functions and their use in algebra and geometry. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008947183",
     "page_url": "https://payhip.com/b/79mdC",
+    "creator_url": "https://create.kahoot.it/creator/fba2a327-a164-4af7-832c-9a4db7d98780",
     "website_link_id": "cie0580:trigonometry-e6:e6-04-trigonometric-functions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-04/E6.4-Listing.md",
     "tags": [
@@ -3754,6 +3861,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.5 Non-Right-Angled Triangles is an Extended-track practice set. This 15-question exam-style Kahoot focuses on solving problems involving non-right-angled triangles, using the sine rule, cosine rule, and area formula. It helps students apply these concepts to solve real-life and geometric problems, including finding unknown sides, angles, and areas. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004411973",
     "page_url": "https://payhip.com/b/Ce7aK",
+    "creator_url": "https://create.kahoot.it/creator/694c269a-05b5-44d1-9946-d74f1f4ac029",
     "website_link_id": "cie0580:trigonometry-e6:e6-05-non-right-angled-triangles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-05/E6.5-Listing.md",
     "tags": [
@@ -3789,6 +3897,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E6.6 Pythagoras and Trigonometry in 3D is an Extended-track practice set. This 15-question exam-style Kahoot focuses on applying Pythagoras' Theorem and trigonometric ratios in three-dimensional geometry. It includes solving problems involving 3D distance, angles between lines, and finding missing lengths and angles in 3D shapes such as cuboids and pyramids. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004179232",
     "page_url": "https://payhip.com/b/h0Qkn",
+    "creator_url": "https://create.kahoot.it/creator/f07927ac-70b3-4cdd-bc7c-8c32a88b16a8",
     "website_link_id": "cie0580:trigonometry-e6:e6-06-pythagoras-and-trigonometry-in-3d",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e6-06/E6.6-Listing.md",
     "tags": [
@@ -3824,6 +3933,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E7.1 Transformations is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the basic geometric transformations, including translations, reflections, rotations, and dilations (scaling). It helps students understand how these transformations affect shapes in the coordinate plane and prepares them for more complex geometric problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0058719503",
     "page_url": "https://payhip.com/b/Q1GfJ",
+    "creator_url": "https://create.kahoot.it/creator/56d7b5ca-3c4b-47d4-b759-65fb54d4fc1c",
     "website_link_id": "cie0580:transformations-e7:e7-01-transformations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e7-01/E7.1-Listing.md",
     "tags": [
@@ -3860,6 +3970,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E7.2 Vectors in Two Dimensions is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and performing operations with vectors in two dimensions, including vector addition, subtraction, scalar multiplication, and finding the magnitude and direction of vectors. It also covers applications of vectors in geometric and real-life problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009838485",
     "page_url": "https://payhip.com/b/YGgqH",
+    "creator_url": "https://create.kahoot.it/creator/5b2a7b81-6f27-438f-842c-a80999efa837",
     "website_link_id": "cie0580:transformations-e7:e7-02-vectors-in-two-dimensions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e7-02/E7.2-Listing.md",
     "tags": [
@@ -3897,6 +4008,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E7.3 Magnitude of a Vector is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating the magnitude (length) of a vector in two dimensions using the formula ( |\\mathbf{v}| = \\sqrt{x^2 + y^2} ), and solving problems that involve the magnitude of vectors in geometric and real-life applications. It helps students strengthen their understanding of vector properties and their use in various mathematical problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003683140",
     "page_url": "https://payhip.com/b/f6ijw",
+    "creator_url": "https://create.kahoot.it/creator/c067b161-32ef-4f6c-8f3e-13b26d36b00b",
     "website_link_id": "cie0580:transformations-e7:e7-03-magnitude-of-a-vector",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e7-03/E7.3-Listing.md",
     "tags": [
@@ -3932,6 +4044,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E7.4 Vector Geometry is an Extended-track practice set. This 15-question exam-style Kahoot focuses on applying vectors in geometric contexts, including solving problems involving vector addition, subtraction, dot product, and using vectors to describe geometric shapes and transformations. It helps students strengthen their understanding of vector operations and their applications in geometry. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0083198690",
     "page_url": "https://payhip.com/b/b3xmf",
+    "creator_url": "https://create.kahoot.it/creator/03fe50b7-1228-46fc-bbd6-c26bee75c179",
     "website_link_id": "cie0580:transformations-e7:e7-04-vector-geometry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e7-04/E7.4-Listing.md",
     "tags": [
@@ -3968,6 +4081,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E8.1 Introduction to Probability is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding the basic concepts of probability, including calculating probabilities for simple events, using the probability scale, and understanding terms like sample space, favorable outcomes, and event complement. It helps students build a strong foundation for more complex probability topics. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009425812",
     "page_url": "https://payhip.com/b/BYwEb",
+    "creator_url": "https://create.kahoot.it/creator/ad3bb90e-70fa-4221-b609-e2889c99605e",
     "website_link_id": "cie0580:probability-e8:e8-01-introduction-to-probability",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e8-01/E8.1-Listing.md",
     "tags": [
@@ -4003,6 +4117,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E8.2 Relative and Expected Frequencies is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating and interpreting relative and expected frequencies, as well as understanding how to use frequency tables and probability distributions to solve real-world problems. It helps students build fluency in applying these concepts and understanding their practical applications. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008672427",
     "page_url": "https://payhip.com/b/MuGs7",
+    "creator_url": "https://create.kahoot.it/creator/01442067-6f90-4ef4-862c-76810ad8f62e",
     "website_link_id": "cie0580:probability-e8:e8-02-relative-and-expected-frequencies",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e8-02/E8.2-Listing.md",
     "tags": [
@@ -4037,6 +4152,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E8.3 Probability of Combined Events is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating probabilities of combined events, including independent and dependent events, as well as using probability trees and Venn diagrams to solve complex problems. It helps students understand compound probability and apply these techniques to real-world scenarios. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/006832107",
     "page_url": "https://payhip.com/b/Y4Sk0",
+    "creator_url": "https://create.kahoot.it/creator/b714e1f4-0029-4999-88ec-b547cdda39a1",
     "website_link_id": "cie0580:probability-e8:e8-03-probability-of-combined-events",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e8-03/E8.3-Listing.md",
     "tags": [
@@ -4074,6 +4190,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E8.4 Conditional Probability is an Extended-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating conditional probability, including solving problems with dependent events, using the formula for conditional probability, and applying it in real-life contexts. It helps students develop an understanding of how probabilities change based on given conditions. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/002100703",
     "page_url": "https://payhip.com/b/wMfp0",
+    "creator_url": "https://create.kahoot.it/creator/4eb8e098-e2de-4503-b3cb-3e8e456d13e5",
     "website_link_id": "cie0580:probability-e8:e8-04-conditional-probability",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e8-04/E8.4-Listing.md",
     "tags": [
@@ -4109,6 +4226,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.1 Classifying Statistical Data is an Extended-track practice set. This 15-question exam-style Kahoot focuses on classifying and organizing data into appropriate categories, including qualitative and quantitative data, frequency distributions, and understanding different data types. It helps students develop skills in grouping data and drawing conclusions based on classification. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0083615330",
     "page_url": "https://payhip.com/b/tW9ey",
+    "creator_url": "https://create.kahoot.it/creator/a6a9c32a-400b-42c1-b8e5-331d5a68d659",
     "website_link_id": "cie0580:statistics-e9:e9-01-classifying-statistical-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-01/E9.1-Listing.md",
     "tags": [
@@ -4144,6 +4262,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.2 Interpreting Statistical Data is an Extended-track practice set. This 15-question exam-style Kahoot focuses on interpreting complex statistical data, including frequency tables, histograms, box plots, and cumulative frequency graphs. It helps students develop advanced skills in reading and analyzing data visualizations and drawing conclusions based on statistical representations. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/008911033",
     "page_url": "https://payhip.com/b/tUVfc",
+    "creator_url": "https://create.kahoot.it/creator/be0ec62e-331b-4a6e-97e5-2687eb7aa833",
     "website_link_id": "cie0580:statistics-e9:e9-02-interpreting-statistical-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-02/E9.2-Listing.md",
     "tags": [
@@ -4181,6 +4300,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.3 Averages and Range is an Extended-track practice set. This 15-question exam-style Kahoot focuses on calculating and interpreting measures of central tendency (mean, median, mode) and range, and solving complex data analysis problems. It helps students develop advanced skills in summarizing data, interpreting statistical information, and understanding the application of averages and range in real-life contexts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/004500994",
     "page_url": "https://payhip.com/b/Z97Yn",
+    "creator_url": "https://create.kahoot.it/creator/58ce3b01-3881-4e62-9e97-a2bb010ec8b1",
     "website_link_id": "cie0580:statistics-e9:e9-03-averages-and-range",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-03/E9.3-Listing.md",
     "tags": [
@@ -4217,6 +4337,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.4 Statistical Charts and Diagrams is an Extended-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing complex statistical charts and diagrams, such as histograms, cumulative frequency graphs, box plots, and frequency polygons. It helps students develop advanced skills in analyzing and presenting data visually, and in solving problems based on these charts. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/003234810",
     "page_url": "https://payhip.com/b/EcVvs",
+    "creator_url": "https://create.kahoot.it/creator/2a0e596d-e4bf-4001-9fda-1602adc05f7f",
     "website_link_id": "cie0580:statistics-e9:e9-04-statistical-charts-and-diagrams",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-04/E9.4-Listing.md",
     "tags": [
@@ -4253,6 +4374,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.5 Scatter Diagrams is an Extended-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing scatter diagrams, analyzing the relationship between two variables, identifying correlations, and drawing conclusions from graphical data. It helps students build fluency in understanding and analyzing bivariate data, with an emphasis on real-world applications. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0034776",
     "page_url": "https://payhip.com/b/x0j5B",
+    "creator_url": "https://create.kahoot.it/creator/d2219b4f-7be3-4c2f-bcf9-7041332bc36c",
     "website_link_id": "cie0580:statistics-e9:e9-05-scatter-diagrams",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-05/E9.5-Listing.md",
     "tags": [
@@ -4287,6 +4409,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.6 Cumulative Frequency Diagrams is an Extended-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing cumulative frequency diagrams, including finding medians, percentiles, and identifying data distribution from the diagrams. It helps students build fluency in analyzing cumulative frequency data and solving related problems. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/009503178",
     "page_url": "https://payhip.com/b/MrULA",
+    "creator_url": "https://create.kahoot.it/creator/359ca45d-e77e-4013-9a42-0a23ecd0c96b",
     "website_link_id": "cie0580:statistics-e9:e9-06-cumulative-frequency-diagrams",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-06/E9.6-Listing.md",
     "tags": [
@@ -4322,6 +4445,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "E9.7 Histograms is an Extended-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing histograms, calculating frequencies from histograms, and analyzing data distributions. It helps students develop advanced skills in interpreting and constructing histograms to solve real-life problems and understand the spread of data. Ideal for lesson starters, mixed-ability teaching, and revision warm-ups.",
     "challenge_url": "https://kahoot.it/challenge/0046316090",
     "page_url": "https://payhip.com/b/FMJcA",
+    "creator_url": "https://create.kahoot.it/creator/fccacdf6-539b-48f1-acc8-b85e481ae44c",
     "website_link_id": "cie0580:statistics-e9:e9-07-histograms",
     "listing_path": "payhip/presale/listing-assets/l1/l1-cie0580/l1-cie0580-e9-07/E9.7-Listing.md",
     "tags": [
@@ -4356,6 +4480,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.1 Integers is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding integers, performing basic operations (addition, subtraction, multiplication, division), and applying integer properties in algebraic contexts. It is designed to help students gain confidence in working with integers and prepare for exam-style questions. Perfect for lesson starters, revision warm-ups, and reinforcing foundational math skills.",
     "challenge_url": "https://kahoot.it/challenge/004264832",
     "page_url": "https://payhip.com/b/JDImL",
+    "creator_url": "https://create.kahoot.it/creator/a1b92f6d-142b-4a0c-8a9e-ff77e133f1ef",
     "website_link_id": "edexcel-4ma1:number-f1:f1-01-integers",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-01/F1.1-Listing.md",
     "tags": [
@@ -4391,6 +4516,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.2 Fractions is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on simplifying, adding, subtracting, multiplying, and dividing fractions. It also includes converting between mixed numbers and improper fractions. This set is designed to help students strengthen their understanding of fractions and their operations, which are essential for solving real-world math problems. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/001697922",
     "page_url": "https://payhip.com/b/6zLpq",
+    "creator_url": "https://create.kahoot.it/creator/361f41c4-9bf0-44b9-a424-7ba1b8e0bee8",
     "website_link_id": "edexcel-4ma1:number-f1:f1-02-fractions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-02/F1.2-Listing.md",
     "tags": [
@@ -4427,6 +4553,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.3 Decimals is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding decimals, performing operations with decimals (addition, subtraction, multiplication, division), and converting between fractions and decimals. This set is designed to help students build a strong foundation in working with decimals and their applications. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/005363422",
     "page_url": "https://payhip.com/b/4oGAl",
+    "creator_url": "https://create.kahoot.it/creator/76535a34-511e-42f0-9750-20e8f5426bfa",
     "website_link_id": "edexcel-4ma1:number-f1:f1-03-decimals",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-03/F1.3-Listing.md",
     "tags": [
@@ -4463,6 +4590,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.4 Powers and Roots is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding powers (indices), square roots, and cube roots, as well as performing calculations involving these operations. It helps students develop a solid foundation in working with exponents and roots, essential for solving algebraic and geometric problems. Perfect for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/003367107",
     "page_url": "https://payhip.com/b/491C6",
+    "creator_url": "https://create.kahoot.it/creator/4355442f-229f-4446-8cdb-75dd50158836",
     "website_link_id": "edexcel-4ma1:number-f1:f1-04-powers-and-roots",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-04/F1.4-Listing.md",
     "tags": [
@@ -4497,6 +4625,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.5 Set Language and Notation is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying set notation, including union, intersection, and complement of sets, as well as Venn diagrams. It is designed to help students strengthen their understanding of set language and its use in solving mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/0025247",
     "page_url": "https://payhip.com/b/3IDxP",
+    "creator_url": "https://create.kahoot.it/creator/bcf450b1-1830-4dd7-8aea-88fa9ecc2350",
     "website_link_id": "edexcel-4ma1:number-f1:f1-05-set-language-and-notation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-05/F1.5-Listing.md",
     "tags": [
@@ -4533,6 +4662,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.6 Percentages is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating percentages, including percentage increase/decrease, percentage of amounts, and solving problems involving percentages. It is designed to help students strengthen their understanding of percentages and their applications in real-life scenarios. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/00239389",
     "page_url": "https://payhip.com/b/7pWH4",
+    "creator_url": "https://create.kahoot.it/creator/9c40b7de-8f5f-4094-8443-afeb1d51a5b1",
     "website_link_id": "edexcel-4ma1:number-f1:f1-06-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-06/F1.6-Listing.md",
     "tags": [
@@ -4567,6 +4697,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.7 Ratio and Proportion is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding ratios, proportions, and solving problems involving direct and inverse proportion. It is designed to help students build a strong foundation in working with ratios and proportions, essential for solving real-life and algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/004900046",
     "page_url": "https://payhip.com/b/eMO8z",
+    "creator_url": "https://create.kahoot.it/creator/d8002b50-899c-4c1e-a363-584c8531cb7a",
     "website_link_id": "edexcel-4ma1:number-f1:f1-07-ratio-and-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-07/F1.7-Listing.md",
     "tags": [
@@ -4602,6 +4733,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.8 Degree of Accuracy is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the concept of degree of accuracy, including rounding, significant figures, and decimal places. It is designed to help students strengthen their ability to handle and express numerical answers with the correct degree of accuracy. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/004980533",
     "page_url": "https://payhip.com/b/6Tzqj",
+    "creator_url": "https://create.kahoot.it/creator/56778817-a7eb-435b-b8f9-8a1d531f7a3a",
     "website_link_id": "edexcel-4ma1:number-f1:f1-08-degree-of-accuracy",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-08/F1.8-Listing.md",
     "tags": [
@@ -4636,6 +4768,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.9 Standard Form is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying standard form (scientific notation), including converting between standard form and ordinary numbers, performing operations with standard form, and solving problems involving large and small numbers. It is designed to help students become confident in working with numbers in standard form. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/004313466",
     "page_url": "https://payhip.com/b/cx6qR",
+    "creator_url": "https://create.kahoot.it/creator/17213c51-b1ce-4864-943c-ecba41f85e4b",
     "website_link_id": "edexcel-4ma1:number-f1:f1-09-standard-form",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-09/F1.9-Listing.md",
     "tags": [
@@ -4670,6 +4803,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.10 Applying Number is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on applying number concepts in various mathematical contexts, including using numbers in real-life problems, performing calculations with whole numbers, decimals, and fractions, and solving practical problems involving basic arithmetic. It is designed to help students develop practical number skills for everyday situations. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/005773114",
     "page_url": "https://payhip.com/b/34RQJ",
+    "creator_url": "https://create.kahoot.it/creator/77b51aac-4ec3-4652-8c1c-ab8b29eef495",
     "website_link_id": "edexcel-4ma1:number-f1:f1-10-applying-number",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-10/F1.10-Listing.md",
     "tags": [
@@ -4704,6 +4838,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F1.11 Electronic Calculators is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on using electronic calculators effectively, including performing basic operations, solving problems involving percentages, and using calculator functions such as memory, square roots, and powers. It is designed to help students become proficient in using calculators in various mathematical contexts. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/0079739455",
     "page_url": "https://payhip.com/b/I9F4l",
+    "creator_url": "https://create.kahoot.it/creator/ddb3559b-35a7-44ee-996c-745c2451c98c",
     "website_link_id": "edexcel-4ma1:number-f1:f1-11-electronic-calculators",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f1-11/F1.11-Listing.md",
     "tags": [
@@ -4737,6 +4872,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.1 Use of Symbols is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and using mathematical symbols correctly, including operations, variables, and expressions. It helps students develop their skills in recognizing, interpreting, and applying mathematical symbols in equations and formulas. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/006394217",
     "page_url": "https://payhip.com/b/u4Vk8",
+    "creator_url": "https://create.kahoot.it/creator/a72deafd-ee07-48f8-a511-093e4f2ccbbf",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-01-use-of-symbols",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-01/F2.1-Listing.md",
     "tags": [
@@ -4770,6 +4906,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.2 Algebraic Manipulation is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on simplifying and manipulating algebraic expressions, including expanding brackets, factorizing expressions, and simplifying fractions. It helps students develop the skills needed to manipulate algebraic terms and solve equations. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/006383980",
     "page_url": "https://payhip.com/b/A2ZD9",
+    "creator_url": "https://create.kahoot.it/creator/07e0fdc8-151f-4fc2-8a62-1e23a074e382",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-02-algebraic-manipulation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-02/F2.2-Listing.md",
     "tags": [
@@ -4804,6 +4941,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.3 Expressions and Formulae is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on simplifying, expanding, and factorizing algebraic expressions, as well as substituting values into formulas and solving linear equations. It helps students develop a solid understanding of algebraic manipulation and the ability to work with algebraic expressions and formulas. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/005282742",
     "page_url": "https://payhip.com/b/usy7o",
+    "creator_url": "https://create.kahoot.it/creator/3a6c4dd0-912e-4b19-b72a-2045930d8daa",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-03-expressions-and-formulae",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-03/F2.3-Listing.md",
     "tags": [
@@ -4838,6 +4976,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.4 Linear Equations is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on solving linear equations, including simple and more complex equations with one variable, using algebraic methods such as balancing equations, collecting like terms, and isolating the variable. It is designed to help students build a solid understanding of solving linear equations in various forms. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/003549486",
     "page_url": "https://payhip.com/b/T9Zg4",
+    "creator_url": "https://create.kahoot.it/creator/9ed1a094-e108-4888-83cb-bb7613ecceae",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-04-linear-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-04/F2.4-Listing.md",
     "tags": [
@@ -4871,6 +5010,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.5 Proportion is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving direct and inverse proportion. It includes solving word problems, using ratios to represent proportions, and applying proportional reasoning in real-life scenarios. It helps students develop a solid understanding of proportion, which is essential for solving more complex mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing key foundational concepts.",
     "challenge_url": "https://kahoot.it/challenge/005840521",
     "page_url": "https://payhip.com/b/Edea8",
+    "creator_url": "https://create.kahoot.it/creator/ef4d3e12-e074-448d-97ce-31ea39117e87",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-05-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-05/F2.5-Listing.md",
     "tags": [
@@ -4905,6 +5045,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.6 Simultaneous Linear Equations is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on solving systems of simultaneous linear equations using methods such as substitution, elimination, and graphical methods. It helps students develop the skills needed to solve more complex equations and apply these skills in real-world problems. Ideal for lesson starters, revision warm-ups, and reinforcing key algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/00505316",
     "page_url": "https://payhip.com/b/XHY12",
+    "creator_url": "https://create.kahoot.it/creator/a6013215-2b9d-4511-b0cc-73dd598b6681",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-06-simultaneous-linear-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-06/F2.6-Listing.md",
     "tags": [
@@ -4939,6 +5080,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.7 Quadratic Equations is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on solving quadratic equations by factorization, completing the square, and using the quadratic formula. It is designed to help students strengthen their skills in solving quadratic equations and understanding their graphical representation. Ideal for lesson starters, revision warm-ups, and reinforcing key algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/004353893",
     "page_url": "https://payhip.com/b/ikXRz",
+    "creator_url": "https://create.kahoot.it/creator/01407c94-8342-4537-83ac-c86e2da58207",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-07-quadratic-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-07/F2.7-Listing.md",
     "tags": [
@@ -4973,6 +5115,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F2.8 Inequalities is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on solving and interpreting inequalities, including representing solutions on number lines, solving linear inequalities, and understanding compound inequalities. It helps students develop a solid understanding of inequalities and their applications in algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/008315909",
     "page_url": "https://payhip.com/b/sQC1D",
+    "creator_url": "https://create.kahoot.it/creator/5cf3d581-d09d-4ac9-925a-32ca1fd82de5",
     "website_link_id": "edexcel-4ma1:equations-f2:f2-08-inequalities",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f2-08/F2.8-Listing.md",
     "tags": [
@@ -5007,6 +5150,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F3.1 Sequences is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with sequences, including arithmetic and geometric sequences, finding nth terms, and solving problems involving sequences. It helps students develop a solid foundation in recognizing and working with patterns in sequences. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/0078960797",
     "page_url": "https://payhip.com/b/0fyu5",
+    "creator_url": "https://create.kahoot.it/creator/4a67bb95-de57-4165-9f21-42dd9ecb9548",
     "website_link_id": "edexcel-4ma1:sequences-f3:f3-01-sequences",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f3-01/F3.1-Listing.md",
     "tags": [
@@ -5041,6 +5185,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F3.2 Function Notation is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and using function notation, including evaluating functions, interpreting function notation in equations, and solving problems involving functions. It helps students develop a solid understanding of how to work with functions and apply function notation in algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing foundational algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/003289003",
     "page_url": "https://payhip.com/b/pJe7b",
+    "creator_url": "https://create.kahoot.it/creator/88268f49-afdf-42b4-a9a8-b737c8e0e1a8",
     "website_link_id": "edexcel-4ma1:sequences-f3:f3-02-function-notation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f3-02/F3.2-Listing.md",
     "tags": [
@@ -5073,6 +5218,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F3.3 Graphs is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on interpreting and plotting graphs, including linear graphs, finding gradients, and using graphs to solve equations. It also covers the basic concepts of graphing functions and understanding the relationship between variables. This set is designed to help students develop a strong understanding of graphing and interpreting graphical data. Ideal for lesson starters, revision warm-ups, and reinforcing key mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/007892287",
     "page_url": "https://payhip.com/b/Yiw2M",
+    "creator_url": "https://create.kahoot.it/creator/a74e7c9a-987e-4333-91ab-8b25a54e2b90",
     "website_link_id": "edexcel-4ma1:sequences-f3:f3-03-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f3-03/F3.3-Listing.md",
     "tags": [
@@ -5107,6 +5253,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F3.4 Calculus is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding basic calculus concepts, including differentiation and integration, as well as applying these techniques to solve problems involving rates of change and area under curves. It helps students develop a foundational understanding of calculus and its applications in real-world problems. Ideal for lesson starters, revision warm-ups, and reinforcing introductory calculus concepts.",
     "challenge_url": "https://kahoot.it/challenge/003727021",
     "page_url": "https://payhip.com/b/JUHhV",
+    "creator_url": "https://create.kahoot.it/creator/cf7abf0e-1a9f-41a7-9b51-58974fab6688",
     "website_link_id": "edexcel-4ma1:sequences-f3:f3-04-calculus",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f3-04/F3.4-Listing.md",
     "tags": [
@@ -5142,6 +5289,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.1 Angles, Lines, and Triangles is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of angles, lines, and triangles, including types of angles, angle relationships, and solving problems involving triangles. It is designed to help students strengthen their foundational geometry skills and develop a solid understanding of geometric concepts. Ideal for lesson starters, revision warm-ups, and reinforcing basic geometric principles.",
     "challenge_url": "https://kahoot.it/challenge/008106316",
     "page_url": "https://payhip.com/b/8g4aS",
+    "creator_url": "https://create.kahoot.it/creator/95b505c3-c8ac-44e7-9198-f278ee4918fa",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-01-angles-lines-and-triangles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-01/F4.1-Listing.md",
     "tags": [
@@ -5177,6 +5325,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.2 Polygons is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of polygons, including the interior and exterior angles, classification of polygons, and solving problems involving angles in polygons. It helps students strengthen their understanding of geometric shapes and develop a solid foundation in polygon properties. Ideal for lesson starters, revision warm-ups, and reinforcing basic geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/008355607",
     "page_url": "https://payhip.com/b/AoDzh",
+    "creator_url": "https://create.kahoot.it/creator/396407fa-24b9-442f-a3fc-471fcdb94893",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-02-polygons",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-02/F4.2-Listing.md",
     "tags": [
@@ -5211,6 +5360,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.3 Symmetry is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and identifying different types of symmetry, including reflection, rotational, and translational symmetry. It also covers symmetry in shapes, graphs, and real-life contexts. This set helps students build a strong foundation in recognizing and applying symmetry concepts in geometry. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric principles.",
     "challenge_url": "https://kahoot.it/challenge/008675611",
     "page_url": "https://payhip.com/b/NhPya",
+    "creator_url": "https://create.kahoot.it/creator/e96c786c-c1ed-4418-b499-c3458d760cd1",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-03-symmetry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-03/F4.3-Listing.md",
     "tags": [
@@ -5245,6 +5395,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.4 Measures is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying units of measurement, including length, mass, volume, area, and time. It also covers converting between different units and solving problems involving measurements in real-life contexts. This set helps students develop a strong foundation in working with various units and performing conversions. Ideal for lesson starters, revision warm-ups, and reinforcing key measurement concepts.",
     "challenge_url": "https://kahoot.it/challenge/003594276",
     "page_url": "https://payhip.com/b/rYKsQ",
+    "creator_url": "https://create.kahoot.it/creator/b94145cb-8558-4a3f-b2b3-7c593e2f787d",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-04-measures",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-04/F4.4-Listing.md",
     "tags": [
@@ -5278,6 +5429,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.5 Construction is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding geometric construction techniques, including drawing angles, perpendicular and parallel lines, bisecting angles, and constructing triangles. It helps students develop a solid foundation in geometric constructions, which are essential for solving geometric problems and creating accurate diagrams. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric skills.",
     "challenge_url": "https://kahoot.it/challenge/002584963",
     "page_url": "https://payhip.com/b/Pyjvt",
+    "creator_url": "https://create.kahoot.it/creator/98027184-40e7-48b1-8414-1a203c25ff39",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-05-construction",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-05/F4.5-Listing.md",
     "tags": [
@@ -5314,6 +5466,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.6 Circle Properties is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of circles, including theorems related to angles, chords, tangents, and sectors of a circle. It helps students develop a strong foundation in working with circles and applying their properties in geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric principles.",
     "challenge_url": "https://kahoot.it/challenge/004953970",
     "page_url": "https://payhip.com/b/CfojV",
+    "creator_url": "https://create.kahoot.it/creator/1c782545-7582-4179-89a0-3688665846c4",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-06-circle-properties",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-06/F4.6-Listing.md",
     "tags": [
@@ -5348,6 +5501,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.7 Geometrical Reasoning is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on using geometrical reasoning to solve problems involving angles, parallel lines, triangles, and other geometric shapes. It helps students develop critical thinking skills in geometry, applying logical steps to prove geometric properties and solve related problems. Ideal for lesson starters, revision warm-ups, and reinforcing fundamental geometric reasoning concepts.",
     "challenge_url": "https://kahoot.it/challenge/005352167",
     "page_url": "https://payhip.com/b/cg9rW",
+    "creator_url": "https://create.kahoot.it/creator/7522fb26-feca-473b-863d-996dfce81843",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-07-geometrical-reasoning",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-07/F4.7-Listing.md",
     "tags": [
@@ -5382,6 +5536,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.8 Trigonometry and Pythagoras' Theorem is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on using trigonometric ratios (sine, cosine, and tangent) and applying the Pythagorean theorem to solve problems in right-angled triangles. It is designed to help students develop a solid foundation in trigonometry and understand how to use the Pythagorean theorem in geometric contexts. Ideal for lesson starters, revision warm-ups, and reinforcing key trigonometric and geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/004134603",
     "page_url": "https://payhip.com/b/Coyep",
+    "creator_url": "https://create.kahoot.it/creator/4b57efe9-78fb-4c1f-bfc6-96f5a20f2b9e",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-08-trigonometry-and-pythagoras-theorem",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-08/F4.8-Listing.md",
     "tags": [
@@ -5416,6 +5571,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.9 Mensuration of 2D Shapes is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on calculating the area, perimeter, and other properties of 2D shapes, such as triangles, rectangles, circles, and parallelograms. It helps students strengthen their skills in mensuration and apply these concepts to real-world geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric measurement concepts.",
     "challenge_url": "https://kahoot.it/challenge/007585457",
     "page_url": "https://payhip.com/b/nkiWm",
+    "creator_url": "https://create.kahoot.it/creator/cdc1a78f-3a61-4cdb-b773-a32c825cf16d",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-09-mensuration-of-2d-shapes",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-09/F4.9-Listing.md",
     "tags": [
@@ -5449,6 +5605,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.10 3D Shapes and Volume is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of 3D shapes, including calculating the volume and surface area of cubes, cuboids, spheres, cones, and cylinders. It helps students develop their skills in mensuration for 3D shapes and understand how to apply these concepts in geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric measurement concepts.",
     "challenge_url": "https://kahoot.it/challenge/006278764",
     "page_url": "https://payhip.com/b/PIl4N",
+    "creator_url": "https://create.kahoot.it/creator/b560e44a-9f40-4c16-aab0-5d734a0c976f",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-10-3d-shapes-and-volume",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-10/F4.10-Listing.md",
     "tags": [
@@ -5487,6 +5644,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F4.11 Similarity is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the concept of similarity in geometry, including the properties of similar shapes, scale factors, and using proportional reasoning to solve problems. It helps students develop a solid understanding of how to apply similarity to solve real-world geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/008976335",
     "page_url": "https://payhip.com/b/R9MBw",
+    "creator_url": "https://create.kahoot.it/creator/3ebbbca9-e5e4-4889-a9d7-4d31db21b273",
     "website_link_id": "edexcel-4ma1:geometry-f4:f4-11-similarity",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f4-11/F4.11-Listing.md",
     "tags": [
@@ -5521,6 +5679,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F5.1 Vectors is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding the basics of vectors, including vector notation, addition, subtraction, and scalar multiplication. It helps students develop a solid foundation in working with vectors, which is essential for solving problems involving direction, magnitude, and displacement in geometry and physics. Ideal for lesson starters, revision warm-ups, and reinforcing key vector concepts.",
     "challenge_url": "https://kahoot.it/challenge/0084710567",
     "page_url": "https://payhip.com/b/2LexV",
+    "creator_url": "https://create.kahoot.it/creator/c1b8780a-ba6f-42f5-9ee4-3986f901d705",
     "website_link_id": "edexcel-4ma1:vectors-f5:f5-01-vectors",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f5-01/F5.1-Listing.md",
     "tags": [
@@ -5555,6 +5714,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F5.2 Transformation Geometry is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding geometric transformations, including translation, reflection, rotation, and enlargement. It helps students develop a solid foundation in recognizing and performing transformations on shapes, understanding the properties of transformations, and solving related problems. Ideal for lesson starters, revision warm-ups, and reinforcing key geometric transformation concepts.",
     "challenge_url": "https://kahoot.it/challenge/005479729",
     "page_url": "https://payhip.com/b/6lDUV",
+    "creator_url": "https://create.kahoot.it/creator/88f11797-2438-402a-acf1-36f24ed31485",
     "website_link_id": "edexcel-4ma1:vectors-f5:f5-02-transformation-geometry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f5-02/F5.2-Listing.md",
     "tags": [
@@ -5590,6 +5750,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F6.1 Graphical Representation of Data is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing different types of graphs, including bar charts, histograms, line graphs, and pie charts. It helps students develop a solid foundation in visualizing data and understanding the relationships between data points. Ideal for lesson starters, revision warm-ups, and reinforcing key data analysis concepts.",
     "challenge_url": "https://kahoot.it/challenge/0074349924",
     "page_url": "https://payhip.com/b/qUhCz",
+    "creator_url": "https://create.kahoot.it/creator/b4d68b2a-2bbd-489c-8068-f2e2977deb2d",
     "website_link_id": "edexcel-4ma1:statistics-f6:f6-01-graphical-representation-of-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f6-01/F6.1-Listing.md",
     "tags": [
@@ -5626,6 +5787,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F6.2 Statistical Measures is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying statistical measures, including mean, median, mode, and range, as well as interpreting data sets and calculating averages. It helps students develop a solid foundation in basic statistics and data analysis. Ideal for lesson starters, revision warm-ups, and reinforcing key statistical concepts.",
     "challenge_url": "https://kahoot.it/challenge/00146920",
     "page_url": "https://payhip.com/b/4Ko37",
+    "creator_url": "https://create.kahoot.it/creator/2c3625e6-1e47-4ebf-8203-1be3d03fac6a",
     "website_link_id": "edexcel-4ma1:statistics-f6:f6-02-statistical-measures",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f6-02/F6.2-Listing.md",
     "tags": [
@@ -5662,6 +5824,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "F6.3 Probability is a Foundation-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating probability, including experimental and theoretical probability, as well as using probability to solve real-life problems. It helps students build a solid foundation in probability concepts and their applications in various contexts. Ideal for lesson starters, revision warm-ups, and reinforcing key probability concepts.",
     "challenge_url": "https://kahoot.it/challenge/006914816",
     "page_url": "https://payhip.com/b/fuB57",
+    "creator_url": "https://create.kahoot.it/creator/5b8f9345-04c5-48c5-9d62-debad1d630de",
     "website_link_id": "edexcel-4ma1:statistics-f6:f6-03-probability",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/foundation/l1-edx4ma1-f6-03/F6.3-Listing.md",
     "tags": [
@@ -5695,6 +5858,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.1 Integers is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding integers and performing operations with integers (addition, subtraction, multiplication, division). It also includes solving problems that involve the properties of integers. This set is designed to help students strengthen their ability to work with integers in more complex mathematical scenarios. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level number concepts.",
     "challenge_url": "https://kahoot.it/challenge/0087225713",
     "page_url": "https://payhip.com/b/0BYj2",
+    "creator_url": "https://create.kahoot.it/creator/57f6ca43-b041-4f57-b770-0d12af692772",
     "website_link_id": "edexcel-4ma1:number-h1:h1-01-integers",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-01/H1.1-Listing.md",
     "tags": [
@@ -5727,6 +5891,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.2 Fractions is a Higher-track practice set. This 15-question exam-style Kahoot focuses on working with fractions, including simplifying, adding, subtracting, multiplying, and dividing fractions. It also covers complex fraction problems, such as mixed numbers and improper fractions. This set is designed to help students strengthen their understanding and application of fractions in higher-level mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level number concepts.",
     "challenge_url": "https://kahoot.it/challenge/009383112",
     "page_url": "https://payhip.com/b/MVuwX",
+    "creator_url": "https://create.kahoot.it/creator/7bbb30b2-7c0e-4499-894c-a84581e0bbd0",
     "website_link_id": "edexcel-4ma1:number-h1:h1-02-fractions",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-02/H1.2-Listing.md",
     "tags": [
@@ -5763,6 +5928,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.3 Decimals is a Higher-track practice set. This 15-question exam-style Kahoot focuses on working with decimals, including performing arithmetic operations (addition, subtraction, multiplication, division) with decimals, converting between fractions and decimals, and solving real-world problems involving decimals. This set is designed to help students strengthen their understanding of decimals and their application in higher-level mathematics. Ideal for lesson starters, revision warm-ups, and reinforcing key number concepts.",
     "challenge_url": "https://kahoot.it/challenge/009652028",
     "page_url": "https://payhip.com/b/S6DTP",
+    "creator_url": "https://create.kahoot.it/creator/e7f55382-7a40-4851-8db2-94867211392b",
     "website_link_id": "edexcel-4ma1:number-h1:h1-03-decimals",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-03/H1.3-Listing.md",
     "tags": [
@@ -5799,6 +5965,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.4 Powers and Roots is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying powers (indices), square roots, and cube roots, as well as performing calculations involving these operations. It is designed to help students develop a solid understanding of exponents and roots, which are essential for solving algebraic and geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level number concepts.",
     "challenge_url": "https://kahoot.it/challenge/004339003",
     "page_url": "https://payhip.com/b/i2NQY",
+    "creator_url": "https://create.kahoot.it/creator/513c3cfe-50ab-4029-8407-2eb552959091",
     "website_link_id": "edexcel-4ma1:number-h1:h1-04-powers-and-roots",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-04/H1.4-Listing.md",
     "tags": [
@@ -5833,6 +6000,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.5 Set Language and Notation is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying set notation, including union, intersection, complement, and Venn diagrams. It is designed to help students become proficient in working with sets, which are fundamental in solving higher-level mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/009336376",
     "page_url": "https://payhip.com/b/9blZB",
+    "creator_url": "https://create.kahoot.it/creator/87d39f8a-0b43-43f5-8baf-1a53e0cb63e0",
     "website_link_id": "edexcel-4ma1:number-h1:h1-05-set-language-and-notation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-05/H1.5-Listing.md",
     "tags": [
@@ -5868,6 +6036,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.6 Percentages is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying percentages, including calculating percentage increase/decrease, finding percentages of amounts, and solving problems involving compound percentages. It is designed to help students strengthen their ability to handle percentage-related problems in more complex contexts. Ideal for lesson starters, revision warm-ups, and reinforcing advanced mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/008758647",
     "page_url": "https://payhip.com/b/m9Nhr",
+    "creator_url": "https://create.kahoot.it/creator/ec4ac818-f307-4e13-bd8b-a5b03bbcc3c6",
     "website_link_id": "edexcel-4ma1:number-h1:h1-06-percentages",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-06/H1.6-Listing.md",
     "tags": [
@@ -5903,6 +6072,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.7 Ratio and Proportion is a Higher-track practice set. This 15-question exam-style Kahoot focuses on solving problems involving ratios and proportions, including direct and inverse proportion, scaling, and applying proportions to real-life situations. It is designed to help students develop a deep understanding of ratios and proportions in advanced mathematical contexts. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level concepts.",
     "challenge_url": "https://kahoot.it/challenge/002123891",
     "page_url": "https://payhip.com/b/f2WUS",
+    "creator_url": "https://create.kahoot.it/creator/9db1b6ba-8819-45c6-97ea-2562063319ba",
     "website_link_id": "edexcel-4ma1:number-h1:h1-07-ratio-and-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-07/H1.7-Listing.md",
     "tags": [
@@ -5939,6 +6109,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.8 Degree of Accuracy is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding degree of accuracy, including rounding to significant figures, decimal places, and performing calculations with correct precision. It is designed to help students become proficient in expressing and handling numbers with the appropriate degree of accuracy for higher-level mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/004164724",
     "page_url": "https://payhip.com/b/o2mKY",
+    "creator_url": "https://create.kahoot.it/creator/0d173fed-6538-44e3-92e2-a2a4b81691be",
     "website_link_id": "edexcel-4ma1:number-h1:h1-08-degree-of-accuracy",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-08/H1.8-Listing.md",
     "tags": [
@@ -5973,6 +6144,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.9 Standard Form is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying standard form (scientific notation), including converting between standard form and ordinary numbers, performing operations with standard form, and solving real-world problems involving large and small numbers. It is designed to help students become confident in using standard form in higher-level mathematics. Ideal for lesson starters, revision warm-ups, and reinforcing advanced mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/002922944",
     "page_url": "https://payhip.com/b/TQzR1",
+    "creator_url": "https://create.kahoot.it/creator/1f027f98-3ca9-4b0e-a870-ea27f24b41da",
     "website_link_id": "edexcel-4ma1:number-h1:h1-09-standard-form",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-09/H1.9-Listing.md",
     "tags": [
@@ -6007,6 +6179,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.10 Applying Number is a Higher-track practice set. This 15-question exam-style Kahoot focuses on applying number concepts in complex mathematical and real-life problems, including operations with integers, fractions, decimals, and percentages. It is designed to help students develop their ability to apply number skills in advanced problem-solving scenarios. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level mathematical concepts.",
     "challenge_url": "https://kahoot.it/challenge/006682943",
     "page_url": "https://payhip.com/b/0arIn",
+    "creator_url": "https://create.kahoot.it/creator/fc0050eb-0ba0-4fb2-a927-b85eade01c76",
     "website_link_id": "edexcel-4ma1:number-h1:h1-10-applying-number",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-10/H1.10-Listing.md",
     "tags": [
@@ -6041,6 +6214,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H1.11 Electronic Calculators is a Higher-track practice set. This 15-question exam-style Kahoot focuses on using electronic calculators effectively, including performing basic and advanced operations, solving complex problems with calculators, and using calculator functions such as memory, square roots, powers, and percentages. It is designed to help students maximize their efficiency and accuracy when using calculators in higher-level mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing calculator skills.",
     "challenge_url": "https://kahoot.it/challenge/009155244",
     "page_url": "https://payhip.com/b/kTpKN",
+    "creator_url": "https://create.kahoot.it/creator/d9392464-7a05-4671-8109-8b0a8eaa5f51",
     "website_link_id": "edexcel-4ma1:number-h1:h1-11-electronic-calculators",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h1-11/H1.11-Listing.md",
     "tags": [
@@ -6074,6 +6248,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.1 Use of Symbols is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and using mathematical symbols, including variables, expressions, and equations in algebraic contexts.  It helps students refine their ability to work with mathematical symbols and use them to simplify and solve problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level algebraic skills.",
     "challenge_url": "https://kahoot.it/challenge/003161396",
     "page_url": "https://payhip.com/b/ug2w0",
+    "creator_url": "https://create.kahoot.it/creator/4c1d352e-fe73-45ff-8cc7-471443796b3f",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-01-use-of-symbols",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-01/H2.1-Listing.md",
     "tags": [
@@ -6107,6 +6282,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.2 Algebraic Manipulation is a Higher-track practice set. This 15-question exam-style Kahoot focuses on simplifying and manipulating algebraic expressions, including expanding brackets, factorizing quadratic expressions, and solving complex linear and quadratic equations.  It is designed to help students refine their algebraic manipulation skills and solve more advanced algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/006419536",
     "page_url": "https://payhip.com/b/mKJZO",
+    "creator_url": "https://create.kahoot.it/creator/d0465493-6019-49b6-a51b-425e615ba926",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-02-algebraic-manipulation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-02/H2.2-Listing.md",
     "tags": [
@@ -6141,6 +6317,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.3 Expressions and Formulae is a Higher-track practice set. This 15-question exam-style Kahoot focuses on simplifying, expanding, and factorizing algebraic expressions, as well as substituting values into formulas and solving linear equations.  It helps students develop a solid understanding of working with algebraic expressions and formulas, which are essential for tackling advanced algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/001329168",
     "page_url": "https://payhip.com/b/0Dv3x",
+    "creator_url": "https://create.kahoot.it/creator/1569891c-96ca-415e-aabe-90479b070433",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-03-expressions-and-formulae",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-03/H2.3-Listing.md",
     "tags": [
@@ -6175,6 +6352,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.4 Linear Equations is a Higher-track practice set. This 15-question exam-style Kahoot focuses on solving linear equations, including equations with one or two variables, as well as equations involving fractions and decimals. It helps students develop their skills in solving complex linear equations using various algebraic techniques.  Ideal for lesson starters, revision warm-ups, and reinforcing advanced algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/0089313979",
     "page_url": "https://payhip.com/b/fk9YR",
+    "creator_url": "https://create.kahoot.it/creator/49719c19-9d07-4125-819f-f4ecfee4b98e",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-04-linear-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-04/H2.4-Listing.md",
     "tags": [
@@ -6208,6 +6386,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.5 Proportion is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and solving problems involving direct and inverse proportion, as well as using proportional reasoning to tackle real-world problems. It helps students refine their skills in working with ratios, proportions, and scale factors.  Ideal for lesson starters, revision warm-ups, and reinforcing advanced proportion concepts.",
     "challenge_url": "https://kahoot.it/challenge/004477360",
     "page_url": "https://payhip.com/b/3SCDV",
+    "creator_url": "https://create.kahoot.it/creator/3e7105a9-dbc1-4b1c-a1a0-ff3dd5b4d4c6",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-05-proportion",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-05/H2.5-Listing.md",
     "tags": [
@@ -6243,6 +6422,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.6 Simultaneous Linear Equations is a Higher-track practice set. This 15-question exam-style Kahoot focuses on solving systems of simultaneous linear equations using methods such as substitution, elimination, and graphical methods. It helps students refine their skills in solving and interpreting systems of equations.  Ideal for lesson starters, revision warm-ups, and reinforcing higher-level algebraic techniques.",
     "challenge_url": "https://kahoot.it/challenge/006202962",
     "page_url": "https://payhip.com/b/uM0VX",
+    "creator_url": "https://create.kahoot.it/creator/4320da3e-44cb-46e5-8ebf-85dc8ab7b380",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-06-simultaneous-linear-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-06/H2.6-Listing.md",
     "tags": [
@@ -6278,6 +6458,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.7 Quadratic Equations is a Higher-track practice set. This 15-question exam-style Kahoot focuses on solving quadratic equations using various methods, such as factorization, completing the square, and the quadratic formula. It helps students develop a deeper understanding of quadratic equations and their solutions. Ideal for lesson starters, revision warm-ups, and reinforcing advanced algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/006338718",
     "page_url": "https://payhip.com/b/K7gx0",
+    "creator_url": "https://create.kahoot.it/creator/f1160ce1-a3f1-4eb7-ab27-9a9f4b25ae4d",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-07-quadratic-equations",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-07/H2.7-Listing.md",
     "tags": [
@@ -6312,6 +6493,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H2.8 Inequalities is a Higher-track practice set. This 15-question exam-style Kahoot focuses on solving linear and quadratic inequalities, interpreting inequality graphs, and solving problems involving inequalities in algebraic contexts. It helps students refine their skills in working with inequalities and understanding their applications in real-world problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/008244903",
     "page_url": "https://payhip.com/b/rRGtQ",
+    "creator_url": "https://create.kahoot.it/creator/96984a6a-1001-489a-b35c-cde6b084c06c",
     "website_link_id": "edexcel-4ma1:equations-h2:h2-08-inequalities",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h2-08/H2.8-Listing.md",
     "tags": [
@@ -6346,6 +6528,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H3.1 Sequences is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and working with sequences, including arithmetic and geometric sequences, finding nth terms, and solving problems involving sequences. It helps students develop a solid understanding of how to recognize and work with patterns in sequences. Ideal for lesson starters, revision warm-ups, and reinforcing advanced algebraic concepts.",
     "challenge_url": "https://kahoot.it/challenge/002467093",
     "page_url": "https://payhip.com/b/M9G6x",
+    "creator_url": "https://create.kahoot.it/creator/9ab3726e-8649-49c7-9fba-568f51f77961",
     "website_link_id": "edexcel-4ma1:sequences-h3:h3-01-sequences",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h3-01/H3.1-Listing.md",
     "tags": [
@@ -6380,6 +6563,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H3.2 Function Notation is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and using function notation, including evaluating functions, interpreting function notation in equations, and solving problems involving functions. It helps students refine their understanding of functions and their notation, which is essential for solving more advanced algebraic problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced algebraic skills.",
     "challenge_url": "https://kahoot.it/challenge/0027792688",
     "page_url": "https://payhip.com/b/AUe3h",
+    "creator_url": "https://create.kahoot.it/creator/14f40259-0b68-421f-877d-22c7ba167ccb",
     "website_link_id": "edexcel-4ma1:sequences-h3:h3-02-function-notation",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h3-02/H3.2-Listing.md",
     "tags": [
@@ -6412,6 +6596,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H3.3 Graphs is a Higher-track practice set. This 15-question exam-style Kahoot focuses on interpreting and plotting graphs, including linear, quadratic, and other polynomial graphs. It also includes understanding the properties of graphs, such as the gradient, intercepts, and areas under curves. It helps students develop a deeper understanding of how to graph functions and solve problems using graphical representations. Ideal for lesson starters, revision warm-ups, and reinforcing advanced graphing skills.",
     "challenge_url": "https://kahoot.it/challenge/007681712",
     "page_url": "https://payhip.com/b/A63Kq",
+    "creator_url": "https://create.kahoot.it/creator/65e9b14d-8453-49cc-8a93-e4c17e02d112",
     "website_link_id": "edexcel-4ma1:sequences-h3:h3-03-graphs",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h3-03/H3.3-Listing.md",
     "tags": [
@@ -6448,6 +6633,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H3.4 Calculus is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding the basics of calculus, including differentiation and integration, and applying these techniques to solve problems involving rates of change and areas under curves. It helps students develop a deeper understanding of calculus and its real-world applications. Ideal for lesson starters, revision warm-ups, and reinforcing advanced calculus concepts.",
     "challenge_url": "https://kahoot.it/challenge/003381080",
     "page_url": "https://payhip.com/b/UYF0T",
+    "creator_url": "https://create.kahoot.it/creator/a19ad4e4-2de0-4c85-a9df-d75b816babb7",
     "website_link_id": "edexcel-4ma1:sequences-h3:h3-04-calculus",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h3-04/H3.4-Listing.md",
     "tags": [
@@ -6483,6 +6669,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.1 Angles, Lines, and Triangles is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of angles, lines, and triangles, including geometric theorems, angle relationships, and solving problems involving triangles. It helps students strengthen their knowledge of geometric concepts and apply them in higher-level algebraic and geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric principles.",
     "challenge_url": "https://kahoot.it/challenge/007005412",
     "page_url": "https://payhip.com/b/8jFHn",
+    "creator_url": "https://create.kahoot.it/creator/058211bb-4c0f-49b6-be42-7cae2d41271d",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-01-angles-lines-and-triangles",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-01/H4.1-Listing.md",
     "tags": [
@@ -6518,6 +6705,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.2 Polygons is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of polygons, including interior and exterior angles, types of polygons, and solving problems involving angles and sides of polygons. It helps students develop a deeper understanding of geometric shapes and their applications in higher-level mathematical problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/0023444521",
     "page_url": "https://payhip.com/b/u2AQw",
+    "creator_url": "https://create.kahoot.it/creator/ef723d33-a7f0-4f8d-9160-9c16f7277ce4",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-02-polygons",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-02/H4.2-Listing.md",
     "tags": [
@@ -6552,6 +6740,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.3 Symmetry is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying the properties of symmetry, including reflection, rotation, and translation, in geometric contexts. It helps students refine their skills in identifying and using symmetry in various shapes, graphs, and transformations. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/0017805073",
     "page_url": "https://payhip.com/b/N1LSD",
+    "creator_url": "https://create.kahoot.it/creator/0ebe58aa-81c0-4f58-9324-4d730bb07d9b",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-03-symmetry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-03/H4.3-Listing.md",
     "tags": [
@@ -6586,6 +6775,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.4 Measures is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying units of measurement, including length, mass, volume, area, and time, as well as converting between different units. It also includes solving problems related to compound measures, such as speed, density, and pressure. Ideal for lesson starters, revision warm-ups, and reinforcing advanced measurement concepts.",
     "challenge_url": "https://kahoot.it/challenge/007811546",
     "page_url": "https://payhip.com/b/bDgJ1",
+    "creator_url": "https://create.kahoot.it/creator/3335d1d7-a2bd-4e7f-9c26-857538bcbafd",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-04-measures",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-04/H4.4-Listing.md",
     "tags": [
@@ -6622,6 +6812,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.5 Construction is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding geometric constructions, including constructing angles, bisecting angles, perpendicular lines, and drawing triangles. It helps students refine their skills in geometric construction and understand how to accurately create and interpret geometric diagrams. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric skills.",
     "challenge_url": "https://kahoot.it/challenge/003082908",
     "page_url": "https://payhip.com/b/WCA84",
+    "creator_url": "https://create.kahoot.it/creator/19b38e11-5e9f-4bab-aa78-ee47ba4ab4e7",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-05-construction",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-05/H4.5-Listing.md",
     "tags": [
@@ -6657,6 +6848,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.6 Circle Properties is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding the properties of circles, including theorems related to angles, tangents, chords, and sectors. It helps students strengthen their knowledge of circle geometry and apply these properties to solve real-world geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric principles.",
     "challenge_url": "https://kahoot.it/challenge/0072074",
     "page_url": "https://payhip.com/b/oPNbu",
+    "creator_url": "https://create.kahoot.it/creator/dfc73f6f-66fe-4cd1-b44e-ff2c103faa0f",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-06-circle-properties",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-06/H4.6-Listing.md",
     "tags": [
@@ -6693,6 +6885,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.7 Geometrical Reasoning is a Higher-track practice set. This 15-question exam-style Kahoot focuses on applying logical reasoning to solve geometric problems, including proving theorems and understanding geometric relationships. It helps students develop the ability to reason through geometric concepts and use these skills to tackle complex problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level geometric reasoning.",
     "challenge_url": "https://kahoot.it/challenge/00483559",
     "page_url": "https://payhip.com/b/vGUgx",
+    "creator_url": "https://create.kahoot.it/creator/4d4d762c-c574-4b94-bd25-2b99595057cf",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-07-geometrical-reasoning",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-07/H4.7-Listing.md",
     "tags": [
@@ -6727,6 +6920,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.8 Trigonometry and Pythagoras' Theorem is a Higher-track practice set. This 15-question exam-style Kahoot focuses on applying trigonometric ratios (sine, cosine, tangent) and the Pythagorean theorem to solve problems involving right-angled triangles. It also covers the relationship between sides and angles in right-angled triangles and their real-world applications. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level trigonometric and geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/007064065",
     "page_url": "https://payhip.com/b/Z6WpQ",
+    "creator_url": "https://create.kahoot.it/creator/8f28156e-2b9c-495e-9920-d30eef9a414f",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-08-trigonometry-and-pythagoras-theorem",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-08/H4.8-Listing.md",
     "tags": [
@@ -6761,6 +6955,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.9 Mensuration is a Higher-track practice set. This 15-question exam-style Kahoot focuses on calculating the area, perimeter, surface area, and volume of various 2D and 3D shapes, including circles, spheres, cones, cylinders, and composite shapes. It helps students develop their skills in mensuration and applying these concepts to real-world geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced mensuration concepts.",
     "challenge_url": "https://kahoot.it/challenge/003633434",
     "page_url": "https://payhip.com/b/pvAVI",
+    "creator_url": "https://create.kahoot.it/creator/ace45700-4cdb-4304-9a59-4eb92656ec2f",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-09-mensuration",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-09/H4.9-Listing.md",
     "tags": [
@@ -6797,6 +6992,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.10 3D Shapes and Volume is a Higher-track practice set. This 15-question exam-style Kahoot focuses on calculating the volume and surface area of 3D shapes such as cubes, cuboids, spheres, cones, and cylinders. It also includes solving problems involving composite 3D shapes. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level mensuration and geometry skills.",
     "challenge_url": "https://kahoot.it/challenge/007881432",
     "page_url": "https://payhip.com/b/JmxAl",
+    "creator_url": "https://create.kahoot.it/creator/db53ae3a-97c4-4a6e-8b7f-80018860ad25",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-10-3d-shapes-and-volume",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-10/H4.10-Listing.md",
     "tags": [
@@ -6835,6 +7031,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H4.11 Similarity is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding similarity in geometry, including the properties of similar shapes, scale factors, and proportional reasoning. It helps students develop a deeper understanding of similarity and how to use it to solve geometric problems. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/002163678",
     "page_url": "https://payhip.com/b/URFiS",
+    "creator_url": "https://create.kahoot.it/creator/8669814b-9015-4dfd-87df-05dd29a8eb1d",
     "website_link_id": "edexcel-4ma1:geometry-h4:h4-11-similarity",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h4-11/H4.11-Listing.md",
     "tags": [
@@ -6869,6 +7066,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H5.1 Vectors is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding vectors, including vector notation, addition, subtraction, scalar multiplication, and using vectors to solve problems in geometry and physics. It helps students refine their skills in working with vectors, which is crucial for solving complex problems in mathematics and real-world applications. Ideal for lesson starters, revision warm-ups, and reinforcing advanced vector concepts.",
     "challenge_url": "https://kahoot.it/challenge/001009059",
     "page_url": "https://payhip.com/b/AaxGd",
+    "creator_url": "https://create.kahoot.it/creator/f924780b-448d-4dd9-8aaf-53182015bd2e",
     "website_link_id": "edexcel-4ma1:vectors-h5:h5-01-vectors",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h5-01/H5.1-Listing.md",
     "tags": [
@@ -6903,6 +7101,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H5.2 Transformation Geometry is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and applying transformations, including translation, reflection, rotation, and enlargement, in two-dimensional geometry. It helps students refine their understanding of geometric transformations and their properties, and develop the skills needed to solve complex transformation problems. Ideal for lesson starters, revision warm-ups, and reinforcing advanced geometric concepts.",
     "challenge_url": "https://kahoot.it/challenge/0071913777",
     "page_url": "https://payhip.com/b/B9Qvd",
+    "creator_url": "https://create.kahoot.it/creator/6213002c-f9a6-4400-b837-637ea147d5e0",
     "website_link_id": "edexcel-4ma1:vectors-h5:h5-02-transformation-geometry",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h5-02/H5.2-Listing.md",
     "tags": [
@@ -6938,6 +7137,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H6.1 Graphical Representation of Data is a Higher-track practice set. This 15-question exam-style Kahoot focuses on interpreting and constructing different types of graphs, including histograms, cumulative frequency graphs, bar charts, and box plots. It helps students develop a solid understanding of how to represent and analyze data visually. Ideal for lesson starters, revision warm-ups, and reinforcing advanced data representation and analysis skills.",
     "challenge_url": "https://kahoot.it/challenge/005309971",
     "page_url": "https://payhip.com/b/w3J7L",
+    "creator_url": "https://create.kahoot.it/creator/9af262da-e4f8-4415-a981-21539d0158c2",
     "website_link_id": "edexcel-4ma1:statistics-h6:h6-01-graphical-representation-of-data",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h6-01/H6.1-Listing.md",
     "tags": [
@@ -6974,6 +7174,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H6.2 Statistical Measures is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating statistical measures such as mean, median, mode, range, and standard deviation. It helps students develop their skills in summarizing and analyzing data using different statistical methods. Ideal for lesson starters, revision warm-ups, and reinforcing higher-level statistical concepts.",
     "challenge_url": "https://kahoot.it/challenge/007574753",
     "page_url": "https://payhip.com/b/2TR0Z",
+    "creator_url": "https://create.kahoot.it/creator/33f8eb2e-8347-4c49-be5a-6ea72c4b3afc",
     "website_link_id": "edexcel-4ma1:statistics-h6:h6-02-statistical-measures",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h6-02/H6.2-Listing.md",
     "tags": [
@@ -7010,6 +7211,7 @@ export const KAHOOT_SEED_ITEMS: KahootItem[] = [
     "description": "H6.3 Probability is a Higher-track practice set. This 15-question exam-style Kahoot focuses on understanding and calculating probability, including experimental and theoretical probability, conditional probability, and the use of probability trees and Venn diagrams. It helps students develop a deeper understanding of probability concepts and their real-world applications. Ideal for lesson starters, revision warm-ups, and reinforcing advanced probability techniques.",
     "challenge_url": "https://kahoot.it/challenge/002849606",
     "page_url": "https://payhip.com/b/ElGRQ",
+    "creator_url": "https://create.kahoot.it/creator/939f12a4-dcbc-43d9-8cca-3f5634832a9d",
     "website_link_id": "edexcel-4ma1:statistics-h6:h6-03-probability",
     "listing_path": "payhip/presale/listing-assets/l1/l1-edx4ma1/higher/l1-edx4ma1-h6-03/H6.3-Listing.md",
     "tags": [

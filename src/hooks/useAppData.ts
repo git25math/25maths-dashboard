@@ -28,6 +28,89 @@ import { useProductivityActions } from './appData/useProductivityActions';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast } from './useToast';
 
+const normalizeKahootLookupValue = (value?: string) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  try {
+    const url = new URL(raw);
+    url.hash = '';
+    url.search = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return raw.toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+};
+
+const normalizeKahootTitle = (value?: string) => {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const isCanonicalCreatorUrl = (value?: string) => {
+  return normalizeKahootLookupValue(value).startsWith('https://create.kahoot.it/creator/');
+};
+
+const KAHOOT_SEED_LOOKUP = (() => {
+  const byId = new Map<string, KahootItem>();
+  const byWebsiteLinkId = new Map<string, KahootItem>();
+  const byChallengeUrl = new Map<string, KahootItem>();
+  const byCompositeKey = new Map<string, KahootItem>();
+  const byTitle = new Map<string, KahootItem>();
+
+  for (const item of MOCK_KAHOOT_ITEMS) {
+    byId.set(item.id, item);
+
+    const websiteLinkId = normalizeKahootLookupValue(item.website_link_id);
+    if (websiteLinkId) byWebsiteLinkId.set(websiteLinkId, item);
+
+    const challengeUrl = normalizeKahootLookupValue(item.challenge_url);
+    if (challengeUrl) byChallengeUrl.set(challengeUrl, item);
+
+    const compositeKey = `${item.board}|${item.track}|${normalizeKahootLookupValue(item.topic_code)}`;
+    byCompositeKey.set(compositeKey, item);
+
+    const title = normalizeKahootTitle(item.title);
+    if (title) byTitle.set(title, item);
+  }
+
+  return { byId, byWebsiteLinkId, byChallengeUrl, byCompositeKey, byTitle };
+})();
+
+const matchKahootSeedItem = (item: KahootItem) => {
+  return (
+    KAHOOT_SEED_LOOKUP.byId.get(item.id) ||
+    KAHOOT_SEED_LOOKUP.byWebsiteLinkId.get(normalizeKahootLookupValue(item.website_link_id)) ||
+    KAHOOT_SEED_LOOKUP.byChallengeUrl.get(normalizeKahootLookupValue(item.challenge_url)) ||
+    KAHOOT_SEED_LOOKUP.byCompositeKey.get(`${item.board}|${item.track}|${normalizeKahootLookupValue(item.topic_code)}`) ||
+    KAHOOT_SEED_LOOKUP.byTitle.get(normalizeKahootTitle(item.title))
+  );
+};
+
+const backfillKahootCreatorUrls = (items: KahootItem[]) => {
+  const changedItems: KahootItem[] = [];
+
+  const mergedItems = items.map(item => {
+    const seed = matchKahootSeedItem(item);
+    if (!seed?.creator_url) return item;
+
+    const currentCreatorUrl = normalizeKahootLookupValue(item.creator_url);
+    const seedCreatorUrl = normalizeKahootLookupValue(seed.creator_url);
+
+    if (currentCreatorUrl === seedCreatorUrl && isCanonicalCreatorUrl(item.creator_url)) {
+      return item;
+    }
+
+    const nextItem = { ...item, creator_url: seed.creator_url };
+    changedItems.push(nextItem);
+    return nextItem;
+  });
+
+  return { mergedItems, changedItems };
+};
+
 export function useAppData() {
   const { toasts, toast } = useToast();
 
@@ -53,12 +136,23 @@ export function useAppData() {
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', MOCK_KAHOOT_ITEMS);
 
-  // One-time migration: replace stale mock kahoot data with full 202-item seed
+  // Replace stale mock kahoot data with the full seed whenever an older cache is loaded.
   useEffect(() => {
-    if (kahootItems.length < MOCK_KAHOOT_ITEMS.length) {
-      setKahootItems(MOCK_KAHOOT_ITEMS);
+    if (kahootItems.length >= MOCK_KAHOOT_ITEMS.length) return;
+    setKahootItems(MOCK_KAHOOT_ITEMS);
+  }, [kahootItems.length, setKahootItems]);
+
+  // Fill in missing creator links from the canonical seed without disturbing other fields.
+  useEffect(() => {
+    const { mergedItems, changedItems } = backfillKahootCreatorUrls(kahootItems);
+    if (changedItems.length === 0) return;
+
+    setKahootItems(mergedItems);
+
+    if (isSupabaseConfigured) {
+      void syncToSupabase('kahoot_items', changedItems);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [kahootItems, setKahootItems]);
 
   // --- Normalize localStorage data ---
   useEffect(() => {

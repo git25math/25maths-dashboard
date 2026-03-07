@@ -11,6 +11,7 @@ import path from 'path';
 
 const LISTING_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/payhip/presale/listing-assets/l1';
 const WORKING_CSV = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/payhip/presale/kahoot-subtopic-links-working.csv';
+const CREATOR_MANIFEST = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/build/kahoot-import/l1-full/manifest-with-creator-urls.json';
 const OUTPUT_JSON = path.join(import.meta.dirname, 'output/kahoot-seed.json');
 const OUTPUT_CONST = path.join(import.meta.dirname, '../src/constants-kahoot.ts');
 
@@ -144,6 +145,48 @@ function parseCSVRow(line) {
   return fields;
 }
 
+function normalizeUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(String(value).trim());
+    url.hash = '';
+    url.search = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return String(value).trim().replace(/\/$/, '');
+  }
+}
+
+function loadExistingSeed(filePath) {
+  if (!fs.existsSync(filePath)) return new Map();
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return new Map(
+      raw
+        .filter(item => item && typeof item.id === 'string')
+        .map(item => [item.id, item]),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
+function loadCreatorLookup(filePath) {
+  if (!fs.existsSync(filePath)) return new Map();
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return new Map(
+      raw
+        .map(row => [normalizeUrl(row.payhip_kahoot_link || row.challenge_url), String(row.creator_url || '').trim()])
+        .filter(([challengeUrl, creatorUrl]) => challengeUrl && creatorUrl),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
 function topicCodeToId(board, track, topicCode) {
   // e.g. kahoot-cie0580-c1-01
   const prefix = topicCode[0].toLowerCase();
@@ -178,35 +221,47 @@ console.log(`Found ${listingFiles.length} Listing.md files`);
 const csvLookup = parseWorkingCsv(WORKING_CSV);
 console.log(`Loaded ${csvLookup.size} entries from working CSV`);
 
+const existingSeed = loadExistingSeed(OUTPUT_JSON);
+console.log(`Loaded ${existingSeed.size} existing seed items`);
+
+const creatorLookup = loadCreatorLookup(CREATOR_MANIFEST);
+console.log(`Loaded ${creatorLookup.size} creator links`);
+
 const now = new Date().toISOString();
 const items = [];
 
 for (const file of listingFiles) {
   const parsed = parseListingMd(file);
   const csvRow = csvLookup.get(parsed.topicCode);
+  const itemId = topicCodeToId(parsed.board, parsed.track, parsed.topicCode);
+  const existing = existingSeed.get(itemId);
+  const challengeUrl = parsed.challengeUrl || csvRow?.kahoot_url || existing?.challenge_url || undefined;
+  const creatorUrl = creatorLookup.get(normalizeUrl(challengeUrl)) || existing?.creator_url || undefined;
 
   const item = {
-    id: topicCodeToId(parsed.board, parsed.track, parsed.topicCode),
+    id: itemId,
     board: parsed.board,
     track: parsed.track,
     topic_code: parsed.topicCode,
     title: parsed.title,
     description: parsed.description,
-    challenge_url: parsed.challengeUrl || csvRow?.kahoot_url || undefined,
+    challenge_url: challengeUrl,
     page_url: csvRow?.worksheet_payhip_url || undefined,
-    creator_url: undefined,
+    creator_url: creatorUrl,
     website_link_id: buildWebsiteLinkId(csvRow),
     listing_path: parsed.listingPath,
-    tags: parsed.tags,
-    upload_status: parsed.challengeUrl ? 'uploaded' : 'draft',
-    questions: [],
-    review_notes: '',
-    org_type: 'standalone',
-    created_at: now,
-    updated_at: now,
-    ai_generated_at: now,
-    human_reviewed_at: parsed.challengeUrl ? now : undefined,
-    uploaded_at: parsed.challengeUrl ? now : undefined,
+    tags: parsed.tags.length > 0 ? parsed.tags : (existing?.tags || []),
+    upload_status: existing?.upload_status || (challengeUrl ? 'uploaded' : 'ai_generated'),
+    questions: existing?.questions || [],
+    review_notes: existing?.review_notes || '',
+    org_type: existing?.org_type || 'standalone',
+    org_name: existing?.org_name,
+    cover_url: existing?.cover_url,
+    created_at: existing?.created_at || now,
+    updated_at: existing?.updated_at || now,
+    ai_generated_at: existing?.ai_generated_at || now,
+    human_reviewed_at: existing?.human_reviewed_at || (challengeUrl ? now : undefined),
+    uploaded_at: existing?.uploaded_at || (challengeUrl ? now : undefined),
   };
 
   items.push(item);
