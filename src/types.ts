@@ -35,6 +35,47 @@ export interface Project {
   created_at: string;
 }
 
+export type KahootBoard = 'cie0580' | 'edexcel-4ma1';
+export type KahootTrack = 'core' | 'extended' | 'foundation' | 'higher';
+export type KahootUploadStatus = 'ai_generated' | 'human_review' | 'uploaded';
+export type KahootTimeLimit = 5 | 10 | 20 | 30 | 60 | 90 | 120;
+export type KahootCorrectOption = 'A' | 'B' | 'C' | 'D';
+
+export interface KahootQuestion {
+  id: string;
+  prompt: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_option: KahootCorrectOption;
+  time_limit: KahootTimeLimit;
+}
+
+export interface KahootItem {
+  id: string;
+  board: KahootBoard;
+  track: KahootTrack;
+  topic_code: string;
+  title: string;
+  description: string;
+  cover_url?: string;
+  page_url?: string;
+  challenge_url?: string;
+  creator_url?: string;
+  website_link_id?: string;
+  listing_path?: string;
+  tags: string[];
+  upload_status: KahootUploadStatus;
+  questions: KahootQuestion[];
+  review_notes?: string;
+  created_at: string;
+  updated_at: string;
+  ai_generated_at?: string;
+  human_reviewed_at?: string;
+  uploaded_at?: string;
+}
+
 export interface Student {
   id: string;
   name: string;

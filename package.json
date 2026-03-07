@@ -9,7 +9,15 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "prep:report": "tsx scripts/report-prep-completeness.ts"
+    "prep:report": "tsx scripts/report-prep-completeness.ts",
+    "agent:local": "node server/local-agent.mjs",
+    "kahoot:artifacts": "node scripts/kahoot/generate-kahoot-artifacts.mjs",
+    "kahoot:ensure-session": "python3 scripts/kahoot/ensure_kahoot_session.py",
+    "kahoot:deploy": "node scripts/kahoot/deploy-kahoot-upload.mjs",
+    "kahoot:create-challenge": "python3 scripts/kahoot/create_kahoot_challenge_link.py",
+    "kahoot:mock-upload": "node scripts/kahoot/mock-uploader.mjs",
+    "kahoot:playwright-upload": "node scripts/kahoot/playwright-upload.mjs",
+    "kahoot:sync": "node scripts/kahoot/sync-website-links.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

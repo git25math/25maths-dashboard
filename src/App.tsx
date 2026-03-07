@@ -40,6 +40,7 @@ import { TasksView } from './views/TasksView';
 import { HousePointHistoryView } from './views/HousePointHistoryView';
 import { EmailDigestView } from './views/EmailDigestView';
 import { ProjectsView } from './views/ProjectsView';
+import { KahootUploadView } from './views/KahootUploadView';
 import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
@@ -497,6 +498,17 @@ function AppContent() {
             onUpdateProject={(id, updates) => data.updateProject(id, updates)}
           />
         );
+      case 'kahoot-upload':
+        return (
+          <KahootUploadView
+            kahootItems={data.kahootItems}
+            onAddKahoot={data.addKahoot}
+            onUpdateKahoot={data.updateKahoot}
+            onDeleteKahoot={data.deleteKahoot}
+            onDuplicateKahoot={data.duplicateKahoot}
+            toast={data.toast}
+          />
+        );
       case 'settings':
         return (
           <SettingsView
@@ -516,6 +528,7 @@ function AppContent() {
               hpAwardLogs: data.hpAwardLogs,
               emailDigests: data.emailDigests,
               projects: data.projects,
+              kahootItems: data.kahootItems,
             }}
             onImport={data.bulkImport}
           />

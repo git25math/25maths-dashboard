@@ -10,3 +10,5 @@ coverage/
 # Teaching data artifacts: keep combined import file tracked, ignore per-year caches
 scripts/output/teaching-units-*.json
 !scripts/output/teaching-units-all.json
+scripts/output/kahoot-deploy/
+server/runtime/

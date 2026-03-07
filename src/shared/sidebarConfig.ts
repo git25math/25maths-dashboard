@@ -15,6 +15,7 @@ import {
   Target,
   CalendarDays,
   Rocket,
+  Gamepad2,
 } from 'lucide-react';
 
 export const SIDEBAR_GROUPS = [
@@ -22,6 +23,7 @@ export const SIDEBAR_GROUPS = [
   { key: 'teaching', label: 'Teaching' },
   { key: 'tutor', label: 'Tutor & Admin' },
   { key: 'projects', label: 'Projects' },
+  { key: 'publishing', label: 'Publishing' },
   { key: 'productivity', label: 'Productivity' },
   { key: 'reference', label: 'Reference' },
 ] as const;
@@ -37,6 +39,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'events', icon: CalendarDays, label: 'School Events', group: 'tutor' },
   { key: 'email-digest', icon: Mail, label: 'Email Digest', group: 'tutor' },
   { key: 'projects', icon: Rocket, label: 'Projects', group: 'projects' },
+  { key: 'kahoot-upload', icon: Gamepad2, label: 'Kahoot Upload', group: 'publishing' },
   { key: 'tasks', icon: CheckSquare, label: 'GTD Tasks', group: 'productivity' },
   { key: 'worklogs', icon: Clock, label: 'Work Logs', group: 'productivity' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool', group: 'productivity' },
