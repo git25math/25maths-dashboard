@@ -37,7 +37,7 @@ export interface Project {
 
 export type KahootBoard = 'cie0580' | 'edexcel-4ma1';
 export type KahootTrack = 'core' | 'extended' | 'foundation' | 'higher';
-export type KahootUploadStatus = 'ai_generated' | 'human_review' | 'uploaded';
+export type KahootUploadStatus = 'ai_generated' | 'human_review' | 'excel_exported' | 'kahoot_uploaded' | 'web_verified' | 'published';
 export type KahootTimeLimit = 5 | 10 | 20 | 30 | 60 | 90 | 120;
 export type KahootCorrectOption = 'A' | 'B' | 'C' | 'D';
 export type KahootOrgType = 'standalone' | 'in_course' | 'in_channel';

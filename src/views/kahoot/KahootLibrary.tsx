@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
 import { cn } from '../../lib/utils';
-import { KahootBoard, KahootItem, KahootOrgType, KahootTrack } from '../../types';
+import { KahootBoard, KahootItem, KahootOrgType, KahootTrack, KahootUploadStatus } from '../../types';
 import { KahootCard } from './KahootCard';
 
 type BoardFilter = 'all' | KahootBoard;
 type TrackFilter = 'all' | KahootTrack;
+type StatusFilter = 'all' | KahootUploadStatus;
 type OrgFilter = 'all' | KahootOrgType;
 
 const BOARD_OPTIONS: { key: BoardFilter; label: string }[] = [
@@ -21,6 +22,16 @@ const TRACK_OPTIONS: { key: TrackFilter; label: string }[] = [
   { key: 'extended', label: 'Extended' },
   { key: 'foundation', label: 'Foundation' },
   { key: 'higher', label: 'Higher' },
+];
+
+const STATUS_OPTIONS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'ai_generated', label: 'AI Generated' },
+  { key: 'human_review', label: 'Reviewed' },
+  { key: 'excel_exported', label: 'Excel Ready' },
+  { key: 'kahoot_uploaded', label: 'Uploaded' },
+  { key: 'web_verified', label: 'Verified' },
+  { key: 'published', label: 'Published' },
 ];
 
 const ORG_OPTIONS: { key: OrgFilter; label: string }[] = [
@@ -55,13 +66,14 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [orgFilter, setOrgFilter] = useState<OrgFilter>('all');
 
   const stats = useMemo(() => ({
     total: items.length,
-    live: items.filter(i => i.upload_status === 'uploaded').length,
-    draft: items.filter(i => i.upload_status === 'ai_generated').length,
-    review: items.filter(i => i.upload_status === 'human_review').length,
+    published: items.filter(i => i.upload_status === 'published').length,
+    uploaded: items.filter(i => i.upload_status === 'kahoot_uploaded' || i.upload_status === 'web_verified').length,
+    inProgress: items.filter(i => i.upload_status === 'ai_generated' || i.upload_status === 'human_review' || i.upload_status === 'excel_exported').length,
   }), [items]);
 
   const filtered = useMemo(() => {
@@ -69,6 +81,7 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
     return items
       .filter(i => boardFilter === 'all' || i.board === boardFilter)
       .filter(i => trackFilter === 'all' || i.track === trackFilter)
+      .filter(i => statusFilter === 'all' || i.upload_status === statusFilter)
       .filter(i => orgFilter === 'all' || (i.org_type ?? 'standalone') === orgFilter)
       .filter(i => {
         if (!q) return true;
@@ -76,16 +89,16 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           .join(' ').toLowerCase().includes(q);
       })
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-  }, [items, boardFilter, trackFilter, orgFilter, search]);
+  }, [items, boardFilter, trackFilter, statusFilter, orgFilter, search]);
 
   return (
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total" value={stats.total} />
-        <StatCard label="Live" value={stats.live} tone="text-emerald-600" />
-        <StatCard label="Draft" value={stats.draft} tone="text-slate-500" />
-        <StatCard label="Needs Review" value={stats.review} tone="text-amber-600" />
+        <StatCard label="Published" value={stats.published} tone="text-emerald-600" />
+        <StatCard label="Uploaded" value={stats.uploaded} tone="text-indigo-600" />
+        <StatCard label="In Progress" value={stats.inProgress} tone="text-amber-600" />
       </div>
 
       {/* Filters */}
@@ -103,6 +116,15 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Track</span>
           {TRACK_OPTIONS.map(o => (
             <FilterChip key={o.key} active={trackFilter === o.key} onClick={() => setTrackFilter(o.key)} tone="violet">
+              {o.label}
+            </FilterChip>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Status</span>
+          {STATUS_OPTIONS.map(o => (
+            <FilterChip key={o.key} active={statusFilter === o.key} onClick={() => setStatusFilter(o.key)} tone="emerald">
               {o.label}
             </FilterChip>
           ))}

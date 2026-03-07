@@ -60,8 +60,23 @@ const STATUS_META: Record<KahootUploadStatus, { label: string; tone: string; ico
     tone: 'bg-amber-100 text-amber-700 border-amber-200',
     icon: TriangleAlert,
   },
-  uploaded: {
+  excel_exported: {
+    label: 'Excel Exported',
+    tone: 'bg-blue-100 text-blue-700 border-blue-200',
+    icon: CheckCircle2,
+  },
+  kahoot_uploaded: {
     label: 'Uploaded',
+    tone: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    icon: CheckCircle2,
+  },
+  web_verified: {
+    label: 'Verified',
+    tone: 'bg-teal-100 text-teal-700 border-teal-200',
+    icon: CheckCircle2,
+  },
+  published: {
+    label: 'Published',
     tone: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     icon: CheckCircle2,
   },
@@ -235,7 +250,7 @@ export function KahootUploadView({
     total: kahootItems.length,
     ai_generated: kahootItems.filter(item => item.upload_status === 'ai_generated').length,
     human_review: kahootItems.filter(item => item.upload_status === 'human_review').length,
-    uploaded: kahootItems.filter(item => item.upload_status === 'uploaded').length,
+    uploaded: kahootItems.filter(item => item.upload_status === 'published').length,
     missing_cover: kahootItems.filter(item => !item.cover_url).length,
     missing_challenge: kahootItems.filter(item => !item.challenge_url).length,
   }), [kahootItems]);
@@ -523,7 +538,7 @@ export function KahootUploadView({
       key: 'publish' as DetailTab,
       label: 'Publish',
       icon: Rocket,
-      summary: draft.upload_status === 'uploaded' ? 'Ready to sync' : STATUS_META[draft.upload_status].label,
+      summary: draft.upload_status === 'published' ? 'Ready to sync' : STATUS_META[draft.upload_status].label,
     },
   ]) : [];
 
@@ -672,7 +687,7 @@ export function KahootUploadView({
                           </p>
                           <p className="mt-2 line-clamp-2 text-sm font-bold text-slate-900">{item.title}</p>
                         </div>
-                        <status.icon size={16} className={cn('mt-0.5 shrink-0', item.upload_status === 'uploaded' ? 'text-emerald-600' : item.upload_status === 'human_review' ? 'text-amber-600' : 'text-sky-600')} />
+                        <status.icon size={16} className={cn('mt-0.5 shrink-0', item.upload_status === 'published' ? 'text-emerald-600' : item.upload_status === 'human_review' ? 'text-amber-600' : 'text-sky-600')} />
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-[11px]">

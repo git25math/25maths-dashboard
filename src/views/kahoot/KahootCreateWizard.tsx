@@ -52,7 +52,7 @@ export function KahootCreateWizard({ onBack, onSaveItem, onCopy }: KahootCreateW
         const merged: KahootItem = {
           ...wizard.draft,
           ...itemResult,
-          upload_status: 'uploaded',
+          upload_status: 'kahoot_uploaded',
           uploaded_at: new Date().toISOString(),
         };
         wizard.updateDraft(merged);

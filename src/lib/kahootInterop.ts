@@ -2,7 +2,7 @@ import { KahootBoard, KahootCorrectOption, KahootItem, KahootQuestion, KahootTim
 
 const VALID_BOARDS: KahootBoard[] = ['cie0580', 'edexcel-4ma1'];
 const VALID_TRACKS: KahootTrack[] = ['core', 'extended', 'foundation', 'higher'];
-const VALID_STATUSES: KahootUploadStatus[] = ['ai_generated', 'human_review', 'uploaded'];
+const VALID_STATUSES: KahootUploadStatus[] = ['ai_generated', 'human_review', 'excel_exported', 'kahoot_uploaded', 'web_verified', 'published'];
 const VALID_OPTIONS: KahootCorrectOption[] = ['A', 'B', 'C', 'D'];
 const VALID_TIME_LIMITS: KahootTimeLimit[] = [5, 10, 20, 30, 60, 90, 120];
 
@@ -61,7 +61,7 @@ function normalizeStatus(value: unknown, challengeUrl?: string): KahootUploadSta
     return normalized as KahootUploadStatus;
   }
 
-  return challengeUrl ? 'uploaded' : 'human_review';
+  return challengeUrl ? 'published' : 'human_review';
 }
 
 function normalizeCorrectOption(value: unknown): KahootCorrectOption {

@@ -1,6 +1,6 @@
-import { CheckCircle2, Circle, Clock, ExternalLink, Gamepad2 } from 'lucide-react';
+import { ExternalLink, Gamepad2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { KahootBoard, KahootItem, KahootOrgType, KahootTrack } from '../../types';
+import { KahootBoard, KahootItem, KahootOrgType, KahootTrack, KahootUploadStatus } from '../../types';
 
 const BOARD_LABELS: Record<KahootBoard, string> = {
   cie0580: 'CIE 0580',
@@ -20,16 +20,23 @@ const ORG_LABELS: Record<KahootOrgType, string> = {
   in_channel: 'In Channel',
 };
 
-function StatusDot({ status }: { status: KahootItem['upload_status'] }) {
-  if (status === 'uploaded') return <CheckCircle2 size={14} className="text-emerald-500" />;
-  if (status === 'human_review') return <Clock size={14} className="text-amber-500" />;
-  return <Circle size={14} className="text-slate-300" />;
+const STATUS_CONFIG: Record<KahootUploadStatus, { label: string; dot: string; text: string }> = {
+  ai_generated:    { label: 'AI Generated',  dot: 'bg-slate-300',   text: 'text-slate-400' },
+  human_review:    { label: 'Reviewed',      dot: 'bg-amber-400',   text: 'text-amber-600' },
+  excel_exported:  { label: 'Excel Ready',   dot: 'bg-blue-400',    text: 'text-blue-600' },
+  kahoot_uploaded: { label: 'Uploaded',       dot: 'bg-indigo-400',  text: 'text-indigo-600' },
+  web_verified:    { label: 'Verified',       dot: 'bg-teal-400',    text: 'text-teal-600' },
+  published:       { label: 'Published',      dot: 'bg-emerald-500', text: 'text-emerald-600' },
+};
+
+function StatusDot({ status }: { status: KahootUploadStatus }) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.ai_generated;
+  return <span className={cn('inline-block w-2.5 h-2.5 rounded-full', cfg.dot)} />;
 }
 
-function StatusLabel({ status }: { status: KahootItem['upload_status'] }) {
-  if (status === 'uploaded') return <span className="text-emerald-600 font-semibold">Live</span>;
-  if (status === 'human_review') return <span className="text-amber-600 font-semibold">Review</span>;
-  return <span className="text-slate-400 font-semibold">Draft</span>;
+function StatusLabel({ status }: { status: KahootUploadStatus }) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.ai_generated;
+  return <span className={cn('font-semibold', cfg.text)}>{cfg.label}</span>;
 }
 
 interface KahootCardProps {

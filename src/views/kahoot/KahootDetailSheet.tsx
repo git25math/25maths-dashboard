@@ -9,15 +9,21 @@ const TRACK_LABELS: Record<KahootTrack, string> = { core: 'Core', extended: 'Ext
 const ORG_LABELS: Record<KahootOrgType, string> = { standalone: 'Standalone', in_course: 'In Course', in_channel: 'In Channel' };
 
 const STATUS_BADGE: Record<string, string> = {
-  uploaded: 'bg-emerald-100 text-emerald-700',
-  human_review: 'bg-amber-100 text-amber-700',
   ai_generated: 'bg-slate-100 text-slate-500',
+  human_review: 'bg-amber-100 text-amber-700',
+  excel_exported: 'bg-blue-100 text-blue-700',
+  kahoot_uploaded: 'bg-indigo-100 text-indigo-700',
+  web_verified: 'bg-teal-100 text-teal-700',
+  published: 'bg-emerald-100 text-emerald-700',
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  uploaded: 'Live',
-  human_review: 'Needs Review',
-  ai_generated: 'Draft',
+  ai_generated: 'AI Generated',
+  human_review: 'Reviewed',
+  excel_exported: 'Excel Ready',
+  kahoot_uploaded: 'Uploaded',
+  web_verified: 'Verified',
+  published: 'Published',
 };
 
 function formatDate(v?: string) {

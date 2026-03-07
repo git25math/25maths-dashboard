@@ -251,7 +251,7 @@ for (const file of listingFiles) {
     website_link_id: buildWebsiteLinkId(csvRow),
     listing_path: parsed.listingPath,
     tags: parsed.tags.length > 0 ? parsed.tags : (existing?.tags || []),
-    upload_status: existing?.upload_status || (challengeUrl ? 'uploaded' : 'ai_generated'),
+    upload_status: existing?.upload_status || (challengeUrl ? 'published' : 'ai_generated'),
     questions: existing?.questions || [],
     review_notes: existing?.review_notes || '',
     org_type: existing?.org_type || 'standalone',

@@ -30,32 +30,17 @@ function makeDefaultQuestion(index: number): KahootQuestion {
   };
 }
 
-function applyStatusTimestamps(item: KahootItem, nextStatus: KahootUploadStatus, timestamp: string): KahootItem {
-  if (nextStatus === 'ai_generated') {
-    return {
-      ...item,
-      upload_status: nextStatus,
-      ai_generated_at: item.ai_generated_at || timestamp,
-      updated_at: timestamp,
-    };
-  }
+const STATUS_ORDER: KahootUploadStatus[] = ['ai_generated', 'human_review', 'excel_exported', 'kahoot_uploaded', 'web_verified', 'published'];
 
-  if (nextStatus === 'human_review') {
-    return {
-      ...item,
-      upload_status: nextStatus,
-      ai_generated_at: item.ai_generated_at || timestamp,
-      human_reviewed_at: item.human_reviewed_at || timestamp,
-      updated_at: timestamp,
-    };
-  }
+function applyStatusTimestamps(item: KahootItem, nextStatus: KahootUploadStatus, timestamp: string): KahootItem {
+  const idx = STATUS_ORDER.indexOf(nextStatus);
 
   return {
     ...item,
     upload_status: nextStatus,
     ai_generated_at: item.ai_generated_at || timestamp,
-    human_reviewed_at: item.human_reviewed_at || timestamp,
-    uploaded_at: item.uploaded_at || timestamp,
+    human_reviewed_at: idx >= 1 ? (item.human_reviewed_at || timestamp) : item.human_reviewed_at,
+    uploaded_at: idx >= 3 ? (item.uploaded_at || timestamp) : item.uploaded_at,
     updated_at: timestamp,
   };
 }

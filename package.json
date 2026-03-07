@@ -16,6 +16,7 @@
     "kahoot:deploy": "node scripts/kahoot/deploy-kahoot-upload.mjs",
     "kahoot:create-challenge": "python3 scripts/kahoot/create_kahoot_challenge_link.py",
     "kahoot:backfill-creators": "node scripts/kahoot/backfill-creator-links.mjs",
+    "kahoot:seed-supabase": "node scripts/kahoot/seed-supabase.mjs",
     "kahoot:mock-upload": "node scripts/kahoot/mock-uploader.mjs",
     "kahoot:playwright-upload": "node scripts/kahoot/playwright-upload.mjs",
     "kahoot:sync": "node scripts/kahoot/sync-website-links.mjs"
