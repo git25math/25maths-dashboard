@@ -9,7 +9,6 @@ import {
   parseArgs,
   parseCsv,
   resolveWebsiteRoot,
-  runCommand,
   sanitizeInlineText,
   serializeCsv,
   writeJson,
@@ -140,6 +139,32 @@ function updateListingContent(text, challengeUrl) {
   throw new Error('Could not locate a Kahoot link block in the listing file');
 }
 
+function updateLinksJsonRecord(jsonPath, recordId, challengeUrl, dryRun) {
+  const payload = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new Error(`Links JSON must be an object map: ${jsonPath}`);
+  }
+
+  const entry = payload[recordId];
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+    throw new Error(`Links JSON record not found: ${recordId}`);
+  }
+
+  const current = sanitizeInlineText(entry.kahoot_url);
+  const next = sanitizeInlineText(challengeUrl);
+  const changed = current !== next;
+
+  if (!dryRun && changed) {
+    payload[recordId] = {
+      ...entry,
+      kahoot_url: next,
+    };
+    writeJson(jsonPath, payload);
+  }
+
+  return changed;
+}
+
 export async function syncWebsiteLinks({
   item,
   websiteRoot,
@@ -192,17 +217,7 @@ export async function syncWebsiteLinks({
     writeFileSync(csvPath, `${serializeCsv(headers, nextRecords)}\n`);
   }
 
-  let jsonUpdated = false;
-  if (!dryRun) {
-    await runCommand('python3', [
-      resolve(resolvedWebsiteRoot, 'scripts/kahoot/import_subtopic_links_csv.py'),
-      '--csv',
-      csvPath,
-      '--mode',
-      'overwrite',
-    ], { cwd: resolvedWebsiteRoot });
-    jsonUpdated = true;
-  }
+  const jsonUpdated = updateLinksJsonRecord(jsonPath, nextRow.id, challengeUrl, dryRun);
 
   return {
     synced: !dryRun && (csvChanged || listingUpdated || jsonUpdated),
