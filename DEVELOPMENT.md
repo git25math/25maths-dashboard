@@ -963,9 +963,22 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `npm run lint` ✅
   - `npm run build` ✅
 
-### Phase 30e — Objective Prep Instrumentation & Resource Quality (Next)
+### Phase 30e — Objective Prep Instrumentation & Resource Quality (2026-03-07) ⚙️
+
+- **新增聚合仪表**:
+  - `prepCompleteness.ts` 抽离 Year / Unit / Class 三层 objective prep completeness 聚合逻辑
+  - `TeachingView` 首页新增 `Prep Completeness Snapshot` 年级聚合卡片
+  - `TeachingView` 年级页新增 `Prep Completeness Snapshot`，并在 unit cards 上同时展示 teaching progress 与 prep coverage
+  - `TeachingView` 的 `Class Progress Tracking` 卡片新增当前 unit 的 prep coverage
+  - `DashboardView` 首页 `Class Progress Tracking` 卡片新增当前 unit prep coverage，与 Teaching 页口径一致
+- **稳健性补充**:
+  - `DashboardView` 修复无 LO 单元时的除零风险，避免出现 `NaN%`
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+
 - [ ] 为 Year 7-11 建立 objective-level 外链资源规范（worksheet / practice / kahoot / homework / vocab）
-- [ ] 增加 prep completeness 仪表（按 Year / Unit / Class 聚合）
+- [x] 增加 prep completeness 仪表（按 Year / Unit / Class 聚合）
 - [ ] 为 objective prep generation 增加失败清单 / coverage report 输出，便于后续批量补跑
 - [ ] 对高频 note-based resources 设计转正式链接的补录流程
 

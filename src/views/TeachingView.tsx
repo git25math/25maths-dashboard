@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2 } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2, Gauge, GraduationCap } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
@@ -8,6 +8,7 @@ import { SubUnitForm } from '../components/SubUnitForm';
 import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 import { getObjectivePrepMetrics, getSharedPrepResources } from '../lib/objectivePrep';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
+import { PrepCompletenessSummary, getPrepCoverageLevel, summarizeClassPrep, summarizeUnitPrep, summarizeYearPrep } from '../lib/prepCompleteness';
 
 // --- Helpers ---
 
@@ -37,6 +38,64 @@ function SegmentedProgressBar({ completed, inProgress, total, className }: { com
       {inProgressPct > 0 && (
         <div className="h-full bg-amber-400 transition-all duration-500" style={{ width: `${inProgressPct}%` }} />
       )}
+    </div>
+  );
+}
+
+function getPrepCoverageClasses(percent: number) {
+  const level = getPrepCoverageLevel(percent);
+  if (level === 'high') {
+    return {
+      badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      bar: 'bg-emerald-500',
+      text: 'text-emerald-700',
+    };
+  }
+  if (level === 'medium') {
+    return {
+      badge: 'bg-amber-50 text-amber-700 border-amber-200',
+      bar: 'bg-amber-500',
+      text: 'text-amber-700',
+    };
+  }
+  return {
+    badge: 'bg-rose-50 text-rose-700 border-rose-200',
+    bar: 'bg-rose-500',
+    text: 'text-rose-700',
+  };
+}
+
+function PrepCoverageMeter({ label, percent, subtitle }: { label: string; percent: number; subtitle: string }) {
+  const tone = getPrepCoverageClasses(percent);
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <span>{label}</span>
+        <span className={tone.text}>{percent}%</span>
+      </div>
+      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+        <div className={cn('h-full transition-all duration-500', tone.bar)} style={{ width: `${percent}%` }} />
+      </div>
+      <p className="text-[10px] text-slate-400">{subtitle}</p>
+    </div>
+  );
+}
+
+function PrepCoverageBreakdown({ summary }: { summary: PrepCompletenessSummary }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <span className="px-2 py-1 rounded-full bg-amber-50 text-[10px] font-bold text-amber-700 border border-amber-100">
+        Vocab {summary.vocabularyReady}/{summary.objectivesTotal}
+      </span>
+      <span className="px-2 py-1 rounded-full bg-blue-50 text-[10px] font-bold text-blue-700 border border-blue-100">
+        Concept {summary.conceptReady}/{summary.objectivesTotal}
+      </span>
+      <span className="px-2 py-1 rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-700 border border-indigo-100">
+        Examples {summary.examplesReady}/{summary.objectivesTotal}
+      </span>
+      <span className="px-2 py-1 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-700 border border-emerald-100">
+        Resources {summary.resourcesReady}/{summary.objectivesTotal}
+      </span>
     </div>
   );
 }
@@ -245,6 +304,18 @@ export const TeachingView = ({
   const [editingSubUnit, setEditingSubUnit] = useState<SubUnit | null>(null);
   const [loFilter, setLoFilter] = useState<LOFilterStatus>('all');
   const teachingClasses = classes.filter(cls => !NON_TEACHING_GROUPS.has(cls.year_group));
+  const unitPrepMap = useMemo(
+    () => new Map(teachingUnits.map(unit => [unit.id, summarizeUnitPrep(unit)])),
+    [teachingUnits]
+  );
+  const yearPrepMap = useMemo<Map<string, PrepCompletenessSummary>>(
+    () => new Map(TEACHING_YEAR_GROUPS.map(year => [year, summarizeYearPrep(year, teachingUnits)])),
+    [teachingUnits]
+  );
+  const classPrepRows = useMemo(
+    () => teachingClasses.map(cls => summarizeClassPrep(cls, teachingUnits)),
+    [teachingClasses, teachingUnits]
+  );
 
   // Drag state
   const dragIndexRef = useRef<number | null>(null);
@@ -1061,6 +1132,8 @@ export const TeachingView = ({
   // ===== Year Group Units List =====
   if (selectedYear) {
     const yearUnits = sortTeachingUnits(teachingUnits.filter(u => u.year_group === selectedYear));
+    const yearPrepSummary = yearPrepMap.get(selectedYear) || summarizeYearPrep(selectedYear, teachingUnits);
+    const fullyReadyUnits = yearUnits.filter(unit => (unitPrepMap.get(unit.id)?.readinessPct || 0) === 100).length;
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -1082,10 +1155,55 @@ export const TeachingView = ({
           <h2 className="text-2xl font-bold text-slate-900">{selectedYear} Units</h2>
         </div>
 
+        <div className="glass-card p-6 space-y-5">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-indigo-600">
+                <Gauge size={18} />
+                <h3 className="font-bold text-lg text-slate-900">Prep Completeness Snapshot</h3>
+              </div>
+              <p className="text-sm text-slate-500">
+                Objective-ready means the objective has all four prep sections available: vocabulary, concept, examples, and resources.
+              </p>
+            </div>
+            <span className={cn('inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold', getPrepCoverageClasses(yearPrepSummary.readinessPct).badge)}>
+              <GraduationCap size={14} />
+              {fullyReadyUnits}/{yearUnits.length} units fully ready
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Objective Prep</p>
+              <p className="text-2xl font-bold text-slate-900">{yearPrepSummary.objectivesReady}/{yearPrepSummary.objectivesTotal}</p>
+              <PrepCoverageMeter
+                label="Objective-Ready"
+                percent={yearPrepSummary.readinessPct}
+                subtitle={`${yearPrepSummary.objectivesReady} of ${yearPrepSummary.objectivesTotal} objectives fully ready`}
+              />
+            </div>
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Section Coverage</p>
+              <p className="text-2xl font-bold text-slate-900">{yearPrepSummary.sectionsReady}/{yearPrepSummary.sectionsTotal}</p>
+              <PrepCoverageMeter
+                label="Section Coverage"
+                percent={yearPrepSummary.sectionPct}
+                subtitle={`${yearPrepSummary.sectionsReady} of ${yearPrepSummary.sectionsTotal} prep sections ready`}
+              />
+            </div>
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Section Breakdown</p>
+              <p className="text-2xl font-bold text-slate-900">{yearPrepSummary.objectivesTotal > 0 ? '4-part pack' : 'No objectives'}</p>
+              <PrepCoverageBreakdown summary={yearPrepSummary} />
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {yearUnits.map(unit => {
             const stats = computeUnitLOStats(unit);
             const completedPct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+            const prepSummary = unitPrepMap.get(unit.id) || summarizeUnitPrep(unit);
             return (
               <div
                 key={unit.id}
@@ -1097,11 +1215,17 @@ export const TeachingView = ({
                   <p className="text-sm text-slate-500 line-clamp-2">
                     {unit.sub_units.length} sub-units &middot; {stats.total} LOs &middot; {completedPct}% done
                   </p>
+                  <PrepCoverageBreakdown summary={prepSummary} />
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                   {stats.total > 0 && (
                     <SegmentedProgressBar completed={stats.completed} inProgress={stats.inProgress} total={stats.total} className="h-1.5" />
                   )}
+                  <PrepCoverageMeter
+                    label="Prep Coverage"
+                    percent={prepSummary.readinessPct}
+                    subtitle={`${prepSummary.objectivesReady}/${prepSummary.objectivesTotal} objectives fully ready`}
+                  />
                 </div>
                 <div className="mt-3 flex items-center justify-end">
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
@@ -1132,30 +1256,78 @@ export const TeachingView = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {TEACHING_YEAR_GROUPS.map(year => (
-          <div
-            key={year}
-            onClick={() => setSelectedYear(year)}
-            className="glass-card p-8 hover:border-indigo-400 transition-all cursor-pointer group text-center space-y-4"
-          >
-            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-indigo-600 group-hover:text-white transition-all">
-              <BookOpen size={32} />
+        {TEACHING_YEAR_GROUPS.map(year => {
+          const yearUnits = teachingUnits.filter(u => u.year_group === year);
+          const prepSummary = yearPrepMap.get(year) || summarizeYearPrep(year, teachingUnits);
+          return (
+            <div
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className="glass-card p-8 hover:border-indigo-400 transition-all cursor-pointer group text-center space-y-4"
+            >
+              <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                <BookOpen size={32} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900">{year}</h3>
+                <p className="text-sm text-slate-500">
+                  {yearUnits.length} Units Available
+                </p>
+                <p className="text-xs text-slate-500">
+                  Prep: <span className="font-bold text-slate-700">{prepSummary.objectivesReady}/{prepSummary.objectivesTotal}</span> objectives ready
+                </p>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden max-w-[220px] mx-auto">
+                  <div
+                    className={cn('h-full transition-all duration-500', getPrepCoverageClasses(prepSummary.readinessPct).bar)}
+                    style={{ width: `${prepSummary.readinessPct}%` }}
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900">{year}</h3>
-              <p className="text-sm text-slate-500 mt-1">
-                {teachingUnits.filter(u => u.year_group === year).length} Units Available
-              </p>
+          );
+        })}
+      </div>
+
+      <div className="glass-card p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-indigo-600">
+              <Gauge size={18} />
+              <h3 className="font-bold text-lg text-slate-900">Prep Completeness Snapshot</h3>
             </div>
+            <p className="text-sm text-slate-500">Aggregated by year group across all available units.</p>
           </div>
-        ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {TEACHING_YEAR_GROUPS.map(year => {
+            const prepSummary = yearPrepMap.get(year) || summarizeYearPrep(year, teachingUnits);
+            return (
+              <div key={`${year}-prep-summary`} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-slate-900">{year}</p>
+                    <p className="text-[11px] text-slate-500">{teachingUnits.filter(unit => unit.year_group === year).length} units</p>
+                  </div>
+                  <span className={cn('px-2 py-1 rounded-full border text-[10px] font-bold', getPrepCoverageClasses(prepSummary.readinessPct).badge)}>
+                    {prepSummary.readinessPct}% ready
+                  </span>
+                </div>
+                <PrepCoverageMeter
+                  label="Objective-Ready"
+                  percent={prepSummary.readinessPct}
+                  subtitle={`${prepSummary.objectivesReady}/${prepSummary.objectivesTotal} objectives fully ready`}
+                />
+                <PrepCoverageBreakdown summary={prepSummary} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="glass-card p-6">
         <h3 className="font-bold text-lg mb-4">Class Progress Tracking</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teachingClasses.map(cls => {
-            const currentUnit = teachingUnits.find(u => u.id === cls.current_unit_id);
+          {classPrepRows.map(({ classProfile: cls, currentUnit, summary: prepSummary }) => {
             const totalLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.length, 0) || 0;
             const completedLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || 0;
             const progress = totalLOs > 0 ? Math.round((completedLOs / totalLOs) * 100) : 0;
@@ -1180,6 +1352,13 @@ export const TeachingView = ({
                       <div className={cn("h-full transition-all duration-500", progress < 30 ? "bg-red-500" : progress < 70 ? "bg-amber-500" : "bg-emerald-500")} style={{ width: `${progress}%` }} />
                     </div>
                     <p className="text-[10px] text-slate-400">{completedLOs}/{totalLOs} LOs completed</p>
+                  </div>
+                  <div className="mt-3">
+                    <PrepCoverageMeter
+                      label="Prep Coverage"
+                      percent={prepSummary.readinessPct}
+                      subtitle={`${prepSummary.objectivesReady}/${prepSummary.objectivesTotal} objectives fully ready`}
+                    />
                   </div>
                 </div>
                 <div className="mt-4 flex justify-between items-center">

@@ -5,6 +5,7 @@ import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog,
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
+import { getPrepCoverageLevel, summarizeUnitPrep } from '../lib/prepCompleteness';
 
 function formatEventDateShort(event: SchoolEvent): string {
   const mode: EventTimeMode = event.time_mode || 'all-day';
@@ -52,6 +53,13 @@ interface DashboardViewProps {
 }
 
 const DASHBOARD_PROGRESS_YEARS = ['Year 7', 'Year 8', 'Year 10', 'Year 11', 'Year 12'] as const;
+
+function getPrepCoverageBarClass(percent: number) {
+  const level = getPrepCoverageLevel(percent);
+  if (level === 'high') return 'bg-emerald-500';
+  if (level === 'medium') return 'bg-amber-500';
+  return 'bg-rose-500';
+}
 
 export const DashboardView = ({
   currentEvent,
@@ -178,9 +186,10 @@ export const DashboardView = ({
                 const currentUnit = primaryClass
                   ? teachingUnits.find(u => u.id === primaryClass.current_unit_id)
                   : orderedYearUnits[0];
+                const prepSummary = currentUnit ? summarizeUnitPrep(currentUnit) : null;
                 const totalLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.length, 0) || 0;
                 const completedLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || 0;
-                const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
+                const progress = currentUnit && totalLOs > 0 ? Math.round((completedLOs / totalLOs) * 100) : 0;
                 return (
                   <div key={year} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                     <div>
@@ -192,7 +201,7 @@ export const DashboardView = ({
                         Unit: <span className="text-indigo-600 font-medium">{currentUnit?.title || 'None'}</span>
                       </p>
                       {currentUnit && (
-                        <div className="mt-2 space-y-1">
+                        <div className="mt-2 space-y-2">
                           <div className="flex justify-between text-[10px] font-bold text-slate-400">
                             <span>PROGRESS</span>
                             <span>{progress}%</span>
@@ -200,6 +209,20 @@ export const DashboardView = ({
                           <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                             <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
                           </div>
+                          {prepSummary && (
+                            <>
+                              <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                                <span>PREP</span>
+                                <span>{prepSummary.readinessPct}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                <div className={cn('h-full transition-all duration-500', getPrepCoverageBarClass(prepSummary.readinessPct))} style={{ width: `${prepSummary.readinessPct}%` }} />
+                              </div>
+                              <p className="text-[10px] text-slate-400">
+                                {prepSummary.objectivesReady}/{prepSummary.objectivesTotal} objectives ready
+                              </p>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
