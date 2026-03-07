@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SmartTaskPreview, Task } from '../types';
+import { RichTextEditor } from './RichTextEditor';
 
 const SOURCE_COLORS: Record<SmartTaskPreview['source_section'], string> = {
   action_item: 'bg-cyan-50 text-cyan-600 border-cyan-200',
@@ -122,12 +123,13 @@ export const SmartExtractModal = ({ tasks: initialTasks, meetingId, onConfirm, o
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description</label>
-                    <textarea
+                    <RichTextEditor
+                      label="Description"
                       value={task.description}
-                      onChange={e => updateTask(idx, { description: e.target.value })}
-                      rows={2}
-                      className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
+                      onChange={value => updateTask(idx, { description: value })}
+                      placeholder="Task description... Supports Markdown and LaTeX..."
+                      editorHeightClass="h-24"
+                      previewMinHeightClass="min-h-[6rem]"
                     />
                   </div>
                   <div className="grid grid-cols-3 gap-3">

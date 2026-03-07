@@ -40,6 +40,7 @@ export type KahootTrack = 'core' | 'extended' | 'foundation' | 'higher';
 export type KahootUploadStatus = 'ai_generated' | 'human_review' | 'uploaded';
 export type KahootTimeLimit = 5 | 10 | 20 | 30 | 60 | 90 | 120;
 export type KahootCorrectOption = 'A' | 'B' | 'C' | 'D';
+export type KahootOrgType = 'standalone' | 'in_course' | 'in_channel';
 
 export interface KahootQuestion {
   id: string;
@@ -69,6 +70,8 @@ export interface KahootItem {
   upload_status: KahootUploadStatus;
   questions: KahootQuestion[];
   review_notes?: string;
+  org_type?: KahootOrgType;
+  org_name?: string;
   created_at: string;
   updated_at: string;
   ai_generated_at?: string;

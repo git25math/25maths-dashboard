@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit3, ExternalLink, GitBranch, CheckSquare } from 'lucid
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
 import { FilterChip } from '../components/FilterChip';
+import { MarkdownRenderer } from '../components/RichTextEditor';
 
 type StatusFilter = 'all' | Project['status'];
 
@@ -107,7 +108,7 @@ export const ProjectsView = ({ projects, tasks, onAddProject, onEditProject, onD
                 {/* Title + Description */}
                 <h3 className="font-bold text-lg text-slate-900">{project.name}</h3>
                 {project.description && (
-                  <p className="text-sm text-slate-500 mt-1 line-clamp-1">{project.description}</p>
+                  <MarkdownRenderer content={project.description} className="text-sm text-slate-500 mt-1 line-clamp-2 [&_p]:inline [&_p]:m-0" />
                 )}
 
                 {/* Stats & links */}

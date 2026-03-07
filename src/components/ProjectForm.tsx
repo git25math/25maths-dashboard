@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { Project } from '../types';
 import { cn } from '../lib/utils';
+import { RichTextEditor } from './RichTextEditor';
 
 interface ProjectFormProps {
   project: Project | null;
@@ -64,16 +65,14 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Description</label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="What is this project about?"
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none"
-            />
-          </div>
+          <RichTextEditor
+            label="Description"
+            value={description}
+            onChange={setDescription}
+            placeholder="What is this project about? Supports Markdown and LaTeX..."
+            editorHeightClass="h-28"
+            previewMinHeightClass="min-h-[7rem]"
+          />
 
           {/* Color picker */}
           <div className="space-y-2">

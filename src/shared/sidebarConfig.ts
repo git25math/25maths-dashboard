@@ -39,7 +39,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'events', icon: CalendarDays, label: 'School Events', group: 'tutor' },
   { key: 'email-digest', icon: Mail, label: 'Email Digest', group: 'tutor' },
   { key: 'projects', icon: Rocket, label: 'Projects', group: 'projects' },
-  { key: 'kahoot-upload', icon: Gamepad2, label: 'Kahoot Upload', group: 'publishing' },
+  { key: 'kahoot-upload', icon: Gamepad2, label: 'Kahoot Hub', group: 'publishing' },
   { key: 'tasks', icon: CheckSquare, label: 'GTD Tasks', group: 'productivity' },
   { key: 'worklogs', icon: Clock, label: 'Work Logs', group: 'productivity' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool', group: 'productivity' },

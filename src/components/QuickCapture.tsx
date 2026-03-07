@@ -3,6 +3,7 @@ import { Plus, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { geminiService } from '../services/geminiService';
+import { RichTextEditor } from './RichTextEditor';
 
 interface QuickCaptureProps {
   onSave: (text: string, category: 'work' | 'student' | 'startup' | 'task') => void;
@@ -46,7 +47,7 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute bottom-16 right-0 w-80 glass-card p-4 mb-2"
+            className="absolute bottom-16 right-0 w-96 glass-card p-4 mb-2"
           >
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex justify-between items-center mb-2">
@@ -55,12 +56,12 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
                   <X size={16} />
                 </button>
               </div>
-              <textarea
-                autoFocus
+              <RichTextEditor
                 value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="What's on your mind?"
-                className="w-full h-24 p-3 rounded-lg bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
+                onChange={setText}
+                placeholder="What's on your mind? Supports Markdown and LaTeX..."
+                editorHeightClass="h-24"
+                previewMinHeightClass="min-h-[6rem]"
               />
               <div className="space-y-1.5">
                 <div className="flex gap-2">

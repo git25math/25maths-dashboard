@@ -40,7 +40,7 @@ import { TasksView } from './views/TasksView';
 import { HousePointHistoryView } from './views/HousePointHistoryView';
 import { EmailDigestView } from './views/EmailDigestView';
 import { ProjectsView } from './views/ProjectsView';
-import { KahootUploadView } from './views/KahootUploadView';
+import { KahootHub } from './views/kahoot/KahootHub';
 import { SettingsView } from './views/SettingsView';
 
 function AppContent() {
@@ -500,7 +500,7 @@ function AppContent() {
         );
       case 'kahoot-upload':
         return (
-          <KahootUploadView
+          <KahootHub
             kahootItems={data.kahootItems}
             onAddKahoot={data.addKahoot}
             onUpdateKahoot={data.updateKahoot}

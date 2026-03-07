@@ -753,7 +753,7 @@ export const StudentsView = ({
                       {comm.needs_follow_up && comm.follow_up_plan && (
                         <div className="p-2 bg-amber-50 rounded-lg border border-amber-100">
                           <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">跟进计划</p>
-                          <p className="text-xs text-amber-700">{comm.follow_up_plan}</p>
+                          <MarkdownRenderer content={comm.follow_up_plan} className="text-xs text-amber-700 [&_p]:m-0" />
                         </div>
                       )}
                       {/* Follow-up records */}
@@ -763,7 +763,7 @@ export const StudentsView = ({
                           {comm.follow_ups.map((fu, idx) => (
                             <div key={idx} className="text-xs text-slate-600">
                               <span className="text-[10px] text-slate-400 font-mono mr-2">{fu.date}</span>
-                              {fu.content}
+                              <MarkdownRenderer content={fu.content} className="inline-block text-xs text-slate-600 [&_p]:inline [&_p]:m-0" />
                             </div>
                           ))}
                         </div>
@@ -876,7 +876,12 @@ export const StudentsView = ({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-3xl font-bold text-slate-900">{selectedClass.name}</h2>
-              <p className="text-slate-500 mt-1">{selectedClass.year_group} • {selectedClass.description}</p>
+              <div className="text-slate-500 mt-1 space-y-1">
+                <p>{selectedClass.year_group}</p>
+                {selectedClass.description && (
+                  <MarkdownRenderer content={selectedClass.description} className="text-sm text-slate-500 [&_p]:m-0" />
+                )}
+              </div>
             </div>
           </div>
 
@@ -982,7 +987,9 @@ export const StudentsView = ({
               </div>
               <div>
                 <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{cls.name}</h3>
-                <p className="text-sm text-slate-500 mt-1 line-clamp-2">{cls.description}</p>
+                {cls.description && (
+                  <MarkdownRenderer content={cls.description} className="text-sm text-slate-500 mt-1 line-clamp-2 [&_p]:inline [&_p]:m-0" />
+                )}
               </div>
               <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{cls.student_ids.length} Students</span>

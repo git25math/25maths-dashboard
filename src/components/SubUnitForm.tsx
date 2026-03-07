@@ -4,10 +4,14 @@ import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective, PrepRes
 import { RichTextEditor } from './RichTextEditor';
 import { uploadFile } from '../services/storageService';
 import { ResourceBankEditor } from './ResourceBankEditor';
+import { geminiService } from '../services/geminiService';
 import { PREP_RESOURCE_KIND_OPTIONS, dedupePrepResources, emptyPrepResource, isPrepResourceFilled } from '../lib/prepResourceCatalog';
 
 interface SubUnitFormProps {
   subUnit?: SubUnit | null;
+  unitTitle?: string;
+  yearGroup?: string;
+  aiPromptTemplate?: string;
   onSave: (subUnit: SubUnit) => void;
   onCancel: () => void;
 }
@@ -83,7 +87,7 @@ const emptyReflection: TeachingReflection = {
 const emptyVocabularyItem = (): VocabularyItem => ({ english: '', chinese: '' });
 const emptyTypicalExample = (): TypicalExample => ({ question: '', solution: '' });
 
-export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => {
+export const SubUnitForm = ({ subUnit, unitTitle, yearGroup, aiPromptTemplate, onSave, onCancel }: SubUnitFormProps) => {
   const emptyLO = (): LearningObjective => ({
     id: genId(),
     objective: '',
@@ -109,6 +113,10 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   const [homeworkContent, setHomeworkContent] = useState('');
   const [reflection, setReflection] = useState<TeachingReflection>(emptyReflection);
   const [aiSummary, setAiSummary] = useState('');
+  const [generatingConceptIds, setGeneratingConceptIds] = useState<Record<string, boolean>>({});
+  const [generatingExampleIds, setGeneratingExampleIds] = useState<Record<string, boolean>>({});
+  const [conceptErrors, setConceptErrors] = useState<Record<string, string>>({});
+  const [exampleErrors, setExampleErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (subUnit) {
@@ -151,6 +159,10 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
       setReflection(emptyReflection);
       setAiSummary('');
     }
+    setGeneratingConceptIds({});
+    setGeneratingExampleIds({});
+    setConceptErrors({});
+    setExampleErrors({});
   }, [subUnit]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -363,6 +375,109 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
     setReflection({ ...reflection, [field]: val });
   };
 
+  const updateLOById = (loId: string, updater: (current: LearningObjective) => LearningObjective) => {
+    setLearningObjectives(prev => prev.map(lo => (lo.id === loId ? updater(lo) : lo)));
+  };
+
+  const setConceptGenerating = (loId: string, isGenerating: boolean) => {
+    setGeneratingConceptIds(prev => {
+      const next = { ...prev };
+      if (isGenerating) next[loId] = true;
+      else delete next[loId];
+      return next;
+    });
+  };
+
+  const setExampleGenerating = (loId: string, isGenerating: boolean) => {
+    setGeneratingExampleIds(prev => {
+      const next = { ...prev };
+      if (isGenerating) next[loId] = true;
+      else delete next[loId];
+      return next;
+    });
+  };
+
+  const setConceptError = (loId: string, message?: string) => {
+    setConceptErrors(prev => {
+      const next = { ...prev };
+      if (message) next[loId] = message;
+      else delete next[loId];
+      return next;
+    });
+  };
+
+  const setExampleError = (loId: string, message?: string) => {
+    setExampleErrors(prev => {
+      const next = { ...prev };
+      if (message) next[loId] = message;
+      else delete next[loId];
+      return next;
+    });
+  };
+
+  const buildObjectiveContext = (lo: LearningObjective) => ({
+    unitTitle,
+    yearGroup,
+    aiPromptTemplate,
+    subUnitTitle: title.trim() || subUnit?.title || 'Untitled Sub-Unit',
+    objective: lo.objective.trim(),
+    sharedVocabulary: vocabulary.filter(v => v.english.trim() || v.chinese.trim()),
+    objectiveVocabulary: (lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()),
+    classroomExercises: classroomExercises.trim(),
+    homeworkContent: homeworkContent.trim(),
+    aiSummary: aiSummary.trim(),
+    conceptExplanation: lo.concept_explanation || '',
+  });
+
+  const handleGenerateConcept = async (lo: LearningObjective) => {
+    if (!lo.objective.trim()) {
+      setConceptError(lo.id, 'Add the learning objective before generating the explanation.');
+      return;
+    }
+
+    setConceptGenerating(lo.id, true);
+    setConceptError(lo.id);
+
+    try {
+      const generated = await geminiService.generateObjectiveConceptExplanation(buildObjectiveContext(lo));
+      updateLOById(lo.id, current => ({ ...current, concept_explanation: generated }));
+    } catch (err) {
+      setConceptError(lo.id, err instanceof Error ? err.message : 'Failed to generate concept explanation.');
+    } finally {
+      setConceptGenerating(lo.id, false);
+    }
+  };
+
+  const handleGenerateExamples = async (lo: LearningObjective) => {
+    if (!lo.objective.trim()) {
+      setExampleError(lo.id, 'Add the learning objective before generating examples.');
+      return;
+    }
+
+    setExampleGenerating(lo.id, true);
+    setExampleError(lo.id);
+
+    try {
+      const generated = await geminiService.generateObjectiveTypicalExamples(buildObjectiveContext(lo));
+      const usableExamples = generated
+        .filter(example => ((example?.question || '').trim() || (example?.solution || '').trim()))
+        .map(example => ({
+          question: (example.question || '').trim(),
+          solution: (example.solution || '').trim(),
+        }));
+
+      if (usableExamples.length === 0) {
+        throw new Error('AI returned no usable examples.');
+      }
+
+      updateLOById(lo.id, current => ({ ...current, typical_examples: usableExamples }));
+    } catch (err) {
+      setExampleError(lo.id, err instanceof Error ? err.message : 'Failed to generate typical examples.');
+    } finally {
+      setExampleGenerating(lo.id, false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -415,16 +530,20 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
             <div className="space-y-4">
               {learningObjectives.map((lo, i) => (
                 <div key={lo.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 items-start">
                     <span className="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">
                       #{i + 1}
                     </span>
-                    <textarea
-                      value={lo.objective}
-                      onChange={e => updateLO(i, 'objective', e.target.value)}
-                      className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm resize-none h-16"
-                      placeholder={`Learning Objective ${i + 1}`}
-                    />
+                    <div className="flex-1">
+                      <RichTextEditor
+                        value={lo.objective}
+                        onChange={value => updateLO(i, 'objective', value)}
+                        placeholder={`Learning Objective ${i + 1} (supports Markdown and LaTeX)...`}
+                        editorHeightClass="h-24"
+                        previewMinHeightClass="min-h-[6rem]"
+                        helperText=""
+                      />
+                    </div>
                     <button type="button" onClick={() => removeLO(i)} className="p-2 text-red-400 hover:text-red-600 self-start">
                       <Trash2 size={18} />
                     </button>
@@ -532,21 +651,48 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                       </section>
 
                       <section className="space-y-2">
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Concept Explanation</label>
-                        <textarea
+                        <div className="flex items-center justify-between gap-3">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Concept Explanation</label>
+                          <button
+                            type="button"
+                            onClick={() => void handleGenerateConcept(lo)}
+                            disabled={!lo.objective.trim() || !!generatingConceptIds[lo.id]}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                          >
+                            {generatingConceptIds[lo.id] ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            {generatingConceptIds[lo.id] ? 'Generating...' : 'AI Generate'}
+                          </button>
+                        </div>
+                        <RichTextEditor
                           value={lo.concept_explanation || ''}
-                          onChange={e => updateLO(i, 'concept_explanation', e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm resize-none h-24"
+                          onChange={value => updateLO(i, 'concept_explanation', value)}
                           placeholder="Explain the key concept, misconceptions, and the teaching sequence for this objective..."
+                          editorHeightClass="h-28"
+                          previewMinHeightClass="min-h-[7rem]"
+                          helperText=""
                         />
+                        {conceptErrors[lo.id] && (
+                          <p className="text-xs text-red-500">{conceptErrors[lo.id]}</p>
+                        )}
                       </section>
 
                       <section className="space-y-3">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Typical Examples</label>
-                          <button type="button" onClick={() => addLOExample(i)} className="text-indigo-600 text-[11px] font-bold hover:underline flex items-center gap-1">
-                            <Plus size={12} /> Add
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => void handleGenerateExamples(lo)}
+                              disabled={!lo.objective.trim() || !!generatingExampleIds[lo.id]}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                            >
+                              {generatingExampleIds[lo.id] ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                              {generatingExampleIds[lo.id] ? 'Generating...' : 'AI Generate'}
+                            </button>
+                            <button type="button" onClick={() => addLOExample(i)} className="text-indigo-600 text-[11px] font-bold hover:underline flex items-center gap-1">
+                              <Plus size={12} /> Add
+                            </button>
+                          </div>
                         </div>
                         <div className="space-y-3">
                           {(lo.typical_examples || []).map((example, exampleIndex) => (
@@ -557,17 +703,21 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                                   <Trash2 size={15} />
                                 </button>
                               </div>
-                              <textarea
+                              <RichTextEditor
+                                label="Question"
                                 value={example.question}
-                                onChange={e => updateLOExample(i, exampleIndex, 'question', e.target.value)}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-20 bg-white"
+                                onChange={value => updateLOExample(i, exampleIndex, 'question', value)}
                                 placeholder="Question / worked example prompt"
+                                editorHeightClass="h-24"
+                                previewMinHeightClass="min-h-[6rem]"
                               />
-                              <textarea
+                              <RichTextEditor
+                                label="Solution"
                                 value={example.solution}
-                                onChange={e => updateLOExample(i, exampleIndex, 'solution', e.target.value)}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24 bg-white"
+                                onChange={value => updateLOExample(i, exampleIndex, 'solution', value)}
                                 placeholder="Solution steps / board explanation"
+                                editorHeightClass="h-28"
+                                previewMinHeightClass="min-h-[7rem]"
                               />
                             </div>
                           ))}
@@ -575,6 +725,9 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                             <p className="text-xs text-slate-400 italic">No objective-specific examples yet.</p>
                           )}
                         </div>
+                        {exampleErrors[lo.id] && (
+                          <p className="text-xs text-red-500">{exampleErrors[lo.id]}</p>
+                        )}
                       </section>
 
                       <section className="space-y-3">
@@ -742,15 +895,14 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                   className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-slate-500">学生接受状态 Student Reception</label>
-                <textarea
-                  value={reflection.student_reception || ''}
-                  onChange={e => updateReflection('student_reception', e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm h-20 resize-none"
-                  placeholder="How well did students receive the content?"
-                />
-              </div>
+              <RichTextEditor
+                label="学生接受状态 Student Reception"
+                value={reflection.student_reception || ''}
+                onChange={val => updateReflection('student_reception', val)}
+                placeholder="How well did students receive the content?"
+                editorHeightClass="h-24"
+                previewMinHeightClass="min-h-[6rem]"
+              />
               <RichTextEditor
                 label="计划讲解 Planned Content"
                 value={reflection.planned_content || ''}

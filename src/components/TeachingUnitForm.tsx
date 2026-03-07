@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
+import { X, Save, Plus, Trash2, Link as LinkIcon, Loader2, Sparkles } from 'lucide-react';
 import { PrepResource, TeachingUnit } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { ResourceBankEditor } from './ResourceBankEditor';
 import { TEACHING_YEAR_GROUPS } from '../shared/constants';
 import { isPrepResourceFilled } from '../lib/prepResourceCatalog';
+import { geminiService } from '../services/geminiService';
 
 interface TeachingUnitFormProps {
   unit?: TeachingUnit | null;
@@ -13,54 +14,44 @@ interface TeachingUnitFormProps {
   initialData?: { year_group: string; title: string } | null;
 }
 
+const createEmptyUnitFormData = (initialData?: { year_group: string; title: string } | null): Omit<TeachingUnit, 'id'> => ({
+  year_group: initialData?.year_group || 'Year 7',
+  title: initialData?.title || '',
+  sub_units: [],
+  typical_examples: [{ question: '', solution: '' }],
+  worksheet_url: '',
+  homework_url: '',
+  online_practice_url: '',
+  kahoot_url: '',
+  vocab_practice_url: '',
+  shared_resources: [],
+  prep_material_template: '',
+  ai_prompt_template: '',
+  teaching_summary: '',
+});
+
 export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: TeachingUnitFormProps) => {
-  const [formData, setFormData] = useState<Omit<TeachingUnit, 'id'>>({
-    year_group: 'Year 7',
-    title: '',
-    sub_units: [],
-    typical_examples: [{ question: '', solution: '' }],
-    worksheet_url: '',
-    homework_url: '',
-    online_practice_url: '',
-    kahoot_url: '',
-    vocab_practice_url: '',
-    shared_resources: [],
-    prep_material_template: '',
-    ai_prompt_template: '',
-    teaching_summary: ''
-  });
+  const [formData, setFormData] = useState<Omit<TeachingUnit, 'id'>>(createEmptyUnitFormData(initialData));
   const [sharedResources, setSharedResources] = useState<PrepResource[]>([]);
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [isGeneratingPrepTemplate, setIsGeneratingPrepTemplate] = useState(false);
+  const [isGeneratingExamples, setIsGeneratingExamples] = useState(false);
+  const [promptError, setPromptError] = useState<string | null>(null);
+  const [prepTemplateError, setPrepTemplateError] = useState<string | null>(null);
+  const [examplesError, setExamplesError] = useState<string | null>(null);
 
   useEffect(() => {
     if (unit) {
       const { id, ...rest } = unit;
       setFormData(rest);
       setSharedResources(unit.shared_resources || []);
-    } else if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        year_group: initialData.year_group,
-        title: initialData.title,
-      }));
-      setSharedResources([]);
     } else {
-      setFormData({
-        year_group: 'Year 7',
-        title: '',
-        sub_units: [],
-        typical_examples: [{ question: '', solution: '' }],
-        worksheet_url: '',
-        homework_url: '',
-        online_practice_url: '',
-        kahoot_url: '',
-        vocab_practice_url: '',
-        shared_resources: [],
-        prep_material_template: '',
-        ai_prompt_template: '',
-        teaching_summary: ''
-      });
+      setFormData(createEmptyUnitFormData(initialData));
       setSharedResources([]);
     }
+    setPromptError(null);
+    setPrepTemplateError(null);
+    setExamplesError(null);
   }, [unit, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -83,6 +74,99 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: Teachi
     setFormData({ ...formData, typical_examples: newExs });
   };
   const removeExample = (index: number) => setFormData({ ...formData, typical_examples: formData.typical_examples.filter((_, i) => i !== index) });
+
+  const buildUnitContext = () => ({
+    yearGroup: formData.year_group,
+    unitTitle: formData.title.trim(),
+    prepMaterialTemplate: formData.prep_material_template,
+    aiPromptTemplate: formData.ai_prompt_template,
+    teachingSummary: formData.teaching_summary,
+    typicalExamples: formData.typical_examples.filter(example => example.question.trim() || example.solution.trim()),
+    subUnits: formData.sub_units.map(subUnit => ({
+      title: subUnit.title,
+      objectives: subUnit.learning_objectives.map(objective => objective.objective).filter(Boolean),
+      reflectionNotes: [
+        subUnit.ai_summary,
+        subUnit.reflection?.student_reception,
+        subUnit.reflection?.planned_content,
+        subUnit.reflection?.actual_content,
+        subUnit.reflection?.improvements,
+      ].filter((value): value is string => !!value?.trim()),
+    })),
+    resourceTitles: [
+      formData.worksheet_url ? 'Worksheet' : '',
+      formData.homework_url ? 'Homework' : '',
+      formData.online_practice_url ? 'Online Practice' : '',
+      formData.kahoot_url ? 'Kahoot' : '',
+      formData.vocab_practice_url ? 'Vocabulary Practice' : '',
+      ...sharedResources.map(resource => resource.title.trim()).filter(Boolean),
+    ].filter(Boolean),
+  });
+
+  const handleGeneratePromptTemplate = async () => {
+    if (!formData.title.trim()) {
+      setPromptError('Add the unit title before generating the AI prompt template.');
+      return;
+    }
+
+    setIsGeneratingPrompt(true);
+    setPromptError(null);
+    try {
+      const generated = await geminiService.generateUnitPromptTemplate(buildUnitContext());
+      setFormData(prev => ({ ...prev, ai_prompt_template: generated }));
+    } catch (error) {
+      setPromptError(error instanceof Error ? error.message : 'Failed to generate AI prompt template.');
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
+  };
+
+  const handleGeneratePrepTemplate = async () => {
+    if (!formData.title.trim()) {
+      setPrepTemplateError('Add the unit title before generating the prep material template.');
+      return;
+    }
+
+    setIsGeneratingPrepTemplate(true);
+    setPrepTemplateError(null);
+    try {
+      const generated = await geminiService.generatePrepMaterialTemplate(buildUnitContext());
+      setFormData(prev => ({ ...prev, prep_material_template: generated }));
+    } catch (error) {
+      setPrepTemplateError(error instanceof Error ? error.message : 'Failed to generate prep material template.');
+    } finally {
+      setIsGeneratingPrepTemplate(false);
+    }
+  };
+
+  const handleGenerateExamples = async () => {
+    if (!formData.title.trim()) {
+      setExamplesError('Add the unit title before generating unit examples.');
+      return;
+    }
+
+    setIsGeneratingExamples(true);
+    setExamplesError(null);
+    try {
+      const generated = await geminiService.generateUnitTypicalExamples(buildUnitContext());
+      const usableExamples = generated
+        .filter(example => example.question.trim() || example.solution.trim())
+        .map(example => ({
+          question: example.question.trim(),
+          solution: example.solution.trim(),
+        }));
+
+      if (usableExamples.length === 0) {
+        throw new Error('AI returned no usable examples.');
+      }
+
+      setFormData(prev => ({ ...prev, typical_examples: usableExamples }));
+    } catch (error) {
+      setExamplesError(error instanceof Error ? error.message : 'Failed to generate unit examples.');
+    } finally {
+      setIsGeneratingExamples(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -179,11 +263,48 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: Teachi
               />
             </div>
 
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Prep Material Template</label>
+                <button
+                  type="button"
+                  onClick={() => void handleGeneratePrepTemplate()}
+                  disabled={!formData.title.trim() || isGeneratingPrepTemplate}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  {isGeneratingPrepTemplate ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {isGeneratingPrepTemplate ? 'Generating...' : 'AI Generate'}
+                </button>
+              </div>
+              <RichTextEditor
+                value={formData.prep_material_template}
+                onChange={value => setFormData({ ...formData, prep_material_template: value })}
+                placeholder="High-value teacher prep notes for this unit: key models, misconceptions, hinge checks, and resource priorities..."
+                editorHeightClass="h-36"
+                previewMinHeightClass="min-h-[9rem]"
+              />
+              <p className="text-xs text-slate-500">
+                This template is fed into lesson-plan generation and should capture the strongest modelling moves, misconceptions, and resource priorities for the whole unit.
+              </p>
+              {prepTemplateError && <p className="text-xs text-red-500">{prepTemplateError}</p>}
+            </div>
+
             <div className="flex justify-between items-center">
               <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Typical Examples</label>
-              <button type="button" onClick={addExample} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
-                <Plus size={14} /> Add Example
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateExamples()}
+                  disabled={!formData.title.trim() || isGeneratingExamples}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  {isGeneratingExamples ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {isGeneratingExamples ? 'Generating...' : 'AI Generate'}
+                </button>
+                <button type="button" onClick={addExample} className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline">
+                  <Plus size={14} /> Add Example
+                </button>
+              </div>
             </div>
             <div className="space-y-4">
               {formData.typical_examples.map((ex, i) => (
@@ -209,16 +330,47 @@ export const TeachingUnitForm = ({ unit, onSave, onCancel, initialData }: Teachi
                 </div>
               ))}
             </div>
+            {examplesError && <p className="text-xs text-red-500">{examplesError}</p>}
           </section>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">AI Prompt Template</label>
-            <textarea
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">AI Prompt Template</label>
+              <button
+                type="button"
+                onClick={() => void handleGeneratePromptTemplate()}
+                disabled={!formData.title.trim() || isGeneratingPrompt}
+                className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  {isGeneratingPrompt ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {isGeneratingPrompt ? 'Generating...' : 'AI Generate'}
+                </button>
+            </div>
+            <RichTextEditor
               value={formData.ai_prompt_template}
-              onChange={e => setFormData({ ...formData, ai_prompt_template: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-32 resize-none font-mono text-xs"
+              onChange={value => setFormData({ ...formData, ai_prompt_template: value })}
               placeholder="Prompt for AI generation..."
+              editorHeightClass="h-32"
+              previewMinHeightClass="min-h-[8rem]"
             />
+            <p className="text-xs text-slate-500">
+              Keep this focused on teaching style and output constraints. Topic, year group, objectives, examples, and prep notes are injected automatically.
+            </p>
+            {promptError && <p className="text-xs text-red-500">{promptError}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Teaching Summary</label>
+            <RichTextEditor
+              value={formData.teaching_summary || ''}
+              onChange={value => setFormData({ ...formData, teaching_summary: value })}
+              placeholder="Record what worked, what students struggled with, and what should change next time..."
+              editorHeightClass="h-32"
+              previewMinHeightClass="min-h-[8rem]"
+            />
+            <p className="text-xs text-slate-500">
+              This is the end-of-unit retrospective. The unit detail page can also generate it from sub-unit progress and reflection notes.
+            </p>
           </div>
         </form>
 

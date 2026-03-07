@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { AISummary, Idea, WorkLog, SOP, SmartTaskPreview } from '../types';
+import { AISummary, Idea, WorkLog, SOP, SmartTaskPreview, TypicalExample, VocabularyItem } from '../types';
 
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -15,8 +15,41 @@ export interface LessonPlanContext {
   yearGroup: string;
   unitTitle: string;
   unitObjectives: string[];
+  prepMaterialTemplate?: string;
+  unitTypicalExamples?: TypicalExample[];
   subUnits?: { title: string; objectives: string[] }[];
   completedObjectives: string[];
+}
+
+export interface UnitPlanningSubUnit {
+  title: string;
+  objectives: string[];
+  reflectionNotes?: string[];
+}
+
+export interface UnitPlanningContext {
+  yearGroup: string;
+  unitTitle: string;
+  prepMaterialTemplate?: string;
+  aiPromptTemplate?: string;
+  teachingSummary?: string;
+  typicalExamples?: TypicalExample[];
+  subUnits?: UnitPlanningSubUnit[];
+  resourceTitles?: string[];
+}
+
+export interface ObjectivePrepContext {
+  unitTitle?: string;
+  yearGroup?: string;
+  aiPromptTemplate?: string;
+  subUnitTitle: string;
+  objective: string;
+  sharedVocabulary?: VocabularyItem[];
+  objectiveVocabulary?: VocabularyItem[];
+  classroomExercises?: string;
+  homeworkContent?: string;
+  aiSummary?: string;
+  conceptExplanation?: string;
 }
 
 export interface CategorizationResult {
@@ -97,6 +130,70 @@ export interface ActionPlanInput {
   transcript?: string;
 }
 
+const stripJsonFences = (raw: string) => raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+
+const formatVocabulary = (items?: VocabularyItem[]) => {
+  const cleaned = (items || [])
+    .filter(item => item.english.trim() || item.chinese.trim())
+    .map(item => {
+      const english = item.english.trim();
+      const chinese = item.chinese.trim();
+      if (english && chinese) return `${english} (${chinese})`;
+      return english || chinese;
+    });
+
+  return cleaned.length > 0 ? cleaned.join('; ') : 'None provided.';
+};
+
+const formatTypicalExamples = (examples?: TypicalExample[]) => {
+  const cleaned = (examples || [])
+    .filter(example => example.question.trim() || example.solution.trim())
+    .map((example, index) => `Example ${index + 1}: Q: ${example.question.trim() || 'N/A'} | A: ${example.solution.trim() || 'N/A'}`);
+
+  return cleaned.length > 0 ? cleaned.join('\n') : 'None provided.';
+};
+
+const formatUnitSubUnits = (subUnits?: UnitPlanningSubUnit[]) => {
+  const cleaned = (subUnits || []).map(subUnit => {
+    const objectives = subUnit.objectives.length > 0 ? subUnit.objectives.join('; ') : 'No objectives listed.';
+    const reflections = (subUnit.reflectionNotes || []).filter(Boolean);
+    return [
+      `- ${subUnit.title}`,
+      `  Objectives: ${objectives}`,
+      reflections.length > 0 ? `  Notes: ${reflections.join(' | ')}` : '',
+    ].filter(Boolean).join('\n');
+  });
+
+  return cleaned.length > 0 ? cleaned.join('\n') : 'None provided.';
+};
+
+const buildUnitContextBlock = (context: UnitPlanningContext) => `Context:
+- Year Group: ${context.yearGroup}
+- Unit: ${context.unitTitle}
+- Prep Material Template: ${context.prepMaterialTemplate?.trim() || 'Not provided'}
+- AI Prompt Template: ${context.aiPromptTemplate?.trim() || 'Not provided'}
+- Existing Teaching Summary: ${context.teachingSummary?.trim() || 'Not provided'}
+- Resource Titles: ${(context.resourceTitles || []).filter(Boolean).join('; ') || 'None provided'}
+
+Sub-units:
+${formatUnitSubUnits(context.subUnits)}
+
+Unit Typical Examples:
+${formatTypicalExamples(context.typicalExamples)}`;
+
+const buildObjectiveContextBlock = (context: ObjectivePrepContext) => `Context:
+- Year Group: ${context.yearGroup || 'Not specified'}
+- Unit: ${context.unitTitle || 'Not specified'}
+- Sub-Unit: ${context.subUnitTitle}
+- Learning Objective: ${context.objective}
+- Objective Vocabulary: ${formatVocabulary(context.objectiveVocabulary)}
+- Shared Vocabulary: ${formatVocabulary(context.sharedVocabulary)}
+- Shared Classroom Exercises: ${context.classroomExercises?.trim() || 'Not provided'}
+- Homework Context: ${context.homeworkContent?.trim() || 'Not provided'}
+- Existing AI Summary: ${context.aiSummary?.trim() || 'Not provided'}
+- Existing Concept Explanation: ${context.conceptExplanation?.trim() || 'Not provided'}
+- Unit AI Prompt Template: ${context.aiPromptTemplate?.trim() || 'Not provided'}`;
+
 export const geminiService = {
   async transcribeAudio(audioBlob: Blob): Promise<string> {
     const ai = getClient();
@@ -163,8 +260,7 @@ ${transcript}`,
     });
 
     const text = (response.text ?? '').trim();
-    // Strip markdown code fences if present
-    const jsonStr = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(text);
     return JSON.parse(jsonStr) as AISummary;
   },
 
@@ -178,6 +274,12 @@ ${transcript}`,
     const subUnitsInfo = context.subUnits?.length
       ? `\nSub-units:\n${context.subUnits.map(s => `- ${s.title}: ${s.objectives.join('; ')}`).join('\n')}`
       : '';
+    const typicalExamplesInfo = context.unitTypicalExamples?.length
+      ? `\nUnit Typical Examples:\n${formatTypicalExamples(context.unitTypicalExamples)}`
+      : '\nNo unit-level typical examples provided.';
+    const prepTemplateInfo = context.prepMaterialTemplate?.trim()
+      ? `\nPrep Material Template:\n${context.prepMaterialTemplate.trim()}`
+      : '\nNo prep material template provided.';
 
     const prompt = `You are a lesson planning assistant for a math teacher. Generate a detailed lesson plan in Markdown format.
 
@@ -186,7 +288,7 @@ Context:
 - Topic: ${context.topic}
 - Class: ${context.className} (${context.yearGroup})
 - Unit: ${context.unitTitle}
-- Unit Objectives: ${context.unitObjectives.join('; ')}${subUnitsInfo}${completedInfo}
+- Unit Objectives: ${context.unitObjectives.join('; ')}${subUnitsInfo}${completedInfo}${typicalExamplesInfo}${prepTemplateInfo}
 
 Teacher's prompt template: ${context.aiPromptTemplate}
 
@@ -205,6 +307,176 @@ Keep it concise and practical. Use bullet points. Include specific example quest
     });
 
     return response.text ?? '';
+  },
+
+  async generatePrepMaterialTemplate(context: UnitPlanningContext): Promise<string> {
+    const ai = getClient();
+    const prompt = `You are a secondary maths planning assistant.
+
+Generate concise Markdown prep notes for this unit for the teacher's internal planning use.
+
+Requirements:
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+- Keep it practical and compact.
+- Do not write a full lesson plan.
+- Use exactly these sections:
+### Core Focus
+### Modelling and Representations
+### Misconceptions to Anticipate
+### Practice and Resource Priorities
+### Hinge Checks
+
+In "Hinge Checks", include 2 or 3 short whole-class check questions or prompts.
+
+${buildUnitContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    return (response.text ?? '').trim();
+  },
+
+  async generateUnitPromptTemplate(context: UnitPlanningContext): Promise<string> {
+    const ai = getClient();
+    const prompt = `You are a secondary maths planning assistant.
+
+Generate a reusable AI prompt template for this unit. The output should help a teacher later request lesson plans, explanations, or worked examples.
+
+Requirements:
+- Return plain text only, no markdown fences.
+- Do not generate the lesson plan itself.
+- Start with: "Act as a rigorous secondary maths teacher."
+- Then write 6-10 short bullet points describing the expected planning style, modelling approach, misconception focus, checking strategy, and formatting constraints.
+- Keep it reusable for the whole unit rather than one single lesson.
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+
+${buildUnitContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    return (response.text ?? '').trim();
+  },
+
+  async generateUnitTypicalExamples(context: UnitPlanningContext): Promise<TypicalExample[]> {
+    const ai = getClient();
+    const prompt = `You are a secondary maths planning assistant preparing unit-level worked examples.
+
+Return ONLY valid JSON array (no markdown fences) with 3 objects in this exact shape:
+[
+  {
+    "question": "Example prompt in Markdown. Use LaTeX only when helpful.",
+    "solution": "Concise worked solution in Markdown, showing the main teaching steps."
+  }
+]
+
+Requirements:
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+- Cover the breadth of the unit, not just one sub-topic.
+- Progress from foundational to standard to more demanding or transfer-style example.
+- Keep the examples classroom-appropriate for the stated year group.
+
+${buildUnitContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = stripJsonFences(raw);
+    return JSON.parse(jsonStr) as TypicalExample[];
+  },
+
+  async generateUnitTeachingSummary(context: UnitPlanningContext): Promise<string> {
+    const ai = getClient();
+    const prompt = `You are a secondary maths reflection assistant.
+
+Generate a concise Markdown teaching summary for this unit based on available sub-unit coverage, examples, notes, and reflections.
+
+Requirements:
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+- Be honest about missing evidence if reflections are sparse.
+- Keep it concise and actionable.
+- Use exactly these sections:
+### Coverage Snapshot
+### What Landed Well
+### Gaps and Misconceptions
+### Next Adjustments
+
+${buildUnitContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    return (response.text ?? '').trim();
+  },
+
+  async generateObjectiveConceptExplanation(context: ObjectivePrepContext): Promise<string> {
+    const ai = getClient();
+    const prompt = `You are a math teaching assistant preparing one learning objective for classroom delivery.
+
+Generate a concise Markdown explanation for the teacher to use directly in planning or board notes.
+
+Requirements:
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+- Focus on explanation quality, not lesson timings.
+- Keep it practical and compact.
+- Do not add a title before the sections.
+- Use exactly these sections:
+### Core Idea
+### Common Misconceptions
+### Teaching Sequence
+### Quick Check
+
+In "Teaching Sequence", give 3-5 clear teacher moves or modelling steps.
+In "Quick Check", give 2 short hinge-check questions or prompts.
+
+${buildObjectiveContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    return (response.text ?? '').trim();
+  },
+
+  async generateObjectiveTypicalExamples(context: ObjectivePrepContext): Promise<TypicalExample[]> {
+    const ai = getClient();
+    const prompt = `You are a math teaching assistant preparing worked examples for one learning objective.
+
+Return ONLY valid JSON array (no markdown fences) with 2 or 3 objects in this exact shape:
+[
+  {
+    "question": "Example prompt in Markdown. Use LaTeX only when helpful.",
+    "solution": "Concise worked solution in Markdown, showing the teacher's modelled steps."
+  }
+]
+
+Requirements:
+- Use the same language as the context, or bilingual Chinese/English if the context is mixed.
+- Make the examples progressively harder: first direct modelling, then standard practice, then optional transfer/application.
+- Keep questions classroom-appropriate for the stated year group.
+- Solutions should be clear enough to project or write on the board.
+- Avoid unnecessary prose outside the worked steps.
+
+${buildObjectiveContextBlock(context)}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+
+    const raw = (response.text ?? '').trim();
+    const jsonStr = stripJsonFences(raw);
+    return JSON.parse(jsonStr) as TypicalExample[];
   },
 
   async suggestCategorization(text: string): Promise<CategorizationResult> {
@@ -237,7 +509,7 @@ ${text}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as CategorizationResult;
   },
 
@@ -304,7 +576,7 @@ ${ideasText}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as ConsolidatedIdea;
   },
 
@@ -343,7 +615,7 @@ ${logsText}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as ConsolidatedWorkLog;
   },
 
@@ -382,7 +654,7 @@ ${sopsText}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as ConsolidatedSOP;
   },
 
@@ -433,7 +705,7 @@ ${contextBlock}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as SmartTaskPreview[];
   },
 
@@ -527,7 +799,7 @@ ${emailContent}`,
     });
 
     const raw = (response.text ?? '').trim();
-    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    const jsonStr = stripJsonFences(raw);
     return JSON.parse(jsonStr) as EmailDigestResult;
   },
 

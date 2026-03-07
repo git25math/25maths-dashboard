@@ -21,9 +21,21 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   label?: string;
+  editorHeightClass?: string;
+  previewMinHeightClass?: string;
+  helperText?: string;
 }
 
-export const RichTextEditor = ({ value, onChange, placeholder, className, label }: RichTextEditorProps) => {
+export const RichTextEditor = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+  label,
+  editorHeightClass = 'h-48',
+  previewMinHeightClass = 'min-h-[12rem]',
+  helperText = 'Supports Markdown and LaTeX (e.g. $E=mc^2$)',
+}: RichTextEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -104,13 +116,13 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder={placeholder}
-              className="w-full h-48 p-4 outline-none resize-none text-sm font-sans leading-relaxed"
+              className={cn("w-full p-4 outline-none resize-none text-sm font-sans leading-relaxed", editorHeightClass)}
             />
           </div>
         ) : (
           <div 
             onClick={() => setIsEditing(true)}
-            className="min-h-[12rem] p-4 bg-white border border-slate-200 rounded-2xl cursor-text hover:border-indigo-300 transition-all"
+            className={cn("p-4 bg-white border border-slate-200 rounded-2xl cursor-text hover:border-indigo-300 transition-all", previewMinHeightClass)}
           >
             {value ? (
               <div className="markdown-content">
@@ -127,7 +139,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, label 
           </div>
         )}
       </div>
-      <p className="text-[10px] text-slate-400 italic">Supports Markdown and LaTeX (e.g. $E=mc^2$)</p>
+      {helperText && <p className="text-[10px] text-slate-400 italic">{helperText}</p>}
     </div>
   );
 };

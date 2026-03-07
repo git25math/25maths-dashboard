@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2, Gauge, GraduationCap } from 'lucide-react';
+import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2, Gauge, GraduationCap, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective, PrepResource } from '../types';
@@ -9,6 +9,7 @@ import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 import { getObjectivePrepMetrics, getSharedPrepResources, getTeachingUnitResources } from '../lib/objectivePrep';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { PrepCompletenessSummary, getPrepCoverageLevel, summarizeClassPrep, summarizeUnitPrep, summarizeYearPrep } from '../lib/prepCompleteness';
+import { geminiService } from '../services/geminiService';
 
 // --- Helpers ---
 
@@ -351,6 +352,8 @@ export const TeachingView = ({
   const [isSubUnitFormOpen, setIsSubUnitFormOpen] = useState(false);
   const [editingSubUnit, setEditingSubUnit] = useState<SubUnit | null>(null);
   const [loFilter, setLoFilter] = useState<LOFilterStatus>('all');
+  const [isGeneratingUnitSummary, setIsGeneratingUnitSummary] = useState(false);
+  const [unitSummaryError, setUnitSummaryError] = useState<string | null>(null);
   const teachingClasses = classes.filter(cls => !NON_TEACHING_GROUPS.has(cls.year_group));
   const unitPrepMap = useMemo(
     () => new Map(teachingUnits.map(unit => [unit.id, summarizeUnitPrep(unit)])),
@@ -399,10 +402,54 @@ export const TeachingView = ({
     }
   }, [initialUnitId, onClearInitialUnit, teachingUnits]);
 
+  useEffect(() => {
+    setUnitSummaryError(null);
+  }, [selectedUnit?.id]);
+
   const handleCopyPrompt = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      onToast?.('Prompt copied to clipboard!');
+      onToast?.('Copied to clipboard!');
     });
+  };
+
+  const buildUnitPlanningContext = (unit: TeachingUnit) => ({
+    yearGroup: unit.year_group,
+    unitTitle: unit.title,
+    prepMaterialTemplate: unit.prep_material_template,
+    aiPromptTemplate: unit.ai_prompt_template,
+    teachingSummary: unit.teaching_summary,
+    typicalExamples: unit.typical_examples,
+    resourceTitles: getTeachingUnitResources(unit).map(resource => resource.title.trim()).filter(Boolean),
+    subUnits: unit.sub_units.map(subUnit => ({
+      title: subUnit.title,
+      objectives: subUnit.learning_objectives.map(objective => objective.objective).filter(Boolean),
+      reflectionNotes: [
+        subUnit.ai_summary,
+        subUnit.classroom_exercises,
+        subUnit.homework_content,
+        subUnit.reflection?.student_reception,
+        subUnit.reflection?.planned_content,
+        subUnit.reflection?.actual_content,
+        subUnit.reflection?.improvements,
+      ].filter((value): value is string => !!value?.trim()),
+    })),
+  });
+
+  const handleGenerateUnitSummary = async () => {
+    if (!selectedUnit) return;
+
+    setIsGeneratingUnitSummary(true);
+    setUnitSummaryError(null);
+
+    try {
+      const summary = await geminiService.generateUnitTeachingSummary(buildUnitPlanningContext(selectedUnit));
+      await Promise.resolve(onSaveUnit({ ...selectedUnit, teaching_summary: summary }));
+      onToast?.('Teaching summary generated.');
+    } catch (error) {
+      setUnitSummaryError(error instanceof Error ? error.message : 'Failed to generate teaching summary.');
+    } finally {
+      setIsGeneratingUnitSummary(false);
+    }
   };
 
   // --- Sub-Unit CRUD ---
@@ -795,7 +842,7 @@ export const TeachingView = ({
                     {selectedSubUnit.reflection.student_reception && (
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">学生接受状态</p>
-                        <p className="text-sm text-slate-700">{selectedSubUnit.reflection.student_reception}</p>
+                        <MarkdownRenderer content={selectedSubUnit.reflection.student_reception} className="text-sm text-slate-700" />
                       </div>
                     )}
                     {selectedSubUnit.reflection.planned_content && (
@@ -847,6 +894,9 @@ export const TeachingView = ({
         {isSubUnitFormOpen && (
           <SubUnitForm
             subUnit={editingSubUnit}
+            unitTitle={selectedUnit.title}
+            yearGroup={selectedUnit.year_group}
+            aiPromptTemplate={selectedUnit.ai_prompt_template}
             onSave={handleSaveSubUnit}
             onCancel={() => { setIsSubUnitFormOpen(false); setEditingSubUnit(null); }}
           />
@@ -1082,13 +1132,25 @@ export const TeachingView = ({
             <div className="glass-card p-8 space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-bold text-lg">教学总结 (Teaching Summary)</h3>
-                <button disabled className="flex items-center gap-2 text-slate-400 text-sm font-bold cursor-not-allowed" title="Coming Soon">
-                  <Lightbulb size={16} /> AI Summary
+                <button
+                  onClick={() => void handleGenerateUnitSummary()}
+                  disabled={isGeneratingUnitSummary}
+                  className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  {isGeneratingUnitSummary ? <Loader2 size={16} className="animate-spin" /> : <Lightbulb size={16} />}
+                  {isGeneratingUnitSummary ? 'Generating...' : 'AI Summary'}
                 </button>
               </div>
-              <p className="text-slate-600 text-sm leading-relaxed italic">
-                {selectedUnit.teaching_summary || "No summary recorded for this unit yet."}
-              </p>
+              {selectedUnit.teaching_summary ? (
+                <MarkdownRenderer content={selectedUnit.teaching_summary} className="text-sm text-slate-700" />
+              ) : (
+                <p className="text-slate-600 text-sm leading-relaxed italic">
+                  No summary recorded for this unit yet.
+                </p>
+              )}
+              {unitSummaryError && (
+                <p className="text-xs text-red-500">{unitSummaryError}</p>
+              )}
             </div>
           </div>
 
@@ -1099,10 +1161,32 @@ export const TeachingView = ({
             </div>
 
             <div className="glass-card p-6 space-y-4">
+              <h3 className="font-bold text-lg">备课模板 (Prep Material)</h3>
+              {selectedUnit.prep_material_template ? (
+                <div className="p-4 bg-amber-50/60 rounded-xl border border-amber-100">
+                  <MarkdownRenderer content={selectedUnit.prep_material_template} className="text-sm text-slate-700" />
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">No prep material template defined for this unit yet.</p>
+              )}
+              <button
+                onClick={() => handleCopyPrompt(selectedUnit.prep_material_template || '')}
+                disabled={!selectedUnit.prep_material_template}
+                className="w-full btn-secondary text-xs py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Copy Template
+              </button>
+            </div>
+
+            <div className="glass-card p-6 space-y-4">
               <h3 className="font-bold text-lg">备课提示 (AI Prompt)</h3>
-              <div className="p-4 bg-slate-900 rounded-xl text-xs font-mono text-indigo-300 leading-relaxed">
-                {selectedUnit.ai_prompt_template}
-              </div>
+              {selectedUnit.ai_prompt_template ? (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <MarkdownRenderer content={selectedUnit.ai_prompt_template} className="text-sm text-slate-700" />
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">No AI prompt template defined for this unit yet.</p>
+              )}
               <button
                 onClick={() => handleCopyPrompt(selectedUnit.ai_prompt_template)}
                 className="w-full btn-primary text-xs py-3"
@@ -1116,6 +1200,9 @@ export const TeachingView = ({
         {isSubUnitFormOpen && (
           <SubUnitForm
             subUnit={editingSubUnit}
+            unitTitle={selectedUnit.title}
+            yearGroup={selectedUnit.year_group}
+            aiPromptTemplate={selectedUnit.ai_prompt_template}
             onSave={handleSaveSubUnit}
             onCancel={() => { setIsSubUnitFormOpen(false); setEditingSubUnit(null); }}
           />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, Clock, BookOpen, CheckCircle2, Sparkles, FileText, Loader2, AlertTriangle, Copy, RotateCcw, Plus, ChevronDown } from 'lucide-react';
 import { TimetableEntry, ClassProfile, TeachingUnit, LessonRecord, Student, HousePointAward, MeetingRecord, PrepStatus } from '../types';
 import { cn } from '../lib/utils';
-import { RichTextEditor } from './RichTextEditor';
+import { MarkdownRenderer, RichTextEditor } from './RichTextEditor';
 import { HousePointAwardsEditor } from './HousePointAwardsEditor';
 import { getISODay, format } from 'date-fns';
 import { geminiService } from '../services/geminiService';
@@ -592,6 +592,8 @@ export const TimetableEntryForm = ({
                           yearGroup: selectedClass?.year_group || '',
                           unitTitle: selectedUnit.title,
                           unitObjectives: allLOs.map(lo => lo.objective),
+                          prepMaterialTemplate: selectedUnit.prep_material_template,
+                          unitTypicalExamples: selectedUnit.typical_examples,
                           subUnits: selectedUnit.sub_units.map(s => ({ title: s.title, objectives: s.learning_objectives.map(lo => formatObjectiveForAI(lo, s)) })),
                           completedObjectives: allLOs.filter(lo => lo.status === 'completed').map(lo => lo.objective),
                         });
@@ -614,9 +616,19 @@ export const TimetableEntryForm = ({
                     {isGenerating ? 'Generating...' : 'Generate Plan'}
                   </button>
                 </div>
-                <div className="p-4 bg-slate-900 rounded-2xl text-xs font-mono text-indigo-300 leading-relaxed">
-                  {selectedUnit.ai_prompt_template || "No AI template defined for this unit."}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  {selectedUnit.ai_prompt_template ? (
+                    <MarkdownRenderer content={selectedUnit.ai_prompt_template} className="text-xs text-slate-700" />
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">No AI template defined for this unit.</p>
+                  )}
                 </div>
+                {selectedUnit.prep_material_template && (
+                  <div className="mt-3 p-4 rounded-2xl border border-amber-100 bg-amber-50/70">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-2">Prep Material Template</p>
+                    <MarkdownRenderer content={selectedUnit.prep_material_template} className="text-xs text-slate-700" />
+                  </div>
+                )}
                 {aiError && (
                   <p className="text-xs text-red-500 mt-2">{aiError}</p>
                 )}
@@ -692,23 +704,23 @@ export const TimetableEntryForm = ({
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Progress</label>
-                      <textarea
+                      <RichTextEditor
+                        label="Progress"
                         value={lrForm.progress || ''}
-                        onChange={e => setLrForm(prev => ({ ...prev, progress: e.target.value }))}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
-                        placeholder="What was covered..."
+                        onChange={val => setLrForm(prev => ({ ...prev, progress: val }))}
+                        placeholder="What was covered... Supports Markdown and LaTeX..."
+                        editorHeightClass="h-24"
+                        previewMinHeightClass="min-h-[6rem]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-teal-700 uppercase tracking-wider">Homework Assigned</label>
-                      <textarea
+                      <RichTextEditor
+                        label="Homework Assigned"
                         value={lrForm.homework_assigned || ''}
-                        onChange={e => setLrForm(prev => ({ ...prev, homework_assigned: e.target.value }))}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg border border-teal-200 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none bg-white"
-                        placeholder="Homework details..."
+                        onChange={val => setLrForm(prev => ({ ...prev, homework_assigned: val }))}
+                        placeholder="Homework details... Supports Markdown and LaTeX..."
+                        editorHeightClass="h-24"
+                        previewMinHeightClass="min-h-[6rem]"
                       />
                     </div>
                     <div className="md:col-span-2">

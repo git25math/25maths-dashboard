@@ -105,13 +105,13 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
 
             {needsFollowUp && (
               <div className="pl-7 space-y-2">
-                <label className="text-sm font-bold text-slate-600">跟进计划</label>
-                <textarea
+                <RichTextEditor
+                  label="跟进计划"
                   value={followUpPlan}
-                  onChange={e => setFollowUpPlan(e.target.value)}
-                  placeholder="描述下一步跟进计划..."
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
+                  onChange={setFollowUpPlan}
+                  placeholder="描述下一步跟进计划... Supports Markdown and LaTeX..."
+                  editorHeightClass="h-28"
+                  previewMinHeightClass="min-h-[7rem]"
                 />
                 <p className="text-[10px] text-slate-400">保存后将自动创建待办事项（标签: 家校沟通）</p>
               </div>

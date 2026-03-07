@@ -3,6 +3,7 @@ import { X, Save } from 'lucide-react';
 import { ClassProfile, TeachingUnit } from '../types';
 import { YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
+import { RichTextEditor } from './RichTextEditor';
 
 interface ClassFormProps {
   classProfile?: ClassProfile | null;
@@ -91,15 +92,14 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
           </div>
           )}
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Description</label>
-            <textarea 
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-24 resize-none"
-              placeholder="Class description..."
-            />
-          </div>
+          <RichTextEditor
+            label="Description"
+            value={formData.description}
+            onChange={value => setFormData({ ...formData, description: value })}
+            placeholder="Class description... Supports Markdown and LaTeX..."
+            editorHeightClass="h-28"
+            previewMinHeightClass="min-h-[7rem]"
+          />
         </form>
 
         <div className="px-4 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">

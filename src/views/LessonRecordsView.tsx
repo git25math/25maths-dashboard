@@ -176,23 +176,23 @@ export const LessonRecordsView = ({ lessonRecords, classes, students, onAdd, onU
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Progress</label>
-              <input
-                type="text"
+              <RichTextEditor
+                label="Progress"
                 value={newForm.progress}
-                onChange={e => setNewForm({ ...newForm, progress: e.target.value })}
-                placeholder="What was covered..."
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                onChange={val => setNewForm({ ...newForm, progress: val })}
+                placeholder="What was covered... Supports Markdown and LaTeX..."
+                editorHeightClass="h-24"
+                previewMinHeightClass="min-h-[6rem]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Homework Assigned</label>
-              <input
-                type="text"
+              <RichTextEditor
+                label="Homework Assigned"
                 value={newForm.homework_assigned}
-                onChange={e => setNewForm({ ...newForm, homework_assigned: e.target.value })}
-                placeholder="Homework details..."
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                onChange={val => setNewForm({ ...newForm, homework_assigned: val })}
+                placeholder="Homework details... Supports Markdown and LaTeX..."
+                editorHeightClass="h-24"
+                previewMinHeightClass="min-h-[6rem]"
               />
             </div>
             <div className="md:col-span-2">
@@ -282,21 +282,23 @@ export const LessonRecordsView = ({ lessonRecords, classes, students, onAdd, onU
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Progress</label>
-                      <input
-                        type="text"
+                      <RichTextEditor
+                        label="Progress"
                         value={editForm.progress || ''}
-                        onChange={e => setEditForm({ ...editForm, progress: e.target.value })}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                        onChange={val => setEditForm({ ...editForm, progress: val })}
+                        placeholder="What was covered... Supports Markdown and LaTeX..."
+                        editorHeightClass="h-24"
+                        previewMinHeightClass="min-h-[6rem]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Homework Assigned</label>
-                      <input
-                        type="text"
+                      <RichTextEditor
+                        label="Homework Assigned"
                         value={editForm.homework_assigned || ''}
-                        onChange={e => setEditForm({ ...editForm, homework_assigned: e.target.value })}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                        onChange={val => setEditForm({ ...editForm, homework_assigned: val })}
+                        placeholder="Homework details... Supports Markdown and LaTeX..."
+                        editorHeightClass="h-24"
+                        previewMinHeightClass="min-h-[6rem]"
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -390,13 +392,13 @@ export const LessonRecordsView = ({ lessonRecords, classes, students, onAdd, onU
                         {record.progress && (
                           <div>
                             <span className="text-xs font-bold text-slate-400 uppercase">Progress</span>
-                            <p className="text-slate-600">{record.progress}</p>
+                            <MarkdownRenderer content={record.progress} className="text-sm text-slate-600" />
                           </div>
                         )}
                         {record.homework_assigned && (
                           <div>
                             <span className="text-xs font-bold text-slate-400 uppercase">Homework</span>
-                            <p className="text-slate-600">{record.homework_assigned}</p>
+                            <MarkdownRenderer content={record.homework_assigned} className="text-sm text-slate-600" />
                           </div>
                         )}
                         {record.notes && (
