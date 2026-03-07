@@ -1,0 +1,1095 @@
+{
+  "generatedAt": "2026-03-07T11:02:20.425Z",
+  "dataSource": "scripts/output/teaching-units-all.json",
+  "overall": {
+    "objectivesReady": 407,
+    "objectivesTotal": 407,
+    "sectionsReady": 1628,
+    "sectionsTotal": 1628,
+    "vocabularyReady": 407,
+    "conceptReady": 407,
+    "examplesReady": 407,
+    "resourcesReady": 407,
+    "readinessPct": 100,
+    "sectionPct": 100
+  },
+  "missingObjectiveCount": 0,
+  "byYear": [
+    {
+      "year": "Year 7",
+      "summary": {
+        "objectivesReady": 84,
+        "objectivesTotal": 84,
+        "sectionsReady": 336,
+        "sectionsTotal": 336,
+        "vocabularyReady": 84,
+        "conceptReady": 84,
+        "examplesReady": 84,
+        "resourcesReady": 84,
+        "readinessPct": 100,
+        "sectionPct": 100
+      },
+      "units": [
+        {
+          "id": "u-y7-1",
+          "title": "Multiplication of Fractions 分数的乘法",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 8,
+            "objectivesTotal": 8,
+            "sectionsReady": 32,
+            "sectionsTotal": 32,
+            "vocabularyReady": 8,
+            "conceptReady": 8,
+            "examplesReady": 8,
+            "resourcesReady": 8,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-4",
+          "title": "Position and Direction 位置和方向",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-2",
+          "title": "Division of Fraction 分数的除法",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-5",
+          "title": "Ratio and Proportion 比率和比例",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 11,
+            "objectivesTotal": 11,
+            "sectionsReady": 44,
+            "sectionsTotal": 44,
+            "vocabularyReady": 11,
+            "conceptReady": 11,
+            "examplesReady": 11,
+            "resourcesReady": 11,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-7",
+          "title": "Circle 圆",
+          "subUnitCount": 4,
+          "summary": {
+            "objectivesReady": 18,
+            "objectivesTotal": 18,
+            "sectionsReady": 72,
+            "sectionsTotal": 72,
+            "vocabularyReady": 18,
+            "conceptReady": 18,
+            "examplesReady": 18,
+            "resourcesReady": 18,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-6",
+          "title": "Percentage 百分比",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 9,
+            "objectivesTotal": 9,
+            "sectionsReady": 36,
+            "sectionsTotal": 36,
+            "vocabularyReady": 9,
+            "conceptReady": 9,
+            "examplesReady": 9,
+            "resourcesReady": 9,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-3",
+          "title": "Negative Number 负数",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-8",
+          "title": "Cylinders and Cones 圆柱和圆锥",
+          "subUnitCount": 3,
+          "summary": {
+            "objectivesReady": 10,
+            "objectivesTotal": 10,
+            "sectionsReady": 40,
+            "sectionsTotal": 40,
+            "vocabularyReady": 10,
+            "conceptReady": 10,
+            "examplesReady": 10,
+            "resourcesReady": 10,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-9",
+          "title": "Linear Sequences 等差序列",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 6,
+            "objectivesTotal": 6,
+            "sectionsReady": 24,
+            "sectionsTotal": 24,
+            "vocabularyReady": 6,
+            "conceptReady": 6,
+            "examplesReady": 6,
+            "resourcesReady": 6,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-10",
+          "title": "Probability 概率",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y7-11",
+          "title": "Constructions 作图",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        }
+      ]
+    },
+    {
+      "year": "Year 8",
+      "summary": {
+        "objectivesReady": 80,
+        "objectivesTotal": 80,
+        "sectionsReady": 320,
+        "sectionsTotal": 320,
+        "vocabularyReady": 80,
+        "conceptReady": 80,
+        "examplesReady": 80,
+        "resourcesReady": 80,
+        "readinessPct": 100,
+        "sectionPct": 100
+      },
+      "units": [
+        {
+          "id": "u-y8-1",
+          "title": "Review of Numbers 数的复习",
+          "subUnitCount": 4,
+          "summary": {
+            "objectivesReady": 14,
+            "objectivesTotal": 14,
+            "sectionsReady": 56,
+            "sectionsTotal": 56,
+            "vocabularyReady": 14,
+            "conceptReady": 14,
+            "examplesReady": 14,
+            "resourcesReady": 14,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-2",
+          "title": "Rational Numbers, Factors and Primes 有理数、因数和质数",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 9,
+            "objectivesTotal": 9,
+            "sectionsReady": 36,
+            "sectionsTotal": 36,
+            "vocabularyReady": 9,
+            "conceptReady": 9,
+            "examplesReady": 9,
+            "resourcesReady": 9,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-3",
+          "title": "Algebraic Formula 代数公式",
+          "subUnitCount": 5,
+          "summary": {
+            "objectivesReady": 8,
+            "objectivesTotal": 8,
+            "sectionsReady": 32,
+            "sectionsTotal": 32,
+            "vocabularyReady": 8,
+            "conceptReady": 8,
+            "examplesReady": 8,
+            "resourcesReady": 8,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-4",
+          "title": "Inequalities and Inequations 不等式和不等式方程",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-5",
+          "title": "Introduction to Pythagoras' Theorem 勾股定理简介",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 3,
+            "objectivesTotal": 3,
+            "sectionsReady": 12,
+            "sectionsTotal": 12,
+            "vocabularyReady": 3,
+            "conceptReady": 3,
+            "examplesReady": 3,
+            "resourcesReady": 3,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-6",
+          "title": "Intersecting Lines and Parallel Lines 相交线和平行线",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 11,
+            "objectivesTotal": 11,
+            "sectionsReady": 44,
+            "sectionsTotal": 44,
+            "vocabularyReady": 11,
+            "conceptReady": 11,
+            "examplesReady": 11,
+            "resourcesReady": 11,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-7",
+          "title": "Further Algebra 进一步的代数",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 10,
+            "objectivesTotal": 10,
+            "sectionsReady": 40,
+            "sectionsTotal": 40,
+            "vocabularyReady": 10,
+            "conceptReady": 10,
+            "examplesReady": 10,
+            "resourcesReady": 10,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-8",
+          "title": "Co-ordinates and Plotting Linear Graphs 坐标和绘制线性图表",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 9,
+            "objectivesTotal": 9,
+            "sectionsReady": 36,
+            "sectionsTotal": 36,
+            "vocabularyReady": 9,
+            "conceptReady": 9,
+            "examplesReady": 9,
+            "resourcesReady": 9,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y8-9",
+          "title": "Further Statistics 更多的统计",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 12,
+            "objectivesTotal": 12,
+            "sectionsReady": 48,
+            "sectionsTotal": 48,
+            "vocabularyReady": 12,
+            "conceptReady": 12,
+            "examplesReady": 12,
+            "resourcesReady": 12,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        }
+      ]
+    },
+    {
+      "year": "Year 9",
+      "summary": {
+        "objectivesReady": 99,
+        "objectivesTotal": 99,
+        "sectionsReady": 396,
+        "sectionsTotal": 396,
+        "vocabularyReady": 99,
+        "conceptReady": 99,
+        "examplesReady": 99,
+        "resourcesReady": 99,
+        "readinessPct": 100,
+        "sectionPct": 100
+      },
+      "units": [
+        {
+          "id": "u-y9-1",
+          "title": "Working with Irrational Numbers 理数的运算",
+          "subUnitCount": 4,
+          "summary": {
+            "objectivesReady": 14,
+            "objectivesTotal": 14,
+            "sectionsReady": 56,
+            "sectionsTotal": 56,
+            "vocabularyReady": 14,
+            "conceptReady": 14,
+            "examplesReady": 14,
+            "resourcesReady": 14,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-2",
+          "title": "Working with Expressions 表达式的运算",
+          "subUnitCount": 6,
+          "summary": {
+            "objectivesReady": 12,
+            "objectivesTotal": 12,
+            "sectionsReady": 48,
+            "sectionsTotal": 48,
+            "vocabularyReady": 12,
+            "conceptReady": 12,
+            "examplesReady": 12,
+            "resourcesReady": 12,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-3",
+          "title": "Algebraic Functions 代数函数",
+          "subUnitCount": 5,
+          "summary": {
+            "objectivesReady": 14,
+            "objectivesTotal": 14,
+            "sectionsReady": 56,
+            "sectionsTotal": 56,
+            "vocabularyReady": 14,
+            "conceptReady": 14,
+            "examplesReady": 14,
+            "resourcesReady": 14,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-4",
+          "title": "Mastery of Angles 掌握角度",
+          "subUnitCount": 3,
+          "summary": {
+            "objectivesReady": 7,
+            "objectivesTotal": 7,
+            "sectionsReady": 28,
+            "sectionsTotal": 28,
+            "vocabularyReady": 7,
+            "conceptReady": 7,
+            "examplesReady": 7,
+            "resourcesReady": 7,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-11",
+          "title": "Practice with Constructions 构造练习",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-12",
+          "title": "Congruence and Similarity 全等和相似",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-5",
+          "title": "Pythagoras Theorem 勾股定理",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-6",
+          "title": "2D Shape 二维图形",
+          "subUnitCount": 3,
+          "summary": {
+            "objectivesReady": 9,
+            "objectivesTotal": 9,
+            "sectionsReady": 36,
+            "sectionsTotal": 36,
+            "vocabularyReady": 9,
+            "conceptReady": 9,
+            "examplesReady": 9,
+            "resourcesReady": 9,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-7",
+          "title": "Percentages 百分比",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 10,
+            "objectivesTotal": 10,
+            "sectionsReady": 40,
+            "sectionsTotal": 40,
+            "vocabularyReady": 10,
+            "conceptReady": 10,
+            "examplesReady": 10,
+            "resourcesReady": 10,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-8",
+          "title": "Statistical Sampling 统计抽样",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-9",
+          "title": "Graphical Representation of Statistical Data 统计数据的图形表示",
+          "subUnitCount": 4,
+          "summary": {
+            "objectivesReady": 10,
+            "objectivesTotal": 10,
+            "sectionsReady": 40,
+            "sectionsTotal": 40,
+            "vocabularyReady": 10,
+            "conceptReady": 10,
+            "examplesReady": 10,
+            "resourcesReady": 10,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y9-10",
+          "title": "Algebraic Fractions 代数分数",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        }
+      ]
+    },
+    {
+      "year": "Year 10",
+      "summary": {
+        "objectivesReady": 95,
+        "objectivesTotal": 95,
+        "sectionsReady": 380,
+        "sectionsTotal": 380,
+        "vocabularyReady": 95,
+        "conceptReady": 95,
+        "examplesReady": 95,
+        "resourcesReady": 95,
+        "readinessPct": 100,
+        "sectionPct": 100
+      },
+      "units": [
+        {
+          "id": "u-y10-1",
+          "title": "Real Numbers实数",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-3",
+          "title": "Quadratic Equations二次方程",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 10,
+            "objectivesTotal": 10,
+            "sectionsReady": 40,
+            "sectionsTotal": 40,
+            "vocabularyReady": 10,
+            "conceptReady": 10,
+            "examplesReady": 10,
+            "resourcesReady": 10,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-2",
+          "title": "Algebraic Fractions 代数分数",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-5",
+          "title": "Functions函数",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 14,
+            "objectivesTotal": 14,
+            "sectionsReady": 56,
+            "sectionsTotal": 56,
+            "vocabularyReady": 14,
+            "conceptReady": 14,
+            "examplesReady": 14,
+            "resourcesReady": 14,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-6",
+          "title": "Further Trigonometry进阶三角学",
+          "subUnitCount": 3,
+          "summary": {
+            "objectivesReady": 19,
+            "objectivesTotal": 19,
+            "sectionsReady": 76,
+            "sectionsTotal": 76,
+            "vocabularyReady": 19,
+            "conceptReady": 19,
+            "examplesReady": 19,
+            "resourcesReady": 19,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-4",
+          "title": "Simultaneous Equations 联立方程组",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 2,
+            "objectivesTotal": 2,
+            "sectionsReady": 8,
+            "sectionsTotal": 8,
+            "vocabularyReady": 2,
+            "conceptReady": 2,
+            "examplesReady": 2,
+            "resourcesReady": 2,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-7",
+          "title": "Unit 6 Circles圆",
+          "subUnitCount": 3,
+          "summary": {
+            "objectivesReady": 11,
+            "objectivesTotal": 11,
+            "sectionsReady": 44,
+            "sectionsTotal": 44,
+            "vocabularyReady": 11,
+            "conceptReady": 11,
+            "examplesReady": 11,
+            "resourcesReady": 11,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-10",
+          "title": "Transformations图形变换",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 7,
+            "objectivesTotal": 7,
+            "sectionsReady": 28,
+            "sectionsTotal": 28,
+            "vocabularyReady": 7,
+            "conceptReady": 7,
+            "examplesReady": 7,
+            "resourcesReady": 7,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-11",
+          "title": "Probability概率",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 9,
+            "objectivesTotal": 9,
+            "sectionsReady": 36,
+            "sectionsTotal": 36,
+            "vocabularyReady": 9,
+            "conceptReady": 9,
+            "examplesReady": 9,
+            "resourcesReady": 9,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-12",
+          "title": "3D Geometry立体几何",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-8",
+          "title": "Practice with Constructions 构造练习",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y10-9",
+          "title": "Congruence and Similarity 全等和相似",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        }
+      ]
+    },
+    {
+      "year": "Year 11",
+      "summary": {
+        "objectivesReady": 49,
+        "objectivesTotal": 49,
+        "sectionsReady": 196,
+        "sectionsTotal": 196,
+        "vocabularyReady": 49,
+        "conceptReady": 49,
+        "examplesReady": 49,
+        "resourcesReady": 49,
+        "readinessPct": 100,
+        "sectionPct": 100
+      },
+      "units": [
+        {
+          "id": "u-y11-1",
+          "title": "Estimation & Bounds",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 6,
+            "objectivesTotal": 6,
+            "sectionsReady": 24,
+            "sectionsTotal": 24,
+            "vocabularyReady": 6,
+            "conceptReady": 6,
+            "examplesReady": 6,
+            "resourcesReady": 6,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-2",
+          "title": "Set Notation & Venn Diagrams",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 4,
+            "objectivesTotal": 4,
+            "sectionsReady": 16,
+            "sectionsTotal": 16,
+            "vocabularyReady": 4,
+            "conceptReady": 4,
+            "examplesReady": 4,
+            "resourcesReady": 4,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-3",
+          "title": "Simultaneous Equations",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-4",
+          "title": "Quadratic Sequences",
+          "subUnitCount": 2,
+          "summary": {
+            "objectivesReady": 6,
+            "objectivesTotal": 6,
+            "sectionsReady": 24,
+            "sectionsTotal": 24,
+            "vocabularyReady": 6,
+            "conceptReady": 6,
+            "examplesReady": 6,
+            "resourcesReady": 6,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-6",
+          "title": "Differentiation",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 5,
+            "objectivesTotal": 5,
+            "sectionsReady": 20,
+            "sectionsTotal": 20,
+            "vocabularyReady": 5,
+            "conceptReady": 5,
+            "examplesReady": 5,
+            "resourcesReady": 5,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-7",
+          "title": "Further Trigonometry",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 3,
+            "objectivesTotal": 3,
+            "sectionsReady": 12,
+            "sectionsTotal": 12,
+            "vocabularyReady": 3,
+            "conceptReady": 3,
+            "examplesReady": 3,
+            "resourcesReady": 3,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-5",
+          "title": "Functions",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 6,
+            "objectivesTotal": 6,
+            "sectionsReady": 24,
+            "sectionsTotal": 24,
+            "vocabularyReady": 6,
+            "conceptReady": 6,
+            "examplesReady": 6,
+            "resourcesReady": 6,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-8",
+          "title": "Graphs of Trigonometric Functions",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 3,
+            "objectivesTotal": 3,
+            "sectionsReady": 12,
+            "sectionsTotal": 12,
+            "vocabularyReady": 3,
+            "conceptReady": 3,
+            "examplesReady": 3,
+            "resourcesReady": 3,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-9",
+          "title": "Regions & Inequalities",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 2,
+            "objectivesTotal": 2,
+            "sectionsReady": 8,
+            "sectionsTotal": 8,
+            "vocabularyReady": 2,
+            "conceptReady": 2,
+            "examplesReady": 2,
+            "resourcesReady": 2,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-10",
+          "title": "Vectors",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 7,
+            "objectivesTotal": 7,
+            "sectionsReady": 28,
+            "sectionsTotal": 28,
+            "vocabularyReady": 7,
+            "conceptReady": 7,
+            "examplesReady": 7,
+            "resourcesReady": 7,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        },
+        {
+          "id": "u-y11-11",
+          "title": "Statistics and Probability",
+          "subUnitCount": 1,
+          "summary": {
+            "objectivesReady": 2,
+            "objectivesTotal": 2,
+            "sectionsReady": 8,
+            "sectionsTotal": 8,
+            "vocabularyReady": 2,
+            "conceptReady": 2,
+            "examplesReady": 2,
+            "resourcesReady": 2,
+            "readinessPct": 100,
+            "sectionPct": 100
+          },
+          "incompleteObjectives": []
+        }
+      ]
+    }
+  ],
+  "missingObjectives": []
+}

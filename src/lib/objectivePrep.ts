@@ -4,6 +4,12 @@ function hasPrepResourceContent(resource: PrepResource) {
   return !!(resource.title.trim() || resource.url.trim() || (resource.note || '').trim());
 }
 
+function asTrimmedString(value: unknown) {
+  if (typeof value === 'string') return value.trim();
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
+}
+
 export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
   const linkedResources: PrepResource[] = [
     {
@@ -44,7 +50,7 @@ export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
     .filter(Boolean)
     .slice(0, 4);
 
-  if (subUnit.classroom_exercises?.trim()) {
+  if (asTrimmedString(subUnit.classroom_exercises)) {
     noteResources.push({
       title: 'Guided Practice Bank',
       url: '',
@@ -53,7 +59,7 @@ export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
     });
   }
 
-  if (String(subUnit.homework_content || '').trim() && !subUnit.homework_url?.trim()) {
+  if (asTrimmedString(subUnit.homework_content) && !subUnit.homework_url?.trim()) {
     noteResources.push({
       title: 'Homework Follow-up',
       url: '',
@@ -71,7 +77,7 @@ export function getSharedPrepResources(subUnit: SubUnit): PrepResource[] {
     });
   }
 
-  if (subUnit.ai_summary?.trim()) {
+  if (asTrimmedString(subUnit.ai_summary)) {
     noteResources.push({
       title: 'Teacher Explanation Notes',
       url: '',
@@ -96,7 +102,7 @@ export function getObjectiveResources(objective: LearningObjective, subUnit: Sub
 }
 
 export function getObjectiveConcept(objective: LearningObjective, subUnit: SubUnit): string {
-  return objective.concept_explanation?.trim() || subUnit.ai_summary?.trim() || '';
+  return asTrimmedString(objective.concept_explanation) || asTrimmedString(subUnit.ai_summary) || '';
 }
 
 export function getObjectivePrepMetrics(objective: LearningObjective, subUnit: SubUnit) {
@@ -104,10 +110,10 @@ export function getObjectivePrepMetrics(objective: LearningObjective, subUnit: S
   const resources = getObjectiveResources(objective, subUnit);
   const concept = getObjectiveConcept(objective, subUnit);
   const examples = objective.typical_examples || [];
-  const hasSharedExercises = !!subUnit.classroom_exercises?.trim();
+  const hasSharedExercises = !!asTrimmedString(subUnit.classroom_exercises);
   const usesSharedVocabulary = (!objective.core_vocabulary || objective.core_vocabulary.length === 0) && vocabulary.length > 0;
   const usesSharedResources = (!objective.prep_resources || objective.prep_resources.length === 0) && resources.length > 0;
-  const usesSharedConcept = !objective.concept_explanation?.trim() && !!subUnit.ai_summary?.trim();
+  const usesSharedConcept = !asTrimmedString(objective.concept_explanation) && !!asTrimmedString(subUnit.ai_summary);
   const examplesReady = examples.length > 0 || hasSharedExercises;
   const readySections =
     (vocabulary.length > 0 ? 1 : 0) +

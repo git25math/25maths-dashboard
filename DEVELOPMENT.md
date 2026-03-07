@@ -971,15 +971,23 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `TeachingView` 年级页新增 `Prep Completeness Snapshot`，并在 unit cards 上同时展示 teaching progress 与 prep coverage
   - `TeachingView` 的 `Class Progress Tracking` 卡片新增当前 unit 的 prep coverage
   - `DashboardView` 首页 `Class Progress Tracking` 卡片新增当前 unit prep coverage，与 Teaching 页口径一致
+- **报告导出**:
+  - 新增 `npm run prep:report`
+  - 新增 `scripts/report-prep-completeness.ts`，可导出 objective prep coverage 的 `JSON + Markdown`
+  - 当前基线导出结果：`407/407 objective-ready`，`missing objectives = 0`
+  - 输出文件：
+    - `scripts/output/prep-completeness-report.json`
+    - `scripts/output/prep-completeness-report.md`
 - **稳健性补充**:
   - `DashboardView` 修复无 LO 单元时的除零风险，避免出现 `NaN%`
+  - `objectivePrep.ts` 对 shared field 的非字符串内容做安全转换，避免 report 脚本遍历时崩溃
 - **回归结果**:
   - `npm run lint` ✅
   - `npm run build` ✅
 
 - [ ] 为 Year 7-11 建立 objective-level 外链资源规范（worksheet / practice / kahoot / homework / vocab）
 - [x] 增加 prep completeness 仪表（按 Year / Unit / Class 聚合）
-- [ ] 为 objective prep generation 增加失败清单 / coverage report 输出，便于后续批量补跑
+- [x] 为 objective prep generation 增加失败清单 / coverage report 输出，便于后续批量补跑
 - [ ] 对高频 note-based resources 设计转正式链接的补录流程
 
 ### Phase 31 — Analytics & Reports (Next)
