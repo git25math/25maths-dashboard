@@ -999,6 +999,31 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [x] 为 objective prep generation 增加失败清单 / coverage report 输出，便于后续批量补跑
 - [ ] 对高频 note-based resources 设计转正式链接的补录流程
 
+### Phase 30f — Unit Plans, Prep Materials & Knowledge Cards Completion (2026-03-07) ✅
+
+- **教学计划补齐**:
+  - 为 `55 / 55` 个 Teaching Units 补齐 `prep_material_template`
+  - 为 `55 / 55` 个 Teaching Units 补齐 `ai_prompt_template`
+  - Lesson plan generator 不再回退到通用 prompt，所有 unit 都有专属 planning prompt
+- **知识点卡片补齐**:
+  - 为 `111 / 111` 个 Sub-Units 补齐 `ai_summary`
+  - `ai_summary` 统一为 teacher-facing bilingual knowledge card，覆盖 `Big Idea / Common Misconception / Teaching Moves`
+- **备课资料落盘**:
+  - 新增 `scripts/seed-prep-resources.mjs`
+  - 基于已有 `classroom_exercises`、`homework_content`、`vocabulary`、`ai_summary`，为 `111 / 111` 个 sub-unit 补齐 `shared_resources`
+  - 为 `407 / 407` 个 objectives 正式写入 `prep_resources`，不再只依赖前端 runtime fallback
+- **脚本新增**:
+  - 新增 `scripts/generate-unit-prep-assets.mjs`，支持按 unit 增量生成并保存 `prep_material_template` / `ai_prompt_template` / `ai_summary`
+  - 生成过程中对代理超时和 Gemini JSON 异常做重试；主批次完成后可按 year / limit 定点补跑失败项
+- **完成态统计**:
+  - `classroom_exercises`: `111 / 111`
+  - `homework_content`: `111 / 111`
+  - `ai_summary`: `111 / 111`
+  - `core_vocabulary`: `407 / 407`
+  - `concept_explanation`: `407 / 407`
+  - `typical_examples`: `407 / 407`
+  - `prep_resources`: `407 / 407`
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
