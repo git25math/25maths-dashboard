@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 
-type FilterChipTone = 'indigo' | 'teal' | 'emerald';
+type FilterChipTone = 'indigo' | 'teal' | 'emerald' | 'violet';
 
 type FilterChipSize = 'xs' | 'sm';
 
@@ -9,6 +9,7 @@ const ACTIVE_STYLES: Record<FilterChipTone, string> = {
   indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
   teal: 'bg-teal-50 border-teal-200 text-teal-600',
   emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
+  violet: 'bg-violet-50 border-violet-200 text-violet-600',
 };
 
 const SIZE_STYLES: Record<FilterChipSize, string> = {

@@ -6,12 +6,21 @@ import { KahootBoard, KahootItem, KahootOrgType, KahootTrack } from '../../types
 import { KahootCard } from './KahootCard';
 
 type BoardFilter = 'all' | KahootBoard;
+type TrackFilter = 'all' | KahootTrack;
 type OrgFilter = 'all' | KahootOrgType;
 
 const BOARD_OPTIONS: { key: BoardFilter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'cie0580', label: 'CIE 0580' },
   { key: 'edexcel-4ma1', label: '4MA1' },
+];
+
+const TRACK_OPTIONS: { key: TrackFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'core', label: 'Core' },
+  { key: 'extended', label: 'Extended' },
+  { key: 'foundation', label: 'Foundation' },
+  { key: 'higher', label: 'Higher' },
 ];
 
 const ORG_OPTIONS: { key: OrgFilter; label: string }[] = [
@@ -45,6 +54,7 @@ interface KahootLibraryProps {
 export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProps) {
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
+  const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [orgFilter, setOrgFilter] = useState<OrgFilter>('all');
 
   const stats = useMemo(() => ({
@@ -58,6 +68,7 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
     const q = search.trim().toLowerCase();
     return items
       .filter(i => boardFilter === 'all' || i.board === boardFilter)
+      .filter(i => trackFilter === 'all' || i.track === trackFilter)
       .filter(i => orgFilter === 'all' || (i.org_type ?? 'standalone') === orgFilter)
       .filter(i => {
         if (!q) return true;
@@ -65,7 +76,7 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           .join(' ').toLowerCase().includes(q);
       })
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-  }, [items, boardFilter, orgFilter, search]);
+  }, [items, boardFilter, trackFilter, orgFilter, search]);
 
   return (
     <div className="space-y-8">
@@ -83,6 +94,15 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Board</span>
           {BOARD_OPTIONS.map(o => (
             <FilterChip key={o.key} active={boardFilter === o.key} onClick={() => setBoardFilter(o.key)}>
+              {o.label}
+            </FilterChip>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Track</span>
+          {TRACK_OPTIONS.map(o => (
+            <FilterChip key={o.key} active={trackFilter === o.key} onClick={() => setTrackFilter(o.key)} tone="violet">
               {o.label}
             </FilterChip>
           ))}
