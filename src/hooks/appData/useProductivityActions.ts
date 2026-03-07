@@ -349,17 +349,16 @@ export function useProductivityActions({
   }, [setMeetings, toast]);
 
   const updateMeeting = useCallback(async (id: string, updates: Partial<MeetingRecord>) => {
-    const existing = meetings.find(m => m.id === id);
-    if (!existing) return;
-    const merged = { ...existing, ...updates };
     try {
-      const updated = await meetingService.update(id, merged);
+      const updated = await meetingService.update(id, updates);
       setMeetings(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
       toast.success('Meeting updated');
+      return updated;
     } catch (error) {
       toast.error('Failed to update meeting');
+      throw error;
     }
-  }, [meetings, setMeetings, toast]);
+  }, [setMeetings, toast]);
 
   const deleteMeeting = useCallback(async (id: string) => {
     try {

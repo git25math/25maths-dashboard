@@ -56,7 +56,7 @@ const TASK_STATUS_COLORS: Record<Task['status'], string> = {
 interface MeetingsViewProps {
   meetings: MeetingRecord[];
   onAddMeeting: (data: Omit<MeetingRecord, 'id'>) => Promise<MeetingRecord>;
-  onUpdateMeeting: (id: string, updates: Partial<MeetingRecord>) => void;
+  onUpdateMeeting: (id: string, updates: Partial<MeetingRecord>) => Promise<unknown>;
   onDeleteMeeting: (id: string) => void;
   onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
   tasks?: Task[];
@@ -118,8 +118,8 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
     setEditParticipants(meeting.participants.join(', '));
   };
 
-  const saveEdit = (id: string) => {
-    onUpdateMeeting(id, {
+  const saveEdit = async (id: string) => {
+    await onUpdateMeeting(id, {
       title: editTitle.trim(),
       category: editCategory,
       participants: editParticipants.split(',').map(p => p.trim()).filter(Boolean),
@@ -281,7 +281,7 @@ export const MeetingsView = ({ meetings, onAddMeeting, onUpdateMeeting, onDelete
 interface MeetingDetailProps {
   meeting: MeetingRecord;
   onBack: () => void;
-  onUpdate: (updates: Partial<MeetingRecord>) => void;
+  onUpdate: (updates: Partial<MeetingRecord>) => Promise<unknown>;
   onAddTask?: (data: Omit<Task, 'id' | 'created_at'>) => void;
   tasks?: Task[];
   onCycleTaskStatus?: (id: string) => void;
@@ -365,20 +365,20 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
     if (!audioBlob || audioBlob.size === 0) return;
 
     // Save duration
-    onUpdate({ duration: recordingTime, status: 'transcribing' });
+    setIsTranscribing(true);
+    await onUpdate({ duration: recordingTime, status: 'transcribing' });
 
     // Transcribe
-    setIsTranscribing(true);
     try {
       const rawTranscript = await geminiService.transcribeAudio(audioBlob);
-      onUpdate({ transcript: ensureHtml(rawTranscript), status: 'summarizing' });
+      await onUpdate({ transcript: ensureHtml(rawTranscript), status: 'summarizing' });
       setIsTranscribing(false);
 
       // Generate summary (use raw plain text for Gemini)
       setIsSummarizing(true);
       try {
         const summary = await geminiService.generateMeetingSummary(rawTranscript);
-        onUpdate({ ai_summary: summary, status: 'completed' });
+        await onUpdate({ ai_summary: summary, status: 'completed' });
         // Auto-create post-meeting tasks
         if (onAddTask) {
           onAddTask({ title: `整理录音稿: ${meeting.title}`, status: 'inbox', priority: 'medium', source_type: 'meeting', source_id: meeting.id });
@@ -387,30 +387,30 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         setError(`Failed to generate summary: ${msg}`);
-        onUpdate({ status: 'draft' });
+        await onUpdate({ status: 'draft' });
       }
       setIsSummarizing(false);
     } catch (err) {
       console.error('Transcription failed:', err);
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Failed to transcribe audio: ${msg}`);
-      onUpdate({ status: 'draft' });
+      await onUpdate({ status: 'draft' });
       setIsTranscribing(false);
     }
-  }, [stopRecording, recordingTime, onUpdate]);
+  }, [stopRecording, recordingTime, onUpdate, onAddTask, meeting.id, meeting.title]);
 
   const handleRegenerateSummary = useCallback(async () => {
     if (!meeting.transcript) return;
     setError(null);
     setIsSummarizing(true);
-    onUpdate({ status: 'summarizing' });
+    await onUpdate({ status: 'summarizing' });
     try {
       const plainText = stripHtml(meeting.transcript);
       const summary = await geminiService.generateMeetingSummary(plainText);
-      onUpdate({ ai_summary: summary, status: 'completed' });
+      await onUpdate({ ai_summary: summary, status: 'completed' });
     } catch (err) {
       setError('Failed to generate summary.');
-      onUpdate({ status: 'draft' });
+      await onUpdate({ status: 'draft' });
     }
     setIsSummarizing(false);
   }, [meeting.transcript, onUpdate]);
@@ -503,7 +503,7 @@ function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onCycleTas
             <div className="mt-4">
               <TipTapEditor
                 content={meeting.transcript}
-                onUpdate={(html) => onUpdate({ transcript: html })}
+                onUpdate={(html) => { void onUpdate({ transcript: html }); }}
                 editable={meeting.status !== 'transcribing' && meeting.status !== 'summarizing'}
                 placeholder="Transcript will appear here..."
                 debounceMs={1000}

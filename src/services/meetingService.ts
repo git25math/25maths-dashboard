@@ -21,7 +21,12 @@ export const meetingService = {
 
   async update(id: string, updates: Partial<MeetingRecord>): Promise<MeetingRecord> {
     if (!isSupabaseConfigured) return { ...updates, id } as MeetingRecord;
-    const { data, error } = await supabase!.from('meeting_records').upsert({ ...updates, id }).select().single();
+    const { data, error } = await supabase!
+      .from('meeting_records')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   },

@@ -873,6 +873,7 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 ### Phase 30a — Architecture Refactor II (Planned, No Feature Change)
 - [ ] 拆分 Student Domain：把 status/request/weakness/parent-comm/exam CRUD 从 `useAppData` 抽离到 `appData/studentActions`
 - [ ] 拆分 Timetable Domain：把 timetable/lessonRecord 联动逻辑抽离到 `appData/timetableActions`
+- [ ] 拆分 Meetings Domain：收敛录音处理状态机，补上 `transcribing -> summarizing -> completed` 顺序更新与回归测试
 - [ ] 增加 AppData Contract 文档：列出 `useAppData` 返回字段、依赖关系、跨域副作用边界
 - [ ] 引入最小测试骨架（Vitest）：先覆盖 `computeHousePointDeltas`、task status cycle、idea status cycle
 - [ ] CI 加质量门禁：在 deploy 前增加 `npm run lint`（后续接入测试后补 `npm run test`）
@@ -914,6 +915,24 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - **备课联动**:
   - `TimetableEntryForm` 在 LO 选择区显示 objective prep coverage
   - AI lesson plan prompt 生成时会携带 objective-level prep context
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+
+### Hotfix — Meeting 状态长期停留在 `transcribing` (2026-03-07)
+
+- **问题**:
+  - Meetings 录音处理后，部分记录会一直停在 `transcribing`
+  - 已经拿到 transcript / summary 的情况下，数据库状态仍可能被旧请求覆盖回去
+- **根因**:
+  - `MeetingDetail` 在一次处理流程里连续触发 3 次异步更新：`transcribing -> summarizing -> completed`
+  - 更新请求没有串行等待
+  - `updateMeeting` 还会把旧 meeting 快照整体 merge 后写回，导致慢返回的早期请求覆盖较新的状态和字段
+- **修复**:
+  - `meetingService.update()` 从 `upsert` 改为按 `id` 精确 `update`
+  - `useProductivityActions.updateMeeting()` 改为只提交传入字段，不再带旧快照回写
+  - `MeetingsView` 录音处理流程改为 `await` 串行推进状态，避免状态回退
+  - 手动编辑 transcript 时保留异步更新，但显式忽略返回值，避免类型与调用语义混淆
 - **回归结果**:
   - `npm run lint` ✅
   - `npm run build` ✅
