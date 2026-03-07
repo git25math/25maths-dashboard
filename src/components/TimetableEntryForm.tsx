@@ -7,6 +7,7 @@ import { HousePointAwardsEditor } from './HousePointAwardsEditor';
 import { getISODay, format } from 'date-fns';
 import { geminiService } from '../services/geminiService';
 import { detectConflicts } from '../lib/timetableUtils';
+import { getObjectiveConcept, getObjectivePrepMetrics, getObjectiveResources, getObjectiveVocabulary } from '../lib/objectivePrep';
 
 interface TimetableEntryFormProps {
   entry: TimetableEntry;
@@ -33,6 +34,24 @@ const PREP_STATUS_CONFIG: Record<PrepStatus, { label: string; color: string; nex
   finished: { label: 'Finished', color: 'bg-blue-100 text-blue-600 border-blue-200', next: 'recorded' },
   recorded: { label: 'Recorded', color: 'bg-slate-100 text-slate-600 border-slate-200', next: 'not_prepared' },
 };
+
+function formatObjectiveForAI(lo: TeachingUnit['sub_units'][number]['learning_objectives'][number], unitSubUnit: TeachingUnit['sub_units'][number]) {
+  const vocab = getObjectiveVocabulary(lo, unitSubUnit)
+    .slice(0, 4)
+    .map(v => `${v.english}${v.chinese ? `/${v.chinese}` : ''}`)
+    .join(', ');
+  const examples = (lo.typical_examples || []).slice(0, 1).map(ex => ex.question).join(' | ');
+  const resources = getObjectiveResources(lo, unitSubUnit).length;
+  const concept = getObjectiveConcept(lo, unitSubUnit);
+  const fragments = [
+    lo.objective,
+    vocab ? `Vocab: ${vocab}` : '',
+    concept ? `Concept: ${concept.slice(0, 120)}` : '',
+    examples ? `Example: ${examples.slice(0, 120)}` : '',
+    resources > 0 ? `Resources: ${resources}` : '',
+  ].filter(Boolean);
+  return fragments.join(' | ');
+}
 
 export const TimetableEntryForm = ({
   entry,
@@ -486,6 +505,10 @@ export const TimetableEntryForm = ({
                                   {su.learning_objectives.map(lo => {
                                     const isChecked = coveredLOIds.has(lo.id);
                                     const canInteract = !!effectiveDate;
+                                    const prepMetrics = getObjectivePrepMetrics(lo, su);
+                                    const prepVocabularyCount = prepMetrics.vocabulary.length;
+                                    const prepExampleCount = prepMetrics.examples.length;
+                                    const prepResourceCount = prepMetrics.resources.length;
                                     return (
                                       <label
                                         key={lo.id}
@@ -520,6 +543,10 @@ export const TimetableEntryForm = ({
                                               {lo.status.replace('_', ' ')}
                                             </span>
                                             <span className="text-[9px] text-slate-400">{lo.periods}p</span>
+                                            <span className="text-[9px] px-1 py-0.5 rounded bg-amber-50 text-amber-600">{prepVocabularyCount}v</span>
+                                            <span className="text-[9px] px-1 py-0.5 rounded bg-indigo-50 text-indigo-600">{prepExampleCount}e</span>
+                                            <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-50 text-emerald-600">{prepResourceCount}r</span>
+                                            <span className="text-[9px] px-1 py-0.5 rounded bg-slate-100 text-slate-500">{prepMetrics.readySections}/{prepMetrics.totalSections} prep</span>
                                             {(lo.covered_lesson_dates || []).map(d => (
                                               <span key={d} title={d} className="text-[9px] px-1 py-0.5 rounded bg-indigo-50 text-indigo-500">
                                                 {d.slice(5)}
@@ -563,7 +590,7 @@ export const TimetableEntryForm = ({
                           yearGroup: selectedClass?.year_group || '',
                           unitTitle: selectedUnit.title,
                           unitObjectives: allLOs.map(lo => lo.objective),
-                          subUnits: selectedUnit.sub_units.map(s => ({ title: s.title, objectives: s.learning_objectives.map(lo => lo.objective) })),
+                          subUnits: selectedUnit.sub_units.map(s => ({ title: s.title, objectives: s.learning_objectives.map(lo => formatObjectiveForAI(lo, s)) })),
                           completedObjectives: allLOs.filter(lo => lo.status === 'completed').map(lo => lo.objective),
                         });
                         setFormData(prev => ({

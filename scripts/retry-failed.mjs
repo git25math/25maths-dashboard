@@ -46,6 +46,16 @@ function callGemini(prompt) {
   }
 }
 
+function getObjectiveTexts(subUnit) {
+  if (Array.isArray(subUnit.learning_objectives) && subUnit.learning_objectives.length > 0) {
+    return subUnit.learning_objectives
+      .map(lo => typeof lo === 'string' ? lo : lo?.objective)
+      .filter(Boolean);
+  }
+
+  return Array.isArray(subUnit.objectives) ? subUnit.objectives.filter(Boolean) : [];
+}
+
 // Process each year file
 const yearFiles = ['y7', 'y8', 'y9', 'y10', 'y11'];
 let totalFixed = 0;
@@ -61,7 +71,7 @@ for (const yt of yearFiles) {
 
     console.log(`Retrying: ${unit.title} (${emptySubs.length} empty sub-units)`);
     const subUnitsForPrompt = unit.sub_units.map((su, i) =>
-      `Sub-unit ${i + 1}: "${su.title}"\nObjectives:\n${su.objectives.map(o => `- ${o}`).join('\n')}`
+      `Sub-unit ${i + 1}: "${su.title}"\nObjectives:\n${getObjectiveTexts(su).map(o => `- ${o}`).join('\n')}`
     ).join('\n\n');
 
     const prompt = `You are a bilingual (English + Chinese) math teacher preparing lesson materials for ${unit.year_group} students.

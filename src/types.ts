@@ -210,6 +210,18 @@ export interface VocabularyItem {
   chinese: string;
 }
 
+export interface TypicalExample {
+  question: string;
+  solution: string;
+}
+
+export interface PrepResource {
+  title: string;
+  url: string;
+  kind?: 'worksheet' | 'practice' | 'kahoot' | 'homework' | 'vocab' | 'link' | 'other';
+  note?: string;
+}
+
 export interface TeachingReflection {
   lesson_date?: string;
   student_reception?: string;
@@ -225,6 +237,10 @@ export interface LearningObjective {
   periods: number;
   notes?: string;
   covered_lesson_dates?: string[];  // ISO dates of lessons that covered this LO
+  core_vocabulary?: VocabularyItem[];
+  concept_explanation?: string;
+  typical_examples?: TypicalExample[];
+  prep_resources?: PrepResource[];
 }
 
 export interface SubUnit {
@@ -249,7 +265,7 @@ export interface TeachingUnit {
   year_group: string;
   title: string;
   sub_units: SubUnit[];
-  typical_examples: { question: string; solution: string }[];
+  typical_examples: TypicalExample[];
   worksheet_url?: string;
   homework_url?: string;
   online_practice_url?: string;

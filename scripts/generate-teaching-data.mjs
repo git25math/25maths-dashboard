@@ -222,10 +222,20 @@ ${docText}`;
 // ─── Step 2: Generate content for each unit's sub-units ─────────────────────
 
 function generateUnitContent(unitTitle, subUnits, yearGroup) {
+  const getObjectiveTexts = (subUnit) => {
+    if (Array.isArray(subUnit.learning_objectives) && subUnit.learning_objectives.length > 0) {
+      return subUnit.learning_objectives
+        .map(lo => typeof lo === 'string' ? lo : lo?.objective)
+        .filter(Boolean);
+    }
+
+    return Array.isArray(subUnit.objectives) ? subUnit.objectives.filter(Boolean) : [];
+  };
+
   const subUnitsDesc = subUnits
     .map(
       (su, i) =>
-        `Sub-unit ${i + 1}: "${su.title}"\nObjectives:\n${su.objectives.map(o => `- ${o}`).join('\n')}`
+        `Sub-unit ${i + 1}: "${su.title}"\nObjectives:\n${getObjectiveTexts(su).map(o => `- ${o}`).join('\n')}`
     )
     .join('\n\n');
 
@@ -279,11 +289,26 @@ function buildTeachingUnit(parsedUnit, contents, yearTag, unitIndex, yearGroup) 
       homework_content: '',
       periods: 2,
     };
+    const objectiveTexts = Array.isArray(su.learning_objectives)
+      ? su.learning_objectives.map(lo => typeof lo === 'string' ? lo : lo?.objective).filter(Boolean)
+      : Array.isArray(su.objectives)
+        ? su.objectives.filter(Boolean)
+        : [];
     return {
       id: `su-${yearTag}-${unitIndex + 1}-${j + 1}`,
       title: su.title,
-      objectives: su.objectives,
       periods: typeof c.periods === 'number' ? c.periods : 2,
+      learning_objectives: objectiveTexts.map((objective, objectiveIndex) => ({
+        id: `lo-${yearTag}-${unitIndex + 1}-${j + 1}-${objectiveIndex + 1}`,
+        objective,
+        status: 'not_started',
+        periods: 1,
+        covered_lesson_dates: [],
+        core_vocabulary: [],
+        concept_explanation: '',
+        typical_examples: [],
+        prep_resources: [],
+      })),
       vocabulary: Array.isArray(c.vocabulary) ? c.vocabulary : [],
       classroom_exercises: c.classroom_exercises || '',
       homework_content: c.homework_content || '',
@@ -294,7 +319,13 @@ function buildTeachingUnit(parsedUnit, contents, yearTag, unitIndex, yearGroup) 
     id: `u-${yearTag}-${unitIndex + 1}`,
     year_group: yearGroup,
     title: parsedUnit.title,
-    learning_objectives: parsedUnit.sub_units.flatMap(su => su.objectives),
+    learning_objectives: parsedUnit.sub_units.flatMap(su => (
+      Array.isArray(su.learning_objectives)
+        ? su.learning_objectives.map(lo => typeof lo === 'string' ? lo : lo?.objective).filter(Boolean)
+        : Array.isArray(su.objectives)
+          ? su.objectives.filter(Boolean)
+          : []
+    )),
     lessons: [],
     sub_units: subUnits,
     typical_examples: [],

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, ChevronRight, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap } from 'lucide-react';
+import { Plus, ChevronRight, ChevronDown, CheckCircle2, Circle, Clock, BookOpen, ExternalLink, Lightbulb, Settings, Trash2, Edit3, Calendar, MessageSquare, Filter, Zap, Layers3, FileText, Link2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { TeachingUnit, ClassProfile, SubUnit, LearningObjective } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
 import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
+import { getObjectivePrepMetrics, getSharedPrepResources } from '../lib/objectivePrep';
 
 // --- Helpers ---
 
@@ -35,6 +36,127 @@ function SegmentedProgressBar({ completed, inProgress, total, className }: { com
       {inProgressPct > 0 && (
         <div className="h-full bg-amber-400 transition-all duration-500" style={{ width: `${inProgressPct}%` }} />
       )}
+    </div>
+  );
+}
+
+function ObjectivePrepSections({ objective, subUnit }: { objective: LearningObjective; subUnit: SubUnit }) {
+  const {
+    vocabulary,
+    resources,
+    examples,
+    concept,
+    usesSharedVocabulary,
+    usesSharedResources,
+    usesSharedConcept,
+    hasSharedExercises,
+  } = getObjectivePrepMetrics(objective, subUnit);
+  const hasConcept = !!concept;
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pt-4">
+      <section className="p-4 rounded-2xl border border-amber-100 bg-amber-50/60 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-bold text-amber-900 flex items-center gap-2">
+            <BookOpen size={16} />
+            Core Vocabulary
+          </h4>
+          {usesSharedVocabulary && <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Shared</span>}
+        </div>
+        {vocabulary.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {vocabulary.map((item, index) => (
+              <span key={`${item.english}-${item.chinese}-${index}`} className="px-2.5 py-1.5 rounded-full bg-white border border-amber-200 text-xs text-slate-700">
+                <span className="font-semibold">{item.english}</span>
+                {item.chinese && <span className="text-slate-400"> / {item.chinese}</span>}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500 italic">No vocabulary attached to this objective yet.</p>
+        )}
+      </section>
+
+      <section className="p-4 rounded-2xl border border-blue-100 bg-blue-50/60 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Layers3 size={16} className="text-blue-600" />
+            <h4 className="text-sm font-bold text-blue-900">Concept Explanation</h4>
+          </div>
+          {usesSharedConcept && <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Shared</span>}
+        </div>
+        {hasConcept ? (
+          <MarkdownRenderer content={concept} className="text-sm text-slate-700" />
+        ) : (
+          <p className="text-xs text-slate-500 italic">No objective-specific concept explanation yet.</p>
+        )}
+      </section>
+
+      <section className="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/60 space-y-3 xl:col-span-2">
+        <div className="flex items-center gap-2">
+          <FileText size={16} className="text-indigo-600" />
+          <h4 className="text-sm font-bold text-indigo-900">Typical Examples</h4>
+        </div>
+        {examples.length > 0 ? (
+          <div className="space-y-3">
+            {examples.map((example, index) => (
+              <div key={`${objective.id}-example-${index}`} className="p-3 rounded-xl bg-white border border-indigo-100 space-y-2">
+                <div className="text-sm font-semibold text-slate-800">
+                  <span className="text-indigo-600 mr-2">Q{index + 1}.</span>
+                  <MarkdownRenderer content={example.question} />
+                </div>
+                <div className="pl-5 border-l-2 border-indigo-100 text-sm text-slate-600">
+                  <MarkdownRenderer content={example.solution} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-slate-500 italic">No objective-specific examples yet.</p>
+            {hasSharedExercises && (
+              <p className="text-xs text-indigo-700 bg-white border border-indigo-100 rounded-xl px-3 py-2">
+                Shared classroom exercises are available in the sub-unit workspace and can be reused for this objective.
+              </p>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 space-y-3 xl:col-span-2">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-bold text-emerald-900 flex items-center gap-2">
+            <Link2 size={16} />
+            Prep Resources
+          </h4>
+          {usesSharedResources && <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Shared</span>}
+        </div>
+        {resources.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {resources.map((resource, index) => (
+              <a
+                key={`${resource.title}-${resource.url}-${index}`}
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-xl bg-white border border-emerald-100 hover:border-emerald-300 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
+                  {(resource.kind || resource.note) && (
+                    <p className="text-[11px] text-slate-400">
+                      {[resource.kind, resource.note].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                </div>
+                <ExternalLink size={14} className="text-emerald-500" />
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500 italic">No prep resources linked yet.</p>
+        )}
+      </section>
     </div>
   );
 }
@@ -342,6 +464,11 @@ export const TeachingView = ({
                         const cycle: Record<string, LearningObjective['status']> = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' };
                         return cycle[current];
                       };
+                      const prepMetrics = getObjectivePrepMetrics(lo, selectedSubUnit);
+                      const objectiveVocabularyCount = prepMetrics.vocabulary.length;
+                      const objectiveExampleCount = prepMetrics.examples.length;
+                      const objectiveResourceCount = prepMetrics.resources.length;
+                      const hasConceptExplanation = !!prepMetrics.concept;
                       const isDragging = dragIndexRef.current === realIndex;
                       const isDragOver = dragOverIndex === realIndex;
                       return (
@@ -396,6 +523,34 @@ export const TeachingView = ({
                                   ))}
                                 </div>
                               )}
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                                  {objectiveVocabularyCount} vocab
+                                </span>
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                  {objectiveExampleCount} examples
+                                </span>
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+                                  {objectiveResourceCount} resources
+                                </span>
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                                  {prepMetrics.readySections}/{prepMetrics.totalSections} prep ready
+                                </span>
+                                {hasConceptExplanation && (
+                                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                    concept ready
+                                  </span>
+                                )}
+                              </div>
+                              <details className="mt-3 rounded-xl border border-white/70 bg-white/60">
+                                <summary className="list-none cursor-pointer px-3 py-2 flex items-center justify-between">
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Objective Prep Pack</span>
+                                  <ChevronDown size={14} className="text-slate-400" />
+                                </summary>
+                                <div className="px-3 pb-3 border-t border-white/70">
+                                  <ObjectivePrepSections objective={lo} subUnit={selectedSubUnit} />
+                                </div>
+                              </details>
                             </div>
                           </div>
                         </div>
@@ -646,43 +801,133 @@ export const TeachingView = ({
                     <Plus size={14} /> Add Sub-Unit
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   {subUnits.map(su => {
                     const suLOs = su.learning_objectives || [];
                     const suCompleted = suLOs.filter(lo => lo.status === 'completed').length;
                     const suInProgress = suLOs.filter(lo => lo.status === 'in_progress').length;
                     const suTotal = suLOs.length;
+                    const sharedResources = getSharedPrepResources(su);
                     return (
-                      <div
+                      <details
                         key={su.id}
-                        onClick={() => setSelectedSubUnit(su)}
-                        className="p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl transition-all cursor-pointer group"
+                        className="group rounded-2xl border border-slate-200 bg-slate-50/80 open:bg-white open:border-indigo-200 transition-all"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-1 flex-1">
-                            <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{su.title}</p>
-                            <div className="flex items-center gap-3 text-xs text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <Clock size={12} /> {su.periods} 课时
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <CheckCircle2 size={12} /> {suCompleted}/{suTotal} LOs completed
-                              </span>
+                        <summary className="list-none cursor-pointer p-4 md:p-5">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="space-y-2 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                  Sub-Unit
+                                </span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-slate-200 text-slate-600">
+                                  {su.periods} periods
+                                </span>
+                              </div>
+                              <p className="font-bold text-slate-900 text-lg group-open:text-indigo-700 transition-colors">{su.title}</p>
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                                <span>{suCompleted}/{suTotal} LOs completed</span>
+                                <span>{su.vocabulary.length} shared vocab</span>
+                                <span>{sharedResources.length} shared resources</span>
+                                <span>{su.classroom_exercises ? 'shared class notes ready' : 'no shared class notes'}</span>
+                              </div>
                             </div>
-                            <div className="flex gap-1 mt-2">
-                              {su.worksheet_url && <span className="w-2 h-2 rounded-full bg-blue-400" title="Worksheet" />}
-                              {su.online_practice_url && <span className="w-2 h-2 rounded-full bg-green-400" title="Online Practice" />}
-                              {su.kahoot_url && <span className="w-2 h-2 rounded-full bg-purple-400" title="Kahoot" />}
-                              {su.homework_url && <span className="w-2 h-2 rounded-full bg-amber-400" title="Homework" />}
+                            <div className="flex items-center gap-3 shrink-0">
+                              {suTotal > 0 && (
+                                <div className="w-24">
+                                  <SegmentedProgressBar completed={suCompleted} inProgress={suInProgress} total={suTotal} className="h-1.5" />
+                                </div>
+                              )}
+                              <ChevronDown size={18} className="text-slate-400 transition-transform group-open:rotate-180" />
                             </div>
                           </div>
-                          <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1 shrink-0 mt-1" />
+                        </summary>
+
+                        <div className="px-4 md:px-5 pb-5 space-y-4 border-t border-slate-200">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-4">
+                            <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Shared Vocabulary</p>
+                              <p className="mt-1 text-lg font-bold text-amber-900">{su.vocabulary.length}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Shared Notes</p>
+                              <p className="mt-1 text-sm font-bold text-blue-900">{su.classroom_exercises ? 'Available' : 'Missing'}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Shared Resources</p>
+                              <p className="mt-1 text-lg font-bold text-emerald-900">{sharedResources.length}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-violet-50 border border-violet-100">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600">Homework</p>
+                              <p className="mt-1 text-sm font-bold text-violet-900">{su.homework_content || su.homework_url ? 'Available' : 'Missing'}</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {suLOs.map((lo, objectiveIndex) => {
+                              const prepMetrics = getObjectivePrepMetrics(lo, su);
+                              const objectiveVocabularyCount = prepMetrics.vocabulary.length;
+                              const objectiveExampleCount = prepMetrics.examples.length;
+                              const objectiveResourceCount = prepMetrics.resources.length;
+                              return (
+                                <details key={lo.id} className="rounded-xl border border-slate-200 bg-white group/objective">
+                                  <summary className="list-none cursor-pointer px-4 py-3 flex justify-between items-start gap-4">
+                                    <div className="space-y-2 flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                                          Objective {objectiveIndex + 1}
+                                        </span>
+                                        <span className={cn(
+                                          "text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full",
+                                          lo.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                                          lo.status === 'in_progress' ? 'bg-amber-100 text-amber-700' :
+                                          'bg-slate-100 text-slate-600'
+                                        )}>
+                                          {lo.status.replace('_', ' ')}
+                                        </span>
+                                      </div>
+                                      <div className="text-sm text-slate-800">
+                                        <MarkdownRenderer content={lo.objective} />
+                                      </div>
+                                      <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                                        <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700">{objectiveVocabularyCount} vocab</span>
+                                        <span className="px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">{objectiveExampleCount} examples</span>
+                                        <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">{objectiveResourceCount} resources</span>
+                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600">{prepMetrics.readySections}/{prepMetrics.totalSections} prep ready</span>
+                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600">{lo.periods} periods</span>
+                                      </div>
+                                    </div>
+                                    <ChevronDown size={16} className="text-slate-400 transition-transform group-open/objective:rotate-180 shrink-0 mt-1" />
+                                  </summary>
+                                  <div className="px-4 pb-4 border-t border-slate-100">
+                                    <ObjectivePrepSections objective={lo} subUnit={su} />
+                                  </div>
+                                </details>
+                              );
+                            })}
+                            {suLOs.length === 0 && (
+                              <p className="text-xs text-slate-400 italic p-4">No objectives defined inside this sub-unit yet.</p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap gap-3 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSubUnit(su)}
+                              className="text-indigo-600 text-xs font-bold hover:underline"
+                            >
+                              Open Sub-Unit Workspace
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setEditingSubUnit(su); setIsSubUnitFormOpen(true); }}
+                              className="text-slate-500 text-xs font-bold hover:text-indigo-600 transition-colors"
+                            >
+                              Edit Sub-Unit
+                            </button>
+                          </div>
                         </div>
-                        {/* Segmented mini progress bar */}
-                        {suTotal > 0 && (
-                          <SegmentedProgressBar completed={suCompleted} inProgress={suInProgress} total={suTotal} className="mt-3 h-1" />
-                        )}
-                      </div>
+                      </details>
                     );
                   })}
                 </div>

@@ -879,6 +879,47 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - [ ] 交互增强：点击年级标题可快速切换到 Teaching 对应年级
 - [ ] 增加 Dashboard progress 映射单测（固定年级、缺失数据、同年级多班）
 
+### Phase 30c — Teaching Prep Hierarchy & Objective Prep Packs (2026-03-07) ✅
+
+- **目标**:
+  - 将备课结构统一为 `大单元 -> 小单元 -> 教学目标`
+  - 明确 `教学目标` 为最小备课单位
+  - 在 UI 与数据层统一支持每个教学目标的 4 类备课内容：
+    - `core_vocabulary`
+    - `concept_explanation`
+    - `typical_examples`
+    - `prep_resources`
+- **数据结构升级**:
+  - `LearningObjective` 新增 objective-level prep fields
+  - `teachingAdapter` 对旧 `sub_units[].objectives` 自动迁移为 `learning_objectives`
+  - 迁移时为每个 LO 注入默认字段，避免新旧数据混用时丢字段
+- **脚本兼容**:
+  - `scripts/generate-teaching-data.mjs` 改为生成 `sub_units[].learning_objectives`
+  - `scripts/retry-failed.mjs` 同时兼容旧 `objectives` 和新 `learning_objectives`
+  - 新增 `scripts/normalize-teaching-data.mjs`，把 `teaching-units-all.json` 基线数据标准化为新结构
+- **Teaching UI 重构**:
+  - `TeachingView` 改为折叠式层级浏览
+  - `Sub-Unit` 下展开 `Objective`，每个目标单独显示 prep pack
+  - 新增 objective prep completeness 标记（`x/4 prep ready`）
+  - 共享 sub-unit 资源可作为 objective fallback 显示，避免空白卡片
+- **编辑器增强**:
+  - `SubUnitForm` 可直接维护每个 LO 的词汇、概念讲解、例题、资源
+  - 支持一键把 shared vocabulary / AI summary / shared links 下沉到某个 objective prep pack
+  - 仍保留 shared sub-unit vocabulary / exercises / resources，兼容旧内容沉淀
+- **备课联动**:
+  - `TimetableEntryForm` 在 LO 选择区显示 objective prep coverage
+  - AI lesson plan prompt 生成时会携带 objective-level prep context
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+
+### Phase 30d — Harrow Y7-Y11 Objective Content Population (Next)
+- [ ] 基于 Harrow Y7-Y11 原始教学计划，按 `unit -> sub-unit -> objective` 生成 objective-level prep packs
+- [ ] 优先填充 `concept_explanation` 与 `typical_examples`，减少当前仅靠 shared fallback 的情况
+- [ ] 为 Year 7-11 建立 objective-level 资源链接规范（worksheet / practice / kahoot / homework / vocab）
+- [ ] 设计并执行内容导入/同步策略：保留已有进度状态，增量补齐备课内容
+- [ ] 增加 prep completeness 仪表（按 Year / Unit / Class 聚合）
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)

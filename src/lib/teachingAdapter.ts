@@ -22,6 +22,10 @@ export function normalizeTeachingUnit(raw: any): TeachingUnit {
         learning_objectives: su.learning_objectives.map((lo: any) => ({
           ...lo,
           covered_lesson_dates: lo.covered_lesson_dates || [],
+          core_vocabulary: lo.core_vocabulary || [],
+          concept_explanation: lo.concept_explanation || '',
+          typical_examples: lo.typical_examples || [],
+          prep_resources: lo.prep_resources || [],
         })),
       };
     }
@@ -34,6 +38,10 @@ export function normalizeTeachingUnit(raw: any): TeachingUnit {
       status: 'not_started' as const,
       periods: 1,
       covered_lesson_dates: [],
+      core_vocabulary: [],
+      concept_explanation: '',
+      typical_examples: [],
+      prep_resources: [],
     }));
 
     const { objectives: _, ...suRest } = su;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, Plus, Trash2, Paperclip, Loader2, Circle, Clock, CheckCircle2, Target, BookOpen, Link, FileText, MessageSquare, Sparkles } from 'lucide-react';
-import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective } from '../types';
+import { SubUnit, VocabularyItem, TeachingReflection, LearningObjective, PrepResource, TypicalExample } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { uploadFile } from '../services/storageService';
 
@@ -78,12 +78,26 @@ const emptyReflection: TeachingReflection = {
   improvements: '',
 };
 
+const emptyVocabularyItem = (): VocabularyItem => ({ english: '', chinese: '' });
+const emptyTypicalExample = (): TypicalExample => ({ question: '', solution: '' });
+const emptyPrepResource = (): PrepResource => ({ title: '', url: '', kind: 'link', note: '' });
+
 export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => {
-  const emptyLO = (): LearningObjective => ({ id: genId(), objective: '', status: 'not_started', periods: 1 });
+  const emptyLO = (): LearningObjective => ({
+    id: genId(),
+    objective: '',
+    status: 'not_started',
+    periods: 1,
+    covered_lesson_dates: [],
+    core_vocabulary: [],
+    concept_explanation: '',
+    typical_examples: [],
+    prep_resources: [],
+  });
   const [title, setTitle] = useState('');
   const [learningObjectives, setLearningObjectives] = useState<LearningObjective[]>([emptyLO()]);
   const [periods, setPeriods] = useState(1);
-  const [vocabulary, setVocabulary] = useState<VocabularyItem[]>([{ english: '', chinese: '' }]);
+  const [vocabulary, setVocabulary] = useState<VocabularyItem[]>([emptyVocabularyItem()]);
   const [classroomExercises, setClassroomExercises] = useState('');
   const [worksheetUrl, setWorksheetUrl] = useState('');
   const [onlinePracticeUrl, setOnlinePracticeUrl] = useState('');
@@ -97,9 +111,18 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   useEffect(() => {
     if (subUnit) {
       setTitle(subUnit.title);
-      setLearningObjectives((subUnit.learning_objectives || []).length > 0 ? subUnit.learning_objectives : [emptyLO()]);
+      setLearningObjectives((subUnit.learning_objectives || []).length > 0
+        ? subUnit.learning_objectives.map(lo => ({
+          ...lo,
+          covered_lesson_dates: lo.covered_lesson_dates || [],
+          core_vocabulary: lo.core_vocabulary || [],
+          concept_explanation: lo.concept_explanation || '',
+          typical_examples: lo.typical_examples || [],
+          prep_resources: lo.prep_resources || [],
+        }))
+        : [emptyLO()]);
       setPeriods(subUnit.periods);
-      setVocabulary(subUnit.vocabulary.length > 0 ? subUnit.vocabulary : [{ english: '', chinese: '' }]);
+      setVocabulary(subUnit.vocabulary.length > 0 ? subUnit.vocabulary : [emptyVocabularyItem()]);
       setClassroomExercises(subUnit.classroom_exercises);
       setWorksheetUrl(subUnit.worksheet_url || '');
       setOnlinePracticeUrl(subUnit.online_practice_url || '');
@@ -117,7 +140,16 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
     onSave({
       id: subUnit?.id || genId(),
       title,
-      learning_objectives: learningObjectives.filter(lo => lo.objective.trim()),
+      learning_objectives: learningObjectives
+        .filter(lo => lo.objective.trim())
+        .map(lo => ({
+          ...lo,
+          covered_lesson_dates: lo.covered_lesson_dates || [],
+          core_vocabulary: (lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()),
+          concept_explanation: lo.concept_explanation || '',
+          typical_examples: (lo.typical_examples || []).filter(ex => ex.question.trim() || ex.solution.trim()),
+          prep_resources: (lo.prep_resources || []).filter(res => res.title.trim() || res.url.trim() || (res.note || '').trim()),
+        })),
       periods,
       vocabulary: vocabulary.filter(v => v.english.trim() || v.chinese.trim()),
       classroom_exercises: classroomExercises,
@@ -140,7 +172,107 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   };
   const removeLO = (i: number) => setLearningObjectives(learningObjectives.filter((_, idx) => idx !== i));
 
-  const addVocab = () => setVocabulary([...vocabulary, { english: '', chinese: '' }]);
+  const updateLOVocabulary = (loIndex: number, vocabIndex: number, field: keyof VocabularyItem, value: string) => {
+    const arr = [...learningObjectives];
+    const current = [...(arr[loIndex].core_vocabulary || [])];
+    current[vocabIndex] = { ...(current[vocabIndex] || emptyVocabularyItem()), [field]: value };
+    arr[loIndex] = { ...arr[loIndex], core_vocabulary: current };
+    setLearningObjectives(arr);
+  };
+  const addLOVocabulary = (loIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = { ...arr[loIndex], core_vocabulary: [...(arr[loIndex].core_vocabulary || []), emptyVocabularyItem()] };
+    setLearningObjectives(arr);
+  };
+  const removeLOVocabulary = (loIndex: number, vocabIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      core_vocabulary: (arr[loIndex].core_vocabulary || []).filter((_, idx) => idx !== vocabIndex),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const updateLOExample = (loIndex: number, exampleIndex: number, field: keyof TypicalExample, value: string) => {
+    const arr = [...learningObjectives];
+    const current = [...(arr[loIndex].typical_examples || [])];
+    current[exampleIndex] = { ...(current[exampleIndex] || emptyTypicalExample()), [field]: value };
+    arr[loIndex] = { ...arr[loIndex], typical_examples: current };
+    setLearningObjectives(arr);
+  };
+  const addLOExample = (loIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = { ...arr[loIndex], typical_examples: [...(arr[loIndex].typical_examples || []), emptyTypicalExample()] };
+    setLearningObjectives(arr);
+  };
+  const removeLOExample = (loIndex: number, exampleIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      typical_examples: (arr[loIndex].typical_examples || []).filter((_, idx) => idx !== exampleIndex),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const updateLOResource = (loIndex: number, resourceIndex: number, field: keyof PrepResource, value: string) => {
+    const arr = [...learningObjectives];
+    const current = [...(arr[loIndex].prep_resources || [])];
+    current[resourceIndex] = { ...(current[resourceIndex] || emptyPrepResource()), [field]: value };
+    arr[loIndex] = { ...arr[loIndex], prep_resources: current };
+    setLearningObjectives(arr);
+  };
+  const addLOResource = (loIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = { ...arr[loIndex], prep_resources: [...(arr[loIndex].prep_resources || []), emptyPrepResource()] };
+    setLearningObjectives(arr);
+  };
+  const removeLOResource = (loIndex: number, resourceIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      prep_resources: (arr[loIndex].prep_resources || []).filter((_, idx) => idx !== resourceIndex),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const buildSharedPrepResourcesDraft = (): PrepResource[] => ([
+    { title: 'Worksheet', url: worksheetUrl.trim(), kind: 'worksheet' as const },
+    { title: 'Online Practice', url: onlinePracticeUrl.trim(), kind: 'practice' as const },
+    { title: 'Kahoot', url: kahootUrl.trim(), kind: 'kahoot' as const },
+    { title: 'Homework', url: homeworkUrl.trim(), kind: 'homework' as const },
+    { title: 'Vocabulary Practice', url: vocabPracticeUrl.trim(), kind: 'vocab' as const },
+  ]).filter(resource => resource.url);
+
+  const seedLOVocabulary = (loIndex: number) => {
+    const sharedVocabulary = vocabulary.filter(v => v.english.trim() || v.chinese.trim());
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      core_vocabulary: sharedVocabulary.map(v => ({ ...v })),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const seedLOResources = (loIndex: number) => {
+    const sharedResources = buildSharedPrepResourcesDraft();
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      prep_resources: sharedResources.map(resource => ({ ...resource })),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const seedLOConcept = (loIndex: number) => {
+    const arr = [...learningObjectives];
+    arr[loIndex] = {
+      ...arr[loIndex],
+      concept_explanation: aiSummary.trim(),
+    };
+    setLearningObjectives(arr);
+  };
+
+  const addVocab = () => setVocabulary([...vocabulary, emptyVocabularyItem()]);
   const updateVocab = (i: number, field: keyof VocabularyItem, val: string) => {
     const arr = [...vocabulary];
     arr[i] = { ...arr[i], [field]: val };
@@ -247,6 +379,186 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                       />
                     </div>
                   </div>
+                  <details className="pl-10 rounded-xl border border-indigo-100 bg-white/80">
+                    <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+                        <Sparkles size={14} />
+                        <span>Objective Prep Pack</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400">
+                        {(lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()).length} vocab · {(lo.typical_examples || []).filter(ex => ex.question.trim() || ex.solution.trim()).length} examples · {(lo.prep_resources || []).filter(res => res.title.trim() || res.url.trim()).length} resources
+                      </span>
+                    </summary>
+                    <div className="px-4 pb-4 space-y-6 border-t border-indigo-100">
+                      <div className="pt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => seedLOVocabulary(i)}
+                          disabled={vocabulary.filter(v => v.english.trim() || v.chinese.trim()).length === 0}
+                          className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Use Shared Vocab
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => seedLOConcept(i)}
+                          disabled={!aiSummary.trim()}
+                          className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Use AI Summary
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => seedLOResources(i)}
+                          disabled={buildSharedPrepResourcesDraft().length === 0}
+                          className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Use Shared Links
+                        </button>
+                      </div>
+
+                      <section className="space-y-3 pt-4">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Core Vocabulary</label>
+                          <button type="button" onClick={() => addLOVocabulary(i)} className="text-indigo-600 text-[11px] font-bold hover:underline flex items-center gap-1">
+                            <Plus size={12} /> Add
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {(lo.core_vocabulary || []).map((vocab, vocabIndex) => (
+                            <div key={`${lo.id}-vocab-${vocabIndex}`} className="flex gap-2">
+                              <input
+                                type="text"
+                                value={vocab.english}
+                                onChange={e => updateLOVocabulary(i, vocabIndex, 'english', e.target.value)}
+                                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                                placeholder="English term"
+                              />
+                              <input
+                                type="text"
+                                value={vocab.chinese}
+                                onChange={e => updateLOVocabulary(i, vocabIndex, 'chinese', e.target.value)}
+                                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                                placeholder="中文术语"
+                              />
+                              <button type="button" onClick={() => removeLOVocabulary(i, vocabIndex)} className="p-2 text-red-400 hover:text-red-600">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                          {(lo.core_vocabulary || []).length === 0 && (
+                            <p className="text-xs text-slate-400 italic">No objective-specific vocabulary yet. Shared sub-unit vocabulary will still be available.</p>
+                          )}
+                        </div>
+                      </section>
+
+                      <section className="space-y-2">
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Concept Explanation</label>
+                        <textarea
+                          value={lo.concept_explanation || ''}
+                          onChange={e => updateLO(i, 'concept_explanation', e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm resize-none h-24"
+                          placeholder="Explain the key concept, misconceptions, and the teaching sequence for this objective..."
+                        />
+                      </section>
+
+                      <section className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Typical Examples</label>
+                          <button type="button" onClick={() => addLOExample(i)} className="text-indigo-600 text-[11px] font-bold hover:underline flex items-center gap-1">
+                            <Plus size={12} /> Add
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          {(lo.typical_examples || []).map((example, exampleIndex) => (
+                            <div key={`${lo.id}-example-${exampleIndex}`} className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Example {exampleIndex + 1}</span>
+                                <button type="button" onClick={() => removeLOExample(i, exampleIndex)} className="p-1 text-red-400 hover:text-red-600">
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                              <textarea
+                                value={example.question}
+                                onChange={e => updateLOExample(i, exampleIndex, 'question', e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-20 bg-white"
+                                placeholder="Question / worked example prompt"
+                              />
+                              <textarea
+                                value={example.solution}
+                                onChange={e => updateLOExample(i, exampleIndex, 'solution', e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24 bg-white"
+                                placeholder="Solution steps / board explanation"
+                              />
+                            </div>
+                          ))}
+                          {(lo.typical_examples || []).length === 0 && (
+                            <p className="text-xs text-slate-400 italic">No objective-specific examples yet.</p>
+                          )}
+                        </div>
+                      </section>
+
+                      <section className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Prep Resources</label>
+                          <button type="button" onClick={() => addLOResource(i)} className="text-indigo-600 text-[11px] font-bold hover:underline flex items-center gap-1">
+                            <Plus size={12} /> Add
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          {(lo.prep_resources || []).map((resource, resourceIndex) => (
+                            <div key={`${lo.id}-resource-${resourceIndex}`} className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Resource {resourceIndex + 1}</span>
+                                <button type="button" onClick={() => removeLOResource(i, resourceIndex)} className="p-1 text-red-400 hover:text-red-600">
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                              <input
+                                type="text"
+                                value={resource.title}
+                                onChange={e => updateLOResource(i, resourceIndex, 'title', e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
+                                placeholder="Resource title"
+                              />
+                              <input
+                                type="url"
+                                value={resource.url}
+                                onChange={e => updateLOResource(i, resourceIndex, 'url', e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
+                                placeholder="https://..."
+                              />
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <select
+                                  value={resource.kind || 'link'}
+                                  onChange={e => updateLOResource(i, resourceIndex, 'kind', e.target.value)}
+                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
+                                >
+                                  <option value="link">General Link</option>
+                                  <option value="worksheet">Worksheet</option>
+                                  <option value="practice">Practice</option>
+                                  <option value="kahoot">Kahoot</option>
+                                  <option value="homework">Homework</option>
+                                  <option value="vocab">Vocabulary</option>
+                                  <option value="other">Other</option>
+                                </select>
+                                <input
+                                  type="text"
+                                  value={resource.note || ''}
+                                  onChange={e => updateLOResource(i, resourceIndex, 'note', e.target.value)}
+                                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
+                                  placeholder="How to use this resource"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          {(lo.prep_resources || []).length === 0 && (
+                            <p className="text-xs text-slate-400 italic">No objective-specific resources yet. Shared sub-unit links can still be used.</p>
+                          )}
+                        </div>
+                      </section>
+                    </div>
+                  </details>
                 </div>
               ))}
               {learningObjectives.length === 0 && (
