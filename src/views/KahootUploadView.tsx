@@ -529,143 +529,50 @@ export function KahootUploadView({
 
   return (
     <div className="space-y-6">
-      <div className="glass-card overflow-hidden">
-        <div className="grid gap-0 xl:grid-cols-[minmax(0,1.25fr)_430px]">
-          <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.38),_transparent_35%),linear-gradient(135deg,_#0f172a_0%,_#172554_42%,_#1e293b_100%)] px-6 py-6 text-white sm:px-7">
-            <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent)] xl:block" />
-            <div className="relative space-y-5">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-100/80">Publishing Pipeline</p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight">Kahoot Upload</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-200/90">
-                  Run the full Kahoot workflow from one surface: metadata, questions, assets, deployment, and website backfill.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  {
-                    label: 'Pipeline',
-                    value: agentHealth === 'online' ? 'Live agent' : 'Ready for agent',
-                    note: 'Browser automation, artifact build, and sync in one run.',
-                  },
-                  {
-                    label: 'Current focus',
-                    value: draft ? draft.topic_code || 'Selected item' : 'No item selected',
-                    note: draft ? `${draftQuestionSummary.total} questions · ${draftReadiness.percent}% ready` : 'Choose an item to inspect readiness and deploy state.',
-                  },
-                  {
-                    label: 'Risk surface',
-                    value: draftIssues.length > 0 ? `${draftIssues.length} blockers` : 'Clean metadata',
-                    note: draftIssues.length > 0 ? draftIssues.slice(0, 2).join(' · ') : 'Core metadata, links, and question structure are in place.',
-                  },
-                ].map(card => (
-                  <div key={card.label} className="rounded-[24px] border border-white/15 bg-white/8 p-4 backdrop-blur-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">{card.label}</p>
-                    <p className="mt-2 text-lg font-bold text-white">{card.value}</p>
-                    <p className="mt-2 text-xs leading-5 text-slate-300">{card.note}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Publishing</p>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Kahoot Upload</h2>
+            <p className="max-w-2xl text-sm leading-6 text-slate-500">
+              Manage Kahoot metadata, question sets, assets, deployment, and website backfill in one workspace.
+            </p>
           </div>
+        </div>
 
-          <div className="space-y-5 bg-white/80 p-5 sm:p-6">
-            <div className="flex flex-wrap gap-2">
-              <button onClick={handleCreate} className="btn-primary flex items-center gap-2 text-sm">
-                <Plus size={16} /> New Kahoot
-              </button>
-              <button
-                onClick={handleDuplicate}
-                disabled={!selectedItem}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Duplicate
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={!draft || !hasUnsavedChanges}
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Save size={16} /> Save Changes
-                </span>
-              </button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { label: 'Total', value: stats.total, tone: 'text-slate-900', note: 'items in this workspace' },
-                { label: 'Human Review', value: stats.human_review, tone: 'text-amber-700', note: 'waiting for QA' },
-                { label: 'Uploaded', value: stats.uploaded, tone: 'text-emerald-700', note: 'already on Kahoot' },
-                { label: 'Missing Play Link', value: stats.missing_challenge, tone: 'text-rose-700', note: 'cannot sync to website yet' },
-              ].map(stat => (
-                <div key={stat.label} className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stat.label}</p>
-                  <p className={cn('mt-2 text-2xl font-bold', stat.tone)}>{stat.value}</p>
-                  <p className="mt-1 text-xs text-slate-500">{stat.note}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Selection Snapshot</p>
-                  <p className="text-sm text-slate-500">Quick readiness read before you open the full detail view.</p>
-                </div>
-                <Gamepad2 size={18} className="text-slate-400" />
-              </div>
-
-              {!draft && (
-                <p className="mt-3 text-sm text-slate-500">No item selected.</p>
-              )}
-
-              {draft && (
-                <div className="mt-4 space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                      {draft.topic_code}
-                    </span>
-                    <span className={cn('rounded-full border px-3 py-1 text-[11px] font-bold', STATUS_META[draft.upload_status].tone)}>
-                      {STATUS_META[draft.upload_status].label}
-                    </span>
-                    {hasUnsavedChanges && (
-                      <span className="rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-bold text-indigo-700">Unsaved</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-slate-900">{draft.title || 'Untitled Kahoot'}</p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {draftQuestionSummary.total} questions · {countCompleteLinks(draft)}/3 links · {draftReadiness.percent}% ready
-                    </p>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500 transition-all"
-                      style={{ width: `${draftReadiness.percent}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={handleCreate} className="btn-primary flex items-center gap-2 text-sm">
+            <Plus size={16} /> New Kahoot
+          </button>
+          <button
+            onClick={handleDuplicate}
+            disabled={!selectedItem}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Duplicate
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!draft || !hasUnsavedChanges}
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Save size={16} /> Save Changes
+            </span>
+          </button>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: 'Total', value: stats.total, tone: 'text-slate-900', accent: 'bg-slate-900' },
-          { label: 'AI Generated', value: stats.ai_generated, tone: 'text-sky-700', accent: 'bg-sky-500' },
-          { label: 'Human Review', value: stats.human_review, tone: 'text-amber-700', accent: 'bg-amber-500' },
-          { label: 'Uploaded', value: stats.uploaded, tone: 'text-emerald-700', accent: 'bg-emerald-500' },
-          { label: 'Missing Cover', value: stats.missing_cover, tone: 'text-rose-700', accent: 'bg-rose-500' },
-          { label: 'Missing Play Link', value: stats.missing_challenge, tone: 'text-rose-700', accent: 'bg-rose-500' },
+          { label: 'Total', value: stats.total, tone: 'text-slate-900' },
+          { label: 'Human Review', value: stats.human_review, tone: 'text-amber-700' },
+          { label: 'Uploaded', value: stats.uploaded, tone: 'text-emerald-700' },
+          { label: 'Missing Play Link', value: stats.missing_challenge, tone: 'text-rose-700' },
         ].map(stat => (
-          <div key={stat.label} className="glass-card overflow-hidden p-4">
-            <div className={cn('h-1 rounded-full', stat.accent)} />
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{stat.label}</p>
-            <p className={cn('mt-2 text-2xl font-bold', stat.tone)}>{stat.value}</p>
+          <div key={stat.label} className="glass-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{stat.label}</p>
+            <p className={cn('mt-3 text-3xl font-bold', stat.tone)}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -744,8 +651,6 @@ export function KahootUploadView({
                 const status = STATUS_META[item.upload_status];
                 const issueCount = getItemIssues(item).length;
                 const questionSummary = getQuestionSummary(item);
-                const checklist = getPublishChecklist(item);
-                const readiness = Math.round((checklist.filter(entry => entry.done).length / checklist.length) * 100);
 
                 return (
                   <button
@@ -759,57 +664,35 @@ export function KahootUploadView({
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
                     )}
                   >
-                    <div className="flex gap-3">
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[20px] border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-200">
-                        {item.cover_url ? (
-                          <img src={item.cover_url} alt={item.title} className="h-full w-full object-cover" />
-                        ) : (
-                          <Gamepad2 size={20} className="text-slate-400" />
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            {item.topic_code} · {TRACK_LABELS[item.track]}
+                          </p>
+                          <p className="mt-2 line-clamp-2 text-sm font-bold text-slate-900">{item.title}</p>
+                        </div>
+                        <status.icon size={16} className={cn('mt-0.5 shrink-0', item.upload_status === 'uploaded' ? 'text-emerald-600' : item.upload_status === 'human_review' ? 'text-amber-600' : 'text-sky-600')} />
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                        <span className={cn('rounded-full border px-2 py-1 font-bold', status.tone)}>{status.label}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-500">
+                          {questionSummary.total} Qs
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-500">
+                          {countCompleteLinks(item)}/3 links
+                        </span>
+                        {issueCount > 0 && (
+                          <span className="rounded-full bg-rose-100 px-2 py-1 font-semibold text-rose-700">
+                            {issueCount} issues
+                          </span>
                         )}
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              {item.topic_code} · {TRACK_LABELS[item.track]}
-                            </p>
-                            <p className="mt-1 line-clamp-2 text-sm font-bold text-slate-900">{item.title}</p>
-                          </div>
-                          <status.icon size={16} className={cn('mt-0.5 shrink-0', item.upload_status === 'uploaded' ? 'text-emerald-600' : item.upload_status === 'human_review' ? 'text-amber-600' : 'text-sky-600')} />
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-                          <span className={cn('rounded-full border px-2 py-1 font-bold', status.tone)}>{status.label}</span>
-                          <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-500">
-                            {questionSummary.total} Qs
-                          </span>
-                          <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-500">
-                            {countCompleteLinks(item)}/3 links
-                          </span>
-                          {issueCount > 0 && (
-                            <span className="rounded-full bg-rose-100 px-2 py-1 font-semibold text-rose-700">
-                              {issueCount} issues
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            <span>Readiness</span>
-                            <span>{readiness}%</span>
-                          </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
-                            <div
-                              className={cn(
-                                'h-full rounded-full transition-all',
-                                readiness >= 80 ? 'bg-emerald-500' : readiness >= 50 ? 'bg-amber-500' : 'bg-rose-500',
-                              )}
-                              style={{ width: `${readiness}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                      <p className="text-xs text-slate-400">
+                        Updated {formatDateTime(item.updated_at)}
+                      </p>
                     </div>
                   </button>
                 );
@@ -837,23 +720,9 @@ export function KahootUploadView({
 
           {draft && (
             <div className="space-y-4">
-              <div className="glass-card overflow-hidden">
-                <div className="grid gap-0 xl:grid-cols-[190px_minmax(0,1fr)_280px]">
-                  <div className="relative min-h-[220px] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-indigo-100/70">
-                    {draft.cover_url ? (
-                      <img src={draft.cover_url} alt={draft.title} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-slate-400">
-                        <Gamepad2 size={34} />
-                      </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent p-4 text-white">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">{draft.topic_code}</p>
-                      <p className="mt-1 text-sm font-bold">{TRACK_LABELS[draft.track]} Track</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-5 p-5 sm:p-6">
+              <div className="glass-card p-6 sm:p-7">
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
+                  <div className="space-y-6">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         {BOARD_LABELS[draft.board]}
@@ -871,43 +740,34 @@ export function KahootUploadView({
                       )}
                     </div>
 
-                    <div>
-                      <h3 className="text-2xl font-bold text-slate-900">{draft.title || 'Untitled Kahoot'}</h3>
-                      <p className="mt-2 text-sm text-slate-500">
-                        {draft.topic_code} · {draft.questions.length} questions · last updated {formatDateTime(draft.updated_at)}
+                    <div className="space-y-3">
+                      <h3 className="text-3xl font-bold tracking-tight text-slate-900">{draft.title || 'Untitled Kahoot'}</h3>
+                      <p className="max-w-3xl text-sm leading-6 text-slate-500">
+                        {draft.topic_code} · {draft.questions.length} questions · {countCompleteLinks(draft)}/3 links ready · last updated {formatDateTime(draft.updated_at)}
                       </p>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {[
-                        {
-                          label: 'Readiness',
-                          value: `${draftReadiness.percent}%`,
-                          note: `${draftReadiness.complete}/${draftReadiness.total} publish checks passed`,
-                        },
-                        {
-                          label: 'Question Health',
-                          value: draftQuestionSummary.flagged > 0 ? `${draftQuestionSummary.flagged} flagged` : 'All clean',
-                          note: `${draftQuestionSummary.valid} valid · avg ${draftQuestionSummary.avgTime || 0}s`,
-                        },
-                        {
-                          label: 'Link Coverage',
-                          value: `${countCompleteLinks(draft)}/3 ready`,
-                          note: draft.challenge_url ? 'Play link available' : 'Challenge link still missing',
-                        },
-                      ].map(card => (
-                        <div key={card.label} className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
-                          <p className="mt-2 text-base font-bold text-slate-900">{card.value}</p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">{card.note}</p>
-                        </div>
-                      ))}
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Readiness</p>
+                        <p className="mt-2 text-2xl font-bold text-slate-900">{draftReadiness.percent}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Question Health</p>
+                        <p className="mt-2 text-2xl font-bold text-slate-900">
+                          {draftQuestionSummary.flagged > 0 ? `${draftQuestionSummary.flagged} flagged` : 'Clean'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current Stage</p>
+                        <p className="mt-2 text-2xl font-bold text-slate-900">{STATUS_META[draft.upload_status].label}</p>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        <span>Deployment Readiness</span>
-                        <span>{draftReadiness.percent}%</span>
+                        <span>Deployment readiness</span>
+                        <span>{draftReadiness.complete}/{draftReadiness.total}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-slate-200">
                         <div
@@ -919,22 +779,19 @@ export function KahootUploadView({
 
                     {draftIssues.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {draftIssues.slice(0, 4).map(issue => (
+                        {draftIssues.slice(0, 3).map(issue => (
                           <span key={issue} className="rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700">
                             {issue}
                           </span>
                         ))}
                       </div>
                     )}
-                  </div>
 
-                  <div className="border-t border-slate-200 bg-slate-50/70 p-5 xl:border-l xl:border-t-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Quick Actions</p>
-                    <div className="mt-4 grid gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => handleCopy(draft.challenge_url, 'Play link')}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                        className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Copy size={14} /> Copy Play Link
@@ -943,7 +800,7 @@ export function KahootUploadView({
                       <button
                         type="button"
                         onClick={() => handleCopy(draft.creator_url, 'Creator link')}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                        className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Link2 size={14} /> Copy Creator Link
@@ -952,31 +809,38 @@ export function KahootUploadView({
                       <button
                         type="button"
                         onClick={handleDelete}
-                        className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-bold text-rose-700 transition hover:bg-rose-50"
+                        className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-bold text-rose-700 transition hover:bg-rose-50"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Trash2 size={14} /> Delete
                         </span>
                       </button>
                     </div>
+                  </div>
 
-                    <div className="mt-5 space-y-3">
-                      {[
-                        ['Last updated', formatDateTime(draft.updated_at)],
-                        ['AI generated', formatDateTime(draft.ai_generated_at)],
-                        ['Uploaded', formatDateTime(draft.uploaded_at)],
-                      ].map(([label, value]) => (
-                        <div key={label} className="rounded-[20px] border border-slate-200 bg-white px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</p>
-                          <p className="mt-1 text-sm font-bold text-slate-900">{value}</p>
+                  <div className="space-y-4">
+                    <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white">
+                      {draft.cover_url ? (
+                        <img src={draft.cover_url} alt={draft.title} className="h-56 w-full object-cover" />
+                      ) : (
+                        <div className="flex h-56 items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-400">
+                          <Gamepad2 size={30} />
                         </div>
-                      ))}
+                      )}
+                    </div>
+                    <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Timestamps</p>
+                      <div className="mt-3 space-y-2 text-sm text-slate-600">
+                        <p>Updated: {formatDateTime(draft.updated_at)}</p>
+                        <p>AI generated: {formatDateTime(draft.ai_generated_at)}</p>
+                        <p>Uploaded: {formatDateTime(draft.uploaded_at)}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="flex flex-wrap gap-2">
                 {detailTabs.map(tab => {
                   const Icon = tab.icon;
                   return (
@@ -985,62 +849,22 @@ export function KahootUploadView({
                       type="button"
                       onClick={() => setDetailTab(tab.key)}
                       className={cn(
-                        'rounded-[24px] border p-4 text-left transition',
+                        'inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold transition',
                         detailTab === tab.key
-                          ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm'
+                          ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
                           : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-800',
                       )}
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className={cn(
-                          'rounded-full p-2',
-                          detailTab === tab.key ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500',
-                        )}>
-                          <Icon size={16} />
-                        </div>
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{tab.summary}</span>
-                      </div>
-                      <p className="mt-4 text-base font-bold">{tab.label}</p>
+                      <Icon size={15} />
+                      <span>{tab.label}</span>
                     </button>
                   );
                 })}
               </div>
 
               {detailTab === 'overview' && (
-                <div className="space-y-4">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {[
-                      {
-                        label: 'Readiness',
-                        value: `${draftReadiness.percent}%`,
-                        note: `${draftReadiness.complete}/${draftReadiness.total} checks passed`,
-                      },
-                      {
-                        label: 'Question Set',
-                        value: `${draftQuestionSummary.total} total`,
-                        note: draftQuestionSummary.flagged > 0 ? `${draftQuestionSummary.flagged} flagged questions` : 'No validation flags',
-                      },
-                      {
-                        label: 'Tags',
-                        value: `${draft.tags.length}`,
-                        note: draft.tags.length > 0 ? draft.tags.slice(0, 3).join(' · ') : 'No tagging yet',
-                      },
-                      {
-                        label: 'Website Mapping',
-                        value: draft.website_link_id ? 'Mapped' : 'Pending',
-                        note: draft.website_link_id || 'Add the website link id before sync',
-                      },
-                    ].map(card => (
-                      <div key={card.label} className="glass-card p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
-                        <p className="mt-2 text-xl font-bold text-slate-900">{card.value}</p>
-                        <p className="mt-1 text-xs leading-5 text-slate-500">{card.note}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_360px]">
-                  <div className="glass-card space-y-5 p-5">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_360px]">
+                  <div className="glass-card space-y-6 p-6">
                     <div className="grid gap-4 md:grid-cols-2">
                       <label className="space-y-2">
                         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Title</span>
@@ -1145,7 +969,7 @@ export function KahootUploadView({
                     </div>
                   </div>
 
-                  <div className="glass-card space-y-4 p-5">
+                  <div className="glass-card space-y-5 p-5">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Card Preview</p>
                       <div className="mt-3 overflow-hidden rounded-[28px] border border-slate-200 bg-white">
@@ -1196,7 +1020,6 @@ export function KahootUploadView({
                       </div>
                     </div>
                   </div>
-                  </div>
                 </div>
               )}
 
@@ -1224,35 +1047,8 @@ export function KahootUploadView({
                     </button>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-4">
-                    {[
-                      {
-                        label: 'Total',
-                        value: draftQuestionSummary.total,
-                        note: 'questions in this kahoot',
-                      },
-                      {
-                        label: 'Valid',
-                        value: draftQuestionSummary.valid,
-                        note: 'no structure issues',
-                      },
-                      {
-                        label: 'Flagged',
-                        value: draftQuestionSummary.flagged,
-                        note: `${draftQuestionSummary.issueCount} field-level issues`,
-                      },
-                      {
-                        label: 'Average Time',
-                        value: `${draftQuestionSummary.avgTime || 0}s`,
-                        note: 'per question',
-                      },
-                    ].map(card => (
-                      <div key={card.label} className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
-                        <p className="mt-2 text-xl font-bold text-slate-900">{card.value}</p>
-                        <p className="mt-1 text-xs text-slate-500">{card.note}</p>
-                      </div>
-                    ))}
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
+                    {draftQuestionSummary.total} questions · {draftQuestionSummary.valid} valid · {draftQuestionSummary.flagged} flagged · average {draftQuestionSummary.avgTime || 0}s
                   </div>
 
                   <div className="space-y-4">
@@ -1399,39 +1195,7 @@ export function KahootUploadView({
               )}
 
               {detailTab === 'assets' && (
-                <div className="space-y-4">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {[
-                      {
-                        label: 'Cover',
-                        value: draft.cover_url ? 'Attached' : 'Missing',
-                        note: draft.cover_url ? 'Preview available in the right rail' : 'Upload or paste a cover asset URL',
-                      },
-                      {
-                        label: 'Page Link',
-                        value: draft.page_url ? 'Ready' : 'Missing',
-                        note: draft.page_url || '25Maths page URL not set',
-                      },
-                      {
-                        label: 'Play Link',
-                        value: draft.challenge_url ? 'Ready' : 'Missing',
-                        note: draft.challenge_url || 'Challenge URL will be created or pasted here',
-                      },
-                      {
-                        label: 'Creator Link',
-                        value: draft.creator_url ? 'Ready' : 'Pending',
-                        note: draft.creator_url || 'Resolved during deploy when available',
-                      },
-                    ].map(card => (
-                      <div key={card.label} className="glass-card p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{card.label}</p>
-                        <p className="mt-2 text-xl font-bold text-slate-900">{card.value}</p>
-                        <p className="mt-1 break-all text-xs leading-5 text-slate-500">{card.note}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
                   <div className="glass-card space-y-5 p-5">
                     <div className="grid gap-4 md:grid-cols-2">
                       <label className="space-y-2 md:col-span-2">
@@ -1551,43 +1315,11 @@ export function KahootUploadView({
                       ))}
                     </div>
                   </div>
-                  </div>
                 </div>
               )}
 
               {detailTab === 'publish' && (
-                <div className="space-y-4">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {[
-                      {
-                        label: 'AI Draft',
-                        value: draft.ai_generated_at ? 'Complete' : 'Pending',
-                        tone: draft.ai_generated_at ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-50 text-slate-600 border-slate-200',
-                      },
-                      {
-                        label: 'Manual Review',
-                        value: draft.upload_status === 'human_review' || draft.upload_status === 'uploaded' ? 'Complete' : 'Pending',
-                        tone: draft.upload_status === 'human_review' || draft.upload_status === 'uploaded' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-600 border-slate-200',
-                      },
-                      {
-                        label: 'Kahoot Upload',
-                        value: draft.upload_status === 'uploaded' ? 'Complete' : 'Pending',
-                        tone: draft.upload_status === 'uploaded' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200',
-                      },
-                      {
-                        label: 'Website Sync',
-                        value: draft.challenge_url && draft.website_link_id ? 'Ready' : 'Needs mapping',
-                        tone: draft.challenge_url && draft.website_link_id ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-600 border-slate-200',
-                      },
-                    ].map(step => (
-                      <div key={step.label} className={cn('rounded-[24px] border p-4', step.tone)}>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{step.label}</p>
-                        <p className="mt-2 text-lg font-bold">{step.value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
                   <div className="glass-card space-y-5 p-5">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Upload Status</p>
@@ -1702,10 +1434,13 @@ export function KahootUploadView({
                       <p className="text-sm font-bold text-slate-900">Publish Checklist</p>
                       <div className="mt-3 space-y-2">
                         {draftChecklist.map(item => (
-                          <div key={item.label} className={cn(
-                            'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium',
-                            item.done ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700',
-                          )}>
+                          <div
+                            key={item.label}
+                            className={cn(
+                              'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium',
+                              item.done ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700',
+                            )}
+                          >
                             {item.done ? <CheckCircle2 size={16} /> : <TriangleAlert size={16} />}
                             <span>{item.label}</span>
                           </div>
@@ -1723,16 +1458,18 @@ export function KahootUploadView({
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <span className={cn(
-                            'rounded-full px-3 py-1 text-xs font-bold',
-                            agentHealth === 'online'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : agentHealth === 'offline'
-                                ? 'bg-rose-100 text-rose-700'
-                                : agentHealth === 'checking'
-                                  ? 'bg-amber-100 text-amber-700'
-                                  : 'bg-slate-100 text-slate-500',
-                          )}>
+                          <span
+                            className={cn(
+                              'rounded-full px-3 py-1 text-xs font-bold',
+                              agentHealth === 'online'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : agentHealth === 'offline'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : agentHealth === 'checking'
+                                    ? 'bg-amber-100 text-amber-700'
+                                    : 'bg-slate-100 text-slate-500',
+                            )}
+                          >
                             {agentHealth === 'online' ? 'Online' : agentHealth === 'offline' ? 'Offline' : agentHealth === 'checking' ? 'Checking' : 'Idle'}
                           </span>
                         </div>
@@ -1881,7 +1618,7 @@ export function KahootUploadView({
                             </div>
                           )}
 
-                          {(typeof deployJob.result?.creator_url === 'string' && deployJob.result.creator_url) && (
+                          {typeof deployJob.result?.creator_url === 'string' && deployJob.result.creator_url && (
                             <div className="rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700">
                               Creator URL: {deployJob.result.creator_url}
                             </div>
@@ -1909,14 +1646,16 @@ export function KahootUploadView({
                                 const skipped = sync.skipped === true;
 
                                 return (
-                                  <div className={cn(
-                                    'rounded-xl px-3 py-2 text-sm font-medium',
-                                    synced
-                                      ? 'bg-emerald-50 text-emerald-700'
-                                      : skipped
-                                        ? 'bg-amber-50 text-amber-700'
-                                        : 'bg-slate-100 text-slate-600',
-                                  )}>
+                                  <div
+                                    className={cn(
+                                      'rounded-xl px-3 py-2 text-sm font-medium',
+                                      synced
+                                        ? 'bg-emerald-50 text-emerald-700'
+                                        : skipped
+                                          ? 'bg-amber-50 text-amber-700'
+                                          : 'bg-slate-100 text-slate-600',
+                                    )}
+                                  >
                                     {synced ? 'Website backfill completed.' : skipped ? `Website backfill skipped: ${reason || 'no reason returned'}` : 'Website backfill pending.'}
                                   </div>
                                 );
@@ -1941,7 +1680,6 @@ export function KahootUploadView({
                         </div>
                       )}
                     </div>
-                  </div>
                   </div>
                 </div>
               )}
