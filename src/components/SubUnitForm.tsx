@@ -236,12 +236,71 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
   };
 
   const buildSharedPrepResourcesDraft = (): PrepResource[] => ([
-    { title: 'Worksheet', url: worksheetUrl.trim(), kind: 'worksheet' as const },
-    { title: 'Online Practice', url: onlinePracticeUrl.trim(), kind: 'practice' as const },
-    { title: 'Kahoot', url: kahootUrl.trim(), kind: 'kahoot' as const },
-    { title: 'Homework', url: homeworkUrl.trim(), kind: 'homework' as const },
-    { title: 'Vocabulary Practice', url: vocabPracticeUrl.trim(), kind: 'vocab' as const },
-  ]).filter(resource => resource.url);
+    {
+      title: 'Worksheet',
+      url: worksheetUrl.trim(),
+      kind: 'worksheet' as const,
+      note: 'Use as the shared fluency or consolidation worksheet after teacher modelling.',
+    },
+    {
+      title: 'Online Practice',
+      url: onlinePracticeUrl.trim(),
+      kind: 'practice' as const,
+      note: 'Use for paced independent practice once the worked example is secure.',
+    },
+    {
+      title: 'Kahoot',
+      url: kahootUrl.trim(),
+      kind: 'kahoot' as const,
+      note: 'Use as a retrieval or hinge-check activity at the start or end of the lesson.',
+    },
+    {
+      title: 'Homework',
+      url: homeworkUrl.trim(),
+      kind: 'homework' as const,
+      note: 'Set as independent follow-up practice after the objective has been introduced.',
+    },
+    {
+      title: 'Vocabulary Practice',
+      url: vocabPracticeUrl.trim(),
+      kind: 'vocab' as const,
+      note: 'Use to rehearse the bilingual vocabulary before or after the main explanation.',
+    },
+    classroomExercises.trim()
+      ? {
+          title: 'Guided Practice Bank',
+          url: '',
+          kind: 'other' as const,
+          note: 'Reuse the sub-unit classroom exercises as the shared guided-practice bank for this objective.',
+        }
+      : null,
+    homeworkContent.trim() && !homeworkUrl.trim()
+      ? {
+          title: 'Homework Follow-up',
+          url: '',
+          kind: 'homework' as const,
+          note: 'Use the existing sub-unit homework content for independent practice or next-lesson retrieval.',
+        }
+      : null,
+    vocabulary.filter(v => v.english.trim() || v.chinese.trim()).length > 0 && !vocabPracticeUrl.trim()
+      ? {
+          title: 'Vocabulary Retrieval',
+          url: '',
+          kind: 'vocab' as const,
+          note: `Revisit ${vocabulary.filter(v => v.english.trim()).map(v => v.english.trim()).slice(0, 4).join(', ')} before direct instruction and again during plenary review.`,
+        }
+      : null,
+    aiSummary.trim()
+      ? {
+          title: 'Teacher Explanation Notes',
+          url: '',
+          kind: 'other' as const,
+          note: 'Use the sub-unit AI summary as a concise explanation scaffold and misconception check.',
+        }
+      : null,
+  ] as Array<PrepResource | null>).filter((resource): resource is PrepResource =>
+    !!resource && !!(resource.title.trim() || resource.url.trim() || (resource.note || '').trim())
+  );
 
   const seedLOVocabulary = (loIndex: number) => {
     const sharedVocabulary = vocabulary.filter(v => v.english.trim() || v.chinese.trim());
@@ -386,7 +445,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                         <span>Objective Prep Pack</span>
                       </div>
                       <span className="text-[10px] text-slate-400">
-                        {(lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()).length} vocab · {(lo.typical_examples || []).filter(ex => ex.question.trim() || ex.solution.trim()).length} examples · {(lo.prep_resources || []).filter(res => res.title.trim() || res.url.trim()).length} resources
+                        {(lo.core_vocabulary || []).filter(v => v.english.trim() || v.chinese.trim()).length} vocab · {(lo.typical_examples || []).filter(ex => ex.question.trim() || ex.solution.trim()).length} examples · {(lo.prep_resources || []).filter(res => res.title.trim() || res.url.trim() || (res.note || '').trim()).length} resources
                       </span>
                     </summary>
                     <div className="px-4 pb-4 space-y-6 border-t border-indigo-100">
@@ -413,7 +472,7 @@ export const SubUnitForm = ({ subUnit, onSave, onCancel }: SubUnitFormProps) => 
                           disabled={buildSharedPrepResourcesDraft().length === 0}
                           className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                          Use Shared Links
+                          Use Shared Resources
                         </button>
                       </div>
 

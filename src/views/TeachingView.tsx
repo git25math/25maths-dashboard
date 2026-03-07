@@ -135,23 +135,44 @@ function ObjectivePrepSections({ objective, subUnit }: { objective: LearningObje
         {resources.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {resources.map((resource, index) => (
-              <a
-                key={`${resource.title}-${resource.url}-${index}`}
-                href={resource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 rounded-xl bg-white border border-emerald-100 hover:border-emerald-300 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
-                  {(resource.kind || resource.note) && (
-                    <p className="text-[11px] text-slate-400">
-                      {[resource.kind, resource.note].filter(Boolean).join(' · ')}
-                    </p>
-                  )}
+              resource.url ? (
+                <a
+                  key={`${resource.title}-${resource.url}-${index}`}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-emerald-100 hover:border-emerald-300 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
+                    {(resource.kind || resource.note) && (
+                      <p className="text-[11px] text-slate-400">
+                        {[resource.kind, resource.note].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                  </div>
+                  <ExternalLink size={14} className="text-emerald-500" />
+                </a>
+              ) : (
+                <div
+                  key={`${resource.title}-${index}`}
+                  className="p-3 rounded-xl bg-white border border-emerald-100"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{resource.title}</p>
+                      {(resource.kind || resource.note) && (
+                        <p className="text-[11px] text-slate-400">
+                          {[resource.kind, resource.note].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+                    </div>
+                    <span className="px-2 py-1 rounded-full bg-emerald-100 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                      Note
+                    </span>
+                  </div>
                 </div>
-                <ExternalLink size={14} className="text-emerald-500" />
-              </a>
+              )
             ))}
           </div>
         ) : (

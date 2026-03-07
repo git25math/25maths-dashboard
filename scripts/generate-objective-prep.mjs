@@ -39,8 +39,66 @@ const GEMINI_API_KEY = loadApiKey();
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
+function escapeControlCharsInJsonStrings(raw) {
+  let result = '';
+  let inString = false;
+  let escaped = false;
+
+  for (const char of raw) {
+    if (!inString) {
+      result += char;
+      if (char === '"') inString = true;
+      continue;
+    }
+
+    if (escaped) {
+      result += char;
+      escaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      result += char;
+      escaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      result += char;
+      inString = false;
+      continue;
+    }
+
+    if (char === '\n') {
+      result += '\\n';
+      continue;
+    }
+
+    if (char === '\r') {
+      result += '\\r';
+      continue;
+    }
+
+    if (char === '\t') {
+      result += '\\t';
+      continue;
+    }
+
+    const code = char.charCodeAt(0);
+    if (code < 0x20) {
+      result += `\\u${code.toString(16).padStart(4, '0')}`;
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
 function sanitizeJsonEscapes(raw) {
-  let result = raw.replace(/(?<!\\)\\([a-zA-Z]{2,})/g, '\\\\$1');
+  let result = escapeControlCharsInJsonStrings(raw);
+  result = result.replace(/(?<!\\)\\([a-zA-Z]{2,})/g, '\\\\$1');
   result = result.replace(/(?<!\\)\\(?!["\\/bfnrtu\\])/g, '\\\\');
   return result;
 }
@@ -123,9 +181,9 @@ function buildPrompt(unit, subUnit) {
     .map((objective, index) => `${index + 1}. [${objective.id}] ${objective.objective}`)
     .join('\n');
 
-  const classroomSnippet = String(subUnit.classroom_exercises || '').slice(0, 2200);
-  const homeworkSnippet = String(subUnit.homework_content || '').slice(0, 1200);
-  const aiSummarySnippet = String(subUnit.ai_summary || '').slice(0, 1200);
+  const classroomSnippet = String(subUnit.classroom_exercises || '').slice(0, 1400);
+  const homeworkSnippet = String(subUnit.homework_content || '').slice(0, 800);
+  const aiSummarySnippet = String(subUnit.ai_summary || '').slice(0, 800);
 
   return `You are a Harrow bilingual mathematics lesson planner.
 
@@ -229,22 +287,36 @@ function main() {
     if (!targetYears.has(unit.year_group)) continue;
 
     console.log(`\n${unit.year_group} :: ${unit.title}`);
-    let unitChanged = false;
-    unit.sub_units = (unit.sub_units || []).map(subUnit => {
-      if (processedSubUnits >= limit) return subUnit;
-      if (!needsObjectivePrep(subUnit)) return subUnit;
+    const nextSubUnits = [];
+
+    for (const subUnit of unit.sub_units || []) {
+      if (processedSubUnits >= limit) {
+        nextSubUnits.push(subUnit);
+        continue;
+      }
+
+      if (!needsObjectivePrep(subUnit)) {
+        nextSubUnits.push(subUnit);
+        continue;
+      }
 
       console.log(`  Generating objective prep for ${subUnit.title}`);
-      const enriched = enrichSubUnit(unit, subUnit);
-      processedSubUnits++;
-      unitChanged = true;
-      execSync(`sleep ${RATE_LIMIT_MS / 1000}`);
-      return enriched;
-    });
 
-    if (unitChanged) {
-      saveData(units);
+      try {
+        const enriched = enrichSubUnit(unit, subUnit);
+        processedSubUnits++;
+        nextSubUnits.push(enriched);
+        unit.sub_units = nextSubUnits.concat((unit.sub_units || []).slice(nextSubUnits.length));
+        saveData(units);
+      } catch (error) {
+        console.error(`  Failed: ${subUnit.title} :: ${(error.message || String(error)).slice(0, 200)}`);
+        nextSubUnits.push(subUnit);
+      }
+
+      execSync(`sleep ${RATE_LIMIT_MS / 1000}`);
     }
+
+    unit.sub_units = nextSubUnits;
 
     if (processedSubUnits >= limit) break;
   }

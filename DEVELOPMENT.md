@@ -937,12 +937,37 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `npm run lint` ✅
   - `npm run build` ✅
 
-### Phase 30d — Harrow Y7-Y11 Objective Content Population (Next)
-- [ ] 基于 Harrow Y7-Y11 原始教学计划，按 `unit -> sub-unit -> objective` 生成 objective-level prep packs
-- [ ] 优先填充 `concept_explanation` 与 `typical_examples`，减少当前仅靠 shared fallback 的情况
-- [ ] 为 Year 7-11 建立 objective-level 资源链接规范（worksheet / practice / kahoot / homework / vocab）
-- [ ] 设计并执行内容导入/同步策略：保留已有进度状态，增量补齐备课内容
+### Phase 30d — Harrow Y7-Y11 Objective Content Population (2026-03-07) ✅
+
+- **数据补齐结果**:
+  - 基于 Harrow Y7-Y11 原始教学计划，为全部 `407 / 407` 个 learning objectives 生成 objective-level prep packs
+  - 覆盖 Year 7-11 全部年级：
+    - Year 7: `84 / 84`
+    - Year 8: `80 / 80`
+    - Year 9: `99 / 99`
+    - Year 10: `95 / 95`
+    - Year 11: `49 / 49`
+  - 每个 objective 现已具备 `core_vocabulary`、`concept_explanation`、`typical_examples`
+- **生成脚本增强**:
+  - `scripts/generate-objective-prep.mjs` 增加 JSON control char 清洗，降低 Gemini 返回非标准 JSON 时的失败率
+  - prompt context 截断长度下调，减少超时与响应过长导致的解析失败
+  - 改为按 sub-unit 增量保存；单个 sub-unit 失败时不中断整批生成，可后续定点补跑
+- **资源体验增强**:
+  - objective prep resources 不再只依赖外链
+  - `objectivePrep.ts` / `SubUnitForm.tsx` / `TeachingView.tsx` 现在支持从 shared worksheet / practice / kahoot / homework / vocab 链接，以及 classroom exercises / homework content / vocabulary / AI summary 自动派生 note-based prep resources
+  - Teaching 视图对无 URL 的资源显示为 note 卡片，避免 objective prep panel 出现“空资源区”
+- **输出产物**:
+  - 更新 `scripts/output/teaching-units-all.json`
+  - 新增 `scripts/output/y7-y11-unit-vocabulary.md` 作为 Y7-Y11 单元词汇汇总文档
+- **回归结果**:
+  - `npm run lint` ✅
+  - `npm run build` ✅
+
+### Phase 30e — Objective Prep Instrumentation & Resource Quality (Next)
+- [ ] 为 Year 7-11 建立 objective-level 外链资源规范（worksheet / practice / kahoot / homework / vocab）
 - [ ] 增加 prep completeness 仪表（按 Year / Unit / Class 聚合）
+- [ ] 为 objective prep generation 增加失败清单 / coverage report 输出，便于后续批量补跑
+- [ ] 对高频 note-based resources 设计转正式链接的补录流程
 
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
