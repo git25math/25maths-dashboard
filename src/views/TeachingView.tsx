@@ -7,6 +7,7 @@ import { MarkdownRenderer } from '../components/RichTextEditor';
 import { SubUnitForm } from '../components/SubUnitForm';
 import { TEACHING_YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
 import { getObjectivePrepMetrics, getSharedPrepResources } from '../lib/objectivePrep';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 
 // --- Helpers ---
 
@@ -1038,7 +1039,7 @@ export const TeachingView = ({
 
   // ===== Year Group Units List =====
   if (selectedYear) {
-    const yearUnits = teachingUnits.filter(u => u.year_group === selectedYear);
+    const yearUnits = sortTeachingUnits(teachingUnits.filter(u => u.year_group === selectedYear));
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">

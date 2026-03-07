@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { ClassProfile, TeachingUnit } from '../types';
 import { YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 
 interface ClassFormProps {
   classProfile?: ClassProfile | null;
@@ -11,6 +12,7 @@ interface ClassFormProps {
 }
 
 export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: ClassFormProps) => {
+  const sortedTeachingUnits = sortTeachingUnits(teachingUnits);
   const [formData, setFormData] = useState<Omit<ClassProfile, 'id'>>({
     name: '',
     year_group: 'Year 7',
@@ -82,7 +84,7 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
             >
               <option value="">Select a Unit</option>
-              {teachingUnits.filter(u => u.year_group === formData.year_group).map(u => (
+              {sortedTeachingUnits.filter(u => u.year_group === formData.year_group).map(u => (
                 <option key={u.id} value={u.id}>{u.title}</option>
               ))}
             </select>

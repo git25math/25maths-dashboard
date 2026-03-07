@@ -8,6 +8,7 @@ import { getISODay, format } from 'date-fns';
 import { geminiService } from '../services/geminiService';
 import { detectConflicts } from '../lib/timetableUtils';
 import { getObjectiveConcept, getObjectivePrepMetrics, getObjectiveResources, getObjectiveVocabulary } from '../lib/objectivePrep';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 
 interface TimetableEntryFormProps {
   entry: TimetableEntry;
@@ -70,6 +71,7 @@ export const TimetableEntryForm = ({
   meetings = [],
   onSaveUnit,
 }: TimetableEntryFormProps) => {
+  const sortedTeachingUnits = useMemo(() => sortTeachingUnits(teachingUnits), [teachingUnits]);
   const [formData, setFormData] = useState<TimetableEntry>(entry);
   const [selectedClass, setSelectedClass] = useState<ClassProfile | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<TeachingUnit | null>(null);
@@ -317,7 +319,7 @@ export const TimetableEntryForm = ({
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               >
                 <option value="">No Unit Linked</option>
-                {teachingUnits
+                {sortedTeachingUnits
                   .filter(u => !selectedClass || u.year_group === selectedClass.year_group)
                   .map(u => (
                     <option key={u.id} value={u.id}>{u.title} ({u.year_group})</option>
