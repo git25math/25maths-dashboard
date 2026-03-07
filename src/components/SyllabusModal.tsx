@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { SYLLABUS } from '../constants';
 import { TeachingUnit } from '../types';
+import { isTeachingUnitSyllabusMatch } from '../lib/teachingUnitOrder';
 
 interface SyllabusModalProps {
   isOpen: boolean;
@@ -14,23 +15,13 @@ interface SyllabusModalProps {
 }
 
 function matchSyllabusEntry(entry: string, units: TeachingUnit[], yearGroup: string): TeachingUnit | undefined {
-  // Strip common prefixes like "Unit 1: " or "Pure 1 - 1. "
-  const topicPart = entry.replace(/^(?:Unit \d+:\s*|Pure \d+\s*-\s*\d+\.\s*)/, '').trim();
-  return units.find(u =>
-    u.year_group === yearGroup && (
-      u.title.toLowerCase() === topicPart.toLowerCase() ||
-      u.title.toLowerCase() === entry.toLowerCase() ||
-      topicPart.toLowerCase().includes(u.title.toLowerCase()) ||
-      u.title.toLowerCase().includes(topicPart.toLowerCase())
-    )
-  );
+  return units.find(u => u.year_group === yearGroup && isTeachingUnitSyllabusMatch(entry, u));
 }
 
 export const SyllabusModal = ({ isOpen, onClose, teachingUnits, onNavigateToUnit, onCreateUnit }: SyllabusModalProps) => {
   const [selectedYear, setSelectedYear] = useState<string>('Year 7');
 
   const yearEntries = SYLLABUS[selectedYear] || [];
-  const yearUnits = teachingUnits.filter(u => u.year_group === selectedYear);
 
   // Compute coverage for each entry
   const entryCoverage = yearEntries.map(entry => ({

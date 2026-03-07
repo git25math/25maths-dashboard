@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea, Task, EventTimeMode, Project, Student } from '../types';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
+import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 
 function formatEventDateShort(event: SchoolEvent): string {
   const mode: EventTimeMode = event.time_mode || 'all-day';
@@ -172,10 +173,11 @@ export const DashboardView = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {DASHBOARD_PROGRESS_YEARS.map(year => {
                 const yearClasses = classes.filter(cls => cls.year_group === year);
+                const orderedYearUnits = sortTeachingUnits(teachingUnits.filter(u => u.year_group === year));
                 const primaryClass = yearClasses.find(cls => cls.current_unit_id) || yearClasses[0];
                 const currentUnit = primaryClass
                   ? teachingUnits.find(u => u.id === primaryClass.current_unit_id)
-                  : teachingUnits.find(u => u.year_group === year);
+                  : orderedYearUnits[0];
                 const totalLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.length, 0) || 0;
                 const completedLOs = currentUnit?.sub_units.reduce((sum, su) => sum + su.learning_objectives.filter(lo => lo.status === 'completed').length, 0) || 0;
                 const progress = currentUnit ? Math.round((completedLOs / totalLOs) * 100) : 0;
