@@ -1024,6 +1024,39 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `typical_examples`: `407 / 407`
   - `prep_resources`: `407 / 407`
 
+### Phase 30g — Paper Generator + Cover Designer (2026-03-09) ✅
+
+- **Paper Generator** — 5,962 道真题组卷系统:
+  - 4 步向导：配置 → 选题 → 审查 → 预览编译
+  - 题库浏览器：6 轴筛选（章节/难度/题型/分值/年份/文本搜索）
+  - 自动组卷算法：加权 section 轮询，±5 分容差，难度升序
+  - LaTeX 生成器：CIE `subpartsaliged` + Edexcel IGCSE 双格式支持
+  - AI 变式题生成：Gemini 生成同结构不同数值的变体，一键替换
+  - XeLaTeX 编译：通过 local-agent 调用 xelatex 两遍编译→PDF
+  - .tex 下载、剪贴板复制、编译计时器
+  - KaTeX 数学公式渲染（展开的题目预览）
+  - 数据来源：CIE 4,107 题 + Edexcel 1,855 题（JSON）
+- **Cover Designer** — 可视化 SVG 封面编辑器:
+  - 4 种参数化模板：Kahoot 1600×900 / Worksheet 2320×1520 / Exam A4 / Vocab 800×600
+  - 实时 SVG 预览：渐变背景/装饰圆/波浪形/徽章/数学公式水印
+  - 参数编辑器：颜色（hex 验证）/ 文字 / 装饰开关
+  - 导出：SVG + PNG 1x/2x/3x（Canvas 管线）
+  - Undo/Redo 历史（30 快照）+ Ctrl+Z/Y 快捷键
+  - AI 配色方案建议（Gemini 生成 4 组配色）
+  - 批量生成：多主题 → SVG 全部下载
+  - localStorage 持久化保存设计方案
+- **基础设施**:
+  - paperService + coverService（QuotaExceeded 错误处理）
+  - local-agent: `paper-generate` + `cover-batch` 作业类型
+  - 侧栏 publishing 组 +2 入口
+- **代码质量**:
+  - setTimeout 泄漏修复（PaperLibrary / CoverHub / PaperTexPreview）
+  - fetch 30 秒超时 + 404/500 区分错误提示
+  - autoFill 最佳拟合候选选择（替代纯随机）
+  - CoverAiSuggestions 稳定 key + 重试按钮
+  - 全部 31 新文件 + 5 修改文件，TypeScript 0 error，Vite build 通过
+- **新增文件（31）**: `src/views/papers/` (11) + `src/views/covers/` (11) + `src/services/` (2) + `scripts/` (2) + `public/data/` (2) + types (3)
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
