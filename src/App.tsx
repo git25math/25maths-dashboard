@@ -44,6 +44,7 @@ import { SettingsView } from './views/SettingsView';
 
 // Lazy-load Kahoot Hub (large module with 202-item seed data)
 const KahootHub = lazy(() => import('./views/kahoot/KahootHub').then(m => ({ default: m.KahootHub })));
+const PayhipHub = lazy(() => import('./views/payhip/PayhipHub').then(m => ({ default: m.PayhipHub })));
 
 function LazyFallback() {
   return (
@@ -522,6 +523,18 @@ function AppContent() {
             />
           </Suspense>
         );
+      case 'payhip-upload':
+        return (
+          <Suspense fallback={<LazyFallback />}>
+            <PayhipHub
+              payhipItems={data.payhipItems}
+              onUpdatePayhip={data.updatePayhip}
+              onTogglePipeline={data.togglePayhipPipelineStage}
+              onBulkPipeline={data.bulkSetPayhipPipeline}
+              toast={data.toast}
+            />
+          </Suspense>
+        );
       case 'settings':
         return (
           <SettingsView
@@ -542,6 +555,7 @@ function AppContent() {
               emailDigests: data.emailDigests,
               projects: data.projects,
               kahootItems: data.kahootItems,
+              payhipItems: data.payhipItems,
             }}
             onImport={data.bulkImport}
           />

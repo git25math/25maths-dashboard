@@ -1,7 +1,8 @@
 import { useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS, MOCK_KAHOOT_ITEMS } from '../constants';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, PrepStatus, EmailDigest, Project, KahootItem } from '../types';
+import { MOCK_PAYHIP_ITEMS } from '../constants-payhip';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, StudentStatusRecord, StudentRequest, ParentCommunication, ParentCommMethod, ParentCommFollowUp, StudentWeakness, ExamRecord, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, PrepStatus, EmailDigest, Project, KahootItem, PayhipItem } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -18,12 +19,14 @@ import { hpAwardService } from '../services/hpAwardService';
 import { emailDigestService } from '../services/emailDigestService';
 import { projectService } from '../services/projectService';
 import { kahootService } from '../services/kahootService';
+import { payhipService } from '../services/payhipService';
 import { randomAlphaId } from '../lib/id';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { computeHousePointDeltas } from './appData/housePointUtils';
 import { useKahootActions } from './appData/useKahootActions';
+import { usePayhipActions } from './appData/usePayhipActions';
 import { useProductivityActions } from './appData/useProductivityActions';
 import { useLocalStorage } from './useLocalStorage';
 import { useToast } from './useToast';
@@ -159,6 +162,7 @@ export function useAppData() {
   const [emailDigests, setEmailDigests] = useLocalStorage<EmailDigest[]>('dashboard-email-digests', []);
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', MOCK_KAHOOT_ITEMS);
+  const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', MOCK_PAYHIP_ITEMS);
 
   // Replace stale mock kahoot data with the full seed whenever an older cache is loaded.
   useEffect(() => {
@@ -267,6 +271,7 @@ export function useAppData() {
         fetchOrSync(emailDigestService.getAll, setEmailDigests, emailDigests, 'email_digests'),
         fetchOrSync(projectService.getAll, setProjects, projects, 'projects'),
         fetchOrSync(kahootService.getAll, setKahootItems, kahootItems, 'kahoot_items'),
+        fetchOrSync(payhipService.getAll, setPayhipItems, payhipItems, 'payhip_items'),
       ]);
 
       // --- One-time backfill: create HPAwardLogs for existing data ---
@@ -954,6 +959,17 @@ export function useAppData() {
     toast,
   });
 
+  const {
+    updatePayhip,
+    setPayhipStatus,
+    togglePayhipPipelineStage,
+    bulkSetPayhipPipeline,
+  } = usePayhipActions({
+    payhipItems,
+    setPayhipItems,
+    toast,
+  });
+
   const applyHousePointDeltas = useCallback(async (deltas: Map<string, number>) => {
     for (const [studentId, delta] of deltas) {
       const student = students.find(s => s.id === studentId);
@@ -1135,6 +1151,7 @@ export function useAppData() {
       emailDigests: (v) => setEmailDigests(v as EmailDigest[]),
       projects: (v) => setProjects(v as Project[]),
       kahootItems: (v) => setKahootItems(v as KahootItem[]),
+      payhipItems: (v) => setPayhipItems(v as PayhipItem[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -1146,12 +1163,12 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [normalizeAndSortUnits, setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, setKahootItems, toast]);
+  }, [normalizeAndSortUnits, setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, setKahootItems, setPayhipItems, toast]);
 
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, kahootItems,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, kahootItems, payhipItems,
     toasts,
 
     // Student
@@ -1198,6 +1215,9 @@ export function useAppData() {
     // Kahoot Upload
     addKahoot, updateKahoot, deleteKahoot, duplicateKahoot,
     addQuestion, updateQuestion, deleteQuestion, moveQuestion,
+
+    // Payhip Upload
+    updatePayhip, setPayhipStatus, togglePayhipPipelineStage, bulkSetPayhipPipeline,
 
     // Tasks (GTD)
     addTask, updateTask, deleteTask, cycleTaskStatus,

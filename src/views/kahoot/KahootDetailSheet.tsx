@@ -95,6 +95,11 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
   // Keyboard: Escape to close, Arrow keys to navigate
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        if (e.key === 'Escape') (e.target as HTMLElement).blur();
+        return;
+      }
       if (e.key === 'Escape') onClose();
       if (onNavigate && item) {
         if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); onNavigate('prev'); }

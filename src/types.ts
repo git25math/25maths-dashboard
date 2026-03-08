@@ -42,6 +42,11 @@ export type KahootTimeLimit = 5 | 10 | 20 | 30 | 60 | 90 | 120;
 export type KahootCorrectOption = 'A' | 'B' | 'C' | 'D';
 export type KahootOrgType = 'standalone' | 'in_course' | 'in_channel';
 
+export type PayhipLevel = 'L1' | 'L2' | 'L3' | 'L4';
+export type PayhipBoard = 'cie0580' | 'edexcel-4ma1';
+export type PayhipStatus = 'planned' | 'presale' | 'live' | 'archived' | 'free_sample_live';
+export type PayhipPipelineStage = 'matrix_ready' | 'copy_ready' | 'payhip_created' | 'url_backfilled' | 'qa_verified' | 'site_synced';
+
 export type KahootPipelineStage = 'ai_generated' | 'reviewed' | 'excel_exported' | 'kahoot_uploaded' | 'web_verified' | 'published';
 
 export const KAHOOT_PIPELINE_STAGES: { key: KahootPipelineStage; label: string }[] = [
@@ -51,6 +56,15 @@ export const KAHOOT_PIPELINE_STAGES: { key: KahootPipelineStage; label: string }
   { key: 'kahoot_uploaded', label: 'Uploaded' },
   { key: 'web_verified', label: 'Verified' },
   { key: 'published', label: 'Published' },
+];
+
+export const PAYHIP_PIPELINE_STAGES: { key: PayhipPipelineStage; label: string }[] = [
+  { key: 'matrix_ready', label: 'Matrix Ready' },
+  { key: 'copy_ready', label: 'Copy Ready' },
+  { key: 'payhip_created', label: 'Payhip Created' },
+  { key: 'url_backfilled', label: 'URL Synced' },
+  { key: 'qa_verified', label: 'QA Verified' },
+  { key: 'site_synced', label: 'Site Synced' },
 ];
 
 export interface KahootQuestion {
@@ -71,6 +85,15 @@ export interface KahootPipeline {
   kahoot_uploaded: boolean;
   web_verified: boolean;
   published: boolean;
+}
+
+export interface PayhipPipeline {
+  matrix_ready: boolean;
+  copy_ready: boolean;
+  payhip_created: boolean;
+  url_backfilled: boolean;
+  qa_verified: boolean;
+  site_synced: boolean;
 }
 
 export interface KahootItem {
@@ -98,6 +121,51 @@ export interface KahootItem {
   ai_generated_at?: string;
   human_reviewed_at?: string;
   uploaded_at?: string;
+}
+
+export interface PayhipItem {
+  id: string;
+  sku: string;
+  level: PayhipLevel;
+  board: PayhipBoard;
+  board_label: string;
+  tier_scope: string;
+  status: PayhipStatus;
+  listing_title: string;
+  slug_candidate?: string;
+  price_early_bird?: string;
+  price_regular?: string;
+  early_bird_end_date?: string;
+  release_date?: string;
+  payhip_url?: string;
+  source_param?: string;
+  unit_key?: string;
+  unit_code?: string;
+  unit_title?: string;
+  section_key?: string;
+  section_code?: string;
+  section_title?: string;
+  subtopic_id?: string;
+  subtopic_code?: string;
+  subtopic_title?: string;
+  subtopic_count?: number | null;
+  section_count?: number | null;
+  unit_count?: number | null;
+  kahoot_url?: string;
+  worksheet_url?: string;
+  section_bundle_url?: string;
+  unit_bundle_url?: string;
+  deliver_now?: string;
+  deliver_on_release?: string;
+  bonus?: string;
+  presale_notes?: string;
+  terms_pdf_url?: string;
+  tags: string[];
+  notes?: string;
+  pipeline: PayhipPipeline;
+  sync_source?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Student {
