@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import express from 'express';
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, resolve } from 'path';
+import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { basename, dirname, resolve, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 
@@ -14,6 +14,10 @@ mkdirSync(RUNTIME_DIR, { recursive: true });
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
+
+function getWebsiteRoot() {
+  return process.env.KAHOOT_WEBSITE_ROOT || resolve(PROJECT_ROOT, '..', '25maths-website');
+}
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,6 +55,16 @@ function serializeJob(job) {
     command: job.command,
     pid: job.pid,
   };
+}
+
+function isWithinRoot(targetPath, rootPath) {
+  const normalizedTarget = resolve(targetPath);
+  const normalizedRoot = resolve(rootPath);
+  return normalizedTarget === normalizedRoot || normalizedTarget.startsWith(`${normalizedRoot}${sep}`);
+}
+
+function isAllowedFilePath(targetPath) {
+  return [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot()].some(root => isWithinRoot(targetPath, root));
 }
 
 function appendLog(job, message, stream = 'stdout') {
@@ -183,9 +197,48 @@ app.get('/health', (_req, res) => {
     service: '25maths-local-agent',
     project_root: PROJECT_ROOT,
     runtime_dir: RUNTIME_DIR,
-    website_root: process.env.KAHOOT_WEBSITE_ROOT || resolve(PROJECT_ROOT, '..', '25maths-website'),
+    website_root: getWebsiteRoot(),
     time: nowIso(),
   });
+});
+
+app.get('/files', (req, res) => {
+  const rawPath = String(req.query.path || '').trim();
+  if (!rawPath) {
+    res.status(400).json({ error: 'Missing file path' });
+    return;
+  }
+
+  const targetPath = resolve(rawPath);
+  if (!isAllowedFilePath(targetPath)) {
+    res.status(403).json({ error: 'File path is outside allowed roots' });
+    return;
+  }
+
+  if (!existsSync(targetPath)) {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+
+  let stats;
+  try {
+    stats = statSync(targetPath);
+  } catch {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+
+  if (!stats.isFile()) {
+    res.status(400).json({ error: 'Only files can be served' });
+    return;
+  }
+
+  if (String(req.query.download || '') === '1') {
+    res.download(targetPath, basename(targetPath));
+    return;
+  }
+
+  res.sendFile(targetPath);
 });
 
 app.get('/jobs', (_req, res) => {
@@ -236,6 +289,38 @@ app.post('/jobs/kahoot-spreadsheet', (req, res) => {
   }
 
   const job = launchKahootSpreadsheetJob(payload);
+  res.status(202).json(serializeJob(job));
+});
+
+// --- Paper Generator ---
+app.post('/jobs/paper-generate', (req, res) => {
+  const payload = req.body || {};
+  if (!payload.texSource) {
+    res.status(400).json({ error: 'Missing texSource' });
+    return;
+  }
+
+  const job = launchJob({
+    type: 'paper-generate',
+    scriptPath: 'scripts/papers/generate-paper.mjs',
+    payload,
+  });
+  res.status(202).json(serializeJob(job));
+});
+
+// --- Cover Batch ---
+app.post('/jobs/cover-batch', (req, res) => {
+  const payload = req.body || {};
+  if (!payload.topics || !payload.topics.length) {
+    res.status(400).json({ error: 'Missing topics' });
+    return;
+  }
+
+  const job = launchJob({
+    type: 'cover-batch',
+    scriptPath: 'scripts/covers/batch-generate-covers.mjs',
+    payload,
+  });
   res.status(202).json(serializeJob(job));
 });
 

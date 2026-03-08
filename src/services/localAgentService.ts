@@ -57,6 +57,15 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 export const localAgentService = {
+  getFileUrl(baseUrl: string, filePath: string, download = false): string {
+    const url = new URL(`${normalizeBaseUrl(baseUrl)}/files`);
+    url.searchParams.set('path', filePath);
+    if (download) {
+      url.searchParams.set('download', '1');
+    }
+    return url.toString();
+  },
+
   async ping(baseUrl: string): Promise<{ ok: boolean; service: string; time: string; website_root?: string }> {
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/health`);
     return parseJson(response);
@@ -89,6 +98,24 @@ export const localAgentService = {
       body: JSON.stringify({ item, options }),
     });
 
+    return parseJson(response);
+  },
+
+  async startPaperGenerate(baseUrl: string, payload: { id: string; texSource: string }): Promise<LocalAgentJob> {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/paper-generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return parseJson(response);
+  },
+
+  async startCoverBatch(baseUrl: string, payload: { template: string; topics: string[]; params: Record<string, unknown> }): Promise<LocalAgentJob> {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/cover-batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
     return parseJson(response);
   },
 
