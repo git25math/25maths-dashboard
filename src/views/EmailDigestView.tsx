@@ -1,20 +1,11 @@
 import { useState } from 'react';
 import { Plus, Trash2, ArrowLeft, Mail, Loader2, CheckSquare, ChevronDown, ChevronUp, ArrowRightCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { TASK_STATUS_COLORS, TASK_STATUS_CYCLE } from '../lib/statusColors';
 import { EmailDigest, EmailDigestItem, Task } from '../types';
 import { geminiService } from '../services/geminiService';
 
 type ViewMode = 'list' | 'detail' | 'new';
-
-const TASK_STATUS_COLORS: Record<Task['status'], string> = {
-  inbox: 'bg-slate-100 text-slate-600',
-  next: 'bg-blue-50 text-blue-600',
-  waiting: 'bg-amber-50 text-amber-600',
-  someday: 'bg-purple-50 text-purple-600',
-  done: 'bg-emerald-50 text-emerald-600',
-};
-
-const TASK_STATUS_CYCLE: Task['status'][] = ['inbox', 'next', 'waiting', 'someday', 'done'];
 
 interface EmailDigestViewProps {
   emailDigests: EmailDigest[];

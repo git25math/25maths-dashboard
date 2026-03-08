@@ -50,15 +50,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -110,15 +110,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -170,15 +170,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -230,15 +230,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -290,15 +290,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -350,15 +350,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -410,15 +410,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -470,15 +470,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -530,15 +530,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -590,15 +590,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -650,15 +650,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -710,15 +710,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -770,15 +770,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -830,15 +830,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -890,15 +890,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -950,15 +950,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1010,15 +1010,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1070,15 +1070,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1130,15 +1130,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1190,15 +1190,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1250,15 +1250,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1310,15 +1310,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1370,15 +1370,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1430,15 +1430,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1490,15 +1490,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1550,15 +1550,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1610,15 +1610,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1670,15 +1670,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1730,15 +1730,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1790,15 +1790,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1850,15 +1850,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1910,15 +1910,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -1970,15 +1970,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2030,15 +2030,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2090,15 +2090,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2150,15 +2150,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2210,15 +2210,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2270,15 +2270,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2330,15 +2330,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2390,15 +2390,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2450,15 +2450,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2510,15 +2510,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2570,15 +2570,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2630,15 +2630,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2690,15 +2690,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2750,15 +2750,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2810,15 +2810,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2870,15 +2870,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2930,15 +2930,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -2990,15 +2990,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3050,15 +3050,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3110,15 +3110,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3170,15 +3170,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3230,15 +3230,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3290,15 +3290,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3350,15 +3350,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3410,15 +3410,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3470,15 +3470,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3530,15 +3530,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_2",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3590,15 +3590,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3650,15 +3650,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3710,15 +3710,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3770,15 +3770,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3830,15 +3830,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3890,15 +3890,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -3950,15 +3950,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4010,15 +4010,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4070,15 +4070,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4130,15 +4130,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4190,15 +4190,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4250,15 +4250,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4310,15 +4310,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4370,15 +4370,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4430,15 +4430,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4490,15 +4490,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4550,15 +4550,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4610,15 +4610,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4670,15 +4670,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4730,15 +4730,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4790,15 +4790,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4850,15 +4850,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4910,15 +4910,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_3",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -4970,15 +4970,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5030,15 +5030,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5090,15 +5090,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_2",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5150,15 +5150,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5210,15 +5210,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5270,15 +5270,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5330,15 +5330,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5390,15 +5390,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5450,15 +5450,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5510,15 +5510,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5570,15 +5570,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5630,15 +5630,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5690,15 +5690,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5750,15 +5750,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5810,15 +5810,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_3",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5870,15 +5870,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5930,15 +5930,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -5990,15 +5990,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6050,15 +6050,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6110,15 +6110,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6170,15 +6170,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6230,15 +6230,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6290,15 +6290,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6350,15 +6350,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6410,15 +6410,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6470,15 +6470,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6530,15 +6530,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6590,15 +6590,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6650,15 +6650,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6710,15 +6710,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6770,15 +6770,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6830,15 +6830,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6890,15 +6890,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -6950,15 +6950,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7010,15 +7010,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7070,15 +7070,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7130,15 +7130,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7190,15 +7190,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7250,15 +7250,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7310,15 +7310,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7370,15 +7370,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7430,15 +7430,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7490,15 +7490,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7550,15 +7550,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7610,15 +7610,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7670,15 +7670,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7730,15 +7730,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7790,15 +7790,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7850,15 +7850,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7910,15 +7910,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -7970,15 +7970,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8030,15 +8030,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8090,15 +8090,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8150,15 +8150,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8210,15 +8210,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8270,15 +8270,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8330,15 +8330,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8390,15 +8390,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8450,15 +8450,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8510,15 +8510,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8570,15 +8570,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8630,15 +8630,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8690,15 +8690,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8750,15 +8750,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8810,15 +8810,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8870,15 +8870,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8930,15 +8930,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -8990,15 +8990,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9050,15 +9050,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9110,15 +9110,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9170,15 +9170,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9230,15 +9230,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9290,15 +9290,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9350,15 +9350,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9410,15 +9410,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9470,15 +9470,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9530,15 +9530,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9590,15 +9590,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9650,15 +9650,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_3",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9710,15 +9710,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9770,15 +9770,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9830,15 +9830,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9890,15 +9890,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -9950,15 +9950,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10010,15 +10010,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10070,15 +10070,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10130,15 +10130,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_2",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10190,15 +10190,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10250,15 +10250,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_2",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10310,15 +10310,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10370,15 +10370,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10430,15 +10430,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10490,15 +10490,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10550,15 +10550,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10610,15 +10610,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10670,15 +10670,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10730,15 +10730,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10790,15 +10790,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10850,15 +10850,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10910,15 +10910,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -10970,15 +10970,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11030,15 +11030,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11090,15 +11090,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11150,15 +11150,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11210,15 +11210,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11270,15 +11270,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11330,15 +11330,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11390,15 +11390,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11450,15 +11450,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11510,15 +11510,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11570,15 +11570,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11630,15 +11630,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11690,15 +11690,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_3",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11750,15 +11750,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11810,15 +11810,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11870,15 +11870,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11930,15 +11930,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "free_sample:batch_1",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -11990,15 +11990,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -12050,15 +12050,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -12110,15 +12110,15 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:_data/kahoot_subtopic_links.json",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
       "payhip_created": true,
       "url_backfilled": true,
-      "qa_verified": true,
-      "site_synced": true
+      "qa_verified": false,
+      "site_synced": false
     }
   },
   {
@@ -12169,8 +12169,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12228,8 +12228,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12287,8 +12287,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12346,8 +12346,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12405,8 +12405,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12464,8 +12464,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12523,8 +12523,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12582,8 +12582,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12641,8 +12641,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12700,8 +12700,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12759,8 +12759,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12818,8 +12818,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12877,8 +12877,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12936,8 +12936,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -12995,8 +12995,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13054,8 +13054,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13113,8 +13113,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13172,8 +13172,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13231,8 +13231,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13290,8 +13290,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13349,8 +13349,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13408,8 +13408,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13467,8 +13467,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13526,8 +13526,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13585,8 +13585,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13644,8 +13644,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13703,8 +13703,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13762,8 +13762,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13821,8 +13821,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13880,8 +13880,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13937,8 +13937,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -13994,8 +13994,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14051,8 +14051,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14108,8 +14108,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14165,8 +14165,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14222,8 +14222,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14279,8 +14279,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14336,8 +14336,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14393,8 +14393,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14450,8 +14450,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14507,8 +14507,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14564,8 +14564,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14621,8 +14621,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14678,8 +14678,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14735,8 +14735,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14792,8 +14792,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,
@@ -14849,8 +14849,8 @@ export const MOCK_PAYHIP_ITEMS: PayhipItem[] = [
     ],
     "notes": "",
     "sync_source": "website:payhip/presale/kahoot-payhip-listings-master.csv",
-    "created_at": "2026-03-08T02:23:59Z",
-    "updated_at": "2026-03-08T02:23:59Z",
+    "created_at": "2026-03-08T04:15:14Z",
+    "updated_at": "2026-03-08T04:15:14Z",
     "pipeline": {
       "matrix_ready": true,
       "copy_ready": true,

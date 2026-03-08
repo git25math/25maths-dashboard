@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Phone, MessageCircle, Mail, Users, MoreHorizontal } from 'lucide-react';
 import { ParentCommunication, ParentCommMethod } from '../types';
 import { RichTextEditor } from './RichTextEditor';
@@ -19,12 +19,18 @@ const METHOD_OPTIONS: { value: ParentCommMethod; label: string; icon: React.Reac
   { value: 'other', label: '其他', icon: <MoreHorizontal size={14} /> },
 ];
 
-export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: ParentCommFormProps) => {
+export const ParentCommForm = memo(function ParentCommForm({ title, initialValue, onSave, onCancel }: ParentCommFormProps) {
   const [date, setDate] = useState(initialValue?.date || new Date().toISOString().split('T')[0]);
   const [method, setMethod] = useState<ParentCommMethod>(initialValue?.method || 'wechat');
   const [content, setContent] = useState(initialValue?.content || '');
   const [needsFollowUp, setNeedsFollowUp] = useState(initialValue?.needs_follow_up || false);
   const [followUpPlan, setFollowUpPlan] = useState(initialValue?.follow_up_plan || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,4 +143,4 @@ export const ParentCommForm = ({ title, initialValue, onSave, onCancel }: Parent
       </div>
     </div>
   );
-};
+});

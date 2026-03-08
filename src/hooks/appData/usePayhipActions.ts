@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback } from 'react';
+import { Dispatch, SetStateAction, useCallback, useRef } from 'react';
 import { payhipService } from '../../services/payhipService';
 import { PayhipItem, PayhipPipeline, PayhipPipelineStage, PayhipStatus, ToastApi } from '../../types';
 import { isPayhipPipelineStageLocked, mergePayhipPipeline } from '../../lib/payhipUtils';
@@ -24,6 +24,9 @@ const PAYHIP_PIPELINE_KEYS: PayhipPipelineStage[] = [
 ];
 
 export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayhipActionsParams) {
+  const itemsRef = useRef(payhipItems);
+  itemsRef.current = payhipItems;
+
   const persistItem = useCallback(async (item: PayhipItem, options?: PayhipUpdateOptions) => {
     try {
       const updated = await payhipService.update(item.id, item);
@@ -38,7 +41,7 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
   }, [setPayhipItems, toast]);
 
   const updatePayhip = useCallback(async (id: string, updates: Partial<PayhipItem>, options?: PayhipUpdateOptions) => {
-    const existing = payhipItems.find(item => item.id === id);
+    const existing = itemsRef.current.find(item => item.id === id);
     if (!existing) return;
 
     const timestamp = new Date().toISOString();
@@ -53,14 +56,14 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
     };
 
     await persistItem(merged, { successMessage: options?.successMessage || 'Payhip item updated', silent: options?.silent });
-  }, [payhipItems, persistItem]);
+  }, [persistItem]);
 
   const setPayhipStatus = useCallback(async (id: string, status: PayhipStatus) => {
     await updatePayhip(id, { status });
   }, [updatePayhip]);
 
   const togglePayhipPipelineStage = useCallback(async (id: string, stage: PayhipPipelineStage) => {
-    const existing = payhipItems.find(item => item.id === id);
+    const existing = itemsRef.current.find(item => item.id === id);
     if (!existing) return;
 
     if (existing.pipeline[stage] && isPayhipPipelineStageLocked(existing, stage)) {
@@ -74,10 +77,10 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
         [stage]: !existing.pipeline[stage],
       },
     });
-  }, [payhipItems, toast, updatePayhip]);
+  }, [toast, updatePayhip]);
 
   const bulkSetPayhipPipeline = useCallback(async (id: string, value: boolean) => {
-    const existing = payhipItems.find(item => item.id === id);
+    const existing = itemsRef.current.find(item => item.id === id);
     if (!existing) return;
 
     const pipeline = PAYHIP_PIPELINE_KEYS.reduce((acc, key) => {
@@ -86,7 +89,7 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
     }, {} as PayhipPipeline);
 
     await updatePayhip(id, { pipeline });
-  }, [payhipItems, updatePayhip]);
+  }, [updatePayhip]);
 
   return {
     updatePayhip,

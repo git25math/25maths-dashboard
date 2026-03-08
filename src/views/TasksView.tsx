@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Trash2, Edit3, Inbox, ArrowRight, Clock, Archive, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Task, TaskStatus, Project } from '../types';
@@ -34,24 +34,25 @@ interface TasksViewProps {
 export const TasksView = ({ tasks, projects, onAddTask, onEditTask, onDeleteTask, onCycleStatus, onNavigate }: TasksViewProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('inbox');
 
-  const filteredTasks = (statusFilter === 'all'
-    ? tasks
-    : tasks.filter(t => t.status === statusFilter)
-  );
+  const sortedTasks = useMemo(() => {
+    const filteredTasks = statusFilter === 'all'
+      ? tasks
+      : tasks.filter(t => t.status === statusFilter);
 
-  // Sort: inbox/next by priority → created_at; done by completed_at desc
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    if (a.status === 'done' && b.status === 'done') {
-      return (b.completed_at || b.created_at).localeCompare(a.completed_at || a.created_at);
-    }
-    const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
-    const pa = priorityOrder[a.priority] ?? 1;
-    const pb = priorityOrder[b.priority] ?? 1;
-    if (pa !== pb) return pa - pb;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+    // Sort: inbox/next by priority → created_at; done by completed_at desc
+    return [...filteredTasks].sort((a, b) => {
+      if (a.status === 'done' && b.status === 'done') {
+        return (b.completed_at || b.created_at).localeCompare(a.completed_at || a.created_at);
+      }
+      const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+      const pa = priorityOrder[a.priority] ?? 1;
+      const pb = priorityOrder[b.priority] ?? 1;
+      if (pa !== pb) return pa - pb;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [tasks, statusFilter]);
 
-  const inboxCount = tasks.filter(t => t.status === 'inbox').length;
+  const inboxCount = useMemo(() => tasks.filter(t => t.status === 'inbox').length, [tasks]);
 
   return (
     <div className="space-y-6">

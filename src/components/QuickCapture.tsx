@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Plus, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -9,7 +9,7 @@ interface QuickCaptureProps {
   onSave: (text: string, category: 'work' | 'student' | 'startup' | 'task') => void;
 }
 
-export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
+export const QuickCapture = memo(function QuickCapture({ onSave }: QuickCaptureProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<'work' | 'student' | 'startup' | 'task'>('work');
@@ -112,10 +112,11 @@ export const QuickCapture = ({ onSave }: QuickCaptureProps) => {
       </AnimatePresence>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close quick capture" : "Quick capture"}
         className="w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xl hover:bg-indigo-700 transition-all hover:scale-110 active:scale-95"
       >
         <Plus size={28} className={cn("transition-transform duration-300", isOpen && "rotate-45")} />
       </button>
     </div>
   );
-};
+});

@@ -12,7 +12,10 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
 
   useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const serialized = JSON.stringify(value);
+      if (localStorage.getItem(key) !== serialized) {
+        localStorage.setItem(key, serialized);
+      }
     } catch {
       console.error(`Failed to save ${key} to localStorage`);
     }

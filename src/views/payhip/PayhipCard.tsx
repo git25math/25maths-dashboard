@@ -1,40 +1,10 @@
 import { memo } from 'react';
 import { ExternalLink, Store } from 'lucide-react';
+import { PipelineDots } from '../../components/PipelineDots';
 import { cn } from '../../lib/utils';
+import { PAYHIP_STATUS_STYLES } from '../../lib/statusColors';
 import { getEffectivePayhipPipeline, getNextPayhipAction, getPayhipHealthAlerts, PAYHIP_STATUS_LABELS } from '../../lib/payhipUtils';
 import { PAYHIP_PIPELINE_STAGES, PayhipItem, PayhipStatus } from '../../types';
-
-const STATUS_STYLES: Record<PayhipStatus, string> = {
-  planned: 'bg-slate-100 text-slate-500',
-  presale: 'bg-amber-50 text-amber-700',
-  live: 'bg-emerald-50 text-emerald-700',
-  archived: 'bg-slate-200 text-slate-600',
-  free_sample_live: 'bg-sky-50 text-sky-700',
-};
-
-function PipelineDots({ item }: { item: PayhipItem }) {
-  const pipeline = getEffectivePayhipPipeline(item);
-  const doneCount = Object.values(pipeline).filter(Boolean).length;
-  const total = PAYHIP_PIPELINE_STAGES.length;
-  const allDone = doneCount === total;
-
-  return (
-    <span className="inline-flex items-center gap-1.5" title={`${doneCount}/${total} stages done`}>
-      <span className="inline-flex items-center gap-0.5">
-        {PAYHIP_PIPELINE_STAGES.map(stage => (
-          <span
-            key={stage.key}
-            className={cn('h-2 w-2 rounded-full', pipeline[stage.key] ? 'bg-emerald-500' : 'bg-slate-200')}
-            title={`${stage.label}: ${pipeline[stage.key] ? 'Done' : 'Pending'}`}
-          />
-        ))}
-      </span>
-      <span className={cn('text-[10px] font-bold tabular-nums', allDone ? 'text-emerald-600' : 'text-slate-400')}>
-        {doneCount}/{total}
-      </span>
-    </span>
-  );
-}
 
 function countLabel(item: PayhipItem) {
   const parts: string[] = [];
@@ -85,13 +55,13 @@ export const PayhipCard = memo(function PayhipCard({ item, isSelected, onClick }
                 </p>
               )}
             </div>
-            <span className={cn('rounded-full px-3 py-1 text-[11px] font-bold', STATUS_STYLES[item.status])}>
+            <span className={cn('rounded-full px-3 py-1 text-[11px] font-bold', PAYHIP_STATUS_STYLES[item.status])}>
               {PAYHIP_STATUS_LABELS[item.status]}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs">
-            <PipelineDots item={item} />
+            <PipelineDots stages={PAYHIP_PIPELINE_STAGES} pipeline={getEffectivePayhipPipeline(item)} />
             {item.release_date && <span className="text-slate-400">Release {item.release_date}</span>}
             {item.payhip_url && (
               <a

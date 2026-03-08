@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { WorkLog } from '../types';
@@ -19,10 +19,16 @@ interface ConsolidateWorkLogPreviewModalProps {
   onCancel: () => void;
 }
 
-export const ConsolidateWorkLogPreviewModal = ({ result, selectedCount, onConfirm, onCancel }: ConsolidateWorkLogPreviewModalProps) => {
+export const ConsolidateWorkLogPreviewModal = memo(function ConsolidateWorkLogPreviewModal({ result, selectedCount, onConfirm, onCancel }: ConsolidateWorkLogPreviewModalProps) {
   const [content, setContent] = useState(result.content);
   const [category, setCategory] = useState<WorkLog['category']>(result.category);
   const [tagInput, setTagInput] = useState(result.tags.join(', '));
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,4 +108,4 @@ export const ConsolidateWorkLogPreviewModal = ({ result, selectedCount, onConfir
       </div>
     </div>
   );
-};
+});

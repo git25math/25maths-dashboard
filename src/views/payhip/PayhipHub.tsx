@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useHubNavigation } from '../../hooks/useHubNavigation';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { buildPayhipHealthAutoFix, hasPayhipHealthAutoFix, isPayhipPipelineStageLocked, PAYHIP_HEALTH_META, PAYHIP_QUEUE_META, PAYHIP_STATUS_LABELS, PayhipHealthKey, PayhipQueueKey } from '../../lib/payhipUtils';
 import { cn } from '../../lib/utils';
@@ -20,53 +21,19 @@ interface PayhipHubProps {
 }
 
 export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBulkPipeline, toast }: PayhipHubProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [visibleIds, setVisibleIds] = useState<string[] | null>(null);
   const [advancingQueue, setAdvancingQueue] = useState<PayhipQueueKey | null>(null);
   const [resolvingHealth, setResolvingHealth] = useState<PayhipHealthKey | null>(null);
   const [batchingVisible, setBatchingVisible] = useState(false);
 
-  const navigationIds = visibleIds ?? payhipItems.map(item => item.id);
+  const {
+    selectedId, setSelectedId, selectedItem, navigationIds, setVisibleIds,
+    handleCopy, handleNavigate, handleSelect, canNavigatePrev, canNavigateNext,
+  } = useHubNavigation({ items: payhipItems, toast });
+
   const visibleItems = useMemo(
     () => navigationIds.map(id => payhipItems.find(item => item.id === id)).filter(Boolean) as PayhipItem[],
     [navigationIds, payhipItems],
   );
-
-  const selectedItem = useMemo(
-    () => payhipItems.find(item => item.id === selectedId) ?? null,
-    [payhipItems, selectedId],
-  );
-
-  const selectedIndex = useMemo(
-    () => (selectedId ? navigationIds.findIndex(id => id === selectedId) : -1),
-    [navigationIds, selectedId],
-  );
-
-  useEffect(() => {
-    if (!selectedId) return;
-    if (!navigationIds.includes(selectedId)) {
-      setSelectedId(null);
-    }
-  }, [navigationIds, selectedId]);
-
-  const handleCopy = useCallback(async (value: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      toast.success(`${label} copied`);
-    } catch {
-      toast.error(`Failed to copy ${label.toLowerCase()}`);
-    }
-  }, [toast]);
-
-  const handleNavigate = useCallback((direction: 'prev' | 'next') => {
-    if (!selectedId) return;
-    const idx = navigationIds.findIndex(id => id === selectedId);
-    if (idx === -1) return;
-    const nextIdx = direction === 'next'
-      ? Math.min(idx + 1, navigationIds.length - 1)
-      : Math.max(idx - 1, 0);
-    if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
-  }, [navigationIds, selectedId]);
 
   const handleOpenFirstVisible = useCallback(() => {
     if (visibleItems.length === 0) {
@@ -74,7 +41,7 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
       return;
     }
     setSelectedId(visibleItems[0].id);
-  }, [toast, visibleItems]);
+  }, [toast, visibleItems, setSelectedId]);
 
   const handleAdvanceQueue = useCallback(async (queue: PayhipQueueKey, ids: string[]) => {
     const targets = ids
@@ -212,8 +179,8 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
     onTogglePipeline,
     onBulkPipeline,
     onNavigate: handleNavigate,
-    canNavigatePrev: selectedIndex > 0,
-    canNavigateNext: selectedIndex !== -1 && selectedIndex < navigationIds.length - 1,
+    canNavigatePrev,
+    canNavigateNext,
     onResolveHealth: (id: string, health: PayhipHealthKey) => handleResolveHealth(health, [id]),
   };
 
@@ -221,7 +188,7 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
     <PayhipLibrary
       items={payhipItems}
       selectedId={selectedId}
-      onSelect={id => setSelectedId(prev => prev === id ? null : id)}
+      onSelect={handleSelect}
       onVisibleIdsChange={setVisibleIds}
       onOpenFirstVisible={handleOpenFirstVisible}
       onAdvanceQueue={handleAdvanceQueue}

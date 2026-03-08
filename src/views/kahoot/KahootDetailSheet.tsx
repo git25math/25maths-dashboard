@@ -5,6 +5,7 @@ import { LinkRow } from '../../components/LinkRow';
 import { useDetailSheetKeyboard } from '../../hooks/useDetailSheetKeyboard';
 import { cn, formatDate } from '../../lib/utils';
 import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootCorrectOption, KahootItem, KahootOrgType, KahootPipelineStage, KahootQuestion, KahootTimeLimit, KahootTrack } from '../../types';
+import { KahootDeploySection } from './KahootDeploySection';
 
 const CORRECT_OPTIONS: KahootCorrectOption[] = ['A', 'B', 'C', 'D'];
 const TIME_LIMITS: KahootTimeLimit[] = [5, 10, 20, 30, 60, 90, 120];
@@ -219,21 +220,20 @@ function QuestionRow({ question, index, onUpdate }: { question: KahootQuestion; 
   );
 }
 
-interface KahootDetailContentProps {
-  item: KahootItem;
-  onClose: () => void;
-  onDelete: (id: string) => void;
-  onDuplicate: (id: string) => void;
-  onCopy: (value: string, label: string) => void;
-  onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
-  onBulkPipeline: (id: string, value: boolean) => void;
-  onUpdateQuestion?: (kahootId: string, questionId: string, updates: Partial<KahootQuestion>) => void;
-  onNavigate?: (direction: 'prev' | 'next') => void;
-  canNavigatePrev?: boolean;
-  canNavigateNext?: boolean;
-}
-
-function DetailContent({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onUpdateQuestion, onNavigate, canNavigatePrev = false, canNavigateNext = false }: KahootDetailContentProps) {
+function DetailContent({
+  item,
+  onClose,
+  onDelete,
+  onDuplicate,
+  onCopy,
+  onPersistItem,
+  onTogglePipeline,
+  onBulkPipeline,
+  onUpdateQuestion,
+  onNavigate,
+  canNavigatePrev = false,
+  canNavigateNext = false,
+}: KahootDetailSheetProps & { item: KahootItem }) {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -305,6 +305,8 @@ function DetailContent({ item, onClose, onDelete, onDuplicate, onCopy, onToggleP
           <LinkRow label="Page Link" url={item.page_url} onCopy={onCopy} />
         </div>
       </section>
+
+      <KahootDeploySection item={item} onCopy={onCopy} onPersistItem={onPersistItem} />
 
       {/* Description */}
       {item.description && (
@@ -394,6 +396,7 @@ export interface KahootDetailSheetProps {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onCopy: (value: string, label: string) => void;
+  onPersistItem?: (id: string, updates: Partial<KahootItem>) => Promise<void> | void;
   onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
   onBulkPipeline: (id: string, value: boolean) => void;
   onUpdateQuestion?: (kahootId: string, questionId: string, updates: Partial<KahootQuestion>) => void;
@@ -403,67 +406,52 @@ export interface KahootDetailSheetProps {
 }
 
 /** Inline detail panel — renders as a scrollable column (no overlay). */
-export function KahootDetailPanel({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onUpdateQuestion, onNavigate, canNavigatePrev = false, canNavigateNext = false }: KahootDetailSheetProps) {
+export function KahootDetailPanel(props: KahootDetailSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useDetailSheetKeyboard({ isOpen: !!item, onClose, onNavigate });
+  useDetailSheetKeyboard({ isOpen: !!props.item, onClose: props.onClose, onNavigate: props.onNavigate });
 
   useEffect(() => {
-    if (item && panelRef.current) {
+    if (props.item && panelRef.current) {
       panelRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [item?.id]);
+  }, [props.item?.id]);
 
-  if (!item) return null;
+  if (!props.item) return null;
 
   return (
     <div
       ref={panelRef}
       className="w-full max-w-md shrink-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg h-full"
     >
-      <DetailContent
-        item={item}
-        onClose={onClose}
-        onDelete={onDelete}
-        onDuplicate={onDuplicate}
-        onCopy={onCopy}
-        onTogglePipeline={onTogglePipeline}
-        onBulkPipeline={onBulkPipeline}
-        onUpdateQuestion={onUpdateQuestion}
-        onNavigate={onNavigate}
-        canNavigatePrev={canNavigatePrev}
-        canNavigateNext={canNavigateNext}
-      />
+      <DetailContent {...props} item={props.item} />
     </div>
   );
 }
 
 /** Mobile overlay sheet — slides in from right with backdrop. */
-export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onUpdateQuestion, onNavigate, canNavigatePrev = false, canNavigateNext = false }: KahootDetailSheetProps) {
+export function KahootDetailSheet(props: KahootDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  useDetailSheetKeyboard({ isOpen: !!item, onClose, onNavigate });
+  useDetailSheetKeyboard({ isOpen: !!props.item, onClose: props.onClose, onNavigate: props.onNavigate });
 
   useEffect(() => {
-    if (item && sheetRef.current) {
+    if (props.item && sheetRef.current) {
       sheetRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [item?.id]);
+  }, [props.item?.id]);
 
   return (
     <AnimatePresence initial={false}>
-      {item && (
+      {props.item && (
         <>
-          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={props.onClose}
           />
-
-          {/* Sheet */}
           <motion.div
             ref={sheetRef}
             initial={{ x: '100%' }}
@@ -472,19 +460,7 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-white shadow-2xl overflow-y-auto"
           >
-            <DetailContent
-              item={item}
-              onClose={onClose}
-              onDelete={onDelete}
-              onDuplicate={onDuplicate}
-              onCopy={onCopy}
-              onTogglePipeline={onTogglePipeline}
-              onBulkPipeline={onBulkPipeline}
-              onUpdateQuestion={onUpdateQuestion}
-              onNavigate={onNavigate}
-              canNavigatePrev={canNavigatePrev}
-              canNavigateNext={canNavigateNext}
-            />
+            <DetailContent {...props} item={props.item} />
           </motion.div>
         </>
       )}

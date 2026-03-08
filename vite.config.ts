@@ -16,6 +16,28 @@ export default defineConfig(({mode}) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-tiptap': [
+              '@tiptap/react',
+              '@tiptap/starter-kit',
+              '@tiptap/extension-highlight',
+              '@tiptap/extension-link',
+              '@tiptap/extension-placeholder',
+              '@tiptap/extension-text-align',
+              '@tiptap/extension-underline',
+            ],
+            'vendor-motion': ['motion'],
+            'vendor-date': ['date-fns'],
+            'vendor-katex': ['katex'],
+            'vendor-markdown': ['react-markdown', 'rehype-katex', 'remark-math'],
+          },
+        },
+      },
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.

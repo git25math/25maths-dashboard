@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, AlertTriangle, Calendar, CalendarRange, Clock, CalendarClock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SchoolEvent, EventTimeMode } from '../types';
@@ -25,7 +25,7 @@ const CATEGORIES: { value: SchoolEvent['category']; label: string; color: string
   { value: 'event', label: 'Event', color: 'bg-amber-50 border-amber-200 text-amber-600' },
 ];
 
-export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProps) => {
+export const SchoolEventForm = memo(function SchoolEventForm({ event, onSave, onCancel }: SchoolEventFormProps) {
   const [title, setTitle] = useState(event?.title || '');
   const [date, setDate] = useState(event?.date || '');
   const [endDate, setEndDate] = useState(event?.end_date || '');
@@ -38,6 +38,12 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
 
   const showEndDate = timeMode === 'multi-day' || timeMode === 'multi-day-timed';
   const showTime = timeMode === 'timed' || timeMode === 'multi-day-timed';
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,4 +203,4 @@ export const SchoolEventForm = ({ event, onSave, onCancel }: SchoolEventFormProp
       </div>
     </div>
   );
-};
+});

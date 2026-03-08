@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Trash2, Edit3, ExternalLink, GitBranch, CheckSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
@@ -25,14 +25,26 @@ interface ProjectsViewProps {
 export const ProjectsView = ({ projects, tasks, onAddProject, onEditProject, onDeleteProject, onUpdateProject }: ProjectsViewProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const filtered = statusFilter === 'all'
-    ? projects
-    : projects.filter(p => p.status === statusFilter);
+  const sorted = useMemo(() => {
+    const filtered = statusFilter === 'all'
+      ? projects
+      : projects.filter(p => p.status === statusFilter);
 
-  const sorted = [...filtered].sort((a, b) => {
-    const order: Record<string, number> = { active: 0, paused: 1, completed: 2 };
-    return (order[a.status] ?? 1) - (order[b.status] ?? 1);
-  });
+    return [...filtered].sort((a, b) => {
+      const order: Record<string, number> = { active: 0, paused: 1, completed: 2 };
+      return (order[a.status] ?? 1) - (order[b.status] ?? 1);
+    });
+  }, [projects, statusFilter]);
+
+  const taskCountByProject = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const t of tasks) {
+      if (t.project_id) {
+        counts[t.project_id] = (counts[t.project_id] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [tasks]);
 
   const cycleStatus = (project: Project) => {
     const cycle: Record<string, Project['status']> = { active: 'paused', paused: 'completed', completed: 'active' };
@@ -65,7 +77,7 @@ export const ProjectsView = ({ projects, tasks, onAddProject, onEditProject, onD
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sorted.map(project => {
           const cfg = STATUS_CONFIG[project.status];
-          const taskCount = tasks.filter(t => t.project_id === project.id).length;
+          const taskCount = taskCountByProject[project.id] || 0;
 
           return (
             <div

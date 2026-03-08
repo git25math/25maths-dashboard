@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getPriorityPillColor } from '../lib/statusColors';
 import { Idea } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 import { ToggleSwitch } from './ToggleSwitch';
@@ -11,12 +12,18 @@ interface IdeaFormProps {
   onCancel: () => void;
 }
 
-export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
+export const IdeaForm = memo(function IdeaForm({ idea, onSave, onCancel }: IdeaFormProps) {
   const [title, setTitle] = useState(idea?.title || '');
   const [content, setContent] = useState(idea?.content || '');
   const [category, setCategory] = useState<Idea['category']>(idea?.category || 'startup');
   const [priority, setPriority] = useState<Idea['priority']>(idea?.priority || 'medium');
   const [showOnDashboard, setShowOnDashboard] = useState(idea?.show_on_dashboard ?? false);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +36,7 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
         <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h2 className="text-xl font-bold text-slate-900">{idea ? 'Edit Idea' : 'New Idea'}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={20} className="text-slate-500" />
           </button>
         </div>
@@ -80,9 +87,7 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                       priority === p
-                        ? p === 'high' ? "bg-red-50 border-red-200 text-red-600"
-                          : p === 'medium' ? "bg-amber-50 border-amber-200 text-amber-600"
-                          : "bg-blue-50 border-blue-200 text-blue-600"
+                        ? getPriorityPillColor(p)
                         : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                     )}
                   >
@@ -120,4 +125,4 @@ export const IdeaForm = ({ idea, onSave, onCancel }: IdeaFormProps) => {
       </div>
     </div>
   );
-};
+});

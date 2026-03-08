@@ -1,10 +1,5 @@
-import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord, Project, KahootItem } from './types';
-import { KAHOOT_SEED_ITEMS } from './constants-kahoot';
+import { TimetableEntry, Student, Idea, SOP, TeachingUnit, SchoolEvent, Goal, WorkLog, ClassProfile, LessonRecord } from './types';
 // Note: learning_objectives, lessons, core_vocabulary removed from TeachingUnit; completed_lesson_ids removed from ClassProfile
-
-export const MOCK_PROJECTS: Project[] = [];
-
-export const MOCK_KAHOOT_ITEMS: KahootItem[] = KAHOOT_SEED_ITEMS;
 
 export const MOCK_LESSON_RECORDS: LessonRecord[] = [];
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { StudentWeakness } from '../types';
 import { RichTextEditor } from './RichTextEditor';
@@ -10,10 +10,16 @@ interface WeaknessFormProps {
   onCancel: () => void;
 }
 
-export const WeaknessForm = ({ title, initialValue, onSave, onCancel }: WeaknessFormProps) => {
+export const WeaknessForm = memo(function WeaknessForm({ title, initialValue, onSave, onCancel }: WeaknessFormProps) {
   const [topic, setTopic] = useState(initialValue?.topic || '');
   const [level, setLevel] = useState<StudentWeakness['level']>(initialValue?.level || 'medium');
   const [notes, setNotes] = useState(initialValue?.notes || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,4 +99,4 @@ export const WeaknessForm = ({ title, initialValue, onSave, onCancel }: Weakness
       </div>
     </div>
   );
-};
+});

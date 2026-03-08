@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Task, TaskStatus, TaskPriority, Project } from '../types';
 import { cn } from '../lib/utils';
@@ -25,7 +25,7 @@ const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] 
   { value: 'low', label: 'Low', color: 'bg-blue-100 text-blue-700 border-blue-200' },
 ];
 
-export const TaskForm = ({ task, projects, onSave, onCancel }: TaskFormProps) => {
+export const TaskForm = memo(function TaskForm({ task, projects, onSave, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'inbox');
@@ -34,6 +34,12 @@ export const TaskForm = ({ task, projects, onSave, onCancel }: TaskFormProps) =>
   const [dueDate, setDueDate] = useState(task?.due_date || '');
   const [tagsInput, setTagsInput] = useState(task?.tags?.join(', ') || '');
   const [projectId, setProjectId] = useState(task?.project_id || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,4 +206,4 @@ export const TaskForm = ({ task, projects, onSave, onCancel }: TaskFormProps) =>
       </div>
     </div>
   );
-};
+});

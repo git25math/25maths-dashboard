@@ -22,7 +22,8 @@
     "kahoot:mock-upload": "node scripts/kahoot/mock-uploader.mjs",
     "kahoot:playwright-upload": "node scripts/kahoot/playwright-upload.mjs",
     "kahoot:sync": "node scripts/kahoot/sync-website-links.mjs",
-    "payhip:seed": "python3 scripts/payhip/generate_payhip_seed.py"
+    "payhip:seed": "python3 scripts/payhip/generate_payhip_seed.py",
+    "payhip:repair": "tsx scripts/payhip/repair_payhip_pipeline.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -50,7 +51,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.7.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^3.5.0",

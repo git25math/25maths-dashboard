@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
 
 interface LinkRowProps {
@@ -7,7 +8,7 @@ interface LinkRowProps {
   linkColor?: string;
 }
 
-export function LinkRow({ label, url, onCopy, linkColor = 'text-indigo-500 hover:text-indigo-700' }: LinkRowProps) {
+export const LinkRow = memo(function LinkRow({ label, url, onCopy, linkColor = 'text-indigo-500 hover:text-indigo-700' }: LinkRowProps) {
   if (!url) {
     return (
       <div className="flex items-center justify-between py-2 text-sm">
@@ -21,13 +22,13 @@ export function LinkRow({ label, url, onCopy, linkColor = 'text-indigo-500 hover
     <div className="flex items-center justify-between gap-2 py-2 text-sm">
       <span className="font-medium text-slate-600">{label}</span>
       <div className="flex items-center gap-2">
-        <a href={url} target="_blank" rel="noreferrer" className={`transition ${linkColor}`}>
+        <a href={url} target="_blank" rel="noreferrer" aria-label={`Open ${label} in new tab`} className={`transition ${linkColor}`}>
           <ExternalLink size={14} />
         </a>
-        <button type="button" onClick={() => onCopy(url, label)} className="text-slate-400 transition hover:text-slate-700">
+        <button type="button" onClick={() => onCopy(url, label)} aria-label={`Copy ${label}`} className="text-slate-400 transition hover:text-slate-700">
           <Copy size={14} />
         </button>
       </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -11,8 +11,14 @@ interface GenericFormProps {
   placeholder?: string;
 }
 
-export const GenericForm = ({ title, label, initialValue = '', onSave, onCancel, placeholder }: GenericFormProps) => {
+export const GenericForm = memo(function GenericForm({ title, label, initialValue = '', onSave, onCancel, placeholder }: GenericFormProps) {
   const [content, setContent] = useState(initialValue);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +32,7 @@ export const GenericForm = ({ title, label, initialValue = '', onSave, onCancel,
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
         <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={20} className="text-slate-500" />
           </button>
         </div>
@@ -58,4 +64,4 @@ export const GenericForm = ({ title, label, initialValue = '', onSave, onCancel,
       </div>
     </div>
   );
-};
+});

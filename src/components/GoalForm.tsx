@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Goal } from '../types';
@@ -21,13 +21,19 @@ const STATUSES: { value: Goal['status']; label: string; color: string }[] = [
   { value: 'on-hold', label: 'On Hold', color: 'bg-slate-50 border-slate-200 text-slate-600' },
 ];
 
-export const GoalForm = ({ goal, onSave, onCancel }: GoalFormProps) => {
+export const GoalForm = memo(function GoalForm({ goal, onSave, onCancel }: GoalFormProps) {
   const [title, setTitle] = useState(goal?.title || '');
   const [category, setCategory] = useState<Goal['category']>(goal?.category || 'work');
   const [status, setStatus] = useState<Goal['status']>(goal?.status || 'in-progress');
   const [progress, setProgress] = useState(goal?.progress ?? 0);
   const [deadline, setDeadline] = useState(goal?.deadline || '');
   const [imageUrl, setImageUrl] = useState(goal?.image_url || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +53,7 @@ export const GoalForm = ({ goal, onSave, onCancel }: GoalFormProps) => {
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
         <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h2 className="text-xl font-bold text-slate-900">{goal ? 'Edit Goal' : 'New Goal'}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={20} className="text-slate-500" />
           </button>
         </div>
@@ -153,4 +159,4 @@ export const GoalForm = ({ goal, onSave, onCancel }: GoalFormProps) => {
       </div>
     </div>
   );
-};
+});

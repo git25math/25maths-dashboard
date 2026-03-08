@@ -55,7 +55,6 @@ def is_sellable_status(status: str) -> bool:
 
 def derive_pipeline(item: dict[str, object]) -> dict[str, bool]:
     payhip_url = str(item.get("payhip_url") or "")
-    status = str(item.get("status") or "planned")
     final_product = is_final_payhip_url(payhip_url)
 
     return {
@@ -68,8 +67,8 @@ def derive_pipeline(item: dict[str, object]) -> dict[str, bool]:
         ),
         "payhip_created": final_product,
         "url_backfilled": final_product,
-        "qa_verified": final_product and is_sellable_status(status),
-        "site_synced": is_sellable_status(status),
+        "qa_verified": False,
+        "site_synced": False,
     }
 
 

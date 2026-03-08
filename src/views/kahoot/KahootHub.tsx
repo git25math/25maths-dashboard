@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { HelpCircle, Plus, Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { KahootItem, KahootPipelineStage, KahootQuestion, ToastApi } from '../../types';
+import { useHubNavigation } from '../../hooks/useHubNavigation';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { KahootLibrary } from './KahootLibrary';
 import { KahootDetailPanel, KahootDetailSheet } from './KahootDetailSheet';
@@ -13,7 +14,7 @@ type HubView = 'library' | 'create' | 'settings';
 
 interface KahootHubProps {
   kahootItems: KahootItem[];
-  onAddKahoot: (seed?: Partial<Omit<KahootItem, 'id'>>) => Promise<KahootItem | undefined>;
+  onAddKahoot: (seed?: Partial<KahootItem>) => Promise<KahootItem | undefined>;
   onUpdateKahoot: (id: string, updates: Partial<KahootItem>) => Promise<void>;
   onDeleteKahoot: (id: string) => Promise<void> | void;
   onDuplicateKahoot: (id: string) => Promise<KahootItem | undefined>;
@@ -24,60 +25,34 @@ export function KahootHub({
   kahootItems, onAddKahoot, onUpdateKahoot, onDeleteKahoot, onDuplicateKahoot, toast,
 }: KahootHubProps) {
   const [view, setView] = useState<HubView>('library');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [visibleIds, setVisibleIds] = useState<string[]>([]);
 
-  const navigationIds = visibleIds.length ? visibleIds : kahootItems.map(i => i.id);
-
-  const selectedItem = useMemo(
-    () => kahootItems.find(i => i.id === selectedId) ?? null,
-    [kahootItems, selectedId],
-  );
-
-  const selectedIndex = useMemo(
-    () => (selectedId ? navigationIds.findIndex(id => id === selectedId) : -1),
-    [navigationIds, selectedId],
-  );
-
-  // Clear selection when item is filtered out
-  useEffect(() => {
-    if (!selectedId) return;
-    if (!navigationIds.includes(selectedId)) setSelectedId(null);
-  }, [navigationIds, selectedId]);
-
-  const handleCopy = useCallback(async (value: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      toast.success(`${label} copied`);
-    } catch {
-      toast.error(`Failed to copy ${label.toLowerCase()}`);
-    }
-  }, [toast]);
-
-  const handleCardClick = useCallback((id: string) => {
-    setSelectedId(prev => prev === id ? null : id);
-  }, []);
-
-  const handleCloseSheet = useCallback(() => setSelectedId(null), []);
+  const {
+    selectedId, setSelectedId, selectedItem, setVisibleIds,
+    handleCopy, handleNavigate, handleSelect, canNavigatePrev, canNavigateNext,
+  } = useHubNavigation({ items: kahootItems, toast });
 
   const handleDelete = useCallback(async (id: string) => {
     await onDeleteKahoot(id);
     if (selectedId === id) setSelectedId(null);
-  }, [onDeleteKahoot, selectedId]);
+  }, [onDeleteKahoot, selectedId, setSelectedId]);
 
   const handleDuplicate = useCallback(async (id: string) => {
     const dup = await onDuplicateKahoot(id);
     if (dup) setSelectedId(dup.id);
-  }, [onDuplicateKahoot]);
+  }, [onDuplicateKahoot, setSelectedId]);
 
   const handleSaveItem = useCallback(async (item: KahootItem) => {
     const existing = kahootItems.find(i => i.id === item.id);
     if (existing) {
       await onUpdateKahoot(item.id, item);
-    } else {
-      await onAddKahoot(item);
+      return {
+        ...existing,
+        ...item,
+      };
     }
+
+    return onAddKahoot(item);
   }, [kahootItems, onAddKahoot, onUpdateKahoot]);
 
   const handleTogglePipeline = useCallback(async (id: string, stage: KahootPipelineStage) => {
@@ -103,28 +78,19 @@ export function KahootHub({
     await onUpdateKahoot(kahootId, { questions: nextQuestions });
   }, [kahootItems, onUpdateKahoot]);
 
-  const handleNavigate = useCallback((direction: 'prev' | 'next') => {
-    if (!selectedId) return;
-    const idx = navigationIds.findIndex(id => id === selectedId);
-    if (idx === -1) return;
-    const nextIdx = direction === 'next'
-      ? Math.min(idx + 1, navigationIds.length - 1)
-      : Math.max(idx - 1, 0);
-    if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
-  }, [navigationIds, selectedId]);
-
   const detailProps = {
     item: selectedItem,
-    onClose: handleCloseSheet,
+    onClose: () => setSelectedId(null),
     onDelete: handleDelete,
     onDuplicate: handleDuplicate,
     onCopy: handleCopy,
+    onPersistItem: onUpdateKahoot,
     onTogglePipeline: handleTogglePipeline,
     onBulkPipeline: handleBulkPipeline,
     onUpdateQuestion: handleUpdateQuestion,
     onNavigate: handleNavigate,
-    canNavigatePrev: selectedIndex > 0,
-    canNavigateNext: selectedIndex !== -1 && selectedIndex < navigationIds.length - 1,
+    canNavigatePrev,
+    canNavigateNext,
   };
 
   // Desktop split layout: header fixed, two panels fill remaining viewport height with independent scroll
@@ -184,11 +150,11 @@ export function KahootHub({
         showDesktopSplit ? (
           /* Desktop split: two panels fill remaining height, each scrolls independently */
           <div className="flex gap-6 flex-1 min-h-0">
-            <div className="flex-1 min-w-0 overflow-y-auto pr-1">
+            <div className="flex-1 min-w-0 min-h-0 pr-1">
               <KahootLibrary
                 items={kahootItems}
                 selectedId={selectedId}
-                onSelect={handleCardClick}
+                onSelect={handleSelect}
                 onVisibleIdsChange={setVisibleIds}
               />
             </div>
@@ -198,7 +164,7 @@ export function KahootHub({
           <KahootLibrary
             items={kahootItems}
             selectedId={selectedId}
-            onSelect={handleCardClick}
+            onSelect={handleSelect}
             onVisibleIdsChange={setVisibleIds}
           />
         )

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback } from 'react';
+import { Dispatch, SetStateAction, useCallback, useRef } from 'react';
 import { randomAlphaId } from '../../lib/id';
 import { kahootService } from '../../services/kahootService';
 import { KahootCorrectOption, KahootItem, KahootPipeline, KahootQuestion, KahootTimeLimit, KahootUploadStatus, ToastApi } from '../../types';
@@ -50,6 +50,9 @@ function applyStatusTimestamps(item: KahootItem, nextStatus: KahootUploadStatus,
 }
 
 export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKahootActionsParams) {
+  const itemsRef = useRef(kahootItems);
+  itemsRef.current = kahootItems;
+
   const persistItem = useCallback(async (item: KahootItem, successMessage?: string) => {
     try {
       const updated = await kahootService.update(item.id, item);
@@ -62,12 +65,13 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
     }
   }, [setKahootItems, toast]);
 
-  const addKahoot = useCallback(async (seed?: Partial<Omit<KahootItem, 'id'>>): Promise<KahootItem | undefined> => {
+  const addKahoot = useCallback(async (seed?: Partial<KahootItem>): Promise<KahootItem | undefined> => {
     const timestamp = new Date().toISOString();
-    const baseItem: Omit<KahootItem, 'id'> = {
+    const baseItem: Omit<KahootItem, 'id'> & { id?: string } = {
+      id: seed?.id,
       board: seed?.board || 'cie0580',
       track: seed?.track || 'core',
-      topic_code: seed?.topic_code || `NEW-${kahootItems.length + 1}`,
+      topic_code: seed?.topic_code || `NEW-${itemsRef.current.length + 1}`,
       title: seed?.title || 'Untitled Kahoot',
       description: seed?.description || '',
       cover_url: seed?.cover_url,
@@ -97,10 +101,10 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       toast.error('Failed to add Kahoot item');
       return undefined;
     }
-  }, [kahootItems.length, setKahootItems, toast]);
+  }, [setKahootItems, toast]);
 
   const updateKahoot = useCallback(async (id: string, updates: Partial<KahootItem>) => {
-    const existing = kahootItems.find(item => item.id === id);
+    const existing = itemsRef.current.find(item => item.id ===id);
     if (!existing) return;
 
     const timestamp = new Date().toISOString();
@@ -115,7 +119,7 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       : mergedBase;
 
     await persistItem(merged, 'Kahoot item updated');
-  }, [kahootItems, persistItem]);
+  }, [persistItem]);
 
   const deleteKahoot = useCallback(async (id: string) => {
     try {
@@ -128,7 +132,7 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
   }, [setKahootItems, toast]);
 
   const duplicateKahoot = useCallback(async (id: string): Promise<KahootItem | undefined> => {
-    const existing = kahootItems.find(item => item.id === id);
+    const existing = itemsRef.current.find(item => item.id ===id);
     if (!existing) return undefined;
 
     return addKahoot({
@@ -150,10 +154,10 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
         prompt: question.prompt || `Question ${index + 1}`,
       })),
     });
-  }, [addKahoot, kahootItems]);
+  }, [addKahoot]);
 
   const addQuestion = useCallback(async (kahootId: string) => {
-    const existing = kahootItems.find(item => item.id === kahootId);
+    const existing = itemsRef.current.find(item => item.id ===kahootId);
     if (!existing) return;
 
     const nextQuestion = makeDefaultQuestion(existing.questions.length + 1);
@@ -165,10 +169,10 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       },
       'Question added',
     );
-  }, [kahootItems, persistItem]);
+  }, [persistItem]);
 
   const updateQuestion = useCallback(async (kahootId: string, questionId: string, updates: Partial<KahootQuestion>) => {
-    const existing = kahootItems.find(item => item.id === kahootId);
+    const existing = itemsRef.current.find(item => item.id ===kahootId);
     if (!existing) return;
 
     await persistItem(
@@ -179,10 +183,10 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       },
       'Question updated',
     );
-  }, [kahootItems, persistItem]);
+  }, [persistItem]);
 
   const deleteQuestion = useCallback(async (kahootId: string, questionId: string) => {
-    const existing = kahootItems.find(item => item.id === kahootId);
+    const existing = itemsRef.current.find(item => item.id ===kahootId);
     if (!existing) return;
 
     await persistItem(
@@ -193,10 +197,10 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       },
       'Question removed',
     );
-  }, [kahootItems, persistItem]);
+  }, [persistItem]);
 
   const moveQuestion = useCallback(async (kahootId: string, questionId: string, direction: -1 | 1) => {
-    const existing = kahootItems.find(item => item.id === kahootId);
+    const existing = itemsRef.current.find(item => item.id ===kahootId);
     if (!existing) return;
 
     const index = existing.questions.findIndex(question => question.id === questionId);
@@ -215,7 +219,7 @@ export function useKahootActions({ kahootItems, setKahootItems, toast }: UseKaho
       },
       'Question order updated',
     );
-  }, [kahootItems, persistItem]);
+  }, [persistItem]);
 
   return {
     addKahoot,

@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useKahootWizard, WizardStep } from '../../hooks/useKahootWizard';
-import { LocalAgentJob } from '../../services/localAgentService';
 import { KahootItem } from '../../types';
 import { StepPrompt } from './steps/StepPrompt';
 import { StepReview } from './steps/StepReview';
@@ -20,7 +19,7 @@ const STEPS: { key: WizardStep; label: string }[] = [
 
 interface KahootCreateWizardProps {
   onBack: () => void;
-  onSaveItem: (item: KahootItem) => Promise<void>;
+  onSaveItem: (item: KahootItem) => Promise<KahootItem | undefined>;
   onCopy: (value: string, label: string) => void;
 }
 
@@ -44,23 +43,40 @@ export function KahootCreateWizard({ onBack, onSaveItem, onCopy }: KahootCreateW
     }
   }, [wizard]);
 
-  const handleJobComplete = useCallback(async (job: LocalAgentJob) => {
-    if (job.status === 'completed') {
-      const result = job.result as Record<string, unknown> | null;
-      const itemResult = result?.item as Partial<KahootItem> | undefined;
-      if (itemResult) {
-        const merged: KahootItem = {
-          ...wizard.draft,
-          ...itemResult,
-          upload_status: 'kahoot_uploaded',
-          uploaded_at: new Date().toISOString(),
-        };
-        wizard.updateDraft(merged);
-        try { await onSaveItem(merged); } catch { /* toast handles errors */ }
-      }
-    }
-    wizard.next(); // Move to Done step
-  }, [wizard, onSaveItem]);
+  const persistDraft = useCallback(async (draft: KahootItem) => {
+    const saved = await onSaveItem(draft);
+    if (saved) wizard.updateDraft(saved);
+    return saved;
+  }, [onSaveItem, wizard]);
+
+  const handlePersistDraftUpdates = useCallback(async (id: string, updates: Partial<KahootItem>) => {
+    const merged: KahootItem = {
+      ...wizard.draft,
+      ...updates,
+      id,
+    };
+
+    wizard.updateDraft(merged);
+    const saved = await onSaveItem(merged);
+    if (saved) wizard.updateDraft(saved);
+  }, [onSaveItem, wizard]);
+
+  const handleReviewNext = useCallback(async () => {
+    const reviewed: KahootItem = {
+      ...wizard.draft,
+      pipeline: {
+        ...wizard.draft.pipeline,
+        reviewed: true,
+      },
+      upload_status: wizard.draft.upload_status === 'ai_generated'
+        ? 'human_review'
+        : wizard.draft.upload_status,
+    };
+
+    wizard.updateDraft(reviewed);
+    await persistDraft(reviewed);
+    wizard.next();
+  }, [persistDraft, wizard]);
 
   const handleGoToLibrary = useCallback(() => {
     onBack();
@@ -144,7 +160,7 @@ export function KahootCreateWizard({ onBack, onSaveItem, onCopy }: KahootCreateW
             draft={wizard.draft}
             onUpdateDraft={wizard.updateDraft}
             onSetQuestions={wizard.setQuestions}
-            onNext={wizard.next}
+            onNext={() => void handleReviewNext()}
             onBack={wizard.back}
           />
         )}
@@ -154,22 +170,24 @@ export function KahootCreateWizard({ onBack, onSaveItem, onCopy }: KahootCreateW
             draft={wizard.draft}
             onNext={wizard.next}
             onBack={wizard.back}
+            onCopy={onCopy}
+            onPersistItem={handlePersistDraftUpdates}
           />
         )}
 
         {wizard.step === 'upload' && (
           <StepUpload
             draft={wizard.draft}
-            onJobComplete={handleJobComplete}
+            onNext={wizard.next}
             onBack={wizard.back}
+            onCopy={onCopy}
+            onPersistItem={handlePersistDraftUpdates}
           />
         )}
 
         {wizard.step === 'done' && (
           <StepDone
-            job={null}
-            draftTitle={wizard.draft.title}
-            questionCount={wizard.draft.questions.length}
+            draft={wizard.draft}
             onCopy={onCopy}
             onGoToLibrary={handleGoToLibrary}
             onCreateAnother={handleCreateAnother}

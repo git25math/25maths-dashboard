@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -15,6 +15,16 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
+const TOOLBAR_BUTTONS = [
+  { icon: Bold, before: '**', after: '**', label: 'Bold' },
+  { icon: Italic, before: '_', after: '_', label: 'Italic' },
+  { icon: List, before: '\n- ', after: '', label: 'Unordered List' },
+  { icon: ListOrdered, before: '\n1. ', after: '', label: 'Ordered List' },
+  { icon: LinkIcon, before: '[', after: '](url)', label: 'Link' },
+  { icon: Sigma, before: '$', after: '$', label: 'Inline Math' },
+  { icon: Code, before: '```\n', after: '\n```', label: 'Code Block' },
+] as const;
+
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -26,7 +36,7 @@ interface RichTextEditorProps {
   helperText?: string;
 }
 
-export const RichTextEditor = ({
+export const RichTextEditor = memo(function RichTextEditor({
   value,
   onChange,
   placeholder,
@@ -35,7 +45,7 @@ export const RichTextEditor = ({
   editorHeightClass = 'h-48',
   previewMinHeightClass = 'min-h-[12rem]',
   helperText = 'Supports Markdown and LaTeX (e.g. $E=mc^2$)',
-}: RichTextEditorProps) => {
+}: RichTextEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -56,16 +66,6 @@ export const RichTextEditor = ({
       textarea.setSelectionRange(start + before.length, end + before.length);
     }, 0);
   };
-
-  const toolbarButtons = [
-    { icon: Bold, action: () => insertText('**', '**'), label: 'Bold' },
-    { icon: Italic, action: () => insertText('_', '_'), label: 'Italic' },
-    { icon: List, action: () => insertText('\n- ', ''), label: 'Unordered List' },
-    { icon: ListOrdered, action: () => insertText('\n1. ', ''), label: 'Ordered List' },
-    { icon: LinkIcon, action: () => insertText('[', '](url)'), label: 'Link' },
-    { icon: Sigma, action: () => insertText('$', '$'), label: 'Inline Math' },
-    { icon: Code, action: () => insertText('```\n', '\n```'), label: 'Code Block' },
-  ];
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -99,11 +99,11 @@ export const RichTextEditor = ({
         {isEditing ? (
           <div className="border border-slate-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
             <div className="flex items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 overflow-x-auto">
-              {toolbarButtons.map((btn, i) => (
+              {TOOLBAR_BUTTONS.map((btn, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={btn.action}
+                  onClick={() => insertText(btn.before, btn.after)}
                   title={btn.label}
                   className="p-2 hover:bg-white hover:text-indigo-600 rounded-lg text-slate-500 transition-all"
                 >
@@ -142,7 +142,7 @@ export const RichTextEditor = ({
       {helperText && <p className="text-[10px] text-slate-400 italic">{helperText}</p>}
     </div>
   );
-};
+});
 
 export const MarkdownRenderer = ({ content, className }: { content: string, className?: string }) => {
   return (

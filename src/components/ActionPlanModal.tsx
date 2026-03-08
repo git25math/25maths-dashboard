@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { X, FileText, Copy, Check, Save } from 'lucide-react';
 import { MarkdownRenderer } from './RichTextEditor';
 
@@ -10,9 +10,15 @@ interface ActionPlanModalProps {
   onClose: () => void;
 }
 
-export const ActionPlanModal = ({ markdown, meetingTitle, title = 'Action Plan', onSaveAsSOP, onClose }: ActionPlanModalProps) => {
+export const ActionPlanModal = memo(function ActionPlanModal({ markdown, meetingTitle, title = 'Action Plan', onSaveAsSOP, onClose }: ActionPlanModalProps) {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(markdown);
@@ -44,7 +50,7 @@ export const ActionPlanModal = ({ markdown, meetingTitle, title = 'Action Plan',
               <p className="text-xs text-teal-500 font-medium">{meetingTitle}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-teal-100 rounded-full transition-colors">
+          <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-teal-100 rounded-full transition-colors">
             <X size={20} className="text-slate-500" />
           </button>
         </div>
@@ -84,4 +90,4 @@ export const ActionPlanModal = ({ markdown, meetingTitle, title = 'Action Plan',
       </div>
     </div>
   );
-};
+});

@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Plus, ChevronRight, AlertCircle, Users, Mail, Key, Trophy, X, Loader2, LayoutGrid, Table as TableIcon, Award, Edit3, CheckCircle2, Circle, Trash2, Pencil, MessageSquare, Phone, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, ChevronRight, X, LayoutGrid, Table as TableIcon, Edit3, Users, Award } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Student, ClassProfile, ExamRecord, HPAwardLog, ParentCommunication, StudentWeakness } from '../types';
 import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
-import { USER_CONFIG } from '../shared/constants';
-import { geminiService } from '../services/geminiService';
-import { ActionPlanModal } from '../components/ActionPlanModal';
+import { StudentDetailView } from './students/StudentDetailView';
+import { ClassDetailView } from './students/ClassDetailView';
 
 interface StudentsViewProps {
   students: Student[];
@@ -80,45 +79,37 @@ export const StudentsView = ({
   onNavigateToHPHistory,
 }: StudentsViewProps) => {
   const [activeSubTab, setActiveSubTab] = useState<'classes' | 'students'>('classes');
-  const [showExamForm, setShowExamForm] = useState(false);
-  const [examForm, setExamForm] = useState({ exam_name: '', date: '', score: '', total_score: '', weaknesses: '' });
-  const [recommendationLoading, setRecommendationLoading] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<Record<string, string>>({});
 
-  // New state for view toggle, class filter, batch HP
+  // View toggle, class filter, batch HP
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [classFilter, setClassFilter] = useState<string>('all');
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [batchPoints, setBatchPoints] = useState(1);
   const [batchReason, setBatchReason] = useState('');
-  const [subjectReportLoading, setSubjectReportLoading] = useState(false);
-  const [subjectReportMarkdown, setSubjectReportMarkdown] = useState<string | null>(null);
-  const [parentNotesLoading, setParentNotesLoading] = useState(false);
-  const [parentNotesMarkdown, setParentNotesMarkdown] = useState<string | null>(null);
 
   // Derived data
-  const classNames = Array.from(new Set(students.map(s => s.class_name).filter(Boolean))).sort();
-  const filteredStudents = classFilter === 'all' ? students : students.filter(s => s.class_name === classFilter);
+  const classNames = useMemo(() => Array.from(new Set(students.map(s => s.class_name).filter(Boolean))).sort(), [students]);
+  const filteredStudents = useMemo(() => classFilter === 'all' ? students : students.filter(s => s.class_name === classFilter), [students, classFilter]);
 
   // Clear selection when filter or sub-tab changes
   useEffect(() => { setSelectedStudentIds(new Set()); }, [classFilter, activeSubTab]);
 
   // Helpers
-  const toggleStudent = (id: string) => {
+  const toggleStudent = useCallback((id: string) => {
     setSelectedStudentIds(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  };
-  const toggleAll = () => {
+  }, []);
+  const toggleAll = useCallback(() => {
     setSelectedStudentIds(prev =>
       prev.size === filteredStudents.length ? new Set() : new Set(filteredStudents.map(s => s.id))
     );
-  };
-  const clearSelection = () => { setSelectedStudentIds(new Set()); setBatchPoints(1); setBatchReason(''); };
+  }, [filteredStudents]);
+  const clearSelection = useCallback(() => { setSelectedStudentIds(new Set()); setBatchPoints(1); setBatchReason(''); }, []);
 
-  const handleBatchAward = () => {
+  const handleBatchAward = useCallback(() => {
     if (selectedStudentIds.size === 0) return;
     const awards = Array.from(selectedStudentIds).map(student_id => ({
       student_id,
@@ -127,786 +118,55 @@ export const StudentsView = ({
     }));
     onBatchAwardHP(awards);
     clearSelection();
-  };
+  }, [selectedStudentIds, batchPoints, batchReason, onBatchAwardHP, clearSelection]);
 
-  const handleGenerateSubjectReport = async (student: Student) => {
-    setSubjectReportLoading(true);
-    try {
-      const result = await geminiService.generateSubjectReport({
-        studentName: student.name,
-        chineseName: student.chinese_name,
-        yearGroup: student.year_group,
-        className: student.class_name,
-        examRecords: (student.exam_records ?? []).map(e => ({ exam_name: e.exam_name, date: e.date, score: e.score, total_score: e.total_score })),
-        weaknesses: (student.weaknesses ?? []).map(w => ({ topic: w.topic, level: w.level, notes: w.notes })),
-        statusRecords: (student.status_records ?? []).map(s => ({ content: s.content, timestamp: s.date })),
-        requests: (student.requests ?? []).map(r => ({ content: r.content, timestamp: r.date })),
-      });
-      setSubjectReportMarkdown(result);
-    } catch (err) {
-      console.error('Failed to generate subject report:', err);
-      alert('Failed to generate subject report. Please try again.');
-    } finally {
-      setSubjectReportLoading(false);
-    }
-  };
-
-  const handleGenerateParentNotes = async (student: Student) => {
-    setParentNotesLoading(true);
-    try {
-      const result = await geminiService.generateParentMeetingNotes({
-        studentName: student.name,
-        chineseName: student.chinese_name,
-        yearGroup: student.year_group,
-        className: student.class_name,
-        examRecords: (student.exam_records ?? []).map(e => ({ exam_name: e.exam_name, date: e.date, score: e.score, total_score: e.total_score })),
-        weaknesses: (student.weaknesses ?? []).map(w => ({ topic: w.topic, level: w.level, notes: w.notes })),
-        statusRecords: (student.status_records ?? []).map(s => ({ content: s.content, timestamp: s.date })),
-        parentCommunications: (student.parent_communications ?? []).map(c => ({ type: c.method, content: c.content, timestamp: c.date })),
-      });
-      setParentNotesMarkdown(result);
-    } catch (err) {
-      console.error('Failed to generate parent meeting notes:', err);
-      alert('Failed to generate parent meeting notes. Please try again.');
-    } finally {
-      setParentNotesLoading(false);
-    }
-  };
-
-  const selectedStudent = students.find(s => s.id === selectedStudentId);
-  const selectedClass = classes.find(c => c.id === selectedClassId);
+  const selectedStudent = useMemo(() => students.find(s => s.id === selectedStudentId), [students, selectedStudentId]);
+  const selectedClass = useMemo(() => classes.find(c => c.id === selectedClassId), [classes, selectedClassId]);
 
   if (selectedStudent) {
     return (
-      <>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => onSelectStudent(null)}
-            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-          >
-            <ChevronRight size={20} className="rotate-180" /> Back to List
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onUpdateStudent(selectedStudent.id)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              Edit Student
-            </button>
-            <button
-              onClick={() => {
-                if (confirm('Are you sure you want to delete this student?')) {
-                  onDeleteStudent(selectedStudent.id);
-                  onSelectStudent(null);
-                }
-              }}
-              className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="glass-card p-8 space-y-8">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
-                    {selectedStudent.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-900">
-                      {selectedStudent.name}
-                      {selectedStudent.chinese_name && <span className="text-xl text-slate-400 ml-2">{selectedStudent.chinese_name}</span>}
-                    </h2>
-                    <p className="text-slate-500">
-                      {selectedStudent.year_group} • {selectedStudent.class_name}
-                      {selectedStudent.tutor_group && <> • Tutor: {selectedStudent.tutor_group}</>}
-                      {selectedStudent.house && <> • {selectedStudent.house}</>}
-                    </p>
-                  </div>
-                </div>
-                <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-bold border border-emerald-100">
-                  {selectedStudent.house_points} HP
-                </div>
-              </div>
-
-              {/* Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {selectedStudent.parent_email && (
-                  <a href={`mailto:${selectedStudent.parent_email}`} className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors">
-                    <Mail size={14} className="text-blue-500" />
-                    <span className="text-xs text-blue-700 truncate">{selectedStudent.parent_email}</span>
-                  </a>
-                )}
-                {selectedStudent.dfm_username && (
-                  <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                    <Key size={14} className="text-purple-500" />
-                    <span className="text-xs text-purple-700">DFM: {selectedStudent.dfm_username} / {selectedStudent.dfm_password || '—'}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Tutors */}
-              {(selectedStudent.tutor_1 || selectedStudent.tutor_2) && (
-                <div className="flex gap-4">
-                  {selectedStudent.tutor_1 && (
-                    <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 text-sm">
-                      <span className="text-amber-500 font-bold text-xs uppercase">导师1</span> <span className="text-amber-800">{selectedStudent.tutor_1}</span>
-                    </div>
-                  )}
-                  {selectedStudent.tutor_2 && (
-                    <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 text-sm">
-                      <span className="text-amber-500 font-bold text-xs uppercase">导师2</span> <span className="text-amber-800">{selectedStudent.tutor_2}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Exam Records */}
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2 flex items-center gap-2">
-                  <Trophy size={18} className="text-amber-500" /> 成绩登记 (Exam Records)
-                </h3>
-                {selectedStudent.exam_records && selectedStudent.exam_records.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-slate-200">
-                          <th className="text-left py-2 px-3 text-xs font-bold text-slate-400 uppercase">考试</th>
-                          <th className="text-left py-2 px-3 text-xs font-bold text-slate-400 uppercase">日期</th>
-                          <th className="text-center py-2 px-3 text-xs font-bold text-slate-400 uppercase">成绩</th>
-                          <th className="text-left py-2 px-3 text-xs font-bold text-slate-400 uppercase">薄弱环节</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedStudent.exam_records.map(exam => {
-                          const pct = exam.total_score > 0 ? Math.round((exam.score / exam.total_score) * 100) : 0;
-                          return (
-                            <tr key={exam.id} className="border-b border-slate-100 hover:bg-slate-50">
-                              <td className="py-3 px-3 font-medium text-slate-900">{exam.exam_name}</td>
-                              <td className="py-3 px-3 text-slate-500">{exam.date}</td>
-                              <td className="py-3 px-3 text-center">
-                                <span className={cn(
-                                  "font-bold",
-                                  pct >= 80 ? "text-emerald-600" : pct >= 60 ? "text-amber-600" : "text-red-600"
-                                )}>
-                                  {exam.score}/{exam.total_score}
-                                </span>
-                                <span className="text-slate-400 text-xs ml-1">({pct}%)</span>
-                              </td>
-                              <td className="py-3 px-3 text-slate-500">{exam.weaknesses || '—'}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-400 italic">No exam records yet.</p>
-                )}
-
-                {showExamForm ? (
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-slate-700">添加考试成绩</span>
-                      <button onClick={() => setShowExamForm(false)} className="p-1 hover:bg-slate-200 rounded-full"><X size={16} /></button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <input
-                        className="px-3 py-2 rounded-lg border border-slate-200 text-sm col-span-2"
-                        placeholder="考试名称 e.g. 第1次考试"
-                        value={examForm.exam_name}
-                        onChange={e => setExamForm(f => ({ ...f, exam_name: e.target.value }))}
-                      />
-                      <input
-                        type="date" className="px-3 py-2 rounded-lg border border-slate-200 text-sm"
-                        value={examForm.date}
-                        onChange={e => setExamForm(f => ({ ...f, date: e.target.value }))}
-                      />
-                      <div className="flex gap-1 items-center">
-                        <input
-                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 text-sm w-20"
-                          placeholder="成绩"
-                          value={examForm.score}
-                          onChange={e => setExamForm(f => ({ ...f, score: e.target.value }))}
-                        />
-                        <span className="text-slate-400">/</span>
-                        <input
-                          type="number" className="px-3 py-2 rounded-lg border border-slate-200 text-sm w-20"
-                          placeholder="总分"
-                          value={examForm.total_score}
-                          onChange={e => setExamForm(f => ({ ...f, total_score: e.target.value }))}
-                        />
-                      </div>
-                    </div>
-                    <input
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
-                      placeholder="薄弱环节 e.g. Algebra, Trigonometry"
-                      value={examForm.weaknesses}
-                      onChange={e => setExamForm(f => ({ ...f, weaknesses: e.target.value }))}
-                    />
-                    <button
-                      onClick={() => {
-                        if (!examForm.exam_name || !examForm.score) return;
-                        onAddExamRecord(selectedStudent.id, {
-                          exam_name: examForm.exam_name,
-                          date: examForm.date || new Date().toISOString().split('T')[0],
-                          score: parseInt(examForm.score) || 0,
-                          total_score: parseInt(examForm.total_score) || 100,
-                          weaknesses: examForm.weaknesses,
-                        });
-                        setExamForm({ exam_name: '', date: '', score: '', total_score: '', weaknesses: '' });
-                        setShowExamForm(false);
-                      }}
-                      className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowExamForm(true)}
-                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all"
-                  >
-                    + 添加考试成绩
-                  </button>
-                )}
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学习状况记录 (Learning Status)</h3>
-                <div className="space-y-4">
-                  {selectedStudent.status_records?.map(record => (
-                    <div key={record.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{record.date}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-500">
-                            {record.category}
-                          </span>
-                          {onEditStatusRecord && (
-                            <button
-                              onClick={() => onEditStatusRecord(selectedStudent.id, record.id, record.content)}
-                              className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Edit"
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          )}
-                          {onDeleteStatusRecord && (
-                            <button
-                              onClick={() => {
-                                if (confirm('Delete this status record?')) onDeleteStatusRecord(selectedStudent.id, record.id);
-                              }}
-                              className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Delete"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <MarkdownRenderer content={record.content} className="text-sm text-slate-700 leading-relaxed" />
-                    </div>
-                  ))}
-                  {(!selectedStudent.status_records || selectedStudent.status_records.length === 0) && (
-                    <p className="text-sm text-slate-400 italic">No status records found.</p>
-                  )}
-                  <button
-                    onClick={() => onAddStatusRecord(selectedStudent.id)}
-                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all"
-                  >
-                    + Add Status Record
-                  </button>
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="font-bold text-lg border-b border-slate-100 pb-2">薄弱环节 (Weaknesses)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedStudent.weaknesses?.map((w, i) => {
-                    const wKey = `${selectedStudent.id}-${w.topic}`;
-                    const isLoading = recommendationLoading === wKey;
-                    const rec = recommendations[wKey];
-                    return (
-                      <div key={i} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2 group">
-                        <div className="flex justify-between items-center">
-                          <p className="font-bold text-slate-900">{w.topic}</p>
-                          <div className="flex items-center gap-2">
-                            <span className={cn(
-                              "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                              w.level === 'high' ? "bg-red-100 text-red-600" :
-                              w.level === 'medium' ? "bg-amber-100 text-amber-600" :
-                              "bg-blue-100 text-blue-600"
-                            )}>
-                              {w.level}
-                            </span>
-                            {onEditWeakness && (
-                              <button
-                                onClick={() => onEditWeakness(selectedStudent.id, i, w)}
-                                className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
-                                title="Edit"
-                              >
-                                <Pencil size={12} />
-                              </button>
-                            )}
-                            {onDeleteWeakness && (
-                              <button
-                                onClick={() => {
-                                  if (confirm('Delete this weakness?')) onDeleteWeakness(selectedStudent.id, i);
-                                }}
-                                className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                                title="Delete"
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        {w.notes && <MarkdownRenderer content={w.notes} className="text-xs text-slate-500" />}
-                        <button
-                          disabled={isLoading}
-                          onClick={async () => {
-                            setRecommendationLoading(wKey);
-                            try {
-                              const result = await geminiService.recommendPractice({
-                                topic: w.topic,
-                                level: w.level,
-                                notes: w.notes,
-                                studentYearGroup: selectedStudent.year_group,
-                              });
-                              setRecommendations(prev => ({ ...prev, [wKey]: result }));
-                            } catch {
-                              // Silent fail
-                            } finally {
-                              setRecommendationLoading(null);
-                            }
-                          }}
-                          className={cn(
-                            "text-[10px] font-bold flex items-center gap-1",
-                            isLoading ? "text-slate-400 cursor-not-allowed" : "text-indigo-600 hover:underline"
-                          )}
-                        >
-                          {isLoading && <Loader2 size={10} className="animate-spin" />}
-                          {isLoading ? 'Analysing...' : 'Recommend Practice'}
-                        </button>
-                        {rec && (
-                          <div className="mt-2 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                            <MarkdownRenderer content={rec} className="text-xs text-slate-700 leading-relaxed" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {(!selectedStudent.weaknesses || selectedStudent.weaknesses.length === 0) && (
-                  <p className="text-sm text-slate-400 italic">No weaknesses recorded.</p>
-                )}
-                {onAddWeakness && (
-                  <button
-                    onClick={() => onAddWeakness(selectedStudent.id)}
-                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-all"
-                  >
-                    + Add Weakness
-                  </button>
-                )}
-              </section>
-
-              {/* HP History */}
-              {hpAwardLogs && (() => {
-                const studentLogs = hpAwardLogs
-                  .filter(l => l.student_id === selectedStudent.id)
-                  .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-                const displayLogs = studentLogs.slice(0, 10);
-                const totalHP = studentLogs.reduce((sum, l) => sum + l.points, 0);
-                return (
-                  <section className="space-y-4">
-                    <h3 className="font-bold text-lg border-b border-slate-100 pb-2 flex items-center gap-2">
-                      <Award size={18} className="text-emerald-500" /> House Point History
-                    </h3>
-                    {studentLogs.length > 0 ? (
-                      <>
-                        <p className="text-sm text-slate-500">
-                          <span className="font-bold text-emerald-600">{totalHP} HP</span> from {studentLogs.length} award{studentLogs.length !== 1 ? 's' : ''}
-                        </p>
-                        <div className="space-y-2">
-                          {displayLogs.map(log => (
-                            <div key={log.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                              <span className="text-xs text-slate-400 font-mono w-[80px] shrink-0">{log.date}</span>
-                              <span className="text-sm text-slate-600 flex-1 truncate">{log.reason}</span>
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-100">+{log.points}</span>
-                              <span className={cn(
-                                "text-[10px] font-bold uppercase",
-                                log.source === 'lesson' ? "text-indigo-500" : "text-amber-500"
-                              )}>{log.source}</span>
-                            </div>
-                          ))}
-                        </div>
-                        {studentLogs.length > 10 && onNavigateToHPHistory && (
-                          <button
-                            onClick={() => onNavigateToHPHistory(selectedStudent.id)}
-                            className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:underline"
-                          >
-                            View All {studentLogs.length} Awards <ChevronRight size={16} />
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-sm text-slate-400 italic">No HP awards yet.</p>
-                    )}
-                  </section>
-                );
-              })()}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="glass-card p-6 space-y-4">
-              <h3 className="font-bold text-lg">平时诉求 (Requests)</h3>
-              <div className="space-y-3">
-                {selectedStudent.requests?.map(req => (
-                  <div key={req.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
-                    <MarkdownRenderer content={req.content} className="text-xs text-slate-700" />
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                        <span>提出:</span>
-                        {onUpdateRequestDate ? (
-                          <input
-                            type="date"
-                            value={req.date}
-                            onChange={e => onUpdateRequestDate(selectedStudent.id, req.id, 'date', e.target.value)}
-                            className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
-                          />
-                        ) : (
-                          <span>{req.date}</span>
-                        )}
-                      </div>
-                      {req.status === 'resolved' && (
-                        <div className="flex items-center gap-1 text-[10px] text-emerald-500">
-                          <span>解决:</span>
-                          {onUpdateRequestDate ? (
-                            <input
-                              type="date"
-                              value={req.resolved_date || ''}
-                              onChange={e => onUpdateRequestDate(selectedStudent.id, req.id, 'resolved_date', e.target.value)}
-                              className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
-                            />
-                          ) : (
-                            <span>{req.resolved_date || '—'}</span>
-                          )}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 ml-auto">
-                        {onToggleRequestStatus && (
-                          <button
-                            onClick={() => onToggleRequestStatus(selectedStudent.id, req.id)}
-                            className={cn(
-                              "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
-                              req.status === 'resolved'
-                                ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
-                                : "text-amber-600 bg-amber-50 hover:bg-amber-100"
-                            )}
-                            title={req.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
-                          >
-                            {req.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
-                            {req.status}
-                          </button>
-                        )}
-                        {!onToggleRequestStatus && (
-                          <span className={cn(
-                            "text-[10px] font-bold uppercase",
-                            req.status === 'resolved' ? "text-emerald-600" : "text-amber-600"
-                          )}>
-                            {req.status}
-                          </span>
-                        )}
-                        {onEditRequest && (
-                          <button
-                            onClick={() => onEditRequest(selectedStudent.id, req.id, req.content)}
-                            className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Edit"
-                          >
-                            <Pencil size={12} />
-                          </button>
-                        )}
-                        {onDeleteRequest && (
-                          <button
-                            onClick={() => {
-                              if (confirm('Delete this request?')) onDeleteRequest(selectedStudent.id, req.id);
-                            }}
-                            className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Delete"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {(!selectedStudent.requests || selectedStudent.requests.length === 0) && (
-                  <p className="text-sm text-slate-400 italic">No requests yet.</p>
-                )}
-                <button
-                  onClick={() => onAddRequest(selectedStudent.id)}
-                  className="w-full btn-secondary text-xs py-2"
-                >
-                  + New Request
-                </button>
-              </div>
-            </div>
-
-            <div className="glass-card p-6 space-y-4">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <MessageSquare size={18} className="text-blue-500" /> 家校沟通 (Parent Comm.)
-              </h3>
-              <div className="space-y-3">
-                {selectedStudent.parent_communications?.map(comm => {
-                  const methodIcon = comm.method === 'phone' ? <Phone size={10} />
-                    : comm.method === 'wechat' ? <MessageCircle size={10} />
-                    : comm.method === 'email' ? <Mail size={10} />
-                    : comm.method === 'face-to-face' ? <Users size={10} />
-                    : <MoreHorizontal size={10} />;
-                  const methodLabel = comm.method === 'face-to-face' ? '面谈'
-                    : comm.method === 'phone' ? '电话'
-                    : comm.method === 'wechat' ? '微信'
-                    : comm.method === 'email' ? '邮件'
-                    : '其他';
-                  return (
-                    <div key={comm.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 group">
-                      {/* Header: date + method + actions */}
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                          {onUpdateParentCommDate ? (
-                            <input
-                              type="date"
-                              value={comm.date}
-                              onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'date', e.target.value)}
-                              className="text-[10px] text-slate-500 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-400 outline-none px-0.5 w-[95px]"
-                            />
-                          ) : (
-                            <span>{comm.date}</span>
-                          )}
-                        </div>
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
-                          {methodIcon} {methodLabel}
-                        </span>
-                        {comm.status === 'resolved' && comm.resolved_date && (
-                          <div className="flex items-center gap-1 text-[10px] text-emerald-500">
-                            <span>解决:</span>
-                            {onUpdateParentCommDate ? (
-                              <input
-                                type="date"
-                                value={comm.resolved_date}
-                                onChange={e => onUpdateParentCommDate(selectedStudent.id, comm.id, 'resolved_date', e.target.value)}
-                                className="text-[10px] text-emerald-500 bg-transparent border-b border-dashed border-emerald-300 focus:border-emerald-500 outline-none px-0.5 w-[95px]"
-                              />
-                            ) : (
-                              <span>{comm.resolved_date}</span>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 ml-auto">
-                          {onToggleParentCommStatus && (
-                            <button
-                              onClick={() => onToggleParentCommStatus(selectedStudent.id, comm.id)}
-                              className={cn(
-                                "flex items-center gap-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded transition-colors cursor-pointer",
-                                comm.status === 'resolved'
-                                  ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
-                                  : "text-amber-600 bg-amber-50 hover:bg-amber-100"
-                              )}
-                              title={comm.status === 'pending' ? 'Mark as resolved' : 'Mark as pending'}
-                            >
-                              {comm.status === 'resolved' ? <CheckCircle2 size={10} /> : <Circle size={10} />}
-                              {comm.status}
-                            </button>
-                          )}
-                          {onEditParentComm && (
-                            <button
-                              onClick={() => onEditParentComm(selectedStudent.id, comm)}
-                              className="p-1 text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Edit"
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          )}
-                          {onDeleteParentComm && (
-                            <button
-                              onClick={() => {
-                                if (confirm('Delete this communication record?')) onDeleteParentComm(selectedStudent.id, comm.id);
-                              }}
-                              className="p-1 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Delete"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      {/* Content */}
-                      <MarkdownRenderer content={comm.content} className="text-xs text-slate-700" />
-                      {/* Follow-up plan */}
-                      {comm.needs_follow_up && comm.follow_up_plan && (
-                        <div className="p-2 bg-amber-50 rounded-lg border border-amber-100">
-                          <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">跟进计划</p>
-                          <MarkdownRenderer content={comm.follow_up_plan} className="text-xs text-amber-700 [&_p]:m-0" />
-                        </div>
-                      )}
-                      {/* Follow-up records */}
-                      {comm.follow_ups && comm.follow_ups.length > 0 && (
-                        <div className="space-y-1.5 pl-3 border-l-2 border-blue-200">
-                          <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">跟进记录</p>
-                          {comm.follow_ups.map((fu, idx) => (
-                            <div key={idx} className="text-xs text-slate-600">
-                              <span className="text-[10px] text-slate-400 font-mono mr-2">{fu.date}</span>
-                              <MarkdownRenderer content={fu.content} className="inline-block text-xs text-slate-600 [&_p]:inline [&_p]:m-0" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {/* Add follow-up button (only for pending items with follow-up plan) */}
-                      {comm.needs_follow_up && onAddParentCommFollowUp && (
-                        <button
-                          onClick={() => onAddParentCommFollowUp(selectedStudent.id, comm.id)}
-                          className="text-[10px] font-bold text-blue-500 hover:underline"
-                        >
-                          + 追加跟进记录
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-                {(!selectedStudent.parent_communications || selectedStudent.parent_communications.length === 0) && (
-                  <p className="text-sm text-slate-400 italic">No communication records yet.</p>
-                )}
-                <button
-                  onClick={() => onAddParentComm(selectedStudent.id)}
-                  className="w-full btn-secondary text-xs py-2"
-                >
-                  + 新增沟通记录
-                </button>
-              </div>
-            </div>
-
-            <div className="glass-card p-6 space-y-4">
-              <h3 className="font-bold text-lg">Quick Actions</h3>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  onClick={() => window.location.href = `mailto:${USER_CONFIG.email}?subject=Missing ${selectedStudent.name} from ${USER_CONFIG.room}`}
-                  className="w-full py-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                >
-                  <AlertCircle size={16} /> Report Missing
-                </button>
-                <button
-                  onClick={() => handleGenerateSubjectReport(selectedStudent)}
-                  disabled={subjectReportLoading}
-                  className="w-full py-3 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-xl hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {subjectReportLoading ? <><Loader2 size={14} className="animate-spin" /> 生成中...</> : 'Generate Subject Report'}
-                </button>
-                <button
-                  onClick={() => handleGenerateParentNotes(selectedStudent)}
-                  disabled={parentNotesLoading}
-                  className="w-full py-3 bg-slate-50 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {parentNotesLoading ? <><Loader2 size={14} className="animate-spin" /> 生成中...</> : 'Parent Meeting Notes'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {subjectReportMarkdown && (
-        <ActionPlanModal
-          title="Subject Report"
-          meetingTitle={`${selectedStudent.name}${selectedStudent.chinese_name ? ` (${selectedStudent.chinese_name})` : ''}`}
-          markdown={subjectReportMarkdown}
-          onClose={() => setSubjectReportMarkdown(null)}
-        />
-      )}
-      {parentNotesMarkdown && (
-        <ActionPlanModal
-          title="Parent Meeting Notes"
-          meetingTitle={`${selectedStudent.name}${selectedStudent.chinese_name ? ` (${selectedStudent.chinese_name})` : ''}`}
-          markdown={parentNotesMarkdown}
-          onClose={() => setParentNotesMarkdown(null)}
-        />
-      )}
-      </>
+      <StudentDetailView
+        student={selectedStudent}
+        hpAwardLogs={hpAwardLogs}
+        onBack={() => onSelectStudent(null)}
+        onUpdateStudent={onUpdateStudent}
+        onDeleteStudent={onDeleteStudent}
+        onAddExamRecord={onAddExamRecord}
+        onAddStatusRecord={onAddStatusRecord}
+        onEditStatusRecord={onEditStatusRecord}
+        onDeleteStatusRecord={onDeleteStatusRecord}
+        onAddWeakness={onAddWeakness}
+        onEditWeakness={onEditWeakness}
+        onDeleteWeakness={onDeleteWeakness}
+        onAddRequest={onAddRequest}
+        onEditRequest={onEditRequest}
+        onDeleteRequest={onDeleteRequest}
+        onToggleRequestStatus={onToggleRequestStatus}
+        onUpdateRequestDate={onUpdateRequestDate}
+        onAddParentComm={onAddParentComm}
+        onEditParentComm={onEditParentComm}
+        onAddParentCommFollowUp={onAddParentCommFollowUp}
+        onDeleteParentComm={onDeleteParentComm}
+        onToggleParentCommStatus={onToggleParentCommStatus}
+        onUpdateParentCommDate={onUpdateParentCommDate}
+        onNavigateToHPHistory={onNavigateToHPHistory}
+      />
     );
   }
 
   if (selectedClass) {
-    const classStudents = students.filter(s => selectedClass.student_ids.includes(s.id));
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => onSelectClass(null)}
-            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-          >
-            <ChevronRight size={20} className="rotate-180" /> Back to Classes
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onUpdateClass(selectedClass.id)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              Edit Class
-            </button>
-            <button
-              onClick={() => {
-                if (confirm('Delete this class?')) {
-                  onDeleteClass(selectedClass.id);
-                  onSelectClass(null);
-                }
-              }}
-              className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors border border-red-100"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-
-        <div className="glass-card p-8 space-y-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900">{selectedClass.name}</h2>
-              <div className="text-slate-500 mt-1 space-y-1">
-                <p>{selectedClass.year_group}</p>
-                {selectedClass.description && (
-                  <MarkdownRenderer content={selectedClass.description} className="text-sm text-slate-500 [&_p]:m-0" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          <section className="space-y-4">
-            <h3 className="font-bold text-lg border-b border-slate-100 pb-2">学生名单 (Student List)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {classStudents.map(student => (
-                <div
-                  key={student.id}
-                  onClick={() => onSelectStudent(student.id)}
-                  className="p-4 bg-slate-50 hover:bg-white border border-slate-200 hover:border-indigo-300 rounded-xl transition-all cursor-pointer group"
-                >
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</p>
-                    <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">{student.house_points} HP • {student.weaknesses?.length || 0} Weaknesses</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      </div>
+      <ClassDetailView
+        classProfile={selectedClass}
+        students={students}
+        onBack={() => onSelectClass(null)}
+        onUpdateClass={onUpdateClass}
+        onDeleteClass={onDeleteClass}
+        onSelectStudent={(id) => onSelectStudent(id)}
+      />
     );
   }
+
 
   return (
     <div className="space-y-6">

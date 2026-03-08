@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Student } from '../types';
 import { RichTextEditor } from './RichTextEditor';
@@ -10,7 +10,7 @@ interface StudentFormProps {
   onCancel: () => void;
 }
 
-export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => {
+export const StudentForm = memo(function StudentForm({ student, onSave, onCancel }: StudentFormProps) {
   const [formData, setFormData] = useState<Omit<Student, 'id'>>({
     name: '',
     chinese_name: '',
@@ -38,6 +38,12 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
     }
   }, [student]);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (student) {
@@ -59,7 +65,7 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
           <h2 className="text-2xl font-bold text-slate-900">
             {student ? 'Edit Student' : 'Add New Student'}
           </h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={24} className="text-slate-500" />
           </button>
         </div>
@@ -223,4 +229,4 @@ export const StudentForm = ({ student, onSave, onCancel }: StudentFormProps) => 
       </div>
     </div>
   );
-};
+});

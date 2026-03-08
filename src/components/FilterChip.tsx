@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { memo, ReactNode } from 'react';
 import { cn } from '../lib/utils';
 
 type FilterChipTone = 'indigo' | 'teal' | 'emerald' | 'violet' | 'rose';
@@ -27,7 +27,7 @@ interface FilterChipProps {
   className?: string;
 }
 
-export function FilterChip({
+export const FilterChip = memo(function FilterChip({
   active,
   onClick,
   children,
@@ -51,4 +51,4 @@ export function FilterChip({
       {children}
     </button>
   );
-}
+});

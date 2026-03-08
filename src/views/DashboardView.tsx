@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb, CheckSquare, Inbox, Rocket } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
@@ -77,12 +78,39 @@ export const DashboardView = ({
   students,
   onNavigate,
 }: DashboardViewProps) => {
-  const pendingRequests = students.reduce((sum, s) => sum + (s.requests?.filter(r => r.status === 'pending').length || 0), 0);
-  const pendingComms = students.reduce((sum, s) => sum + (s.parent_communications?.filter(c => c.status === 'pending').length || 0), 0);
-  const upcomingSchoolEvents = schoolEvents
-    .filter(event => !isSchoolEventPast(event))
-    .sort(compareSchoolEventsUpcoming)
-    .slice(0, 3);
+  const pendingRequests = useMemo(() => students.reduce((sum, s) => sum + (s.requests?.filter(r => r.status === 'pending').length || 0), 0), [students]);
+  const pendingComms = useMemo(() => students.reduce((sum, s) => sum + (s.parent_communications?.filter(c => c.status === 'pending').length || 0), 0), [students]);
+
+  const activeGoals = useMemo(() => goals.filter(g => g.status === 'in-progress').slice(0, 2), [goals]);
+
+  const activeProjects = useMemo(() => projects.filter(p => p.status === 'active'), [projects]);
+
+  const inboxCount = useMemo(() => tasks.filter(t => t.status === 'inbox').length, [tasks]);
+
+  const nextTasks = useMemo(() => {
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    return tasks
+      .filter(t => t.status === 'next')
+      .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+      .slice(0, 3);
+  }, [tasks]);
+
+  const recentUpdates = useMemo(() => {
+    const items: UpdateItem[] = [
+      ...workLogs.map(log => ({ type: 'worklog' as const, id: log.id, time: log.timestamp, content: log.content, category: log.category })),
+      ...ideas.filter(i => i.show_on_dashboard).map(idea => ({ type: 'idea' as const, id: idea.id, time: idea.created_at, content: idea.content, title: idea.title })),
+    ];
+    items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    return items.slice(0, 5);
+  }, [workLogs, ideas]);
+
+  const upcomingSchoolEvents = useMemo(
+    () => schoolEvents
+      .filter(event => !isSchoolEventPast(event))
+      .sort(compareSchoolEventsUpcoming)
+      .slice(0, 3),
+    [schoolEvents]
+  );
 
   return (
     <div className="space-y-8">
@@ -254,7 +282,7 @@ export const DashboardView = ({
               <button onClick={() => onNavigate('goals')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
             </div>
             <div className="space-y-3">
-              {goals.filter(g => g.status === 'in-progress').slice(0, 2).map(goal => (
+              {activeGoals.map(goal => (
                 <div key={goal.id} className="space-y-2">
                   <div className="flex justify-between text-[10px] font-bold">
                     <span className="text-slate-600">{goal.title}</span>
@@ -334,14 +362,14 @@ export const DashboardView = ({
       </section>
 
       {/* ── Projects Section ── */}
-      {projects.filter(p => p.status === 'active').length > 0 && (
+      {activeProjects.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 rounded-full bg-purple-500" />
             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Projects</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.filter(p => p.status === 'active').map(project => {
+            {activeProjects.map(project => {
               const taskCount = tasks.filter(t => t.project_id === project.id && t.status !== 'done').length;
               return (
                 <button
@@ -377,26 +405,20 @@ export const DashboardView = ({
               <h4 className="font-bold text-slate-900 flex items-center gap-2">
                 <CheckSquare size={16} className="text-cyan-600" />
                 GTD Tasks
-                {tasks.filter(t => t.status === 'inbox').length > 0 && (
+                {inboxCount > 0 && (
                   <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                     <Inbox size={9} />
-                    {tasks.filter(t => t.status === 'inbox').length}
+                    {inboxCount}
                   </span>
                 )}
               </h4>
               <button onClick={() => onNavigate('tasks')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
             </div>
             <div className="space-y-2">
-              {(() => {
-                const priorityOrder = { high: 0, medium: 1, low: 2 };
-                const nextTasks = tasks
-                  .filter(t => t.status === 'next')
-                  .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
-                  .slice(0, 3);
-                if (nextTasks.length === 0) {
-                  return <p className="text-xs text-slate-400 italic">No next actions. Check your inbox!</p>;
-                }
-                return nextTasks.map(task => (
+              {nextTasks.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">No next actions. Check your inbox!</p>
+              ) : (
+                nextTasks.map(task => (
                   <div key={task.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className={cn("w-1.5 h-full min-h-[24px] rounded-full flex-shrink-0",
                       task.priority === 'high' ? "bg-red-500" : task.priority === 'medium' ? "bg-amber-500" : "bg-blue-400"
@@ -410,8 +432,8 @@ export const DashboardView = ({
                       )}
                     </div>
                   </div>
-                ));
-              })()}
+                ))
+              )}
             </div>
           </div>
 
@@ -422,13 +444,7 @@ export const DashboardView = ({
               <button onClick={() => onNavigate('worklogs')} className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
             </div>
             <div className="space-y-3">
-              {(() => {
-                const items: UpdateItem[] = [
-                  ...workLogs.map(log => ({ type: 'worklog' as const, id: log.id, time: log.timestamp, content: log.content, category: log.category })),
-                  ...ideas.filter(i => i.show_on_dashboard).map(idea => ({ type: 'idea' as const, id: idea.id, time: idea.created_at, content: idea.content, title: idea.title })),
-                ];
-                items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-                return items.slice(0, 5).map(item => (
+              {recentUpdates.map(item => (
                   <div key={`${item.type}-${item.id}`} className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className={cn(
                       "w-1 h-auto rounded-full flex-shrink-0",
@@ -455,8 +471,7 @@ export const DashboardView = ({
                       <p className="text-[10px] text-slate-400 mt-0.5">{item.time}</p>
                     </div>
                   </div>
-                ));
-              })()}
+                ))}
             </div>
           </div>
         </div>

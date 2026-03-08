@@ -5,19 +5,12 @@ import { LinkRow } from '../../components/LinkRow';
 import { useDetailSheetKeyboard } from '../../hooks/useDetailSheetKeyboard';
 import { getEffectivePayhipPipeline, getNextPayhipAction, getPayhipHealthAlerts, hasPayhipHealthAutoFix, isPayhipPipelineStageLocked, PAYHIP_STATUS_LABELS, PayhipHealthKey } from '../../lib/payhipUtils';
 import { cn, formatDate } from '../../lib/utils';
+import { PAYHIP_STATUS_STYLES_HOVER } from '../../lib/statusColors';
 import { PAYHIP_PIPELINE_STAGES, PayhipItem, PayhipPipelineStage, PayhipStatus } from '../../types';
 
 const PAYHIP_LINK_COLOR = 'text-emerald-600 hover:text-emerald-700';
 
 const STATUS_ORDER: PayhipStatus[] = ['planned', 'presale', 'live', 'free_sample_live', 'archived'];
-
-const STATUS_STYLES: Record<PayhipStatus, string> = {
-  planned: 'bg-slate-100 text-slate-500 hover:bg-slate-200',
-  presale: 'bg-amber-50 text-amber-700 hover:bg-amber-100',
-  live: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
-  archived: 'bg-slate-200 text-slate-600 hover:bg-slate-300',
-  free_sample_live: 'bg-sky-50 text-sky-700 hover:bg-sky-100',
-};
 
 export interface PayhipDetailSheetProps {
   item: PayhipItem | null;
@@ -194,7 +187,7 @@ function PayhipDetailContent({
               onClick={() => setDraftStatus(status)}
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-bold transition',
-                STATUS_STYLES[status],
+                PAYHIP_STATUS_STYLES_HOVER[status],
                 draftStatus === status && 'ring-2 ring-offset-2 ring-emerald-200',
               )}
             >

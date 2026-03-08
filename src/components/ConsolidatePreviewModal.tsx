@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getPriorityPillColor } from '../lib/statusColors';
 import { Idea } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -11,11 +12,17 @@ interface ConsolidatePreviewModalProps {
   onCancel: () => void;
 }
 
-export const ConsolidatePreviewModal = ({ result, selectedCount, onConfirm, onCancel }: ConsolidatePreviewModalProps) => {
+export const ConsolidatePreviewModal = memo(function ConsolidatePreviewModal({ result, selectedCount, onConfirm, onCancel }: ConsolidatePreviewModalProps) {
   const [title, setTitle] = useState(result.title);
   const [content, setContent] = useState(result.content);
   const [category, setCategory] = useState<Idea['category']>(result.category);
   const [priority, setPriority] = useState<Idea['priority']>(result.priority);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,9 +94,7 @@ export const ConsolidatePreviewModal = ({ result, selectedCount, onConfirm, onCa
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
                       priority === p
-                        ? p === 'high' ? "bg-red-50 border-red-200 text-red-600"
-                          : p === 'medium' ? "bg-amber-50 border-amber-200 text-amber-600"
-                          : "bg-blue-50 border-blue-200 text-blue-600"
+                        ? getPriorityPillColor(p)
                         : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                     )}
                   >
@@ -120,4 +125,4 @@ export const ConsolidatePreviewModal = ({ result, selectedCount, onConfirm, onCa
       </div>
     </div>
   );
-};
+});

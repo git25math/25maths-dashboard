@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -9,10 +9,16 @@ interface ConsolidateSOPPreviewModalProps {
   onCancel: () => void;
 }
 
-export const ConsolidateSOPPreviewModal = ({ result, selectedCount, onConfirm, onCancel }: ConsolidateSOPPreviewModalProps) => {
+export const ConsolidateSOPPreviewModal = memo(function ConsolidateSOPPreviewModal({ result, selectedCount, onConfirm, onCancel }: ConsolidateSOPPreviewModalProps) {
   const [title, setTitle] = useState(result.title);
   const [content, setContent] = useState(result.content);
   const [category, setCategory] = useState(result.category);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,4 +90,4 @@ export const ConsolidateSOPPreviewModal = ({ result, selectedCount, onConfirm, o
       </div>
     </div>
   );
-};
+});

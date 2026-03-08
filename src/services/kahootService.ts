@@ -23,10 +23,10 @@ export const kahootService = {
     }
   },
 
-  async create(item: Omit<KahootItem, 'id'>): Promise<KahootItem> {
+  async create(item: Omit<KahootItem, 'id'> & { id?: string }): Promise<KahootItem> {
     const newItem: KahootItem = {
       ...item,
-      id: genId(),
+      id: item.id || genId(),
     };
 
     if (!isSupabaseConfigured) return newItem;

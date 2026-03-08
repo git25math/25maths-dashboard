@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Library, Plus, Trash2 } from 'lucide-react';
 import { PrepResource } from '../types';
 import { PREP_RESOURCE_KIND_OPTIONS, RESOURCE_TEMPLATE_KINDS, emptyPrepResource, isPrepResourceFilled } from '../lib/prepResourceCatalog';
@@ -12,14 +12,14 @@ interface ResourceBankEditorProps {
   templateKinds?: Array<NonNullable<PrepResource['kind']>>;
 }
 
-export const ResourceBankEditor = ({
+export const ResourceBankEditor = memo(function ResourceBankEditor({
   label,
   resources,
   onChange,
   emptyText,
   description,
   templateKinds = RESOURCE_TEMPLATE_KINDS,
-}: ResourceBankEditorProps) => {
+}: ResourceBankEditorProps) {
   const addResource = (kind: NonNullable<PrepResource['kind']> = 'link') => {
     onChange([...(resources || []), emptyPrepResource(kind)]);
   };
@@ -114,4 +114,4 @@ export const ResourceBankEditor = ({
       </div>
     </section>
   );
-};
+});

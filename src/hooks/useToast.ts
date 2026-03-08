@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export interface Toast {
   id: number;
@@ -6,17 +6,25 @@ export interface Toast {
   type: 'success' | 'error' | 'info';
 }
 
-let nextId = 0;
-
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextIdRef = useRef(0);
+  const timersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(t => clearTimeout(t));
+    };
+  }, []);
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'info') => {
-    const id = nextId++;
+    const id = nextIdRef.current++;
     setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
+      timersRef.current.delete(timer);
     }, 3000);
+    timersRef.current.add(timer);
   }, []);
 
   const toast = {

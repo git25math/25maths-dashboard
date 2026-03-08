@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { SOP } from '../types';
 import { RichTextEditor } from './RichTextEditor';
@@ -9,10 +9,16 @@ interface SOPFormProps {
   onCancel: () => void;
 }
 
-export const SOPForm = ({ sop, onSave, onCancel }: SOPFormProps) => {
+export const SOPForm = memo(function SOPForm({ sop, onSave, onCancel }: SOPFormProps) {
   const [title, setTitle] = useState(sop?.title || '');
   const [category, setCategory] = useState(sop?.category || 'General');
   const [content, setContent] = useState(sop?.content || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,4 +81,4 @@ export const SOPForm = ({ sop, onSave, onCancel }: SOPFormProps) => {
       </div>
     </div>
   );
-};
+});

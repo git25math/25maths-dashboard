@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Project } from '../types';
 import { cn } from '../lib/utils';
@@ -21,13 +21,19 @@ const STATUS_OPTIONS: { value: Project['status']; label: string; color: string }
   { value: 'completed', label: 'Completed', color: 'bg-slate-100 text-slate-600 border-slate-200' },
 ];
 
-export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => {
+export const ProjectForm = memo(function ProjectForm({ project, onSave, onCancel }: ProjectFormProps) {
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
   const [color, setColor] = useState(project?.color || PRESET_COLORS[0]);
   const [status, setStatus] = useState<Project['status']>(project?.status || 'active');
   const [url, setUrl] = useState(project?.url || '');
   const [repoUrl, setRepoUrl] = useState(project?.repo_url || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +53,7 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-4 sm:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h2 className="text-2xl font-bold text-slate-900">{project ? 'Edit Project' : 'New Project'}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={24} className="text-slate-500" />
           </button>
         </div>
@@ -152,4 +158,4 @@ export const ProjectForm = ({ project, onSave, onCancel }: ProjectFormProps) => 
       </div>
     </div>
   );
-};
+});

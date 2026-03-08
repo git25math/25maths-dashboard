@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { WorkLog } from '../types';
@@ -18,10 +18,16 @@ const CATEGORIES: { value: WorkLog['category']; label: string }[] = [
   { value: 'other', label: 'Other' },
 ];
 
-export const WorkLogForm = ({ workLog, onSave, onCancel }: WorkLogFormProps) => {
+export const WorkLogForm = memo(function WorkLogForm({ workLog, onSave, onCancel }: WorkLogFormProps) {
   const [content, setContent] = useState(workLog?.content || '');
   const [category, setCategory] = useState<WorkLog['category']>(workLog?.category || 'teaching');
   const [tagInput, setTagInput] = useState(workLog?.tags?.join(', ') || '');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,4 +98,4 @@ export const WorkLogForm = ({ workLog, onSave, onCancel }: WorkLogFormProps) => 
       </div>
     </div>
   );
-};
+});

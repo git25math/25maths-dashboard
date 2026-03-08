@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { X, CheckCircle2, Plus, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -18,18 +18,30 @@ function matchSyllabusEntry(entry: string, units: TeachingUnit[], yearGroup: str
   return units.find(u => u.year_group === yearGroup && isTeachingUnitSyllabusMatch(entry, u));
 }
 
-export const SyllabusModal = ({ isOpen, onClose, teachingUnits, onNavigateToUnit, onCreateUnit }: SyllabusModalProps) => {
+export const SyllabusModal = memo(function SyllabusModal({ isOpen, onClose, teachingUnits, onNavigateToUnit, onCreateUnit }: SyllabusModalProps) {
   const [selectedYear, setSelectedYear] = useState<string>('Year 7');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
 
   const yearEntries = SYLLABUS[selectedYear] || [];
 
   // Compute coverage for each entry
-  const entryCoverage = yearEntries.map(entry => ({
-    entry,
-    matchedUnit: matchSyllabusEntry(entry, teachingUnits, selectedYear),
-  }));
+  const entryCoverage = useMemo(
+    () => yearEntries.map(entry => ({
+      entry,
+      matchedUnit: matchSyllabusEntry(entry, teachingUnits, selectedYear),
+    })),
+    [yearEntries, teachingUnits, selectedYear],
+  );
 
-  const coveredCount = entryCoverage.filter(e => e.matchedUnit).length;
+  const coveredCount = useMemo(
+    () => entryCoverage.filter(e => e.matchedUnit).length,
+    [entryCoverage],
+  );
   const totalEntries = yearEntries.length;
   const coveragePct = totalEntries > 0 ? Math.round((coveredCount / totalEntries) * 100) : 0;
 
@@ -48,7 +60,7 @@ export const SyllabusModal = ({ isOpen, onClose, teachingUnits, onNavigateToUnit
                 <h3 className="text-xl font-bold text-slate-900">Curriculum Syllabus</h3>
                 <p className="text-sm text-slate-500">Browse units by year group &middot; Click to navigate or create</p>
               </div>
-              <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+              <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
                 <X size={20} className="text-slate-500" />
               </button>
             </div>
@@ -188,4 +200,4 @@ export const SyllabusModal = ({ isOpen, onClose, teachingUnits, onNavigateToUnit
       )}
     </AnimatePresence>
   );
-};
+});

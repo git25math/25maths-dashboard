@@ -1,6 +1,5 @@
 import { TeachingUnit, LearningObjective } from '../types';
-
-const genId = () => Math.random().toString(36).substr(2, 9);
+import { randomAlphaId } from './id';
 
 /**
  * Normalize a TeachingUnit:
@@ -34,7 +33,7 @@ export function normalizeTeachingUnit(raw: any): TeachingUnit {
     // Old format: objectives is string[]
     const oldObjectives: string[] = su.objectives || [];
     const newLOs: LearningObjective[] = oldObjectives.map((text: string) => ({
-      id: genId(),
+      id: randomAlphaId(),
       objective: text,
       status: 'not_started' as const,
       periods: 1,

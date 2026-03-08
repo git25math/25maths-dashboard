@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, Mail, FileText, Settings, GraduationCap, Rocket } from 'lucide-react';
 import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry, Task, EmailDigest, EventTimeMode, Project } from '../types';
 
@@ -165,7 +165,7 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
   }
 }
 
-export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
+export const GlobalSearch = memo(function GlobalSearch({ data, onNavigate }: GlobalSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -245,7 +245,7 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
           <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-slate-400 bg-slate-100 rounded-md">
             ESC
           </kbd>
-          <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <button onClick={() => setIsOpen(false)} aria-label="Close search" className="text-slate-400 hover:text-slate-600">
             <X size={18} />
           </button>
         </div>
@@ -299,4 +299,4 @@ export const GlobalSearch = ({ data, onNavigate }: GlobalSearchProps) => {
       </div>
     </div>
   );
-};
+});

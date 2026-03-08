@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { X, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getPriorityPillColor } from '../lib/statusColors';
 import { SmartTaskPreview, Task } from '../types';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -25,13 +26,19 @@ interface SmartExtractModalProps {
   onCancel: () => void;
 }
 
-export const SmartExtractModal = ({ tasks: initialTasks, meetingId, onConfirm, onCancel }: SmartExtractModalProps) => {
+export const SmartExtractModal = memo(function SmartExtractModal({ tasks: initialTasks, meetingId, onConfirm, onCancel }: SmartExtractModalProps) {
   const [tasks, setTasks] = useState<(SmartTaskPreview & { enabled: boolean })[]>(
     initialTasks.map(t => ({ ...t, enabled: true }))
   );
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   const enabledCount = tasks.filter(t => t.enabled).length;
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const toggleEnabled = (idx: number) => {
     setTasks(prev => prev.map((t, i) => i === idx ? { ...t, enabled: !t.enabled } : t));
@@ -144,9 +151,7 @@ export const SmartExtractModal = ({ tasks: initialTasks, meetingId, onConfirm, o
                             className={cn(
                               "px-2 py-1 rounded-lg text-xs font-bold border transition-all flex-1",
                               task.priority === p
-                                ? p === 'high' ? "bg-red-50 border-red-200 text-red-600"
-                                  : p === 'medium' ? "bg-amber-50 border-amber-200 text-amber-600"
-                                  : "bg-blue-50 border-blue-200 text-blue-600"
+                                ? getPriorityPillColor(p)
                                 : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                             )}
                           >
@@ -205,4 +210,4 @@ export const SmartExtractModal = ({ tasks: initialTasks, meetingId, onConfirm, o
       </div>
     </div>
   );
-};
+});

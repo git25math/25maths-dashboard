@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { ClassProfile, TeachingUnit } from '../types';
 import { YEAR_GROUPS, NON_TEACHING_GROUPS } from '../shared/constants';
@@ -12,7 +12,7 @@ interface ClassFormProps {
   onCancel: () => void;
 }
 
-export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: ClassFormProps) => {
+export const ClassForm = memo(function ClassForm({ classProfile, teachingUnits, onSave, onCancel }: ClassFormProps) {
   const sortedTeachingUnits = sortTeachingUnits(teachingUnits);
   const [formData, setFormData] = useState<Omit<ClassProfile, 'id'>>({
     name: '',
@@ -28,6 +28,12 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
       setFormData(rest);
     }
   }, [classProfile]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +51,7 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
           <h2 className="text-2xl font-bold text-slate-900">
             {classProfile ? 'Edit Class' : 'Add New Class'}
           </h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onCancel} aria-label="Close" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X size={24} className="text-slate-500" />
           </button>
         </div>
@@ -120,4 +126,4 @@ export const ClassForm = ({ classProfile, teachingUnits, onSave, onCancel }: Cla
       </div>
     </div>
   );
-};
+});
