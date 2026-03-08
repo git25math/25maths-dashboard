@@ -1057,6 +1057,45 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - 全部 31 新文件 + 5 修改文件，TypeScript 0 error，Vite build 通过
 - **新增文件（31）**: `src/views/papers/` (11) + `src/views/covers/` (11) + `src/services/` (2) + `scripts/` (2) + `public/data/` (2) + types (3)
 
+### Phase 30h — Architecture & Performance Optimization (2026-03-09) ✅
+
+- **性能基线**: 主包体积从 3,584 KB 降至 2,160 KB (gzip 316 KB)，减少 **40%**
+- **P0 — 内存泄漏与回调级联修复**:
+  - `useToast`: setTimeout 泄漏修复（Set ref 追踪 + unmount 清理）
+  - 4 个 hooks 引入 `useRef` 模式消除数组依赖级联重建（useStudentActions / useTeachingActions / useKahootActions / usePayhipActions），30+ useCallback 移除数组 deps
+- **P1 — useMemo 计算缓存**:
+  - 为 DashboardView / TasksView / StudentsView / MeetingsView / ProjectsView / SchoolEventsView 等添加 useMemo 缓存派生数据
+  - `useHubNavigation`: navigationIds 缓存
+  - ProjectsView: `taskCountByProject` Map 替代 O(n²) 内联 filter
+- **P2 — 代码重复消除**:
+  - 新建 `lib/statusColors.ts` 替换 7 处状态颜色重复定义
+  - 合并 `formatDateKey` 和 `genId` 重复实现
+  - 清除 `MOCK_PROJECTS` 等无用导出
+  - `SubUnitForm` genId → 统一 `randomAlphaId`
+- **P3 — React.memo 覆盖**: 77 个组件文件已包裹 memo()
+- **P4 — 可访问性**: 12 个组件添加 aria-label，19 个 modal/form 添加 Escape 关闭
+- **P5 — 微优化**: RichTextEditor toolbar 常量提取、useLocalStorage 跳过冗余 setItem
+- **Bundle 分包优化**:
+  - Vite `manualChunks` 配置 6 个 vendor chunk（supabase / tiptap / motion / date-fns / katex / markdown）
+  - 20 个视图全部懒加载（含 Dashboard / Students / Teaching / Tasks）
+  - 移除无用 `recharts` 依赖
+- **组件拆分（4 大视图 → 20+ 子组件）**:
+  - `StudentsView` 1,226→486 行 + StudentDetailView(7 子组件) + ClassDetailView
+  - `CalendarView` 868→166 行 + 7 文件（calendarUtils / DndWrappers / EntryCard / DaySchedule / MonthGrid / QuickAddForm / MobileDateStrip）
+  - `MeetingsView` 903→181 行 + 6 文件（MeetingDetail / MeetingCard / NewMeetingForm / AISummaryPanel / RelatedTasksPanel / constants）
+  - `TeachingView` 1,470→270 行 + 5 文件（UnitDetailView / SubUnitDetailView / YearGroupsOverview / YearGroupUnitsView / helpers）
+  - `App.tsx` 905→215 行 + ViewRouter(511 行)
+  - `TimetableEntryForm` 793→314 行 + 8 子组件
+  - `SubUnitForm` 956→596 行 + 5 子组件
+  - `StudentDetailView` 779→200 行 + 7 子组件
+  - `PayhipLibrary` 702→纯编排器 + 8 子组件
+- **Hooks 拆分**:
+  - `useAppData` 1,295→645 行 + useStudentActions(460) + useTeachingActions(335)
+  - `useProductivityActions` 539→75 行组合器 + 9 个领域 hook
+- **Services 拆分**:
+  - `geminiService` 1,021→30 行门面 + 5 个领域服务（student / meeting / teaching / productivity / paper）
+- **产出统计**: 204 个源文件，31,622 行代码（不含数据常量），TypeScript 0 error
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
