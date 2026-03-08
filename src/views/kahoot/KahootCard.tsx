@@ -1,6 +1,6 @@
 import { ExternalLink, Gamepad2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { KahootBoard, KahootItem, KahootOrgType, KahootTrack, KahootUploadStatus } from '../../types';
+import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipeline, KahootTrack } from '../../types';
 
 const BOARD_LABELS: Record<KahootBoard, string> = {
   cie0580: 'CIE 0580',
@@ -20,23 +20,23 @@ const ORG_LABELS: Record<KahootOrgType, string> = {
   in_channel: 'In Channel',
 };
 
-const STATUS_CONFIG: Record<KahootUploadStatus, { label: string; dot: string; text: string }> = {
-  ai_generated:    { label: 'AI Generated',  dot: 'bg-slate-300',   text: 'text-slate-400' },
-  human_review:    { label: 'Reviewed',      dot: 'bg-amber-400',   text: 'text-amber-600' },
-  excel_exported:  { label: 'Excel Ready',   dot: 'bg-blue-400',    text: 'text-blue-600' },
-  kahoot_uploaded: { label: 'Uploaded',       dot: 'bg-indigo-400',  text: 'text-indigo-600' },
-  web_verified:    { label: 'Verified',       dot: 'bg-teal-400',    text: 'text-teal-600' },
-  published:       { label: 'Published',      dot: 'bg-emerald-500', text: 'text-emerald-600' },
-};
-
-function StatusDot({ status }: { status: KahootUploadStatus }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.ai_generated;
-  return <span className={cn('inline-block w-2.5 h-2.5 rounded-full', cfg.dot)} />;
-}
-
-function StatusLabel({ status }: { status: KahootUploadStatus }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.ai_generated;
-  return <span className={cn('font-semibold', cfg.text)}>{cfg.label}</span>;
+function PipelineDots({ pipeline }: { pipeline?: KahootPipeline }) {
+  if (!pipeline) return null;
+  const doneCount = Object.values(pipeline).filter(Boolean).length;
+  return (
+    <span className="inline-flex items-center gap-1" title={`${doneCount}/${KAHOOT_PIPELINE_STAGES.length} stages done`}>
+      {KAHOOT_PIPELINE_STAGES.map(s => (
+        <span
+          key={s.key}
+          className={cn(
+            'w-2 h-2 rounded-full',
+            pipeline[s.key] ? 'bg-emerald-500' : 'bg-slate-200',
+          )}
+          title={`${s.label}: ${pipeline[s.key] ? 'Done' : 'Pending'}`}
+        />
+      ))}
+    </span>
+  );
 }
 
 interface KahootCardProps {
@@ -94,10 +94,7 @@ export function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
 
           {/* Status + counts + links */}
           <div className="flex items-center gap-4 text-xs">
-            <span className="inline-flex items-center gap-1.5">
-              <StatusDot status={item.upload_status} />
-              <StatusLabel status={item.upload_status} />
-            </span>
+            <PipelineDots pipeline={item.pipeline} />
 
             <span className="text-slate-400">{item.questions.length} Qs</span>
 

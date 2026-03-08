@@ -42,6 +42,17 @@ export type KahootTimeLimit = 5 | 10 | 20 | 30 | 60 | 90 | 120;
 export type KahootCorrectOption = 'A' | 'B' | 'C' | 'D';
 export type KahootOrgType = 'standalone' | 'in_course' | 'in_channel';
 
+export type KahootPipelineStage = 'ai_generated' | 'reviewed' | 'excel_exported' | 'kahoot_uploaded' | 'web_verified' | 'published';
+
+export const KAHOOT_PIPELINE_STAGES: { key: KahootPipelineStage; label: string }[] = [
+  { key: 'ai_generated', label: 'AI Generated' },
+  { key: 'reviewed', label: 'Reviewed' },
+  { key: 'excel_exported', label: 'Excel Exported' },
+  { key: 'kahoot_uploaded', label: 'Uploaded' },
+  { key: 'web_verified', label: 'Verified' },
+  { key: 'published', label: 'Published' },
+];
+
 export interface KahootQuestion {
   id: string;
   prompt: string;
@@ -51,6 +62,15 @@ export interface KahootQuestion {
   option_d: string;
   correct_option: KahootCorrectOption;
   time_limit: KahootTimeLimit;
+}
+
+export interface KahootPipeline {
+  ai_generated: boolean;
+  reviewed: boolean;
+  excel_exported: boolean;
+  kahoot_uploaded: boolean;
+  web_verified: boolean;
+  published: boolean;
 }
 
 export interface KahootItem {
@@ -68,6 +88,7 @@ export interface KahootItem {
   listing_path?: string;
   tags: string[];
   upload_status: KahootUploadStatus;
+  pipeline: KahootPipeline;
   questions: KahootQuestion[];
   review_notes?: string;
   org_type?: KahootOrgType;

@@ -1,14 +1,25 @@
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Check, Search, X } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
 import { cn } from '../../lib/utils';
-import { KahootBoard, KahootItem, KahootOrgType, KahootTrack, KahootUploadStatus } from '../../types';
+import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipelineStage, KahootTrack } from '../../types';
 import { KahootCard } from './KahootCard';
 
 type BoardFilter = 'all' | KahootBoard;
 type TrackFilter = 'all' | KahootTrack;
-type StatusFilter = 'all' | KahootUploadStatus;
 type OrgFilter = 'all' | KahootOrgType;
+
+// null = no filter, true = done, false = not done
+type PipelineFilter = Record<KahootPipelineStage, boolean | null>;
+
+const INITIAL_PIPELINE_FILTER: PipelineFilter = {
+  ai_generated: null,
+  reviewed: null,
+  excel_exported: null,
+  kahoot_uploaded: null,
+  web_verified: null,
+  published: null,
+};
 
 const BOARD_OPTIONS: { key: BoardFilter; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -22,16 +33,6 @@ const TRACK_OPTIONS: { key: TrackFilter; label: string }[] = [
   { key: 'extended', label: 'Extended' },
   { key: 'foundation', label: 'Foundation' },
   { key: 'higher', label: 'Higher' },
-];
-
-const STATUS_OPTIONS: { key: StatusFilter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'ai_generated', label: 'AI Generated' },
-  { key: 'human_review', label: 'Reviewed' },
-  { key: 'excel_exported', label: 'Excel Ready' },
-  { key: 'kahoot_uploaded', label: 'Uploaded' },
-  { key: 'web_verified', label: 'Verified' },
-  { key: 'published', label: 'Published' },
 ];
 
 const ORG_OPTIONS: { key: OrgFilter; label: string }[] = [
@@ -66,22 +67,53 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>(INITIAL_PIPELINE_FILTER);
   const [orgFilter, setOrgFilter] = useState<OrgFilter>('all');
 
-  const stats = useMemo(() => ({
-    total: items.length,
-    published: items.filter(i => i.upload_status === 'published').length,
-    uploaded: items.filter(i => i.upload_status === 'kahoot_uploaded' || i.upload_status === 'web_verified').length,
-    inProgress: items.filter(i => i.upload_status === 'ai_generated' || i.upload_status === 'human_review' || i.upload_status === 'excel_exported').length,
-  }), [items]);
+  const togglePipeline = (stage: KahootPipelineStage) => {
+    setPipelineFilter(prev => {
+      const current = prev[stage];
+      // cycle: null -> true (done) -> false (not done) -> null
+      const next = current === null ? true : current === true ? false : null;
+      return { ...prev, [stage]: next };
+    });
+  };
+
+  const pipelineStats = useMemo(() => {
+    const result: Record<KahootPipelineStage, number> = {
+      ai_generated: 0, reviewed: 0, excel_exported: 0,
+      kahoot_uploaded: 0, web_verified: 0, published: 0,
+    };
+    for (const item of items) {
+      const p = item.pipeline;
+      if (p) {
+        for (const key of Object.keys(result) as KahootPipelineStage[]) {
+          if (p[key]) result[key]++;
+        }
+      }
+    }
+    return result;
+  }, [items]);
+
+  const completedCount = useMemo(
+    () => items.filter(i => i.pipeline && Object.values(i.pipeline).every(Boolean)).length,
+    [items],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return items
       .filter(i => boardFilter === 'all' || i.board === boardFilter)
       .filter(i => trackFilter === 'all' || i.track === trackFilter)
-      .filter(i => statusFilter === 'all' || i.upload_status === statusFilter)
+      .filter(i => {
+        const p = i.pipeline;
+        if (!p) return true;
+        for (const [stage, value] of Object.entries(pipelineFilter) as [KahootPipelineStage, boolean | null][]) {
+          if (value === null) continue;
+          if (p[stage] !== value) return false;
+        }
+        return true;
+      })
       .filter(i => orgFilter === 'all' || (i.org_type ?? 'standalone') === orgFilter)
       .filter(i => {
         if (!q) return true;
@@ -89,16 +121,16 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           .join(' ').toLowerCase().includes(q);
       })
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-  }, [items, boardFilter, trackFilter, statusFilter, orgFilter, search]);
+  }, [items, boardFilter, trackFilter, pipelineFilter, orgFilter, search]);
 
   return (
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total" value={stats.total} />
-        <StatCard label="Published" value={stats.published} tone="text-emerald-600" />
-        <StatCard label="Uploaded" value={stats.uploaded} tone="text-indigo-600" />
-        <StatCard label="In Progress" value={stats.inProgress} tone="text-amber-600" />
+        <StatCard label="Total" value={items.length} />
+        <StatCard label="All Done" value={completedCount} tone="text-emerald-600" />
+        <StatCard label="Published" value={pipelineStats.published} tone="text-indigo-600" />
+        <StatCard label="AI Generated" value={pipelineStats.ai_generated} tone="text-sky-600" />
       </div>
 
       {/* Filters */}
@@ -121,13 +153,32 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Status</span>
-          {STATUS_OPTIONS.map(o => (
-            <FilterChip key={o.key} active={statusFilter === o.key} onClick={() => setStatusFilter(o.key)} tone="emerald">
-              {o.label}
-            </FilterChip>
-          ))}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Pipeline</span>
+          {KAHOOT_PIPELINE_STAGES.map(s => {
+            const val = pipelineFilter[s.key];
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => togglePipeline(s.key)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.97]',
+                  val === true
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm'
+                    : val === false
+                      ? 'bg-rose-50 border-rose-200 text-rose-600 shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300',
+                )}
+                title={val === null ? 'Click to filter: done' : val ? 'Click to filter: not done' : 'Click to clear filter'}
+              >
+                {val === true && <Check size={12} />}
+                {val === false && <X size={12} />}
+                {s.label}
+                <span className="text-[10px] opacity-60">{pipelineStats[s.key]}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-2">

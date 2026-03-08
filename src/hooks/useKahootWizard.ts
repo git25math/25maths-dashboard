@@ -17,6 +17,10 @@ function createBlankItem(board: KahootBoard, track: KahootTrack): KahootItem {
     description: '',
     tags: [],
     upload_status: 'ai_generated',
+    pipeline: {
+      ai_generated: false, reviewed: false, excel_exported: false,
+      kahoot_uploaded: false, web_verified: false, published: false,
+    },
     questions: [],
     created_at: now,
     updated_at: now,

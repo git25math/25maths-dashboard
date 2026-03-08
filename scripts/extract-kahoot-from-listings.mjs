@@ -12,6 +12,8 @@ import path from 'path';
 const LISTING_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/payhip/presale/listing-assets/l1';
 const WORKING_CSV = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/payhip/presale/kahoot-subtopic-links-working.csv';
 const CREATOR_MANIFEST = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website/build/kahoot-import/l1-full/manifest-with-creator-urls.json';
+const WEBSITE_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-website';
+const WEBSITE_PUBLIC_ORIGIN = 'https://www.25maths.com';
 const OUTPUT_JSON = path.join(import.meta.dirname, 'output/kahoot-seed.json');
 const OUTPUT_CONST = path.join(import.meta.dirname, '../src/constants-kahoot.ts');
 
@@ -187,6 +189,111 @@ function loadCreatorLookup(filePath) {
   }
 }
 
+function loadCoverLookup(filePath) {
+  if (!fs.existsSync(filePath)) return new Map();
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return new Map(
+      raw
+        .map(row => {
+          const challengeUrl = normalizeUrl(row.payhip_kahoot_link || row.challenge_url);
+          const topicDir = String(row.topic_dir || '').trim();
+          if (!challengeUrl || !topicDir) return null;
+
+          const coverPath = path.join(topicDir, 'cover-2320x1520-kahoot-minimal.webp');
+          if (!fs.existsSync(coverPath)) return null;
+
+          const relativePath = path.relative(WEBSITE_ROOT, coverPath).replaceAll(path.sep, '/');
+          return [challengeUrl, `${WEBSITE_PUBLIC_ORIGIN}/${relativePath}`];
+        })
+        .filter(Boolean),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
+function normalizeTimeLimit(seconds) {
+  const allowed = [5, 10, 20, 30, 60, 90, 120];
+  const value = Number(seconds);
+  if (allowed.includes(value)) return value;
+  const nextSupported = allowed.find(limit => limit >= value);
+  return nextSupported || allowed.at(-1);
+}
+
+function parseTableRow(line) {
+  return line
+    .split('|')
+    .slice(1, -1)
+    .map(cell => cell.trim());
+}
+
+function parseQuestionSet(filePath, itemId) {
+  if (!fs.existsSync(filePath)) return [];
+
+  const text = fs.readFileSync(filePath, 'utf-8');
+  const timerMap = new Map();
+
+  for (const match of text.matchAll(/-\s+Q(\d+)(?:-Q?(\d+))?:\s*(\d+)s/gi)) {
+    const start = Number(match[1]);
+    const end = Number(match[2] || match[1]);
+    const timeLimit = normalizeTimeLimit(match[3]);
+
+    for (let questionNumber = start; questionNumber <= end; questionNumber += 1) {
+      timerMap.set(questionNumber, timeLimit);
+    }
+  }
+
+  return text
+    .split(/\r?\n/)
+    .filter(line => /^\|\s*\d+\s*\|/.test(line))
+    .map(line => parseTableRow(line))
+    .filter(columns => columns.length >= 8)
+    .map(columns => {
+      const questionNumber = Number(columns[0]);
+      return {
+        id: `${itemId}-q${String(questionNumber).padStart(2, '0')}`,
+        prompt: columns[1],
+        option_a: columns[2],
+        option_b: columns[3],
+        option_c: columns[4],
+        option_d: columns[5],
+        correct_option: columns[6],
+        time_limit: timerMap.get(questionNumber) || 30,
+      };
+    });
+}
+
+function loadQuestionLookup(filePath) {
+  if (!fs.existsSync(filePath)) return new Map();
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return new Map(
+      raw
+        .map(row => {
+          const challengeUrl = normalizeUrl(row.payhip_kahoot_link || row.challenge_url);
+          const topicDir = String(row.topic_dir || '').trim();
+          const topicCode = String(row.topic_code || '').trim();
+          const board = String(row.board_key || '').trim();
+          if (!challengeUrl || !topicDir || !topicCode) return null;
+
+          const track = topicCode.startsWith('C') ? 'core'
+            : topicCode.startsWith('E') ? 'extended'
+              : topicCode.startsWith('F') ? 'foundation'
+                : 'higher';
+          const itemId = topicCodeToId(board === 'cie0580' ? 'cie0580' : 'edexcel-4ma1', track, topicCode);
+          const questionSetPath = path.join(topicDir, 'kahoot-question-set.md');
+          return [challengeUrl, parseQuestionSet(questionSetPath, itemId)];
+        })
+        .filter(Boolean),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
 function topicCodeToId(board, track, topicCode) {
   // e.g. kahoot-cie0580-c1-01
   const prefix = topicCode[0].toLowerCase();
@@ -227,6 +334,12 @@ console.log(`Loaded ${existingSeed.size} existing seed items`);
 const creatorLookup = loadCreatorLookup(CREATOR_MANIFEST);
 console.log(`Loaded ${creatorLookup.size} creator links`);
 
+const coverLookup = loadCoverLookup(CREATOR_MANIFEST);
+console.log(`Loaded ${coverLookup.size} cover URLs`);
+
+const questionLookup = loadQuestionLookup(CREATOR_MANIFEST);
+console.log(`Loaded ${questionLookup.size} question sets`);
+
 const now = new Date().toISOString();
 const items = [];
 
@@ -237,6 +350,8 @@ for (const file of listingFiles) {
   const existing = existingSeed.get(itemId);
   const challengeUrl = parsed.challengeUrl || csvRow?.kahoot_url || existing?.challenge_url || undefined;
   const creatorUrl = creatorLookup.get(normalizeUrl(challengeUrl)) || existing?.creator_url || undefined;
+  const coverUrl = coverLookup.get(normalizeUrl(challengeUrl)) || existing?.cover_url || undefined;
+  const questions = questionLookup.get(normalizeUrl(challengeUrl)) || existing?.questions || [];
 
   const item = {
     id: itemId,
@@ -252,11 +367,19 @@ for (const file of listingFiles) {
     listing_path: parsed.listingPath,
     tags: parsed.tags.length > 0 ? parsed.tags : (existing?.tags || []),
     upload_status: existing?.upload_status || (challengeUrl ? 'published' : 'ai_generated'),
-    questions: existing?.questions || [],
+    pipeline: existing?.pipeline || {
+      ai_generated: Boolean(questions.length > 0),
+      reviewed: Boolean(challengeUrl),
+      excel_exported: Boolean(challengeUrl),
+      kahoot_uploaded: Boolean(challengeUrl),
+      web_verified: Boolean(challengeUrl),
+      published: Boolean(challengeUrl),
+    },
+    questions,
     review_notes: existing?.review_notes || '',
     org_type: existing?.org_type || 'standalone',
     org_name: existing?.org_name,
-    cover_url: existing?.cover_url,
+    cover_url: coverUrl,
     created_at: existing?.created_at || now,
     updated_at: existing?.updated_at || now,
     ai_generated_at: existing?.ai_generated_at || now,
@@ -304,6 +427,9 @@ const stats = {
   edx_foundation: items.filter(i => i.board === 'edexcel-4ma1' && i.track === 'foundation').length,
   edx_higher: items.filter(i => i.board === 'edexcel-4ma1' && i.track === 'higher').length,
   with_challenge_url: items.filter(i => i.challenge_url).length,
+  with_cover_url: items.filter(i => i.cover_url).length,
+  with_questions: items.filter(i => i.questions.length > 0).length,
+  total_questions: items.reduce((sum, item) => sum + item.questions.length, 0),
   with_csv_match: items.filter(i => i.website_link_id).length,
 };
 console.log('\nStats:', JSON.stringify(stats, null, 2));

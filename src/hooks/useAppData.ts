@@ -53,6 +53,10 @@ const isCanonicalCreatorUrl = (value?: string) => {
   return normalizeKahootLookupValue(value).startsWith('https://create.kahoot.it/creator/');
 };
 
+const isCanonicalCoverUrl = (value?: string) => {
+  return normalizeKahootLookupValue(value).startsWith('https://www.25maths.com/projects/kahoot-channel/');
+};
+
 const KAHOOT_SEED_LOOKUP = (() => {
   const byId = new Map<string, KahootItem>();
   const byWebsiteLinkId = new Map<string, KahootItem>();
@@ -89,21 +93,39 @@ const matchKahootSeedItem = (item: KahootItem) => {
   );
 };
 
-const backfillKahootCreatorUrls = (items: KahootItem[]) => {
+const backfillKahootSeedFields = (items: KahootItem[]) => {
   const changedItems: KahootItem[] = [];
 
   const mergedItems = items.map(item => {
     const seed = matchKahootSeedItem(item);
-    if (!seed?.creator_url) return item;
+    if (!seed) return item;
 
     const currentCreatorUrl = normalizeKahootLookupValue(item.creator_url);
     const seedCreatorUrl = normalizeKahootLookupValue(seed.creator_url);
+    const currentCoverUrl = normalizeKahootLookupValue(item.cover_url);
+    const seedCoverUrl = normalizeKahootLookupValue(seed.cover_url);
+    const currentQuestions = Array.isArray(item.questions) ? item.questions : [];
+    const seedQuestions = Array.isArray(seed.questions) ? seed.questions : [];
+    const shouldUpdateCreator = Boolean(
+      seed.creator_url &&
+      (currentCreatorUrl !== seedCreatorUrl || !isCanonicalCreatorUrl(item.creator_url))
+    );
+    const shouldUpdateCover = Boolean(
+      seed.cover_url &&
+      (currentCoverUrl !== seedCoverUrl || !isCanonicalCoverUrl(item.cover_url))
+    );
+    const shouldUpdateQuestions = currentQuestions.length === 0 && seedQuestions.length > 0;
 
-    if (currentCreatorUrl === seedCreatorUrl && isCanonicalCreatorUrl(item.creator_url)) {
+    if (!shouldUpdateCreator && !shouldUpdateCover && !shouldUpdateQuestions) {
       return item;
     }
 
-    const nextItem = { ...item, creator_url: seed.creator_url };
+    const nextItem = {
+      ...item,
+      creator_url: shouldUpdateCreator ? seed.creator_url : item.creator_url,
+      cover_url: shouldUpdateCover ? seed.cover_url : item.cover_url,
+      questions: shouldUpdateQuestions ? seed.questions : item.questions,
+    };
     changedItems.push(nextItem);
     return nextItem;
   });
@@ -142,9 +164,9 @@ export function useAppData() {
     setKahootItems(MOCK_KAHOOT_ITEMS);
   }, [kahootItems.length, setKahootItems]);
 
-  // Fill in missing creator links from the canonical seed without disturbing other fields.
+  // Fill in canonical creator and cover links from the seed without disturbing other fields.
   useEffect(() => {
-    const { mergedItems, changedItems } = backfillKahootCreatorUrls(kahootItems);
+    const { mergedItems, changedItems } = backfillKahootSeedFields(kahootItems);
     if (changedItems.length === 0) return;
 
     setKahootItems(mergedItems);

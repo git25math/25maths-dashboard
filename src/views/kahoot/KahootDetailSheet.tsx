@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronRight, Copy, ExternalLink, Gamepad2, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Circle, Copy, ExternalLink, Gamepad2, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
-import { KahootBoard, KahootItem, KahootOrgType, KahootQuestion, KahootTrack } from '../../types';
+import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootQuestion, KahootTrack } from '../../types';
 
 const BOARD_LABELS: Record<KahootBoard, string> = { cie0580: 'CIE 0580', 'edexcel-4ma1': 'Edexcel 4MA1' };
 const TRACK_LABELS: Record<KahootTrack, string> = { core: 'Core', extended: 'Extended', foundation: 'Foundation', higher: 'Higher' };
@@ -163,13 +163,31 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-500">{BOARD_LABELS[item.board]}</span>
                 <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-500">{TRACK_LABELS[item.track]}</span>
-                <span className={cn('rounded-full px-3 py-1 font-bold', STATUS_BADGE[item.upload_status])}>
-                  {STATUS_LABEL[item.upload_status]}
-                </span>
                 <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-500">
                   {ORG_LABELS[item.org_type ?? 'standalone']}{item.org_name ? ` : ${item.org_name}` : ''}
                 </span>
               </div>
+
+              {/* Pipeline checklist */}
+              {item.pipeline && (
+                <section>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Pipeline Status</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {KAHOOT_PIPELINE_STAGES.map(s => {
+                      const done = item.pipeline[s.key];
+                      return (
+                        <div key={s.key} className={cn(
+                          'flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold',
+                          done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400',
+                        )}>
+                          {done ? <Check size={14} /> : <Circle size={14} />}
+                          {s.label}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               {/* Links section */}
               <section>

@@ -135,6 +135,14 @@ export function normalizeImportedKahootItem(value: unknown, index: number): Kaho
     listing_path: asString(record.listing_path) || undefined,
     tags: asStringArray(record.tags),
     upload_status: normalizeStatus(record.upload_status || record.status, challengeUrl),
+    pipeline: {
+      ai_generated: Boolean(record.pipeline && asRecord(record.pipeline).ai_generated),
+      reviewed: Boolean(record.pipeline && asRecord(record.pipeline).reviewed),
+      excel_exported: Boolean(record.pipeline && asRecord(record.pipeline).excel_exported),
+      kahoot_uploaded: Boolean(record.pipeline && asRecord(record.pipeline).kahoot_uploaded),
+      web_verified: Boolean(record.pipeline && asRecord(record.pipeline).web_verified),
+      published: Boolean(record.pipeline && asRecord(record.pipeline).published),
+    },
     questions: Array.isArray(record.questions)
       ? record.questions.map((question, questionIndex) => normalizeQuestion(question, questionIndex))
       : [],
