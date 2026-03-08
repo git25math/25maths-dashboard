@@ -6,7 +6,9 @@ const CACHE: Record<string, PaperData> = {};
 export const paperService = {
   async loadQuestions(board: PaperBoard): Promise<PaperData> {
     if (CACHE[board]) return CACHE[board];
-    const url = board === 'cie' ? '/data/papers-cie.json' : '/data/papers-edx.json';
+    const base = import.meta.env.BASE_URL || '/';
+    const file = board === 'cie' ? 'papers-cie.json' : 'papers-edx.json';
+    const url = `${base}data/${file}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
     let res: Response;
