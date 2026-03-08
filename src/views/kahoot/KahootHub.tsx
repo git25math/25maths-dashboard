@@ -85,6 +85,16 @@ export function KahootHub({
     });
   }, [onUpdateKahoot]);
 
+  const handleNavigate = useCallback((direction: 'prev' | 'next') => {
+    if (!selectedId) return;
+    const idx = kahootItems.findIndex(i => i.id === selectedId);
+    if (idx === -1) return;
+    const nextIdx = direction === 'next'
+      ? Math.min(idx + 1, kahootItems.length - 1)
+      : Math.max(idx - 1, 0);
+    if (nextIdx !== idx) setSelectedId(kahootItems[nextIdx].id);
+  }, [selectedId, kahootItems]);
+
   return (
     <div className="space-y-6">
       {/* Top bar - only show in library/settings */}
@@ -156,6 +166,7 @@ export function KahootHub({
         onCopy={handleCopy}
         onTogglePipeline={handleTogglePipeline}
         onBulkPipeline={handleBulkPipeline}
+        onNavigate={handleNavigate}
       />
 
       {/* Module Guide modal */}

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Menu, X, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { CheckCircle2, Menu, X, Settings, LogOut, ChevronDown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
@@ -40,8 +40,19 @@ import { TasksView } from './views/TasksView';
 import { HousePointHistoryView } from './views/HousePointHistoryView';
 import { EmailDigestView } from './views/EmailDigestView';
 import { ProjectsView } from './views/ProjectsView';
-import { KahootHub } from './views/kahoot/KahootHub';
 import { SettingsView } from './views/SettingsView';
+
+// Lazy-load Kahoot Hub (large module with 202-item seed data)
+const KahootHub = lazy(() => import('./views/kahoot/KahootHub').then(m => ({ default: m.KahootHub })));
+
+function LazyFallback() {
+  return (
+    <div className="flex items-center justify-center h-[40vh] text-slate-400">
+      <Loader2 size={24} className="animate-spin mr-3" />
+      <span className="text-sm font-medium">Loading module...</span>
+    </div>
+  );
+}
 
 function AppContent() {
   const data = useAppData();
@@ -500,14 +511,16 @@ function AppContent() {
         );
       case 'kahoot-upload':
         return (
-          <KahootHub
-            kahootItems={data.kahootItems}
-            onAddKahoot={data.addKahoot}
-            onUpdateKahoot={data.updateKahoot}
-            onDeleteKahoot={data.deleteKahoot}
-            onDuplicateKahoot={data.duplicateKahoot}
-            toast={data.toast}
-          />
+          <Suspense fallback={<LazyFallback />}>
+            <KahootHub
+              kahootItems={data.kahootItems}
+              onAddKahoot={data.addKahoot}
+              onUpdateKahoot={data.updateKahoot}
+              onDeleteKahoot={data.deleteKahoot}
+              onDuplicateKahoot={data.duplicateKahoot}
+              toast={data.toast}
+            />
+          </Suspense>
         );
       case 'settings':
         return (

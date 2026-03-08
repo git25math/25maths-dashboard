@@ -16,34 +16,38 @@ const GUIDE_SECTIONS: GuideSection[] = [
     title: 'Overview',
     content: `## What is Kahoot Hub?
 
-Kahoot Hub manages the full lifecycle of Kahoot quizzes for 25Maths: from AI-assisted question generation to automated upload and link backfill.
+Kahoot Hub manages the full lifecycle of **202 Kahoot quizzes** for 25Maths across CIE 0580 and Edexcel 4MA1, from AI-assisted question generation to automated upload, verification, and publishing.
 
 ### Two workflows
 
-- **Create Flow**: A step-by-step wizard for creating new Kahoots. Follow 5 steps: Prompt, Review, Export, Upload, Done.
-- **Library**: Browse, filter, and manage all existing Kahoots. Click any card to see details, copy links, or jump to Kahoot's editor.
+- **Create Flow**: A 5-step wizard (Prompt → Review → Export → Upload → Done) for new Kahoots
+- **Library**: Browse, filter, and manage all 202 Kahoots with advanced filtering, pipeline tracking, and batch operations
 
 ### Organisation types
 
-Each Kahoot can be tagged as:
-- **Standalone** - an independent quiz
-- **In Course** - part of a Kahoot course
-- **In Channel** - published within a Kahoot channel`,
+- **Standalone** — an independent quiz
+- **In Course** — part of a Kahoot course
+- **In Channel** — published within a Kahoot channel
+
+### Boards & Tracks
+
+- **CIE 0580**: Core / Extended
+- **Edexcel 4MA1**: Foundation / Higher`,
   },
   {
     id: 'create-flow',
     title: 'Create Flow',
     content: `## Create Flow (Wizard)
 
-### Step 1 - Prompt
-Set the board (CIE 0580 / Edexcel 4MA1), track (Core/Extended), and topic code. Write a natural language instruction for the AI, or skip to paste questions directly.
+### Step 1 — Prompt
+Set the board (CIE 0580 / Edexcel 4MA1), track, and topic code. Write a natural language instruction for the AI, or skip to paste questions directly.
 
 The AI uses Gemini 2.5 Flash via \`generate-kahoot-artifacts.mjs\`.
 
-### Step 2 - Review
+### Step 2 — Review
 Paste a Markdown table or JSON array of questions. The parser auto-detects the format and shows a live preview with validation.
 
-Edit title, description, and tags here. Questions with missing prompts or options are flagged in red.
+Edit title, description, and tags. Questions with missing prompts or options are flagged in red.
 
 **Supported paste formats:**
 
@@ -55,16 +59,16 @@ Markdown table:
 
 JSON array:
 \`\`\`json
-[{ "prompt": "What is 2+2?", "option_a": "3", "option_b": "4", "option_c": "5", "option_d": "6", "correct_option": "B", "time_limit": 20 }]
+[{ "prompt": "What is 2+2?", "option_a": "3", ... }]
 \`\`\`
 
-### Step 3 - Export
-Preview the import table and download a CSV file matching Kahoot's bulk import format. You can upload this manually, or proceed to auto-upload.
+### Step 3 — Export
+Preview the import table and download a CSV file matching Kahoot's bulk import format.
 
-### Step 4 - Upload
-The local agent (\`npm run agent:local\`) runs Playwright automation to upload the quiz to Kahoot. Supports dry-run mode. Requires the agent to be running on your machine.
+### Step 4 — Upload
+The local agent (\`npm run agent:local\`) runs Playwright automation to upload the quiz to Kahoot. Supports dry-run mode.
 
-### Step 5 - Done
+### Step 5 — Done
 Confirms success, shows the Play link and Creator link, and reports whether website backfill was performed.`,
   },
   {
@@ -73,63 +77,82 @@ Confirms success, shows the Play link and Creator link, and reports whether webs
     content: `## Library View
 
 ### Stats bar
-Four cards showing Total, Live, Draft, and Needs Review counts at a glance.
+Four cards: **Total** (all items), **All Done** (all 6 pipeline stages complete), **Published**, **AI Generated**.
 
-### Filters
-- **Board**: All / CIE 0580 / Edexcel 4MA1
-- **Type**: All / Standalone / In Course / In Channel
-- **Search**: Free-text search across title, topic code, tags, and links
+### Filters (3 rows)
+
+**Row 1 — Board + Track + Search**
+- Board: All / CIE 0580 / Edexcel 4MA1
+- Track: Smart-filtered by board — CIE shows Core/Extended, Edexcel shows Foundation/Higher
+- Search: Free-text across title, topic code, tags, and links
+
+**Row 2 — Pipeline toggles**
+Six tri-state buttons (one per pipeline stage). Click cycles: no filter → done only → not done only → no filter. Each shows a count badge.
+
+**Row 3 — Type + Sort + Clear**
+- Type: All / Standalone / In Course / In Channel
+- Sort: Topic Code (natural sort C1.1 < C1.10 < C2.1) or Last Updated
+- Clear Filters: resets all filters at once
 
 ### Card layout
-Each Kahoot appears as a horizontal card with:
-- Cover thumbnail (left)
-- Topic code, board, track, org type (top line)
+Each card shows:
+- Cover thumbnail (left, desktop only)
+- Topic code · Board · Track · Org type (top line)
 - Title (main line)
-- Status dot + Play link + Creator link (bottom line)
+- Pipeline dots (6 colored dots + fraction "4/6") + question count + Play/Creator links
 
-Click a card to open the **Detail Sheet** - a slide-in panel on the right showing full details, collapsible question list, links with copy buttons, and timeline.
-
-### Actions in Detail Sheet
-- **Copy links**: One-click copy for Play, Creator, or Page links
-- **External links**: Open Play link, Creator link, or edit directly on Kahoot
-- **Duplicate / Delete**: Quick actions at the bottom`,
+### Detail Sheet
+Click a card to open a slide-in panel with:
+- Cover image, meta badges, full pipeline checklist with progress bar
+- **Pipeline toggles**: Click any stage to toggle done/pending
+- **Bulk actions**: "Mark All Done" / "Reset All"
+- Links section with copy buttons
+- Collapsible question list with answer highlights
+- Timeline (created, updated, uploaded dates)
+- Duplicate / Delete actions`,
   },
   {
     id: 'pipeline',
     title: 'Pipeline',
-    content: `## Pipeline Architecture
+    content: `## Pipeline Status
 
-The deployment pipeline runs on your local machine, triggered from the browser via a local Express agent.
+Each Kahoot tracks **6 independent boolean stages**:
+
+| Stage | Meaning |
+|-------|---------|
+| AI Generated | Questions have been created by AI |
+| Reviewed | Human has verified question quality |
+| Excel Exported | CSV/XLSX file has been generated |
+| Uploaded | Quiz has been uploaded to Kahoot platform |
+| Verified | Web verification confirms quiz is live and correct |
+| Published | Quiz is published and accessible to students |
+
+Each stage is **independently toggleable** — they are not sequential gates. You can mark "Published" without "Excel Exported" if the quiz was created manually on Kahoot.
+
+### Toggling pipeline status
+- **From the Detail Sheet**: Click any stage checkbox, or use "Mark All Done" / "Reset All"
+- **From the Library**: Pipeline filter buttons show which stages are done/pending across all items
+
+### Deploy Agent Architecture
 
 \`\`\`
-Browser  ->  POST /jobs/kahoot-upload  ->  local-agent.mjs (:4318)
+Browser  →  POST /jobs/kahoot-upload  →  local-agent.mjs (:4318)
                                                 |  spawn
                                        deploy-kahoot-upload.mjs
                                                 |
   1. generateKahootArtifacts    (Gemini AI fill)
   2. resolveCreatorMetadata     (Python URL resolver)
-  3. buildImportManifest        (Python -> XLSX)
+  3. buildImportManifest        (Python → XLSX)
   4. ensureKahootSession        (Playwright login check)
   5. runPlaywrightUpload        (auto upload to Kahoot)
   6. createChallengeLink        (capture public link)
   7. syncWebsiteLinks           (backfill CSV/JSON/Listing)
 \`\`\`
 
-### Prerequisites
-- \`python3\` with \`openpyxl\` and \`playwright\`
-- Installed Chromium for Playwright
-- Valid Kahoot creator login session
-- Sibling repo \`25maths-website\` (or \`KAHOOT_WEBSITE_ROOT\` env var)
-
 ### Starting the agent
 \`\`\`bash
 npm run agent:local
-\`\`\`
-
-### Agent endpoints
-- \`GET /health\` - Health check
-- \`GET /jobs/:id\` - Job status + logs
-- \`POST /jobs/kahoot-upload\` - Start a deploy job`,
+\`\`\``,
   },
   {
     id: 'files',
@@ -140,32 +163,30 @@ npm run agent:local
 
 | File | Purpose |
 |------|---------|
-| \`views/kahoot/KahootHub.tsx\` | Top-level view routing |
-| \`views/kahoot/KahootLibrary.tsx\` | Resource overview + filters |
-| \`views/kahoot/KahootCard.tsx\` | Single resource card |
-| \`views/kahoot/KahootDetailSheet.tsx\` | Slide-in detail panel |
+| \`views/kahoot/KahootHub.tsx\` | Top-level view routing + pipeline handlers |
+| \`views/kahoot/KahootLibrary.tsx\` | Library with smart filters + pipeline toggles |
+| \`views/kahoot/KahootCard.tsx\` | Card with pipeline dots + fraction |
+| \`views/kahoot/KahootDetailSheet.tsx\` | Detail panel with pipeline checklist + bulk actions |
 | \`views/kahoot/KahootCreateWizard.tsx\` | 5-step wizard container |
-| \`views/kahoot/steps/StepPrompt.tsx\` | Step 1: AI prompt |
-| \`views/kahoot/steps/StepReview.tsx\` | Step 2: Paste + preview |
-| \`views/kahoot/steps/StepExport.tsx\` | Step 3: CSV export |
-| \`views/kahoot/steps/StepUpload.tsx\` | Step 4: Agent deploy |
-| \`views/kahoot/steps/StepDone.tsx\` | Step 5: Confirmation |
-| \`views/kahoot/KahootSettings.tsx\` | Agent + options config |
+| \`views/kahoot/steps/Step*.tsx\` | Individual wizard steps (Prompt/Review/Export/Upload/Done) |
+| \`views/kahoot/KahootSettings.tsx\` | Agent + deploy options config |
 | \`views/kahoot/KahootModuleGuide.tsx\` | This guide modal |
 | \`hooks/useKahootWizard.ts\` | Wizard state management |
+| \`hooks/appData/useKahootActions.ts\` | CRUD + pipeline actions |
 | \`lib/kahootQuestionParser.ts\` | Markdown/JSON parser |
+| \`lib/kahootInterop.ts\` | Import normalization |
+| \`constants-kahoot.ts\` | 202-item seed data (auto-generated) |
+| \`types.ts\` | KahootPipeline, KahootItem, etc. |
 
-### Backend (scripts/kahoot/)
+### Data Pipeline (scripts/)
 
 | File | Purpose |
 |------|---------|
-| \`deploy-kahoot-upload.mjs\` | End-to-end orchestrator |
-| \`generate-kahoot-artifacts.mjs\` | AI generation (Gemini) |
-| \`playwright-upload.mjs\` | Upload wrapper |
-| \`ensure_kahoot_session.py\` | Login session check |
-| \`create_kahoot_challenge_link.py\` | Challenge link capture |
-| \`sync-website-links.mjs\` | Website backfill |
-| \`pipeline-lib.mjs\` | Shared utilities |
+| \`extract-kahoot-from-listings.mjs\` | Parse Listing.md → seed JSON |
+| \`kahoot/deploy-kahoot-upload.mjs\` | End-to-end deploy orchestrator |
+| \`kahoot/generate-kahoot-artifacts.mjs\` | AI generation (Gemini) |
+| \`kahoot/playwright-upload.mjs\` | Playwright upload wrapper |
+| \`kahoot/sync-website-links.mjs\` | Website backfill |
 
 ### Server
 

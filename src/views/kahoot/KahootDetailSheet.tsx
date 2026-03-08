@@ -86,17 +86,31 @@ interface KahootDetailSheetProps {
   onCopy: (value: string, label: string) => void;
   onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
   onBulkPipeline: (id: string, value: boolean) => void;
+  onNavigate?: (direction: 'prev' | 'next') => void;
 }
 
-export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline }: KahootDetailSheetProps) {
+export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onNavigate }: KahootDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
+  // Keyboard: Escape to close, Arrow keys to navigate
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (onNavigate && item) {
+        if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); onNavigate('prev'); }
+        if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); onNavigate('next'); }
+      }
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [onClose, onNavigate, item]);
+
+  // Scroll to top when navigating to a different item
+  useEffect(() => {
+    if (item && sheetRef.current) {
+      sheetRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [item?.id]);
 
   return (
     <AnimatePresence>
@@ -292,6 +306,16 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
                   <Trash2 size={14} />
                 </button>
               </div>
+
+              {/* Keyboard hints */}
+              {onNavigate && (
+                <p className="text-[10px] text-slate-300 text-center pt-2">
+                  <kbd className="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 font-mono">↑</kbd>{' '}
+                  <kbd className="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 font-mono">↓</kbd> navigate
+                  {' · '}
+                  <kbd className="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 font-mono">Esc</kbd> close
+                </p>
+              )}
             </div>
           </motion.div>
         </>
