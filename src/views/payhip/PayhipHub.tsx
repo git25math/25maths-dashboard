@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { PAYHIP_QUEUE_META, PayhipQueueKey } from '../../lib/payhipUtils';
 import { PayhipItem, PayhipPipelineStage } from '../../types';
 import { PayhipLibrary } from './PayhipLibrary';
 import { PayhipDetailSheet } from './PayhipDetailSheet';
@@ -8,9 +9,14 @@ interface ToastApi {
   error: (msg: string) => void;
 }
 
+interface PayhipUpdateOptions {
+  silent?: boolean;
+  successMessage?: string;
+}
+
 interface PayhipHubProps {
   payhipItems: PayhipItem[];
-  onUpdatePayhip: (id: string, updates: Partial<PayhipItem>) => Promise<void>;
+  onUpdatePayhip: (id: string, updates: Partial<PayhipItem>, options?: PayhipUpdateOptions) => Promise<void>;
   onTogglePipeline: (id: string, stage: PayhipPipelineStage) => Promise<void>;
   onBulkPipeline: (id: string, value: boolean) => Promise<void>;
   toast: ToastApi;
@@ -19,8 +25,13 @@ interface PayhipHubProps {
 export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBulkPipeline, toast }: PayhipHubProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [visibleIds, setVisibleIds] = useState<string[] | null>(null);
+  const [advancingQueue, setAdvancingQueue] = useState<PayhipQueueKey | null>(null);
 
   const navigationIds = visibleIds ?? payhipItems.map(item => item.id);
+  const visibleItems = useMemo(
+    () => navigationIds.map(id => payhipItems.find(item => item.id === id)).filter(Boolean) as PayhipItem[],
+    [navigationIds, payhipItems],
+  );
 
   const selectedItem = useMemo(
     () => payhipItems.find(item => item.id === selectedId) ?? null,
@@ -58,6 +69,44 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
     if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
   }, [navigationIds, selectedId]);
 
+  const handleOpenFirstVisible = useCallback(() => {
+    if (visibleItems.length === 0) {
+      toast.error('No visible Payhip listings to open');
+      return;
+    }
+    setSelectedId(visibleItems[0].id);
+  }, [toast, visibleItems]);
+
+  const handleAdvanceQueue = useCallback(async (queue: PayhipQueueKey, ids: string[]) => {
+    const targets = ids
+      .map(id => payhipItems.find(item => item.id === id))
+      .filter(Boolean) as PayhipItem[];
+
+    if (targets.length === 0) {
+      toast.error('No visible Payhip listings to update');
+      return;
+    }
+
+    const meta = PAYHIP_QUEUE_META[queue];
+    setAdvancingQueue(queue);
+
+    try {
+      for (const item of targets) {
+        await onUpdatePayhip(item.id, {
+          pipeline: {
+            ...item.pipeline,
+            [meta.stage]: true,
+          },
+        }, { silent: true });
+      }
+      toast.success(`Marked ${targets.length} listing${targets.length === 1 ? '' : 's'} as ${meta.successLabel}`);
+    } catch {
+      toast.error(`Failed to advance ${meta.label.toLowerCase()}`);
+    } finally {
+      setAdvancingQueue(null);
+    }
+  }, [onUpdatePayhip, payhipItems, toast]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -75,6 +124,9 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
         selectedId={selectedId}
         onSelect={id => setSelectedId(prev => prev === id ? null : id)}
         onVisibleIdsChange={setVisibleIds}
+        onOpenFirstVisible={handleOpenFirstVisible}
+        onAdvanceQueue={handleAdvanceQueue}
+        advancingQueue={advancingQueue}
       />
 
       <PayhipDetailSheet

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowDownAZ, Check, Clock, RotateCcw, Search, X } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
 import { cn } from '../../lib/utils';
@@ -74,9 +74,10 @@ interface KahootLibraryProps {
   items: KahootItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onVisibleIdsChange?: (ids: string[]) => void;
 }
 
-export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProps) {
+export function KahootLibrary({ items, selectedId, onSelect, onVisibleIdsChange }: KahootLibraryProps) {
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
@@ -164,6 +165,10 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
         : b.updated_at.localeCompare(a.updated_at),
       );
   }, [items, boardFilter, trackFilter, pipelineFilter, orgFilter, search, sortMode]);
+
+  useEffect(() => {
+    onVisibleIdsChange?.(filtered.map(i => i.id));
+  }, [filtered, onVisibleIdsChange]);
 
   return (
     <div className="space-y-8">

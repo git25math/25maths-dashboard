@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Plus, Settings } from 'lucide-react';
 import { KahootItem, KahootPipelineStage } from '../../types';
 import { KahootLibrary } from './KahootLibrary';
@@ -29,11 +29,25 @@ export function KahootHub({
   const [view, setView] = useState<HubView>('library');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [visibleIds, setVisibleIds] = useState<string[]>([]);
+
+  const navigationIds = visibleIds.length ? visibleIds : kahootItems.map(i => i.id);
 
   const selectedItem = useMemo(
     () => kahootItems.find(i => i.id === selectedId) ?? null,
     [kahootItems, selectedId],
   );
+
+  const selectedIndex = useMemo(
+    () => (selectedId ? navigationIds.findIndex(id => id === selectedId) : -1),
+    [navigationIds, selectedId],
+  );
+
+  // Clear selection when item is filtered out
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!navigationIds.includes(selectedId)) setSelectedId(null);
+  }, [navigationIds, selectedId]);
 
   const handleCopy = useCallback(async (value: string, label: string) => {
     try {
@@ -87,13 +101,13 @@ export function KahootHub({
 
   const handleNavigate = useCallback((direction: 'prev' | 'next') => {
     if (!selectedId) return;
-    const idx = kahootItems.findIndex(i => i.id === selectedId);
+    const idx = navigationIds.findIndex(id => id === selectedId);
     if (idx === -1) return;
     const nextIdx = direction === 'next'
-      ? Math.min(idx + 1, kahootItems.length - 1)
+      ? Math.min(idx + 1, navigationIds.length - 1)
       : Math.max(idx - 1, 0);
-    if (nextIdx !== idx) setSelectedId(kahootItems[nextIdx].id);
-  }, [selectedId, kahootItems]);
+    if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
+  }, [navigationIds, selectedId]);
 
   return (
     <div className="space-y-6">
@@ -142,6 +156,7 @@ export function KahootHub({
           items={kahootItems}
           selectedId={selectedId}
           onSelect={handleCardClick}
+          onVisibleIdsChange={setVisibleIds}
         />
       )}
 
@@ -167,6 +182,8 @@ export function KahootHub({
         onTogglePipeline={handleTogglePipeline}
         onBulkPipeline={handleBulkPipeline}
         onNavigate={handleNavigate}
+        canNavigatePrev={selectedIndex > 0}
+        canNavigateNext={selectedIndex !== -1 && selectedIndex < navigationIds.length - 1}
       />
 
       {/* Module Guide modal */}

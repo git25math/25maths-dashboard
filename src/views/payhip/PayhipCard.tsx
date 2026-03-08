@@ -1,6 +1,6 @@
 import { ExternalLink, Store } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { PAYHIP_STATUS_LABELS } from '../../lib/payhipUtils';
+import { getNextPayhipAction, PAYHIP_STATUS_LABELS } from '../../lib/payhipUtils';
 import { PAYHIP_PIPELINE_STAGES, PayhipItem, PayhipStatus } from '../../types';
 
 const STATUS_STYLES: Record<PayhipStatus, string> = {
@@ -42,6 +42,8 @@ function countLabel(item: PayhipItem) {
 }
 
 export function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; isSelected: boolean; onClick: () => void }) {
+  const nextAction = getNextPayhipAction(item);
+
   return (
     <button
       type="button"
@@ -70,6 +72,9 @@ export function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; is
             <div className="min-w-0 space-y-1">
               <p className="truncate text-sm font-bold text-slate-900">{item.listing_title}</p>
               <p className="truncate text-xs text-slate-500">{countLabel(item)}</p>
+              <p className={cn('truncate text-xs font-semibold', nextAction.key === 'complete' ? 'text-emerald-600' : 'text-slate-400')}>
+                Next: {nextAction.label}
+              </p>
             </div>
             <span className={cn('rounded-full px-3 py-1 text-[11px] font-bold', STATUS_STYLES[item.status])}>
               {PAYHIP_STATUS_LABELS[item.status]}

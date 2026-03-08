@@ -14,6 +14,11 @@ interface UsePayhipActionsParams {
   toast: ToastApi;
 }
 
+export interface PayhipUpdateOptions {
+  silent?: boolean;
+  successMessage?: string;
+}
+
 const PAYHIP_PIPELINE_KEYS: PayhipPipelineStage[] = [
   'matrix_ready',
   'copy_ready',
@@ -24,11 +29,12 @@ const PAYHIP_PIPELINE_KEYS: PayhipPipelineStage[] = [
 ];
 
 export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayhipActionsParams) {
-  const persistItem = useCallback(async (item: PayhipItem, successMessage?: string) => {
+  const persistItem = useCallback(async (item: PayhipItem, options?: PayhipUpdateOptions) => {
     try {
       const updated = await payhipService.update(item.id, item);
       setPayhipItems(prev => prev.map(entry => entry.id === item.id ? { ...entry, ...updated } : entry));
-      if (successMessage) toast.success(successMessage);
+      const successMessage = options?.successMessage;
+      if (!options?.silent && successMessage) toast.success(successMessage);
       return updated;
     } catch (error) {
       toast.error('Failed to save Payhip item');
@@ -36,7 +42,7 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
     }
   }, [setPayhipItems, toast]);
 
-  const updatePayhip = useCallback(async (id: string, updates: Partial<PayhipItem>) => {
+  const updatePayhip = useCallback(async (id: string, updates: Partial<PayhipItem>, options?: PayhipUpdateOptions) => {
     const existing = payhipItems.find(item => item.id === id);
     if (!existing) return;
 
@@ -51,7 +57,7 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
       updated_at: timestamp,
     };
 
-    await persistItem(merged, 'Payhip item updated');
+    await persistItem(merged, { successMessage: options?.successMessage || 'Payhip item updated', silent: options?.silent });
   }, [payhipItems, persistItem]);
 
   const setPayhipStatus = useCallback(async (id: string, status: PayhipStatus) => {

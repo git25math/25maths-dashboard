@@ -1,6 +1,6 @@
 import { ExternalLink, Gamepad2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipeline, KahootTrack } from '../../types';
+import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipeline, KahootPipelineStage, KahootTrack } from '../../types';
 
 const BOARD_LABELS: Record<KahootBoard, string> = {
   cie0580: 'CIE 0580',
@@ -49,6 +49,23 @@ function PipelineDots({ pipeline }: { pipeline?: KahootPipeline }) {
   );
 }
 
+const NEXT_ACTION_LABELS: Record<KahootPipelineStage, string> = {
+  ai_generated: 'Generate with AI',
+  reviewed: 'Review questions',
+  excel_exported: 'Export to Excel',
+  kahoot_uploaded: 'Upload to Kahoot',
+  web_verified: 'Verify on web',
+  published: 'Publish quiz',
+};
+
+function getNextKahootAction(pipeline?: KahootPipeline): { key: KahootPipelineStage | 'complete'; label: string } {
+  if (!pipeline) return { key: 'ai_generated', label: NEXT_ACTION_LABELS.ai_generated };
+  for (const stage of KAHOOT_PIPELINE_STAGES) {
+    if (!pipeline[stage.key]) return { key: stage.key, label: NEXT_ACTION_LABELS[stage.key] };
+  }
+  return { key: 'complete', label: 'All done' };
+}
+
 interface KahootCardProps {
   item: KahootItem;
   isSelected: boolean;
@@ -57,6 +74,7 @@ interface KahootCardProps {
 
 export function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
   const orgType = item.org_type ?? 'standalone';
+  const nextAction = getNextKahootAction(item.pipeline);
 
   return (
     <button
@@ -101,6 +119,11 @@ export function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
 
           {/* Title */}
           <p className="text-sm font-bold text-slate-900 truncate">{item.title || 'Untitled Kahoot'}</p>
+
+          {/* Next action */}
+          <p className={cn('text-xs font-semibold truncate', nextAction.key === 'complete' ? 'text-emerald-600' : 'text-slate-400')}>
+            Next: {nextAction.label}
+          </p>
 
           {/* Status + counts + links */}
           <div className="flex items-center gap-4 text-xs">

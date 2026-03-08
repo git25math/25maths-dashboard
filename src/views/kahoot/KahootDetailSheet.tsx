@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, ChevronRight, Circle, Copy, ExternalLink, Gamepad2, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, ChevronUp, Circle, Copy, ExternalLink, Gamepad2, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipelineStage, KahootQuestion, KahootTrack } from '../../types';
@@ -87,9 +87,11 @@ interface KahootDetailSheetProps {
   onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
   onBulkPipeline: (id: string, value: boolean) => void;
   onNavigate?: (direction: 'prev' | 'next') => void;
+  canNavigatePrev?: boolean;
+  canNavigateNext?: boolean;
 }
 
-export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onNavigate }: KahootDetailSheetProps) {
+export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline, onNavigate, canNavigatePrev, canNavigateNext }: KahootDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // Keyboard: Escape to close, Arrow keys to navigate
@@ -146,9 +148,33 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{item.topic_code}</p>
                   <h3 className="text-xl font-bold text-slate-900">{item.title || 'Untitled'}</h3>
                 </div>
-                <button type="button" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition">
-                  <X size={18} className="text-slate-400" />
-                </button>
+                <div className="flex items-center gap-1">
+                  {onNavigate && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('prev')}
+                        disabled={!canNavigatePrev}
+                        className={cn('rounded-full p-1.5 transition', canNavigatePrev ? 'hover:bg-slate-100 text-slate-400' : 'text-slate-200 cursor-not-allowed')}
+                        title="Previous (↑)"
+                      >
+                        <ChevronUp size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('next')}
+                        disabled={!canNavigateNext}
+                        className={cn('rounded-full p-1.5 transition', canNavigateNext ? 'hover:bg-slate-100 text-slate-400' : 'text-slate-200 cursor-not-allowed')}
+                        title="Next (↓)"
+                      >
+                        <ChevronDown size={16} />
+                      </button>
+                    </>
+                  )}
+                  <button type="button" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition">
+                    <X size={18} className="text-slate-400" />
+                  </button>
+                </div>
               </div>
 
               {/* Cover */}
