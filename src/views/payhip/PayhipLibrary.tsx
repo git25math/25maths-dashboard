@@ -1,9 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDownAZ, CalendarClock, Download, Search } from 'lucide-react';
+import {
+  getEffectivePayhipPipeline,
+  hasPayhipHealthAutoFix,
+  isPayhipPipelineStageLocked,
+  matchesPayhipHealth,
+  matchesPayhipQueue,
+  PAYHIP_HEALTH_META,
+  PAYHIP_QUEUE_META,
+  PAYHIP_STATUS_LABELS,
+  PayhipHealthKey,
+  PayhipQueueKey,
+} from '../../lib/payhipUtils';
 import { FilterChip } from '../../components/FilterChip';
-import { matchesPayhipQueue, PAYHIP_QUEUE_META, PAYHIP_STATUS_LABELS, PayhipQueueKey } from '../../lib/payhipUtils';
+import { StatCard } from '../../components/StatCard';
 import { cn } from '../../lib/utils';
-import { PayhipBoard, PayhipItem, PayhipLevel, PayhipStatus } from '../../types';
+import { PAYHIP_PIPELINE_STAGES, PayhipBoard, PayhipItem, PayhipLevel, PayhipPipelineStage, PayhipStatus } from '../../types';
 import { PayhipCard } from './PayhipCard';
 
 type BoardFilter = 'all' | PayhipBoard;
@@ -12,6 +24,7 @@ type StatusFilter = 'all' | PayhipStatus;
 type SortMode = 'sku' | 'release' | 'updated';
 type QueueFilter = 'all' | PayhipQueueKey;
 type ReleaseFocus = 'all' | 'releasing_soon' | 'overdue' | 'early_bird';
+type HealthFilter = 'all' | PayhipHealthKey;
 
 const BOARD_OPTIONS: { key: BoardFilter; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -36,6 +49,9 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string }[] = [
   { key: 'archived', label: PAYHIP_STATUS_LABELS.archived },
 ];
 
+const BATCH_STATUS_OPTIONS: { key: PayhipStatus; label: string }[] = STATUS_OPTIONS
+  .filter((option): option is { key: PayhipStatus; label: string } => option.key !== 'all');
+
 const LEVEL_ORDER: Record<PayhipLevel, number> = { L1: 1, L2: 2, L3: 3, L4: 4 };
 
 const RELEASE_FOCUS_LABELS: Record<Exclude<ReleaseFocus, 'all'>, string> = {
@@ -45,6 +61,7 @@ const RELEASE_FOCUS_LABELS: Record<Exclude<ReleaseFocus, 'all'>, string> = {
 };
 
 const QUEUE_KEYS = Object.keys(PAYHIP_QUEUE_META) as PayhipQueueKey[];
+const HEALTH_KEYS = Object.keys(PAYHIP_HEALTH_META) as PayhipHealthKey[];
 
 function formatDateKey(date: Date) {
   const year = date.getFullYear();
@@ -59,14 +76,14 @@ function addDays(date: Date, days: number) {
   return next;
 }
 
-function StatCard({ label, value, tone = 'text-slate-900' }: { label: string; value: number; tone?: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className={cn('mt-2 text-3xl font-bold', tone)}>{value}</p>
-    </div>
-  );
+function getDateWindow() {
+  const now = new Date();
+  return {
+    todayKey: formatDateKey(now),
+    nextWeekKey: formatDateKey(addDays(now, 7)),
+  };
 }
+
 
 interface PayhipLibraryProps {
   items: PayhipItem[];
@@ -76,6 +93,11 @@ interface PayhipLibraryProps {
   onOpenFirstVisible?: () => void;
   onAdvanceQueue?: (queue: PayhipQueueKey, ids: string[]) => Promise<void>;
   advancingQueue?: PayhipQueueKey | null;
+  onResolveHealth?: (health: PayhipHealthKey, ids: string[]) => Promise<void>;
+  resolvingHealth?: PayhipHealthKey | null;
+  onBatchStatus?: (status: PayhipStatus, ids: string[]) => Promise<void>;
+  onBatchPipeline?: (stage: PayhipPipelineStage, value: boolean, ids: string[]) => Promise<void>;
+  batchingVisible?: boolean;
 }
 
 export function PayhipLibrary({
@@ -86,6 +108,11 @@ export function PayhipLibrary({
   onOpenFirstVisible,
   onAdvanceQueue,
   advancingQueue = null,
+  onResolveHealth,
+  resolvingHealth = null,
+  onBatchStatus,
+  onBatchPipeline,
+  batchingVisible = false,
 }: PayhipLibraryProps) {
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
@@ -94,15 +121,45 @@ export function PayhipLibrary({
   const [sortMode, setSortMode] = useState<SortMode>('sku');
   const [queueFilter, setQueueFilter] = useState<QueueFilter>('all');
   const [releaseFocus, setReleaseFocus] = useState<ReleaseFocus>('all');
+  const [healthFilter, setHealthFilter] = useState<HealthFilter>('all');
+  const [batchStatus, setBatchStatus] = useState<PayhipStatus>('presale');
+  const [batchStage, setBatchStage] = useState<PayhipPipelineStage>('payhip_created');
+  const [{ todayKey, nextWeekKey }, setDateWindow] = useState(getDateWindow);
 
-  const todayKey = useMemo(() => formatDateKey(new Date()), []);
-  const nextWeekKey = useMemo(() => formatDateKey(addDays(new Date(), 7)), []);
+  useEffect(() => {
+    let timeoutId: number | undefined;
+
+    const refreshDateWindow = () => setDateWindow(getDateWindow());
+    const scheduleMidnightRefresh = () => {
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 5, 0);
+      timeoutId = window.setTimeout(() => {
+        refreshDateWindow();
+        scheduleMidnightRefresh();
+      }, nextMidnight.getTime() - now.getTime());
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refreshDateWindow();
+    };
+
+    scheduleMidnightRefresh();
+    window.addEventListener('focus', refreshDateWindow);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      window.removeEventListener('focus', refreshDateWindow);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const stats = useMemo(() => ({
     total: items.length,
-    created: items.filter(item => item.pipeline.payhip_created).length,
+    created: items.filter(item => getEffectivePayhipPipeline(item).payhip_created).length,
     live: items.filter(item => item.status === 'live' || item.status === 'free_sample_live').length,
-    needsBackfill: items.filter(item => !item.pipeline.url_backfilled).length,
+    needsBackfill: items.filter(item => !getEffectivePayhipPipeline(item).url_backfilled).length,
   }), [items]);
 
   const queueStats = useMemo(() => {
@@ -112,9 +169,16 @@ export function PayhipLibrary({
     }, {} as Record<PayhipQueueKey, number>);
   }, [items]);
 
+  const healthStats = useMemo(() => {
+    return HEALTH_KEYS.reduce((acc, key) => {
+      acc[key] = items.filter(item => matchesPayhipHealth(item, key, todayKey)).length;
+      return acc;
+    }, {} as Record<PayhipHealthKey, number>);
+  }, [items, todayKey]);
+
   const releaseWatch = useMemo(() => ({
     releasingSoon: items.filter(item => Boolean(item.release_date) && item.release_date! >= todayKey && item.release_date! <= nextWeekKey).length,
-    overdue: items.filter(item => Boolean(item.release_date) && item.release_date! < todayKey && !item.pipeline.site_synced && item.status !== 'archived').length,
+    overdue: items.filter(item => matchesPayhipHealth(item, 'release_overdue', todayKey)).length,
     earlyBird: items.filter(item => Boolean(item.early_bird_end_date) && item.early_bird_end_date! >= todayKey && item.early_bird_end_date! <= nextWeekKey && item.status === 'presale').length,
   }), [items, nextWeekKey, todayKey]);
 
@@ -128,12 +192,17 @@ export function PayhipLibrary({
       case 'releasing_soon':
         return Boolean(item.release_date) && item.release_date! >= todayKey && item.release_date! <= nextWeekKey;
       case 'overdue':
-        return Boolean(item.release_date) && item.release_date! < todayKey && !item.pipeline.site_synced && item.status !== 'archived';
+        return matchesPayhipHealth(item, 'release_overdue', todayKey);
       case 'early_bird':
         return Boolean(item.early_bird_end_date) && item.early_bird_end_date! >= todayKey && item.early_bird_end_date! <= nextWeekKey && item.status === 'presale';
       default:
         return true;
     }
+  };
+
+  const matchesHealth = (item: PayhipItem) => {
+    if (healthFilter === 'all') return true;
+    return matchesPayhipHealth(item, healthFilter, todayKey);
   };
 
   const filtered = useMemo(() => {
@@ -145,6 +214,7 @@ export function PayhipLibrary({
       .filter(item => statusFilter === 'all' || item.status === statusFilter)
       .filter(matchesQueue)
       .filter(matchesReleaseFocus)
+      .filter(matchesHealth)
       .filter(item => {
         if (!q) return true;
         return [
@@ -162,7 +232,14 @@ export function PayhipLibrary({
         if (sortMode === 'release') return (a.release_date || '9999-12-31').localeCompare(b.release_date || '9999-12-31') || a.sku.localeCompare(b.sku);
         return LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || a.sku.localeCompare(b.sku);
       });
-  }, [items, boardFilter, levelFilter, nextWeekKey, queueFilter, releaseFocus, search, sortMode, statusFilter, todayKey]);
+  }, [items, boardFilter, healthFilter, levelFilter, nextWeekKey, queueFilter, releaseFocus, search, sortMode, statusFilter, todayKey]);
+
+  const batchStageLabel = PAYHIP_PIPELINE_STAGES.find(stage => stage.key === batchStage)?.label || batchStage;
+  const resetLockedCount = useMemo(
+    () => filtered.filter(item => isPayhipPipelineStageLocked(item, batchStage)).length,
+    [batchStage, filtered],
+  );
+  const resetEligibleCount = filtered.length - resetLockedCount;
 
   useEffect(() => {
     onVisibleIdsChange?.(filtered.map(item => item.id));
@@ -175,20 +252,22 @@ export function PayhipLibrary({
     || statusFilter !== 'all'
     || queueFilter !== 'all'
     || releaseFocus !== 'all'
+    || healthFilter !== 'all'
     || sortMode !== 'sku'
   );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearch('');
     setBoardFilter('all');
     setLevelFilter('all');
     setStatusFilter('all');
     setQueueFilter('all');
     setReleaseFocus('all');
+    setHealthFilter('all');
     setSortMode('sku');
-  };
+  }, []);
 
-  const exportVisibleCsv = () => {
+  const exportVisibleCsv = useCallback(() => {
     const headers = [
       'sku',
       'level',
@@ -230,7 +309,7 @@ export function PayhipLibrary({
     link.download = `payhip-dashboard-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [filtered]);
 
   const queueCards = QUEUE_KEYS.map(key => ({
     key,
@@ -242,6 +321,18 @@ export function PayhipLibrary({
         : key === 'qa'
           ? 'border-sky-200 bg-sky-50/60 text-sky-700'
           : 'border-emerald-200 bg-emerald-50/60 text-emerald-700',
+  }));
+
+  const healthCards = HEALTH_KEYS.map(key => ({
+    key,
+    count: healthStats[key],
+    tone: key === 'sellable_missing_url'
+      ? 'border-rose-200 bg-rose-50/70 text-rose-700'
+      : key === 'release_overdue'
+        ? 'border-orange-200 bg-orange-50/70 text-orange-700'
+        : key === 'live_without_qa'
+          ? 'border-sky-200 bg-sky-50/70 text-sky-700'
+          : 'border-slate-300 bg-slate-100 text-slate-700',
   }));
 
   return (
@@ -262,6 +353,33 @@ export function PayhipLibrary({
           Export Visible CSV ({filtered.length})
         </button>
       </div>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Health Watch</p>
+          {healthFilter !== 'all' && (
+            <button type="button" onClick={() => setHealthFilter('all')} className="text-xs font-bold text-slate-400 transition hover:text-slate-600">
+              Clear Health Filter
+            </button>
+          )}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {healthCards.map(card => (
+            <button
+              key={card.key}
+              type="button"
+              onClick={() => setHealthFilter(prev => prev === card.key ? 'all' : card.key)}
+              className={cn(
+                'rounded-2xl border p-4 text-left transition hover:shadow-sm',
+                healthFilter === card.key ? card.tone : 'border-slate-200 bg-white text-slate-700',
+              )}
+            >
+              <p className="text-xs font-semibold uppercase tracking-widest opacity-70">{PAYHIP_HEALTH_META[card.key].label}</p>
+              <p className="mt-2 text-3xl font-bold">{card.count}</p>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -390,6 +508,15 @@ export function PayhipLibrary({
             </FilterChip>
           </div>
 
+          {healthFilter !== 'all' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Health</span>
+              <FilterChip active tone="rose" onClick={() => setHealthFilter('all')}>
+                {PAYHIP_HEALTH_META[healthFilter].label}
+              </FilterChip>
+            </div>
+          )}
+
           {queueFilter !== 'all' && (
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Queue</span>
@@ -414,12 +541,14 @@ export function PayhipLibrary({
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-1">
             <p className="text-sm font-bold text-slate-900">Showing {filtered.length} of {items.length} listings</p>
-            {queueFilter !== 'all' ? (
+            {healthFilter !== 'all' ? (
+              <p className="text-xs text-slate-500">{PAYHIP_HEALTH_META[healthFilter].detail}</p>
+            ) : queueFilter !== 'all' ? (
               <p className="text-xs text-slate-500">{PAYHIP_QUEUE_META[queueFilter].detail}</p>
             ) : releaseFocus !== 'all' ? (
               <p className="text-xs text-slate-500">{RELEASE_FOCUS_LABELS[releaseFocus]}</p>
             ) : (
-              <p className="text-xs text-slate-500">Use queue and release focus cards to narrow down the next batch of Payhip work.</p>
+              <p className="text-xs text-slate-500">Use health, queue, and release cards to narrow down the next batch of Payhip work.</p>
             )}
           </div>
 
@@ -440,13 +569,27 @@ export function PayhipLibrary({
               <button
                 type="button"
                 onClick={() => onAdvanceQueue(queueFilter, filtered.map(item => item.id))}
-                disabled={advancingQueue !== null}
+                disabled={advancingQueue !== null || resolvingHealth !== null || batchingVisible}
                 className={cn(
                   'rounded-xl px-4 py-2 text-sm font-bold transition',
-                  advancingQueue !== null ? 'cursor-wait bg-emerald-100 text-emerald-400' : 'bg-emerald-600 text-white hover:bg-emerald-700',
+                  advancingQueue !== null || resolvingHealth !== null || batchingVisible ? 'cursor-wait bg-emerald-100 text-emerald-400' : 'bg-emerald-600 text-white hover:bg-emerald-700',
                 )}
               >
                 {advancingQueue === queueFilter ? 'Updating...' : `${PAYHIP_QUEUE_META[queueFilter].buttonLabel} (${filtered.length})`}
+              </button>
+            )}
+
+            {healthFilter !== 'all' && onResolveHealth && hasPayhipHealthAutoFix(healthFilter) && filtered.length > 0 && (
+              <button
+                type="button"
+                onClick={() => onResolveHealth(healthFilter, filtered.map(item => item.id))}
+                disabled={advancingQueue !== null || resolvingHealth !== null || batchingVisible}
+                className={cn(
+                  'rounded-xl px-4 py-2 text-sm font-bold transition',
+                  advancingQueue !== null || resolvingHealth !== null || batchingVisible ? 'cursor-wait bg-rose-100 text-rose-400' : 'bg-rose-600 text-white hover:bg-rose-700',
+                )}
+              >
+                {resolvingHealth === healthFilter ? 'Resolving...' : `${PAYHIP_HEALTH_META[healthFilter].buttonLabel} (${filtered.length})`}
               </button>
             )}
 
@@ -463,8 +606,95 @@ export function PayhipLibrary({
         </div>
       </section>
 
+      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Batch Ops</p>
+            <p className="mt-1 text-sm text-slate-500">Apply controlled bulk changes to the current visible list.</p>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Visible Status</p>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                <select
+                  value={batchStatus}
+                  onChange={e => setBatchStatus(e.target.value as PayhipStatus)}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                >
+                  {BATCH_STATUS_OPTIONS.map(option => (
+                    <option key={option.key} value={option.key}>{option.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => onBatchStatus?.(batchStatus, filtered.map(item => item.id))}
+                  disabled={filtered.length === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null}
+                  className={cn(
+                    'rounded-xl px-4 py-2.5 text-sm font-bold transition',
+                    filtered.length === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null
+                      ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                      : 'bg-slate-900 text-white hover:bg-slate-700',
+                  )}
+                >
+                  {batchingVisible ? 'Applying...' : `Set ${filtered.length} To ${PAYHIP_STATUS_LABELS[batchStatus]}`}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Visible Pipeline Stage</p>
+              <div className="mt-3 space-y-3">
+                <select
+                  value={batchStage}
+                  onChange={e => setBatchStage(e.target.value as PayhipPipelineStage)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                >
+                  {PAYHIP_PIPELINE_STAGES.map(stage => (
+                    <option key={stage.key} value={stage.key}>{stage.label}</option>
+                  ))}
+                </select>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onBatchPipeline?.(batchStage, true, filtered.map(item => item.id))}
+                    disabled={filtered.length === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null}
+                    className={cn(
+                      'rounded-xl px-4 py-2.5 text-sm font-bold transition',
+                      filtered.length === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null
+                        ? 'cursor-not-allowed bg-emerald-100 text-emerald-400'
+                        : 'bg-emerald-600 text-white hover:bg-emerald-700',
+                    )}
+                  >
+                    {batchingVisible ? 'Applying...' : `Mark ${filtered.length} Done`}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onBatchPipeline?.(batchStage, false, filtered.map(item => item.id))}
+                    disabled={resetEligibleCount === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null}
+                    className={cn(
+                      'rounded-xl px-4 py-2.5 text-sm font-bold transition',
+                      resetEligibleCount === 0 || batchingVisible || advancingQueue !== null || resolvingHealth !== null
+                        ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                        : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900',
+                    )}
+                  >
+                    {batchingVisible ? 'Applying...' : `Reset ${resetEligibleCount}`}
+                  </button>
+                </div>
+                {resetLockedCount > 0 && (
+                  <p className="text-xs text-slate-500">
+                    {resetLockedCount} visible listing{resetLockedCount === 1 ? '' : 's'} keep {batchStageLabel} complete because a final Payhip URL already exists.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {filtered.length === 0 ? (
-        <div className="glass-card border-dashed p-12 text-center text-slate-400">
+        <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-12 text-center text-slate-400">
           No Payhip listings match the current filters.
         </div>
       ) : (

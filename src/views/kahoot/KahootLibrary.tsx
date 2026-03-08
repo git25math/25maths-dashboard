@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDownAZ, Check, Clock, RotateCcw, Search, X } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
+import { StatCard } from '../../components/StatCard';
 import { cn } from '../../lib/utils';
 import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipelineStage, KahootTrack } from '../../types';
 import { KahootCard } from './KahootCard';
@@ -55,20 +56,6 @@ function naturalTopicSort(a: string, b: string): number {
   return as_ - bs;
 }
 
-interface StatCardProps {
-  label: string;
-  value: number;
-  tone?: string;
-}
-
-function StatCard({ label, value, tone = 'text-slate-900' }: StatCardProps) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className={cn('mt-2 text-3xl font-bold', tone)}>{value}</p>
-    </div>
-  );
-}
 
 interface KahootLibraryProps {
   items: KahootItem[];
@@ -92,32 +79,34 @@ export function KahootLibrary({ items, selectedId, onSelect, onVisibleIdsChange 
   );
 
   // Reset track when board changes and current track is invalid
-  const handleBoardChange = (board: BoardFilter) => {
+  const handleBoardChange = useCallback((board: BoardFilter) => {
     setBoardFilter(board);
     if (board !== 'all') {
-      const valid = ALL_TRACK_OPTIONS.filter(o => o.key === 'all' || o.board === board).map(o => o.key);
-      if (!valid.includes(trackFilter)) setTrackFilter('all');
+      setTrackFilter(prev => {
+        const valid = ALL_TRACK_OPTIONS.filter(o => o.key === 'all' || o.board === board).map(o => o.key);
+        return valid.includes(prev) ? prev : 'all';
+      });
     }
-  };
+  }, []);
 
-  const togglePipeline = (stage: KahootPipelineStage) => {
+  const togglePipeline = useCallback((stage: KahootPipelineStage) => {
     setPipelineFilter(prev => {
       const current = prev[stage];
       const next = current === null ? true : current === true ? false : null;
       return { ...prev, [stage]: next };
     });
-  };
+  }, []);
 
   const hasActiveFilters = boardFilter !== 'all' || trackFilter !== 'all' || orgFilter !== 'all' || search.trim() !== ''
     || Object.values(pipelineFilter).some(v => v !== null);
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setSearch('');
     setBoardFilter('all');
     setTrackFilter('all');
     setPipelineFilter(INITIAL_PIPELINE_FILTER);
     setOrgFilter('all');
-  };
+  }, []);
 
   const pipelineStats = useMemo(() => {
     const result: Record<KahootPipelineStage, number> = {
@@ -276,24 +265,22 @@ export function KahootLibrary({ items, selectedId, onSelect, onVisibleIdsChange 
       </div>
 
       {/* Card list */}
-      <div className="space-y-3">
-        {filtered.map(item => (
-          <KahootCard
-            key={item.id}
-            item={item}
-            isSelected={item.id === selectedId}
-            onClick={() => onSelect(item.id)}
-          />
-        ))}
-
-        {filtered.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-16 text-center">
-            <p className="text-sm text-slate-400">
-              {items.length === 0 ? 'No Kahoots yet. Create your first one!' : 'No items match the current filters.'}
-            </p>
-          </div>
-        )}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-12 text-center text-slate-400">
+          {items.length === 0 ? 'No Kahoots yet. Create your first one!' : 'No items match the current filters.'}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(item => (
+            <KahootCard
+              key={item.id}
+              item={item}
+              isSelected={item.id === selectedId}
+              onClick={() => onSelect(item.id)}
+            />
+          ))}
+        </div>
+      )}
 
       <p className="text-xs text-slate-400 text-center">
         {filtered.length} of {items.length} shown

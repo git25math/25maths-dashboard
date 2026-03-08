@@ -10,6 +10,17 @@ export interface KahootDeployOptions {
   website_root?: string;
 }
 
+export const DEFAULT_DEPLOY_OPTIONS: KahootDeployOptions = {
+  use_ai_fill: true,
+  sync_website: true,
+  update_listing: true,
+  headless: false,
+  manual_fallback: true,
+  slow_mo: 250,
+};
+
+export const DEPLOY_OPTIONS_KEY = 'kahoot-deploy-options';
+
 export interface LocalAgentLogLine {
   at: string;
   stream: 'stdout' | 'stderr';

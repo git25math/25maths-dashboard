@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { randomAlphaId } from '../../lib/id';
 import { kahootService } from '../../services/kahootService';
-import { KahootCorrectOption, KahootItem, KahootPipeline, KahootQuestion, KahootTimeLimit, KahootUploadStatus } from '../../types';
+import { KahootCorrectOption, KahootItem, KahootPipeline, KahootQuestion, KahootTimeLimit, KahootUploadStatus, ToastApi } from '../../types';
 
 const DEFAULT_PIPELINE: KahootPipeline = {
   ai_generated: false,
@@ -11,11 +11,6 @@ const DEFAULT_PIPELINE: KahootPipeline = {
   web_verified: false,
   published: false,
 };
-
-interface ToastApi {
-  success: (message: string) => void;
-  error: (message: string) => void;
-}
 
 interface UseKahootActionsParams {
   kahootItems: KahootItem[];

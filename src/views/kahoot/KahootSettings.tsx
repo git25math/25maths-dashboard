@@ -1,18 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { KahootDeployOptions, localAgentService } from '../../services/localAgentService';
-
-const DEFAULT_DEPLOY_OPTIONS: KahootDeployOptions = {
-  use_ai_fill: true,
-  sync_website: true,
-  update_listing: true,
-  headless: false,
-  manual_fallback: true,
-  slow_mo: 250,
-};
-
-const DEPLOY_OPTIONS_KEY = 'kahoot-deploy-options';
+import { DEFAULT_DEPLOY_OPTIONS, DEPLOY_OPTIONS_KEY, KahootDeployOptions, localAgentService } from '../../services/localAgentService';
 const AGENT_URL_KEY = 'kahoot-agent-url';
 
 type AgentStatus = 'idle' | 'checking' | 'online' | 'offline';

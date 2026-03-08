@@ -1,12 +1,7 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { payhipService } from '../../services/payhipService';
-import { PayhipItem, PayhipPipeline, PayhipPipelineStage, PayhipStatus } from '../../types';
-import { mergePayhipPipeline } from '../../lib/payhipUtils';
-
-interface ToastApi {
-  success: (message: string) => void;
-  error: (message: string) => void;
-}
+import { PayhipItem, PayhipPipeline, PayhipPipelineStage, PayhipStatus, ToastApi } from '../../types';
+import { isPayhipPipelineStageLocked, mergePayhipPipeline } from '../../lib/payhipUtils';
 
 interface UsePayhipActionsParams {
   payhipItems: PayhipItem[];
@@ -68,20 +63,25 @@ export function usePayhipActions({ payhipItems, setPayhipItems, toast }: UsePayh
     const existing = payhipItems.find(item => item.id === id);
     if (!existing) return;
 
+    if (existing.pipeline[stage] && isPayhipPipelineStageLocked(existing, stage)) {
+      toast.error('Final Payhip URL keeps this stage complete');
+      return;
+    }
+
     await updatePayhip(id, {
       pipeline: {
         ...existing.pipeline,
         [stage]: !existing.pipeline[stage],
       },
     });
-  }, [payhipItems, updatePayhip]);
+  }, [payhipItems, toast, updatePayhip]);
 
   const bulkSetPayhipPipeline = useCallback(async (id: string, value: boolean) => {
     const existing = payhipItems.find(item => item.id === id);
     if (!existing) return;
 
     const pipeline = PAYHIP_PIPELINE_KEYS.reduce((acc, key) => {
-      acc[key] = value;
+      acc[key] = !value && isPayhipPipelineStageLocked(existing, key) ? true : value;
       return acc;
     }, {} as PayhipPipeline);
 

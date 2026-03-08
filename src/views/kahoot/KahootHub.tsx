@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, Plus, Settings } from 'lucide-react';
-import { KahootItem, KahootPipelineStage } from '../../types';
+import { cn } from '../../lib/utils';
+import { KahootItem, KahootPipelineStage, KahootQuestion, ToastApi } from '../../types';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { KahootLibrary } from './KahootLibrary';
-import { KahootDetailSheet } from './KahootDetailSheet';
+import { KahootDetailPanel, KahootDetailSheet } from './KahootDetailSheet';
 import { KahootCreateWizard } from './KahootCreateWizard';
 import { KahootSettings } from './KahootSettings';
 import { KahootModuleGuide } from './KahootModuleGuide';
 
 type HubView = 'library' | 'create' | 'settings';
-
-interface ToastApi {
-  success: (msg: string) => void;
-  error: (msg: string) => void;
-}
 
 interface KahootHubProps {
   kahootItems: KahootItem[];
@@ -99,6 +96,13 @@ export function KahootHub({
     });
   }, [onUpdateKahoot]);
 
+  const handleUpdateQuestion = useCallback(async (kahootId: string, questionId: string, updates: Partial<KahootQuestion>) => {
+    const item = kahootItems.find(i => i.id === kahootId);
+    if (!item) return;
+    const nextQuestions = item.questions.map(q => q.id === questionId ? { ...q, ...updates } : q);
+    await onUpdateKahoot(kahootId, { questions: nextQuestions });
+  }, [kahootItems, onUpdateKahoot]);
+
   const handleNavigate = useCallback((direction: 'prev' | 'next') => {
     if (!selectedId) return;
     const idx = navigationIds.findIndex(id => id === selectedId);
@@ -109,55 +113,95 @@ export function KahootHub({
     if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
   }, [navigationIds, selectedId]);
 
+  const detailProps = {
+    item: selectedItem,
+    onClose: handleCloseSheet,
+    onDelete: handleDelete,
+    onDuplicate: handleDuplicate,
+    onCopy: handleCopy,
+    onTogglePipeline: handleTogglePipeline,
+    onBulkPipeline: handleBulkPipeline,
+    onUpdateQuestion: handleUpdateQuestion,
+    onNavigate: handleNavigate,
+    canNavigatePrev: selectedIndex > 0,
+    canNavigateNext: selectedIndex !== -1 && selectedIndex < navigationIds.length - 1,
+  };
+
+  // Desktop split layout: header fixed, two panels fill remaining viewport height with independent scroll
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const showDesktopSplit = isDesktop && view === 'library' && !!selectedItem;
+
+  const headerBar = view !== 'create' && (
+    <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', showDesktopSplit && 'lg:shrink-0')}>
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Publishing</p>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Kahoot Hub</h2>
+        <p className="text-sm text-slate-500 max-w-lg">
+          Create, manage, and deploy Kahoot quizzes across CIE and Edexcel exam boards.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setView('create')}
+          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700"
+        >
+          <Plus size={16} /> Create New
+        </button>
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition"
+          title="Module Guide"
+        >
+          <HelpCircle size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setView(v => v === 'settings' ? 'library' : 'settings')}
+          className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition"
+          title="Settings"
+        >
+          <Settings size={18} />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Top bar - only show in library/settings */}
-      {view !== 'create' && (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Publishing</p>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Kahoot Hub</h2>
-            <p className="text-sm text-slate-500 max-w-lg">
-              Create, manage, and deploy Kahoot quizzes across CIE and Edexcel exam boards.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setView('create')}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700"
-            >
-              <Plus size={16} /> Create New
-            </button>
-            <button
-              type="button"
-              onClick={() => setGuideOpen(true)}
-              className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition"
-              title="Module Guide"
-            >
-              <HelpCircle size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setView(v => v === 'settings' ? 'library' : 'settings')}
-              className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition"
-              title="Settings"
-            >
-              <Settings size={18} />
-            </button>
-          </div>
-        </div>
+    <div
+      className={cn(
+        showDesktopSplit
+          ? 'flex flex-col gap-6'
+          : 'space-y-6',
       )}
+      style={showDesktopSplit ? { height: 'calc(100vh - 4rem)' } : undefined}
+    >
+      {headerBar}
 
-      {/* Views */}
       {view === 'library' && (
-        <KahootLibrary
-          items={kahootItems}
-          selectedId={selectedId}
-          onSelect={handleCardClick}
-          onVisibleIdsChange={setVisibleIds}
-        />
+        showDesktopSplit ? (
+          /* Desktop split: two panels fill remaining height, each scrolls independently */
+          <div className="flex gap-6 flex-1 min-h-0">
+            <div className="flex-1 min-w-0 overflow-y-auto pr-1">
+              <KahootLibrary
+                items={kahootItems}
+                selectedId={selectedId}
+                onSelect={handleCardClick}
+                onVisibleIdsChange={setVisibleIds}
+              />
+            </div>
+            <KahootDetailPanel {...detailProps} />
+          </div>
+        ) : (
+          <KahootLibrary
+            items={kahootItems}
+            selectedId={selectedId}
+            onSelect={handleCardClick}
+            onVisibleIdsChange={setVisibleIds}
+          />
+        )
       )}
 
       {view === 'settings' && (
@@ -172,19 +216,8 @@ export function KahootHub({
         />
       )}
 
-      {/* Detail Sheet - overlays library view */}
-      <KahootDetailSheet
-        item={selectedItem}
-        onClose={handleCloseSheet}
-        onDelete={handleDelete}
-        onDuplicate={handleDuplicate}
-        onCopy={handleCopy}
-        onTogglePipeline={handleTogglePipeline}
-        onBulkPipeline={handleBulkPipeline}
-        onNavigate={handleNavigate}
-        canNavigatePrev={selectedIndex > 0}
-        canNavigateNext={selectedIndex !== -1 && selectedIndex < navigationIds.length - 1}
-      />
+      {/* Mobile overlay sheet — used when split layout is not active */}
+      {!showDesktopSplit && <KahootDetailSheet {...detailProps} />}
 
       {/* Module Guide modal */}
       <KahootModuleGuide isOpen={guideOpen} onClose={() => setGuideOpen(false)} />

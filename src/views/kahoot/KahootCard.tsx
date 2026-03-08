@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ExternalLink, Gamepad2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipeline, KahootPipelineStage, KahootTrack } from '../../types';
@@ -72,7 +73,7 @@ interface KahootCardProps {
   onClick: () => void;
 }
 
-export function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
+export const KahootCard = memo(function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
   const orgType = item.org_type ?? 'standalone';
   const nextAction = getNextKahootAction(item.pipeline);
 
@@ -159,4 +160,4 @@ export function KahootCard({ item, isSelected, onClick }: KahootCardProps) {
       </div>
     </button>
   );
-}
+});

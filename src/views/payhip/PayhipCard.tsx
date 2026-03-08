@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { ExternalLink, Store } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { getNextPayhipAction, PAYHIP_STATUS_LABELS } from '../../lib/payhipUtils';
+import { getEffectivePayhipPipeline, getNextPayhipAction, getPayhipHealthAlerts, PAYHIP_STATUS_LABELS } from '../../lib/payhipUtils';
 import { PAYHIP_PIPELINE_STAGES, PayhipItem, PayhipStatus } from '../../types';
 
 const STATUS_STYLES: Record<PayhipStatus, string> = {
@@ -12,8 +13,10 @@ const STATUS_STYLES: Record<PayhipStatus, string> = {
 };
 
 function PipelineDots({ item }: { item: PayhipItem }) {
-  const doneCount = Object.values(item.pipeline).filter(Boolean).length;
+  const pipeline = getEffectivePayhipPipeline(item);
+  const doneCount = Object.values(pipeline).filter(Boolean).length;
   const total = PAYHIP_PIPELINE_STAGES.length;
+  const allDone = doneCount === total;
 
   return (
     <span className="inline-flex items-center gap-1.5" title={`${doneCount}/${total} stages done`}>
@@ -21,12 +24,12 @@ function PipelineDots({ item }: { item: PayhipItem }) {
         {PAYHIP_PIPELINE_STAGES.map(stage => (
           <span
             key={stage.key}
-            className={cn('h-2 w-2 rounded-full', item.pipeline[stage.key] ? 'bg-emerald-500' : 'bg-slate-200')}
-            title={`${stage.label}: ${item.pipeline[stage.key] ? 'Done' : 'Pending'}`}
+            className={cn('h-2 w-2 rounded-full', pipeline[stage.key] ? 'bg-emerald-500' : 'bg-slate-200')}
+            title={`${stage.label}: ${pipeline[stage.key] ? 'Done' : 'Pending'}`}
           />
         ))}
       </span>
-      <span className="text-[10px] font-bold tabular-nums text-slate-400">
+      <span className={cn('text-[10px] font-bold tabular-nums', allDone ? 'text-emerald-600' : 'text-slate-400')}>
         {doneCount}/{total}
       </span>
     </span>
@@ -41,8 +44,9 @@ function countLabel(item: PayhipItem) {
   return parts.join(' | ') || item.tier_scope;
 }
 
-export function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; isSelected: boolean; onClick: () => void }) {
+export const PayhipCard = memo(function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; isSelected: boolean; onClick: () => void }) {
   const nextAction = getNextPayhipAction(item);
+  const healthAlerts = getPayhipHealthAlerts(item);
 
   return (
     <button
@@ -75,6 +79,11 @@ export function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; is
               <p className={cn('truncate text-xs font-semibold', nextAction.key === 'complete' ? 'text-emerald-600' : 'text-slate-400')}>
                 Next: {nextAction.label}
               </p>
+              {healthAlerts.length > 0 && (
+                <p className="truncate text-xs font-semibold text-rose-600">
+                  Alert: {healthAlerts[0].label}
+                </p>
+              )}
             </div>
             <span className={cn('rounded-full px-3 py-1 text-[11px] font-bold', STATUS_STYLES[item.status])}>
               {PAYHIP_STATUS_LABELS[item.status]}
@@ -111,4 +120,4 @@ export function PayhipCard({ item, isSelected, onClick }: { item: PayhipItem; is
       </div>
     </button>
   );
-}
+});

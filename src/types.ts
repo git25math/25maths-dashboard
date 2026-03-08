@@ -1,5 +1,10 @@
 export type Role = 'teacher' | 'tutor' | 'entrepreneur';
 
+export interface ToastApi {
+  success: (message: string) => void;
+  error: (message: string) => void;
+}
+
 // --- PrepStatus (4-state) ---
 export type PrepStatus = 'not_prepared' | 'prepared' | 'finished' | 'recorded';
 

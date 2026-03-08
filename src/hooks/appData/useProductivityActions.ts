@@ -9,12 +9,7 @@ import { meetingService } from '../../services/meetingService';
 import { emailDigestService } from '../../services/emailDigestService';
 import { taskService } from '../../services/taskService';
 import { projectService } from '../../services/projectService';
-import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project } from '../../types';
-
-interface ToastApi {
-  success: (message: string) => void;
-  error: (message: string) => void;
-}
+import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project, ToastApi } from '../../types';
 
 interface UseProductivityActionsParams {
   ideas: Idea[];
