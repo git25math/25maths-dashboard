@@ -115,8 +115,9 @@ const backfillKahootSeedFields = (items: KahootItem[]) => {
       (currentCoverUrl !== seedCoverUrl || !isCanonicalCoverUrl(item.cover_url))
     );
     const shouldUpdateQuestions = currentQuestions.length === 0 && seedQuestions.length > 0;
+    const shouldUpdatePipeline = !item.pipeline && seed.pipeline;
 
-    if (!shouldUpdateCreator && !shouldUpdateCover && !shouldUpdateQuestions) {
+    if (!shouldUpdateCreator && !shouldUpdateCover && !shouldUpdateQuestions && !shouldUpdatePipeline) {
       return item;
     }
 
@@ -125,6 +126,7 @@ const backfillKahootSeedFields = (items: KahootItem[]) => {
       creator_url: shouldUpdateCreator ? seed.creator_url : item.creator_url,
       cover_url: shouldUpdateCover ? seed.cover_url : item.cover_url,
       questions: shouldUpdateQuestions ? seed.questions : item.questions,
+      pipeline: item.pipeline || seed.pipeline,
     };
     changedItems.push(nextItem);
     return nextItem;
