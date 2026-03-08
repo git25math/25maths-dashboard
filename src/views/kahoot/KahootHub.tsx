@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { HelpCircle, Plus, Settings } from 'lucide-react';
-import { KahootItem } from '../../types';
+import { KahootItem, KahootPipelineStage } from '../../types';
 import { KahootLibrary } from './KahootLibrary';
 import { KahootDetailSheet } from './KahootDetailSheet';
 import { KahootCreateWizard } from './KahootCreateWizard';
@@ -68,6 +68,13 @@ export function KahootHub({
       await onAddKahoot(item);
     }
   }, [kahootItems, onAddKahoot, onUpdateKahoot]);
+
+  const handleTogglePipeline = useCallback(async (id: string, stage: KahootPipelineStage) => {
+    const item = kahootItems.find(i => i.id === id);
+    if (!item) return;
+    const updatedPipeline = { ...item.pipeline, [stage]: !item.pipeline[stage] };
+    await onUpdateKahoot(id, { pipeline: updatedPipeline });
+  }, [kahootItems, onUpdateKahoot]);
 
   return (
     <div className="space-y-6">
@@ -138,6 +145,7 @@ export function KahootHub({
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
         onCopy={handleCopy}
+        onTogglePipeline={handleTogglePipeline}
       />
 
       {/* Module Guide modal */}

@@ -2,29 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Circle, Copy, ExternalLink, Gamepad2, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
-import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootQuestion, KahootTrack } from '../../types';
+import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipelineStage, KahootQuestion, KahootTrack } from '../../types';
 
 const BOARD_LABELS: Record<KahootBoard, string> = { cie0580: 'CIE 0580', 'edexcel-4ma1': 'Edexcel 4MA1' };
 const TRACK_LABELS: Record<KahootTrack, string> = { core: 'Core', extended: 'Extended', foundation: 'Foundation', higher: 'Higher' };
 const ORG_LABELS: Record<KahootOrgType, string> = { standalone: 'Standalone', in_course: 'In Course', in_channel: 'In Channel' };
-
-const STATUS_BADGE: Record<string, string> = {
-  ai_generated: 'bg-slate-100 text-slate-500',
-  human_review: 'bg-amber-100 text-amber-700',
-  excel_exported: 'bg-blue-100 text-blue-700',
-  kahoot_uploaded: 'bg-indigo-100 text-indigo-700',
-  web_verified: 'bg-teal-100 text-teal-700',
-  published: 'bg-emerald-100 text-emerald-700',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  ai_generated: 'AI Generated',
-  human_review: 'Reviewed',
-  excel_exported: 'Excel Ready',
-  kahoot_uploaded: 'Uploaded',
-  web_verified: 'Verified',
-  published: 'Published',
-};
 
 function formatDate(v?: string) {
   if (!v) return '-';
@@ -102,9 +84,10 @@ interface KahootDetailSheetProps {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onCopy: (value: string, label: string) => void;
+  onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
 }
 
-export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy }: KahootDetailSheetProps) {
+export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline }: KahootDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
@@ -176,13 +159,20 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
                     {KAHOOT_PIPELINE_STAGES.map(s => {
                       const done = item.pipeline[s.key];
                       return (
-                        <div key={s.key} className={cn(
-                          'flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold',
-                          done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400',
-                        )}>
+                        <button
+                          key={s.key}
+                          type="button"
+                          onClick={() => onTogglePipeline(item.id, s.key)}
+                          className={cn(
+                            'flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all active:scale-[0.97] cursor-pointer',
+                            done
+                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600',
+                          )}
+                        >
                           {done ? <Check size={14} /> : <Circle size={14} />}
                           {s.label}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
