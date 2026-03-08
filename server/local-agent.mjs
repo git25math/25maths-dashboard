@@ -67,7 +67,7 @@ function appendLog(job, message, stream = 'stdout') {
   }
 }
 
-function launchKahootDeployJob(payload, dryRun) {
+function launchJob({ type, scriptPath, payload, dryRun = false }) {
   const jobId = makeJobId();
   const payloadPath = resolve(RUNTIME_DIR, `${jobId}.payload.json`);
   const resultPath = resolve(RUNTIME_DIR, `${jobId}.result.json`);
@@ -76,7 +76,7 @@ function launchKahootDeployJob(payload, dryRun) {
 
   const command = [
     process.execPath,
-    resolve(PROJECT_ROOT, 'scripts/kahoot/deploy-kahoot-upload.mjs'),
+    resolve(PROJECT_ROOT, scriptPath),
     '--payload',
     payloadPath,
     '--result',
@@ -86,7 +86,7 @@ function launchKahootDeployJob(payload, dryRun) {
 
   const job = {
     id: jobId,
-    type: 'kahoot-upload',
+    type,
     status: 'queued',
     meta: {
       item_id: payload?.item?.id || '',
@@ -152,6 +152,31 @@ function launchKahootDeployJob(payload, dryRun) {
   return job;
 }
 
+function launchKahootDeployJob(payload, dryRun) {
+  return launchJob({
+    type: 'kahoot-upload',
+    scriptPath: 'scripts/kahoot/deploy-kahoot-upload.mjs',
+    payload,
+    dryRun,
+  });
+}
+
+function launchKahootArtifactsJob(payload) {
+  return launchJob({
+    type: 'kahoot-artifacts',
+    scriptPath: 'scripts/kahoot/export-kahoot-artifacts.mjs',
+    payload,
+  });
+}
+
+function launchKahootSpreadsheetJob(payload) {
+  return launchJob({
+    type: 'kahoot-spreadsheet',
+    scriptPath: 'scripts/kahoot/build-kahoot-spreadsheet.mjs',
+    payload,
+  });
+}
+
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
@@ -189,6 +214,28 @@ app.post('/jobs/kahoot-upload', (req, res) => {
   }
 
   const job = launchKahootDeployJob(payload, Boolean(payload.dry_run));
+  res.status(202).json(serializeJob(job));
+});
+
+app.post('/jobs/kahoot-artifacts', (req, res) => {
+  const payload = req.body || {};
+  if (!payload.item || !payload.item.title) {
+    res.status(400).json({ error: 'Missing item payload' });
+    return;
+  }
+
+  const job = launchKahootArtifactsJob(payload);
+  res.status(202).json(serializeJob(job));
+});
+
+app.post('/jobs/kahoot-spreadsheet', (req, res) => {
+  const payload = req.body || {};
+  if (!payload.item || !payload.item.title) {
+    res.status(400).json({ error: 'Missing item payload' });
+    return;
+  }
+
+  const job = launchKahootSpreadsheetJob(payload);
   res.status(202).json(serializeJob(job));
 });
 

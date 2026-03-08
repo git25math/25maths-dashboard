@@ -12,6 +12,8 @@
     "prep:report": "tsx scripts/report-prep-completeness.ts",
     "agent:local": "node server/local-agent.mjs",
     "kahoot:artifacts": "node scripts/kahoot/generate-kahoot-artifacts.mjs",
+    "kahoot:export-artifacts": "node scripts/kahoot/export-kahoot-artifacts.mjs",
+    "kahoot:build-spreadsheet": "node scripts/kahoot/build-kahoot-spreadsheet.mjs",
     "kahoot:ensure-session": "python3 scripts/kahoot/ensure_kahoot_session.py",
     "kahoot:deploy": "node scripts/kahoot/deploy-kahoot-upload.mjs",
     "kahoot:create-challenge": "python3 scripts/kahoot/create_kahoot_challenge_link.py",

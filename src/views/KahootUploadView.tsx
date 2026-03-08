@@ -6,6 +6,7 @@ import {
   Copy,
   ExternalLink,
   FileQuestion,
+  FileSpreadsheet,
   Gamepad2,
   ImageUp,
   Link2,
@@ -218,6 +219,53 @@ function getQuestionSummary(item: KahootItem) {
   };
 }
 
+const STATUS_PROGRESS: KahootUploadStatus[] = ['ai_generated', 'human_review', 'excel_exported', 'kahoot_uploaded', 'web_verified', 'published'];
+
+function getPipelineForStatus(current: KahootItem['pipeline'], status: KahootUploadStatus): KahootItem['pipeline'] {
+  const index = STATUS_PROGRESS.indexOf(status);
+
+  return {
+    ai_generated: true,
+    reviewed: current.reviewed || index >= 1,
+    excel_exported: current.excel_exported || index >= 2,
+    kahoot_uploaded: current.kahoot_uploaded || index >= 3,
+    web_verified: current.web_verified || index >= 4,
+    published: current.published || index >= 5,
+  };
+}
+
+function applyLocalStatus(item: KahootItem, status: KahootUploadStatus) {
+  const timestamp = new Date().toISOString();
+  const index = STATUS_PROGRESS.indexOf(status);
+
+  return {
+    ...item,
+    upload_status: status,
+    pipeline: getPipelineForStatus(item.pipeline, status),
+    ai_generated_at: item.ai_generated_at || timestamp,
+    human_reviewed_at: index >= 1 ? (item.human_reviewed_at || timestamp) : item.human_reviewed_at,
+    uploaded_at: index >= 3 ? (item.uploaded_at || timestamp) : item.uploaded_at,
+    updated_at: timestamp,
+  };
+}
+
+function getNextStageAction(status: KahootUploadStatus) {
+  switch (status) {
+    case 'ai_generated':
+      return { status: 'human_review' as KahootUploadStatus, label: 'Mark Review Done', note: 'Use after manual QA in Dashboard.' };
+    case 'human_review':
+      return { status: 'excel_exported' as KahootUploadStatus, label: 'Mark Excel Ready', note: 'Use after the upload spreadsheet is built.' };
+    case 'excel_exported':
+      return { status: 'kahoot_uploaded' as KahootUploadStatus, label: 'Mark Upload Done', note: 'Use after spreadsheet import succeeds in Creator.' };
+    case 'kahoot_uploaded':
+      return { status: 'web_verified' as KahootUploadStatus, label: 'Mark Website Verified', note: 'Use after page and play links are checked.' };
+    case 'web_verified':
+      return { status: 'published' as KahootUploadStatus, label: 'Mark Published', note: 'Use after the final release is confirmed.' };
+    default:
+      return null;
+  }
+}
+
 export function KahootUploadView({
   kahootItems,
   onAddKahoot,
@@ -241,7 +289,7 @@ export function KahootUploadView({
   const [agentWebsiteRoot, setAgentWebsiteRoot] = useState('');
   const [deployOptions, setDeployOptions] = useState<KahootDeployOptions>(() => readStoredDeployOptions());
   const [deployJob, setDeployJob] = useState<LocalAgentJob | null>(null);
-  const [isStartingDeploy, setIsStartingDeploy] = useState(false);
+  const [isStartingJob, setIsStartingJob] = useState(false);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const processedDeployJobsRef = useRef<Set<string>>(new Set());
@@ -280,6 +328,11 @@ export function KahootUploadView({
     () => kahootItems.find(item => item.id === selectedId) ?? null,
     [kahootItems, selectedId],
   );
+  const activeJob = useMemo(
+    () => (draft && deployJob?.meta?.item_id === draft.id ? deployJob : null),
+    [deployJob, draft],
+  );
+  const activeJobResult = useMemo(() => asRecord(activeJob?.result), [activeJob]);
 
   const draftIssues = useMemo(() => draft ? getItemIssues(draft) : [], [draft]);
   const draftChecklist = useMemo(() => draft ? getPublishChecklist(draft) : [], [draft]);
@@ -306,6 +359,7 @@ export function KahootUploadView({
     if (!selectedItem || !draft) return false;
     return JSON.stringify(selectedItem) !== JSON.stringify(draft);
   }, [draft, selectedItem]);
+  const nextStageAction = useMemo(() => draft ? getNextStageAction(draft.upload_status) : null, [draft]);
 
   useEffect(() => {
     if (kahootItems.length === 0) {
@@ -354,6 +408,7 @@ export function KahootUploadView({
     processedDeployJobsRef.current.add(deployJob.id);
 
     const itemId = deployJob.meta?.item_id;
+    const jobType = deployJob.type;
     const result = asRecord(deployJob.result);
     const resultItem = asRecord(result.item) as Partial<KahootItem>;
     const dryRun = result.dry_run === true;
@@ -365,6 +420,66 @@ export function KahootUploadView({
     const uploaded = asRecord(result.upload).uploaded === true;
 
     if (!itemId) return;
+
+    if (jobType === 'kahoot-artifacts') {
+      if (challengeUrl || creatorUrl || websiteLinkId || listingPath || Object.keys(resultItem).length) {
+        updateDraft(current => current && current.id === itemId
+          ? {
+              ...current,
+              ...resultItem,
+              challenge_url: challengeUrl || current.challenge_url,
+              creator_url: creatorUrl || current.creator_url,
+              website_link_id: websiteLinkId || current.website_link_id,
+              listing_path: listingPath || current.listing_path,
+            }
+          : current);
+      }
+      toast.success('Markdown artifacts exported');
+      return;
+    }
+
+    if (jobType === 'kahoot-spreadsheet') {
+      let persistUpdates: Partial<KahootItem> | null = null;
+
+      updateDraft(current => {
+        if (!current || current.id !== itemId) return current;
+
+        const merged = {
+          ...current,
+          ...resultItem,
+          challenge_url: challengeUrl || current.challenge_url,
+          creator_url: creatorUrl || current.creator_url,
+          website_link_id: websiteLinkId || current.website_link_id,
+          listing_path: listingPath || current.listing_path,
+        };
+        const next = STATUS_PROGRESS.indexOf(merged.upload_status) >= STATUS_PROGRESS.indexOf('excel_exported')
+          ? merged
+          : applyLocalStatus(merged, 'excel_exported');
+
+        persistUpdates = {
+          ...resultItem,
+          challenge_url: next.challenge_url,
+          creator_url: next.creator_url,
+          website_link_id: next.website_link_id,
+          listing_path: next.listing_path,
+          upload_status: next.upload_status,
+          pipeline: next.pipeline,
+          human_reviewed_at: next.human_reviewed_at,
+          uploaded_at: next.uploaded_at,
+        };
+
+        return next;
+      });
+
+      if (persistUpdates && !dryRun) {
+        onUpdateKahoot(itemId, persistUpdates).catch(() => {
+          toast.error('Spreadsheet export finished but item auto-save failed');
+        });
+      }
+
+      toast.success('Spreadsheet export complete');
+      return;
+    }
 
     if (!dryRun) {
       const updates: Partial<KahootItem> = {
@@ -496,23 +611,92 @@ export function KahootUploadView({
     }
   };
 
-  const handleStartDeploy = async (dryRun: boolean) => {
+  const startAgentJob = async (mode: 'artifacts' | 'spreadsheet' | 'deploy', dryRun = false) => {
     if (!draft) return;
 
     try {
-      setIsStartingDeploy(true);
-      const job = await localAgentService.startKahootUpload(agentUrl, draft, dryRun, deployOptions);
+      setIsStartingJob(true);
+
+      const job = mode === 'artifacts'
+        ? await localAgentService.startKahootArtifacts(agentUrl, draft, deployOptions)
+        : mode === 'spreadsheet'
+          ? await localAgentService.startKahootSpreadsheet(agentUrl, draft, deployOptions)
+          : await localAgentService.startKahootUpload(agentUrl, draft, dryRun, deployOptions);
+
       setDeployJob(job);
       setAgentHealth('online');
-      setAgentMessage(dryRun ? 'Dry-run job started' : 'Deploy job started');
-      toast.success(dryRun ? 'Dry-run started' : 'Deploy started');
+      setAgentMessage(
+        mode === 'artifacts'
+          ? 'Markdown export started'
+          : mode === 'spreadsheet'
+            ? 'Spreadsheet build started'
+            : dryRun
+              ? 'Dry-run job started'
+              : 'Deploy job started',
+      );
+      toast.success(
+        mode === 'artifacts'
+          ? 'Markdown export started'
+          : mode === 'spreadsheet'
+            ? 'Spreadsheet build started'
+            : dryRun
+              ? 'Dry-run started'
+              : 'Deploy started',
+      );
     } catch (error) {
       setAgentHealth('offline');
-      setAgentMessage('Failed to start deploy job');
-      toast.error('Could not start local deploy job');
+      setAgentMessage(
+        mode === 'artifacts'
+          ? 'Failed to start markdown export'
+          : mode === 'spreadsheet'
+            ? 'Failed to start spreadsheet build'
+            : 'Failed to start deploy job',
+      );
+      toast.error(
+        mode === 'artifacts'
+          ? 'Could not export markdown artifacts'
+          : mode === 'spreadsheet'
+            ? 'Could not build spreadsheet'
+            : 'Could not start local deploy job',
+      );
     } finally {
-      setIsStartingDeploy(false);
+      setIsStartingJob(false);
     }
+  };
+
+  const handleStartArtifacts = async () => {
+    await startAgentJob('artifacts');
+  };
+
+  const handleStartSpreadsheet = async () => {
+    await startAgentJob('spreadsheet');
+  };
+
+  const handleStartDeploy = async (dryRun: boolean) => {
+    await startAgentJob('deploy', dryRun);
+  };
+
+  const handleAdvanceStage = async (status: KahootUploadStatus) => {
+    if (!draft) return;
+
+    const next = applyLocalStatus(draft, status);
+    setDraft(next);
+
+    try {
+      await onUpdateKahoot(draft.id, {
+        upload_status: next.upload_status,
+        pipeline: next.pipeline,
+        human_reviewed_at: next.human_reviewed_at,
+        uploaded_at: next.uploaded_at,
+      });
+    } catch (error) {
+      toast.error('Stage update failed');
+    }
+  };
+
+  const handleOpenCreator = () => {
+    const url = asString(activeJobResult.open_creator_url) || 'https://create.kahoot.it/';
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const detailTabs = draft ? ([
@@ -1336,6 +1520,215 @@ export function KahootUploadView({
               {detailTab === 'publish' && (
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
                   <div className="glass-card space-y-5 p-5">
+                    <div className="rounded-[28px] border border-slate-200 bg-white p-5">
+                      <div className="max-w-2xl">
+                        <p className="text-sm font-bold text-slate-900">Manual Upload Flow</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-500">
+                          Run the manual path in order: save to Supabase, export markdown, build the import spreadsheet,
+                          open Kahoot Creator, then mark the manual stage after you confirm the upload.
+                        </p>
+                      </div>
+
+                      <div className="mt-5 grid gap-3 xl:grid-cols-2">
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Step 1</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">Save to Supabase</p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                Persist the current draft first. Later export steps stay disabled while the draft is dirty.
+                              </p>
+                            </div>
+                            <Save size={18} className="text-slate-400" />
+                          </div>
+                          <div className="mt-4 flex items-center justify-between gap-3">
+                            <p className="text-xs font-medium text-slate-500">
+                              {hasUnsavedChanges ? 'Unsaved changes detected' : 'Supabase is in sync'}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={handleSave}
+                              disabled={!hasUnsavedChanges}
+                              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Save Changes
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Step 2</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">Export to Markdown</p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                Generate the temporary `listing-copy.md` and `kahoot-question-set.md` files from the saved record.
+                              </p>
+                            </div>
+                            <FileQuestion size={18} className="text-slate-400" />
+                          </div>
+                          <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleStartArtifacts}
+                              disabled={hasUnsavedChanges || isStartingJob}
+                              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                {isStartingJob ? <LoaderCircle size={14} className="animate-spin" /> : <FileQuestion size={14} />}
+                                Export MD
+                              </span>
+                            </button>
+                            {asString(activeJobResult.question_set_path) && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(asString(activeJobResult.question_set_path), 'Question Set Path')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                              >
+                                Copy MD Path
+                              </button>
+                            )}
+                          </div>
+                          <p className="mt-3 text-xs text-slate-500">
+                            {hasUnsavedChanges ? 'Save current edits before exporting markdown.' : asString(activeJobResult.question_set_path) || 'No markdown export for this item yet.'}
+                          </p>
+                        </div>
+
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Step 3</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">Build Upload Spreadsheet</p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                Convert the markdown question set into Kahoot&apos;s spreadsheet import `.xlsx` format.
+                              </p>
+                            </div>
+                            <FileSpreadsheet size={18} className="text-slate-400" />
+                          </div>
+                          <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleStartSpreadsheet}
+                              disabled={hasUnsavedChanges || isStartingJob}
+                              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                {isStartingJob ? <LoaderCircle size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
+                                Build Excel
+                              </span>
+                            </button>
+                            {asString(activeJobResult.xlsx_path) && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(asString(activeJobResult.xlsx_path), 'XLSX Path')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                              >
+                                Copy XLSX Path
+                              </button>
+                            )}
+                          </div>
+                          <p className="mt-3 text-xs text-slate-500">
+                            {hasUnsavedChanges ? 'Save current edits before building the spreadsheet.' : asString(activeJobResult.xlsx_path) || 'No spreadsheet build for this item yet.'}
+                          </p>
+                        </div>
+
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Step 4</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">Open Kahoot Creator</p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                In Creator, open `Add question`, then `Import`, then `Import spreadsheet`, and upload the generated `.xlsx`.
+                              </p>
+                            </div>
+                            <ExternalLink size={18} className="text-slate-400" />
+                          </div>
+                          <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleOpenCreator}
+                              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <ExternalLink size={14} /> Open Creator
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(asString(activeJobResult.open_creator_url) || 'https://create.kahoot.it/', 'Creator URL')}
+                              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                            >
+                              Copy Creator URL
+                            </button>
+                          </div>
+                          <p className="mt-3 text-xs text-slate-500">
+                            {asString(activeJobResult.xlsx_path) ? `Current upload file: ${asString(activeJobResult.xlsx_path)}` : 'Build the spreadsheet first so the upload file is ready.'}
+                          </p>
+                        </div>
+
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 xl:col-span-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Step 5</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">Manual Confirmation</p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                After you confirm the import in Creator, advance the workflow stage here so Supabase reflects the real-world state.
+                              </p>
+                            </div>
+                            <CheckCircle2 size={18} className="text-slate-400" />
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap items-center gap-2">
+                            {nextStageAction ? (
+                              <button
+                                type="button"
+                                onClick={() => handleAdvanceStage(nextStageAction.status)}
+                                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100"
+                              >
+                                {nextStageAction.label}
+                              </button>
+                            ) : (
+                              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
+                                Workflow already marked as published
+                              </div>
+                            )}
+
+                            {draft.upload_status !== 'human_review' && (
+                              <button
+                                type="button"
+                                onClick={() => handleAdvanceStage('human_review')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                              >
+                                Mark Human Review
+                              </button>
+                            )}
+                            {draft.upload_status !== 'kahoot_uploaded' && (
+                              <button
+                                type="button"
+                                onClick={() => handleAdvanceStage('kahoot_uploaded')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                              >
+                                Mark Uploaded
+                              </button>
+                            )}
+                            {draft.upload_status !== 'published' && (
+                              <button
+                                type="button"
+                                onClick={() => handleAdvanceStage('published')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                              >
+                                Mark Published
+                              </button>
+                            )}
+                          </div>
+
+                          <p className="mt-3 text-xs text-slate-500">
+                            {nextStageAction ? nextStageAction.note : 'No further manual stage is required.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Upload Status</p>
                       <div className="mt-3 grid gap-3 md:grid-cols-3">
@@ -1515,22 +1908,22 @@ export function KahootUploadView({
                           <button
                             type="button"
                             onClick={() => handleStartDeploy(true)}
-                            disabled={isStartingDeploy}
+                            disabled={isStartingJob}
                             className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <span className="inline-flex items-center gap-2">
-                              {isStartingDeploy ? <LoaderCircle size={14} className="animate-spin" /> : <Terminal size={14} />}
+                              {isStartingJob ? <LoaderCircle size={14} className="animate-spin" /> : <Terminal size={14} />}
                               Dry Run
                             </span>
                           </button>
                           <button
                             type="button"
                             onClick={() => handleStartDeploy(false)}
-                            disabled={isStartingDeploy}
+                            disabled={isStartingJob}
                             className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <span className="inline-flex items-center gap-2">
-                              {isStartingDeploy ? <LoaderCircle size={14} className="animate-spin" /> : <Rocket size={14} />}
+                              {isStartingJob ? <LoaderCircle size={14} className="animate-spin" /> : <Rocket size={14} />}
                               Deploy to Kahoot
                             </span>
                           </button>
@@ -1589,62 +1982,69 @@ export function KahootUploadView({
                     <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-sm font-bold text-slate-900">Deploy Run</p>
-                          <p className="text-sm text-slate-500">Latest local terminal execution and logs.</p>
+                          <p className="text-sm font-bold text-slate-900">Latest Agent Job</p>
+                          <p className="text-sm text-slate-500">Markdown export, spreadsheet build, or full deploy logs for this item.</p>
                         </div>
                         <Server size={16} className="text-slate-400" />
                       </div>
 
-                      {!deployJob && (
+                      {!activeJob && (
                         <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-400">
-                          No deploy job started yet.
+                          No agent job started for this item yet.
                         </div>
                       )}
 
-                      {deployJob && (
+                      {activeJob && (
                         <div className="mt-3 space-y-3">
                           <div className="grid gap-2 text-sm md:grid-cols-2">
                             <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Status</p>
-                              <p className="mt-1 font-bold text-slate-900">{deployJob.status}</p>
+                              <p className="mt-1 font-bold text-slate-900">{activeJob.status}</p>
                             </div>
                             <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Started</p>
-                              <p className="mt-1 font-bold text-slate-900">{formatDateTime(deployJob.started_at || deployJob.created_at)}</p>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Job Type</p>
+                              <p className="mt-1 font-bold text-slate-900">{activeJob.type}</p>
                             </div>
                           </div>
 
-                          {deployJob.command && (
+                          <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Started</p>
+                            <p className="mt-1 font-bold text-slate-900">{formatDateTime(activeJob.started_at || activeJob.created_at)}</p>
+                          </div>
+
+                          {activeJob.command && (
                             <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Command</p>
-                              <p className="mt-1 break-all font-mono text-xs text-slate-600">{deployJob.command}</p>
+                              <p className="mt-1 break-all font-mono text-xs text-slate-600">{activeJob.command}</p>
                             </div>
                           )}
 
-                          {deployJob.error && (
+                          {activeJob.error && (
                             <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
-                              {deployJob.error}
+                              {activeJob.error}
                             </div>
                           )}
 
-                          {typeof deployJob.result?.challenge_url === 'string' && deployJob.result.challenge_url && (
+                          {typeof activeJob.result?.challenge_url === 'string' && activeJob.result.challenge_url && (
                             <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-                              Returned challenge link: {deployJob.result.challenge_url}
+                              Returned challenge link: {activeJob.result.challenge_url}
                             </div>
                           )}
 
-                          {typeof deployJob.result?.creator_url === 'string' && deployJob.result.creator_url && (
+                          {typeof activeJob.result?.creator_url === 'string' && activeJob.result.creator_url && (
                             <div className="rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700">
-                              Creator URL: {deployJob.result.creator_url}
+                              Creator URL: {activeJob.result.creator_url}
                             </div>
                           )}
 
-                          {deployJob.result && (
+                          {activeJob.result && (
                             <div className="grid gap-2 text-sm">
                               {[
-                                ['Artifact Dir', asString(deployJob.result.artifact_dir)],
-                                ['XLSX', asString(deployJob.result.xlsx_path)],
-                                ['Website Link ID', asString(deployJob.result.website_link_id)],
+                                ['Artifact Dir', asString(activeJob.result.artifact_dir)],
+                                ['Question Set', asString(activeJob.result.question_set_path)],
+                                ['Listing Copy', asString(activeJob.result.listing_copy_path)],
+                                ['XLSX', asString(activeJob.result.xlsx_path)],
+                                ['Website Link ID', asString(activeJob.result.website_link_id)],
                               ].filter(([, value]) => value).map(([label, value]) => (
                                 <div key={label} className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
@@ -1653,7 +2053,7 @@ export function KahootUploadView({
                               ))}
 
                               {(() => {
-                                const sync = asRecord(deployJob.result?.sync);
+                                const sync = asRecord(activeJob.result?.sync);
                                 if (!Object.keys(sync).length) return null;
 
                                 const reason = asString(sync.reason);
@@ -1679,7 +2079,7 @@ export function KahootUploadView({
                           )}
 
                           <div className="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-950 p-3">
-                            {(deployJob.logs || []).map((line, index) => (
+                            {(activeJob.logs || []).map((line, index) => (
                               <div key={`${line.at}-${index}`} className="font-mono text-xs leading-5 text-slate-200">
                                 <span className="text-slate-500">{line.at}</span>{' '}
                                 <span className={line.stream === 'stderr' ? 'text-rose-300' : 'text-emerald-300'}>
@@ -1688,7 +2088,7 @@ export function KahootUploadView({
                                 <span>{line.message}</span>
                               </div>
                             ))}
-                            {deployJob.logs.length === 0 && (
+                            {activeJob.logs.length === 0 && (
                               <p className="font-mono text-xs text-slate-500">No logs yet.</p>
                             )}
                           </div>

@@ -61,6 +61,26 @@ export const localAgentService = {
     return parseJson(response);
   },
 
+  async startKahootArtifacts(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-artifacts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item, options }),
+    });
+
+    return parseJson(response);
+  },
+
+  async startKahootSpreadsheet(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-spreadsheet`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item, options }),
+    });
+
+    return parseJson(response);
+  },
+
   async getJob(baseUrl: string, jobId: string): Promise<LocalAgentJob> {
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/${jobId}`);
     return parseJson(response);
