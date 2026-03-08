@@ -85,9 +85,10 @@ interface KahootDetailSheetProps {
   onDuplicate: (id: string) => void;
   onCopy: (value: string, label: string) => void;
   onTogglePipeline: (id: string, stage: KahootPipelineStage) => void;
+  onBulkPipeline: (id: string, value: boolean) => void;
 }
 
-export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline }: KahootDetailSheetProps) {
+export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy, onTogglePipeline, onBulkPipeline }: KahootDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
@@ -152,32 +153,75 @@ export function KahootDetailSheet({ item, onClose, onDelete, onDuplicate, onCopy
               </div>
 
               {/* Pipeline checklist */}
-              {item.pipeline && (
-                <section>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Pipeline Status</p>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {KAHOOT_PIPELINE_STAGES.map(s => {
-                      const done = item.pipeline[s.key];
-                      return (
+              {item.pipeline && (() => {
+                const total = KAHOOT_PIPELINE_STAGES.length;
+                const doneCount = Object.values(item.pipeline).filter(Boolean).length;
+                const pct = Math.round((doneCount / total) * 100);
+                const allDone = doneCount === total;
+                const noneDone = doneCount === 0;
+                return (
+                  <section>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Pipeline Status</p>
+                      <span className={cn('text-xs font-bold tabular-nums', allDone ? 'text-emerald-600' : 'text-slate-400')}>
+                        {doneCount}/{total}
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="h-1.5 rounded-full bg-slate-100 mb-3 overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full transition-all duration-300', allDone ? 'bg-emerald-500' : 'bg-indigo-500')}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {KAHOOT_PIPELINE_STAGES.map(s => {
+                        const done = item.pipeline[s.key];
+                        return (
+                          <button
+                            key={s.key}
+                            type="button"
+                            onClick={() => onTogglePipeline(item.id, s.key)}
+                            className={cn(
+                              'flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all active:scale-[0.97] cursor-pointer',
+                              done
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600',
+                            )}
+                          >
+                            {done ? <Check size={14} /> : <Circle size={14} />}
+                            {s.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Bulk actions */}
+                    <div className="flex gap-2 mt-2">
+                      {!allDone && (
                         <button
-                          key={s.key}
                           type="button"
-                          onClick={() => onTogglePipeline(item.id, s.key)}
-                          className={cn(
-                            'flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all active:scale-[0.97] cursor-pointer',
-                            done
-                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                              : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600',
-                          )}
+                          onClick={() => onBulkPipeline(item.id, true)}
+                          className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition"
                         >
-                          {done ? <Check size={14} /> : <Circle size={14} />}
-                          {s.label}
+                          Mark All Done
                         </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
+                      )}
+                      {!noneDone && (
+                        <button
+                          type="button"
+                          onClick={() => onBulkPipeline(item.id, false)}
+                          className="text-xs font-bold text-slate-400 hover:text-slate-600 transition"
+                        >
+                          Reset All
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                );
+              })()}
 
               {/* Links section */}
               <section>

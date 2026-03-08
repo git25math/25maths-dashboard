@@ -76,6 +76,15 @@ export function KahootHub({
     await onUpdateKahoot(id, { pipeline: updatedPipeline });
   }, [kahootItems, onUpdateKahoot]);
 
+  const handleBulkPipeline = useCallback(async (id: string, value: boolean) => {
+    await onUpdateKahoot(id, {
+      pipeline: {
+        ai_generated: value, reviewed: value, excel_exported: value,
+        kahoot_uploaded: value, web_verified: value, published: value,
+      },
+    });
+  }, [onUpdateKahoot]);
+
   return (
     <div className="space-y-6">
       {/* Top bar - only show in library/settings */}
@@ -146,6 +155,7 @@ export function KahootHub({
         onDuplicate={handleDuplicate}
         onCopy={handleCopy}
         onTogglePipeline={handleTogglePipeline}
+        onBulkPipeline={handleBulkPipeline}
       />
 
       {/* Module Guide modal */}

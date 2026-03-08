@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Check, Search, X } from 'lucide-react';
+import { ArrowDownAZ, Check, Clock, RotateCcw, Search, X } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
 import { cn } from '../../lib/utils';
 import { KAHOOT_PIPELINE_STAGES, KahootBoard, KahootItem, KahootOrgType, KahootPipelineStage, KahootTrack } from '../../types';
@@ -8,6 +8,7 @@ import { KahootCard } from './KahootCard';
 type BoardFilter = 'all' | KahootBoard;
 type TrackFilter = 'all' | KahootTrack;
 type OrgFilter = 'all' | KahootOrgType;
+type SortMode = 'updated' | 'topic';
 
 // null = no filter, true = done, false = not done
 type PipelineFilter = Record<KahootPipelineStage, boolean | null>;
@@ -27,12 +28,12 @@ const BOARD_OPTIONS: { key: BoardFilter; label: string }[] = [
   { key: 'edexcel-4ma1', label: '4MA1' },
 ];
 
-const TRACK_OPTIONS: { key: TrackFilter; label: string }[] = [
+const ALL_TRACK_OPTIONS: { key: TrackFilter; label: string; board?: KahootBoard }[] = [
   { key: 'all', label: 'All' },
-  { key: 'core', label: 'Core' },
-  { key: 'extended', label: 'Extended' },
-  { key: 'foundation', label: 'Foundation' },
-  { key: 'higher', label: 'Higher' },
+  { key: 'core', label: 'Core', board: 'cie0580' },
+  { key: 'extended', label: 'Extended', board: 'cie0580' },
+  { key: 'foundation', label: 'Foundation', board: 'edexcel-4ma1' },
+  { key: 'higher', label: 'Higher', board: 'edexcel-4ma1' },
 ];
 
 const ORG_OPTIONS: { key: OrgFilter; label: string }[] = [
@@ -41,6 +42,18 @@ const ORG_OPTIONS: { key: OrgFilter; label: string }[] = [
   { key: 'in_course', label: 'In Course' },
   { key: 'in_channel', label: 'In Channel' },
 ];
+
+function naturalTopicSort(a: string, b: string): number {
+  const parseCode = (code: string) => {
+    const m = code.match(/^([A-Za-z])(\d+)\.(\d+)$/);
+    return m ? [m[1].toLowerCase(), Number(m[2]), Number(m[3])] as const : [code, 0, 0] as const;
+  };
+  const [ap, ac, as_] = parseCode(a);
+  const [bp, bc, bs] = parseCode(b);
+  if (ap !== bp) return ap < bp ? -1 : 1;
+  if (ac !== bc) return ac - bc;
+  return as_ - bs;
+}
 
 interface StatCardProps {
   label: string;
@@ -69,14 +82,40 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
   const [trackFilter, setTrackFilter] = useState<TrackFilter>('all');
   const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>(INITIAL_PIPELINE_FILTER);
   const [orgFilter, setOrgFilter] = useState<OrgFilter>('all');
+  const [sortMode, setSortMode] = useState<SortMode>('topic');
+
+  // Smart track options: filter by selected board
+  const trackOptions = useMemo(
+    () => ALL_TRACK_OPTIONS.filter(o => o.key === 'all' || !o.board || boardFilter === 'all' || o.board === boardFilter),
+    [boardFilter],
+  );
+
+  // Reset track when board changes and current track is invalid
+  const handleBoardChange = (board: BoardFilter) => {
+    setBoardFilter(board);
+    if (board !== 'all') {
+      const valid = ALL_TRACK_OPTIONS.filter(o => o.key === 'all' || o.board === board).map(o => o.key);
+      if (!valid.includes(trackFilter)) setTrackFilter('all');
+    }
+  };
 
   const togglePipeline = (stage: KahootPipelineStage) => {
     setPipelineFilter(prev => {
       const current = prev[stage];
-      // cycle: null -> true (done) -> false (not done) -> null
       const next = current === null ? true : current === true ? false : null;
       return { ...prev, [stage]: next };
     });
+  };
+
+  const hasActiveFilters = boardFilter !== 'all' || trackFilter !== 'all' || orgFilter !== 'all' || search.trim() !== ''
+    || Object.values(pipelineFilter).some(v => v !== null);
+
+  const clearAllFilters = () => {
+    setSearch('');
+    setBoardFilter('all');
+    setTrackFilter('all');
+    setPipelineFilter(INITIAL_PIPELINE_FILTER);
+    setOrgFilter('all');
   };
 
   const pipelineStats = useMemo(() => {
@@ -120,8 +159,11 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
         return [i.title, i.topic_code, i.description, i.tags.join(' '), i.challenge_url ?? '']
           .join(' ').toLowerCase().includes(q);
       })
-      .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-  }, [items, boardFilter, trackFilter, pipelineFilter, orgFilter, search]);
+      .sort((a, b) => sortMode === 'topic'
+        ? naturalTopicSort(a.topic_code, b.topic_code)
+        : b.updated_at.localeCompare(a.updated_at),
+      );
+  }, [items, boardFilter, trackFilter, pipelineFilter, orgFilter, search, sortMode]);
 
   return (
     <div className="space-y-8">
@@ -134,25 +176,39 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-6">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Board</span>
-          {BOARD_OPTIONS.map(o => (
-            <FilterChip key={o.key} active={boardFilter === o.key} onClick={() => setBoardFilter(o.key)}>
-              {o.label}
-            </FilterChip>
-          ))}
+      <div className="space-y-4">
+        {/* Row 1: Board + Track + Search */}
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Board</span>
+            {BOARD_OPTIONS.map(o => (
+              <FilterChip key={o.key} active={boardFilter === o.key} onClick={() => handleBoardChange(o.key)}>
+                {o.label}
+              </FilterChip>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Track</span>
+            {trackOptions.map(o => (
+              <FilterChip key={o.key} active={trackFilter === o.key} onClick={() => setTrackFilter(o.key)} tone="violet">
+                {o.label}
+              </FilterChip>
+            ))}
+          </div>
+
+          <label className="relative flex-1 min-w-[200px]">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search title, tags, code..."
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+            />
+          </label>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Track</span>
-          {TRACK_OPTIONS.map(o => (
-            <FilterChip key={o.key} active={trackFilter === o.key} onClick={() => setTrackFilter(o.key)} tone="violet">
-              {o.label}
-            </FilterChip>
-          ))}
-        </div>
-
+        {/* Row 2: Pipeline toggles */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Pipeline</span>
           {KAHOOT_PIPELINE_STAGES.map(s => {
@@ -181,24 +237,37 @@ export function KahootLibrary({ items, selectedId, onSelect }: KahootLibraryProp
           })}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Type</span>
-          {ORG_OPTIONS.map(o => (
-            <FilterChip key={o.key} active={orgFilter === o.key} onClick={() => setOrgFilter(o.key)} tone="teal">
-              {o.label}
-            </FilterChip>
-          ))}
-        </div>
+        {/* Row 3: Type + Sort + Clear */}
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Type</span>
+            {ORG_OPTIONS.map(o => (
+              <FilterChip key={o.key} active={orgFilter === o.key} onClick={() => setOrgFilter(o.key)} tone="teal">
+                {o.label}
+              </FilterChip>
+            ))}
+          </div>
 
-        <label className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search title, tags, code..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-          />
-        </label>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Sort</span>
+            <FilterChip active={sortMode === 'topic'} onClick={() => setSortMode('topic')} tone="indigo">
+              <ArrowDownAZ size={12} className="mr-1 inline" />Topic
+            </FilterChip>
+            <FilterChip active={sortMode === 'updated'} onClick={() => setSortMode('updated')} tone="indigo">
+              <Clock size={12} className="mr-1 inline" />Updated
+            </FilterChip>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-600 transition"
+            >
+              <RotateCcw size={12} /> Clear Filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Card list */}

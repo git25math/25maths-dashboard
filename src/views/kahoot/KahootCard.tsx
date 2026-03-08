@@ -22,19 +22,29 @@ const ORG_LABELS: Record<KahootOrgType, string> = {
 
 function PipelineDots({ pipeline }: { pipeline?: KahootPipeline }) {
   if (!pipeline) return null;
+  const total = KAHOOT_PIPELINE_STAGES.length;
   const doneCount = Object.values(pipeline).filter(Boolean).length;
+  const allDone = doneCount === total;
   return (
-    <span className="inline-flex items-center gap-1" title={`${doneCount}/${KAHOOT_PIPELINE_STAGES.length} stages done`}>
-      {KAHOOT_PIPELINE_STAGES.map(s => (
-        <span
-          key={s.key}
-          className={cn(
-            'w-2 h-2 rounded-full',
-            pipeline[s.key] ? 'bg-emerald-500' : 'bg-slate-200',
-          )}
-          title={`${s.label}: ${pipeline[s.key] ? 'Done' : 'Pending'}`}
-        />
-      ))}
+    <span className="inline-flex items-center gap-1.5" title={`${doneCount}/${total} stages done`}>
+      <span className="inline-flex items-center gap-0.5">
+        {KAHOOT_PIPELINE_STAGES.map(s => (
+          <span
+            key={s.key}
+            className={cn(
+              'w-2 h-2 rounded-full',
+              pipeline[s.key] ? 'bg-emerald-500' : 'bg-slate-200',
+            )}
+            title={`${s.label}: ${pipeline[s.key] ? 'Done' : 'Pending'}`}
+          />
+        ))}
+      </span>
+      <span className={cn(
+        'text-[10px] font-bold tabular-nums',
+        allDone ? 'text-emerald-600' : 'text-slate-400',
+      )}>
+        {doneCount}/{total}
+      </span>
     </span>
   );
 }
