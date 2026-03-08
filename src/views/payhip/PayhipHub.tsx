@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PayhipItem, PayhipPipelineStage } from '../../types';
 import { PayhipLibrary } from './PayhipLibrary';
 import { PayhipDetailSheet } from './PayhipDetailSheet';
@@ -18,11 +18,26 @@ interface PayhipHubProps {
 
 export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBulkPipeline, toast }: PayhipHubProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [visibleIds, setVisibleIds] = useState<string[] | null>(null);
+
+  const navigationIds = visibleIds ?? payhipItems.map(item => item.id);
 
   const selectedItem = useMemo(
     () => payhipItems.find(item => item.id === selectedId) ?? null,
     [payhipItems, selectedId],
   );
+
+  const selectedIndex = useMemo(
+    () => (selectedId ? navigationIds.findIndex(id => id === selectedId) : -1),
+    [navigationIds, selectedId],
+  );
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!navigationIds.includes(selectedId)) {
+      setSelectedId(null);
+    }
+  }, [navigationIds, selectedId]);
 
   const handleCopy = useCallback(async (value: string, label: string) => {
     try {
@@ -35,13 +50,13 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
 
   const handleNavigate = useCallback((direction: 'prev' | 'next') => {
     if (!selectedId) return;
-    const idx = payhipItems.findIndex(i => i.id === selectedId);
+    const idx = navigationIds.findIndex(id => id === selectedId);
     if (idx === -1) return;
     const nextIdx = direction === 'next'
-      ? Math.min(idx + 1, payhipItems.length - 1)
+      ? Math.min(idx + 1, navigationIds.length - 1)
       : Math.max(idx - 1, 0);
-    if (nextIdx !== idx) setSelectedId(payhipItems[nextIdx].id);
-  }, [selectedId, payhipItems]);
+    if (nextIdx !== idx) setSelectedId(navigationIds[nextIdx]);
+  }, [navigationIds, selectedId]);
 
   return (
     <div className="space-y-6">
@@ -59,6 +74,7 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
         items={payhipItems}
         selectedId={selectedId}
         onSelect={id => setSelectedId(prev => prev === id ? null : id)}
+        onVisibleIdsChange={setVisibleIds}
       />
 
       <PayhipDetailSheet
@@ -69,6 +85,8 @@ export function PayhipHub({ payhipItems, onUpdatePayhip, onTogglePipeline, onBul
         onTogglePipeline={onTogglePipeline}
         onBulkPipeline={onBulkPipeline}
         onNavigate={handleNavigate}
+        canNavigatePrev={selectedIndex > 0}
+        canNavigateNext={selectedIndex !== -1 && selectedIndex < navigationIds.length - 1}
       />
     </div>
   );

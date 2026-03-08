@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowDownAZ, CalendarClock, Download, Search } from 'lucide-react';
 import { FilterChip } from '../../components/FilterChip';
 import { cn } from '../../lib/utils';
@@ -58,9 +58,10 @@ interface PayhipLibraryProps {
   items: PayhipItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onVisibleIdsChange?: (ids: string[]) => void;
 }
 
-export function PayhipLibrary({ items, selectedId, onSelect }: PayhipLibraryProps) {
+export function PayhipLibrary({ items, selectedId, onSelect, onVisibleIdsChange }: PayhipLibraryProps) {
   const [search, setSearch] = useState('');
   const [boardFilter, setBoardFilter] = useState<BoardFilter>('all');
   const [levelFilter, setLevelFilter] = useState<LevelFilter>('all');
@@ -123,6 +124,10 @@ export function PayhipLibrary({ items, selectedId, onSelect }: PayhipLibraryProp
         return LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || a.sku.localeCompare(b.sku);
       });
   }, [items, boardFilter, levelFilter, queueFilter, search, sortMode, statusFilter]);
+
+  useEffect(() => {
+    onVisibleIdsChange?.(filtered.map(item => item.id));
+  }, [filtered, onVisibleIdsChange]);
 
   const exportVisibleCsv = () => {
     const headers = [
