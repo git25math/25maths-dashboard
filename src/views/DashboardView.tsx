@@ -6,6 +6,7 @@ import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { getPrepCoverageLevel, summarizeUnitPrep } from '../lib/prepCompleteness';
+import { compareSchoolEventsUpcoming, isSchoolEventPast } from '../lib/schoolEventTime';
 
 function formatEventDateShort(event: SchoolEvent): string {
   const mode: EventTimeMode = event.time_mode || 'all-day';
@@ -78,6 +79,10 @@ export const DashboardView = ({
 }: DashboardViewProps) => {
   const pendingRequests = students.reduce((sum, s) => sum + (s.requests?.filter(r => r.status === 'pending').length || 0), 0);
   const pendingComms = students.reduce((sum, s) => sum + (s.parent_communications?.filter(c => c.status === 'pending').length || 0), 0);
+  const upcomingSchoolEvents = schoolEvents
+    .filter(event => !isSchoolEventPast(event))
+    .sort(compareSchoolEventsUpcoming)
+    .slice(0, 3);
 
   return (
     <div className="space-y-8">
@@ -310,7 +315,7 @@ export const DashboardView = ({
               <button onClick={() => onNavigate('events')} className="text-indigo-600 text-xs font-bold hover:underline">View All</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {schoolEvents.slice(0, 3).map(event => (
+              {upcomingSchoolEvents.length > 0 ? upcomingSchoolEvents.map(event => (
                 <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div className="flex justify-between items-start">
                     <h5 className="text-xs font-bold text-slate-900">{event.title}</h5>
@@ -318,7 +323,11 @@ export const DashboardView = ({
                   </div>
                   <MarkdownRenderer content={event.description} className="text-[10px] text-slate-500 mt-1 line-clamp-1" />
                 </div>
-              ))}
+              )) : (
+                <div className="sm:col-span-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-500">
+                  No upcoming school events.
+                </div>
+              )}
             </div>
           </div>
         </div>
