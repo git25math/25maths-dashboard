@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import express from 'express';
-import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync, realpathSync } from 'fs';
 import { basename, dirname, resolve, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -31,6 +31,8 @@ app.use((req, res, next) => {
 });
 
 const jobs = new Map();
+const MAX_CONCURRENT_JOBS = 3;
+const JOB_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
 function nowIso() {
   return new Date().toISOString();
@@ -69,7 +71,16 @@ const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
 
 function isAllowedFilePath(targetPath) {
-  return [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT].some(root => isWithinRoot(targetPath, root));
+  const allowedRoots = [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT];
+  // Check resolved path first
+  if (!allowedRoots.some(root => isWithinRoot(targetPath, root))) return false;
+  // Also check real path (resolve symlinks) to prevent symlink escape
+  try {
+    const realPath = realpathSync(targetPath);
+    return allowedRoots.some(root => isWithinRoot(realPath, root));
+  } catch {
+    return false; // Can't resolve = can't serve
+  }
 }
 
 function appendLog(job, message, stream = 'stdout') {
@@ -86,7 +97,19 @@ function appendLog(job, message, stream = 'stdout') {
   }
 }
 
+function countRunningJobs() {
+  let count = 0;
+  for (const job of jobs.values()) {
+    if (job.status === 'running' || job.status === 'queued') count++;
+  }
+  return count;
+}
+
 function launchJob({ type, scriptPath, payload, dryRun = false }) {
+  if (countRunningJobs() >= MAX_CONCURRENT_JOBS) {
+    throw Object.assign(new Error(`Too many concurrent jobs (max ${MAX_CONCURRENT_JOBS}). Wait for running jobs to finish.`), { statusCode: 429 });
+  }
+
   const jobId = makeJobId();
   const payloadPath = resolve(RUNTIME_DIR, `${jobId}.payload.json`);
   const resultPath = resolve(RUNTIME_DIR, `${jobId}.result.json`);
@@ -140,7 +163,17 @@ function launchJob({ type, scriptPath, payload, dryRun = false }) {
   child.stdout.on('data', chunk => appendLog(job, chunk, 'stdout'));
   child.stderr.on('data', chunk => appendLog(job, chunk, 'stderr'));
 
+  // Kill job if it exceeds timeout
+  const jobTimer = setTimeout(() => {
+    if (job.status === 'running') {
+      appendLog(job, `Job killed: exceeded ${JOB_TIMEOUT_MS / 1000}s timeout`, 'stderr');
+      child.kill('SIGTERM');
+      setTimeout(() => { if (!child.killed) child.kill('SIGKILL'); }, 5000);
+    }
+  }, JOB_TIMEOUT_MS);
+
   child.on('close', code => {
+    clearTimeout(jobTimer);
     job.finished_at = nowIso();
 
     if (code === 0) {
@@ -264,15 +297,23 @@ app.get('/jobs/:jobId', (req, res) => {
   res.json(serializeJob(job));
 });
 
+function tryLaunchJob(res, fn) {
+  try {
+    const job = fn();
+    res.status(202).json(serializeJob(job));
+  } catch (err) {
+    const code = err.statusCode || 500;
+    res.status(code).json({ error: err.message });
+  }
+}
+
 app.post('/jobs/kahoot-upload', (req, res) => {
   const payload = req.body || {};
   if (!payload.item || !payload.item.title) {
     res.status(400).json({ error: 'Missing item payload' });
     return;
   }
-
-  const job = launchKahootDeployJob(payload, Boolean(payload.dry_run));
-  res.status(202).json(serializeJob(job));
+  tryLaunchJob(res, () => launchKahootDeployJob(payload, Boolean(payload.dry_run)));
 });
 
 app.post('/jobs/kahoot-artifacts', (req, res) => {
@@ -281,9 +322,7 @@ app.post('/jobs/kahoot-artifacts', (req, res) => {
     res.status(400).json({ error: 'Missing item payload' });
     return;
   }
-
-  const job = launchKahootArtifactsJob(payload);
-  res.status(202).json(serializeJob(job));
+  tryLaunchJob(res, () => launchKahootArtifactsJob(payload));
 });
 
 app.post('/jobs/kahoot-spreadsheet', (req, res) => {
@@ -292,9 +331,7 @@ app.post('/jobs/kahoot-spreadsheet', (req, res) => {
     res.status(400).json({ error: 'Missing item payload' });
     return;
   }
-
-  const job = launchKahootSpreadsheetJob(payload);
-  res.status(202).json(serializeJob(job));
+  tryLaunchJob(res, () => launchKahootSpreadsheetJob(payload));
 });
 
 // --- Paper Generator ---
@@ -304,13 +341,11 @@ app.post('/jobs/paper-generate', (req, res) => {
     res.status(400).json({ error: 'Missing id or texSource' });
     return;
   }
-
-  const job = launchJob({
+  tryLaunchJob(res, () => launchJob({
     type: 'paper-generate',
     scriptPath: 'scripts/papers/generate-paper.mjs',
     payload,
-  });
-  res.status(202).json(serializeJob(job));
+  }));
 });
 
 // --- Cover Batch ---
@@ -324,13 +359,11 @@ app.post('/jobs/cover-batch', (req, res) => {
     res.status(400).json({ error: 'Missing params or template' });
     return;
   }
-
-  const job = launchJob({
+  tryLaunchJob(res, () => launchJob({
     type: 'cover-batch',
     scriptPath: 'scripts/covers/batch-generate-covers.mjs',
     payload,
-  });
-  res.status(202).json(serializeJob(job));
+  }));
 });
 
 app.listen(PORT, '127.0.0.1', () => {

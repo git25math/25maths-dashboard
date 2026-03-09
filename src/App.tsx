@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, lazy, Suspense, Component } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
 import { useAppData } from './hooks/useAppData';
 import { Sidebar } from './components/Sidebar';
@@ -33,6 +34,33 @@ const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ de
 const StudentsView = lazy(() => import('./views/StudentsView').then(m => ({ default: m.StudentsView })));
 const TeachingView = lazy(() => import('./views/TeachingView').then(m => ({ default: m.TeachingView })));
 const TasksView = lazy(() => import('./views/TasksView').then(m => ({ default: m.TasksView })));
+
+class ViewErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('[ViewErrorBoundary]', error, info.componentStack);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[50vh] text-slate-500 gap-4">
+          <AlertTriangle size={32} className="text-amber-500" />
+          <h2 className="text-lg font-bold text-slate-700">Something went wrong</h2>
+          <p className="text-sm max-w-md text-center">{this.state.error.message}</p>
+          <button
+            type="button"
+            onClick={() => this.setState({ error: null })}
+            className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function LazyFallback() {
   return (
@@ -132,7 +160,8 @@ function AppContent() {
 
       <main ref={mainRef} className="flex-1 p-4 md:p-6 lg:p-8 pt-20 lg:pt-8 overflow-y-auto">
         <Suspense fallback={<LazyFallback />}>
-          <div key={activeTab} className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
+          <ViewErrorBoundary key={activeTab}>
+          <div className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
             <ViewRouter
               activeTab={activeTab}
               data={data}
@@ -173,6 +202,7 @@ function AppContent() {
               TikzHub={TikzHub}
             />
           </div>
+          </ViewErrorBoundary>
         </Suspense>
       </main>
 
