@@ -42,6 +42,13 @@ export function getEffectiveEndTime(entry: TimetableEntry): string {
   return addMinutesToTime(entry.start_time, 45);
 }
 
+export function compareEntriesByStartTime(a: TimetableEntry, b: TimetableEntry): number {
+  return a.start_time.localeCompare(b.start_time)
+    || getEffectiveEndTime(a).localeCompare(getEffectiveEndTime(b))
+    || a.subject.localeCompare(b.subject)
+    || a.id.localeCompare(b.id);
+}
+
 export function classifyEntries(
   entries: TimetableEntry[], now: string
 ): { past: TimetableEntry[]; current: TimetableEntry | null; upcoming: TimetableEntry[] } {
@@ -83,7 +90,7 @@ export function getEntriesForDate(date: Date, timetable: TimetableEntry[]): Time
     ...recurring.filter(e => !overriddenTimes.has(e.start_time) && !overriddenIds.has(e.id)),
   ];
 
-  return merged.sort((a, b) => a.start_time.localeCompare(b.start_time));
+  return merged.sort(compareEntriesByStartTime);
 }
 
 export function countEntriesForDate(date: Date, timetable: TimetableEntry[]): { total: number; hasDateSpecific: boolean } {

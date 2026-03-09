@@ -7,7 +7,7 @@ import { format, isToday } from 'date-fns';
 import { detectConflicts } from '../../lib/timetableUtils';
 import { DraggableEntry, DroppableCell } from './DndWrappers';
 import { EntryCard, CurrentEntryCard } from './EntryCard';
-import { classifyEntries, getEffectiveEndTime, TIME_SLOTS } from './calendarUtils';
+import { classifyEntries, compareEntriesByStartTime, getEffectiveEndTime } from './calendarUtils';
 
 interface DayScheduleProps {
   selectedDate: Date;
@@ -49,10 +49,10 @@ export const DaySchedule = memo(function DaySchedule({
 
   const renderEntryList = (entries: TimetableEntry[], dimmed = false) => (
     <div className={cn("space-y-1", dimmed && "opacity-60")}>
-      {entries.map(entry => {
+      {[...entries].sort(compareEntriesByStartTime).map(entry => {
         const cellId = `slot-${entry.start_time}`;
         return (
-          <DroppableCell key={cellId} id={cellId}>
+          <DroppableCell key={entry.id} id={cellId}>
             <DraggableEntry entry={entry}>
               <EntryCard
                 entry={entry}
@@ -68,11 +68,7 @@ export const DaySchedule = memo(function DaySchedule({
     </div>
   );
 
-  const renderFlatList = () => {
-    const standardEntries = TIME_SLOTS.map(time => dayEntries.find(e => e.start_time === time)).filter(Boolean) as TimetableEntry[];
-    const nonStandard = dayEntries.filter(e => !TIME_SLOTS.includes(e.start_time));
-    return renderEntryList([...standardEntries, ...nonStandard]);
-  };
+  const renderFlatList = () => renderEntryList(dayEntries);
 
   return (
     <div className="space-y-3">
