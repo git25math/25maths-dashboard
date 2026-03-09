@@ -64,7 +64,7 @@ function isWithinRoot(targetPath, rootPath) {
 }
 
 // Exam board roots for serving original past paper PDFs
-const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..', '..');
+const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..');
 const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
 
