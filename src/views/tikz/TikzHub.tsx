@@ -1,8 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, ChevronLeft, ChevronRight, Image, FileText, Filter, X, ExternalLink } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Image, FileText, Filter, X, Eye, Code, ChevronDown } from 'lucide-react';
 import { tikzService, type TikzCatalogIndex, type TikzQuestion, type TikzYearSummary } from '../../services/tikzService';
+import { localAgentService } from '../../services/localAgentService';
 
 const PAGE_SIZE = 40;
+const AGENT_BASE = 'http://127.0.0.1:4318';
+const CIE_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/CIE/IGCSE_v2';
+
+function questionFilePath(q: TikzQuestion, file: string): string {
+  return `${CIE_ROOT}/${q.path}${file}`;
+}
 
 const TOPIC_COLORS: Record<string, string> = {
   Number: 'bg-blue-100 text-blue-700',
@@ -44,34 +51,172 @@ function YearCard({ year, active, onClick }: { year: TikzYearSummary; active: bo
   );
 }
 
-function QuestionCard({ q }: { q: TikzQuestion }) {
+/** Detail panel shown when a question card is expanded */
+function QuestionDetail({ q, agentOnline }: { q: TikzQuestion; agentOnline: boolean }) {
+  const [texContent, setTexContent] = useState<string | null>(null);
+  const [texLoading, setTexLoading] = useState(false);
+  const [texError, setTexError] = useState('');
+  const [showTex, setShowTex] = useState(false);
+
+  const pdfUrl = agentOnline && q.has_question_pdf
+    ? localAgentService.getFileUrl(AGENT_BASE, questionFilePath(q, 'QuestionStandalone.pdf'))
+    : null;
+
+  const originalPdfUrl = agentOnline && q.has_original_pdf
+    ? localAgentService.getFileUrl(AGENT_BASE, questionFilePath(q, 'OriginalPDF/OriginalPDF.pdf'))
+    : null;
+
+  const loadTex = useCallback(() => {
+    if (texContent !== null || texLoading) return;
+    setTexLoading(true);
+    const url = localAgentService.getFileUrl(AGENT_BASE, questionFilePath(q, 'QuestionStatement.tex'));
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then(text => { setTexContent(text); setTexLoading(false); })
+      .catch(err => { setTexError(err.message); setTexLoading(false); });
+  }, [q, texContent, texLoading]);
+
+  const handleShowTex = () => {
+    setShowTex(v => !v);
+    if (texContent === null && agentOnline) loadTex();
+  };
+
+  if (!agentOnline) {
+    return (
+      <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+        Local agent offline. Run <code className="bg-amber-100 px-1 rounded">node server/local-agent.mjs</code> to view question content.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 space-y-3">
+      {/* PDF preview */}
+      {pdfUrl && (
+        <div className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+          <object
+            data={pdfUrl}
+            type="application/pdf"
+            className="w-full h-[400px]"
+          >
+            <div className="flex items-center justify-center h-[400px] text-slate-400 text-sm">
+              <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">
+                Open PDF in new tab
+              </a>
+            </div>
+          </object>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleShowTex}
+          className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition"
+        >
+          <Code size={12} /> {showTex ? 'Hide' : 'Show'} LaTeX
+        </button>
+        {originalPdfUrl && (
+          <a
+            href={originalPdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition"
+          >
+            <Eye size={12} /> Original PDF
+          </a>
+        )}
+      </div>
+
+      {/* TeX source */}
+      {showTex && (
+        <div className="bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto">
+          {texLoading ? (
+            <span className="text-slate-400">Loading...</span>
+          ) : texError ? (
+            <span className="text-red-400">Error: {texError}</span>
+          ) : (
+            texContent
+          )}
+        </div>
+      )}
+
+      {/* Figures list */}
+      {q.figures.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold text-slate-500 uppercase">Figures ({q.figures.length})</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {q.figures.map((fig, i) => {
+              const pngUrl = fig.png_file
+                ? localAgentService.getFileUrl(AGENT_BASE, `${CIE_ROOT}/${q.path}Figures/${fig.png_file}`)
+                : null;
+              return (
+                <div key={i} className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+                  <p className="text-[10px] font-mono text-slate-500 mb-1 truncate">{fig.name}</p>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                    <StatusDot status={fig.tikz_status || ''} />
+                    <span>{fig.tikz_status || 'no tikz'}</span>
+                  </div>
+                  {pngUrl && (
+                    <img
+                      src={pngUrl}
+                      alt={fig.name}
+                      className="mt-2 max-h-[150px] rounded border border-slate-200 bg-white"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuestionCard({ q, expanded, onToggle, agentOnline }: { q: TikzQuestion; expanded: boolean; onToggle: () => void; agentOnline: boolean }) {
   const figCount = q.figures.length;
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2">
-          <StatusDot status={q.question_status} />
-          <span className="text-xs font-mono font-bold text-slate-700">{q.id}</span>
+    <div className={`bg-white rounded-xl border transition-shadow ${expanded ? 'border-indigo-300 shadow-md col-span-full' : 'border-slate-200 hover:shadow-md'}`}>
+      <button onClick={onToggle} className="w-full text-left p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <StatusDot status={q.question_status} />
+            <span className="text-xs font-mono font-bold text-slate-700">{q.id}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-indigo-600">{q.total_marks}m</span>
+            <ChevronDown size={14} className={`text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          </div>
         </div>
-        <span className="text-xs font-bold text-indigo-600">{q.total_marks}m</span>
-      </div>
 
-      <div className="flex flex-wrap gap-1 mb-2">
-        {q.topics.map(t => <TopicBadge key={t} topic={t} />)}
-      </div>
+        <div className="flex flex-wrap gap-1 mb-2">
+          {q.topics.map(t => <TopicBadge key={t} topic={t} />)}
+        </div>
 
-      <div className="flex items-center gap-3 text-[11px] text-slate-400">
-        {figCount > 0 && (
-          <span className="flex items-center gap-1">
-            <Image size={12} /> {figCount} figure{figCount > 1 ? 's' : ''}
-            {q.tikz_status && <span className="text-[10px]">({q.tikz_status})</span>}
-          </span>
+        <div className="flex items-center gap-3 text-[11px] text-slate-400">
+          {figCount > 0 && (
+            <span className="flex items-center gap-1">
+              <Image size={12} /> {figCount} figure{figCount > 1 ? 's' : ''}
+              {q.tikz_status && <span className="text-[10px]">({q.tikz_status})</span>}
+            </span>
+          )}
+          {q.has_question_pdf && <span className="flex items-center gap-1"><FileText size={12} /> PDF</span>}
+        </div>
+
+        {q.review_note && (
+          <p className="mt-2 text-[11px] text-amber-600 bg-amber-50 rounded px-2 py-1">{q.review_note}</p>
         )}
-        {q.has_question_pdf && <span className="flex items-center gap-1"><FileText size={12} /> PDF</span>}
-      </div>
+      </button>
 
-      {q.review_note && (
-        <p className="mt-2 text-[11px] text-amber-600 bg-amber-50 rounded px-2 py-1">{q.review_note}</p>
+      {expanded && (
+        <div className="px-4 pb-4">
+          <QuestionDetail q={q} agentOnline={agentOnline} />
+        </div>
       )}
     </div>
   );
@@ -84,6 +229,8 @@ export function TikzHub() {
   const [loading, setLoading] = useState(true);
   const [yearLoading, setYearLoading] = useState(false);
   const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [agentOnline, setAgentOnline] = useState(false);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -92,6 +239,13 @@ export function TikzHub() {
   const [sessionFilter, setSessionFilter] = useState('');
   const [hasFigures, setHasFigures] = useState(false);
   const [page, setPage] = useState(0);
+
+  // Check local agent connectivity
+  useEffect(() => {
+    localAgentService.ping(AGENT_BASE)
+      .then(() => setAgentOnline(true))
+      .catch(() => setAgentOnline(false));
+  }, []);
 
   // Load index on mount
   useEffect(() => {
@@ -115,6 +269,7 @@ export function TikzHub() {
   useEffect(() => {
     if (!selectedYear) return;
     setYearLoading(true);
+    setExpandedId(null);
     tikzService.loadYear(selectedYear)
       .then(qs => { setQuestions(qs); setYearLoading(false); })
       .catch(err => { setError(err.message); setYearLoading(false); });
@@ -195,10 +350,16 @@ export function TikzHub() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Publishing</p>
+        <div className="flex items-center gap-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Publishing</p>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${agentOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+            Agent {agentOnline ? 'Online' : 'Offline'}
+          </span>
+        </div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">TikzVault</h2>
         <p className="text-sm text-slate-500 max-w-lg">
           {summary.total_questions.toLocaleString()} questions with {summary.total_figures.toLocaleString()} figures from CIE 0580 past papers.
+          {!agentOnline && ' Start local agent to preview question content.'}
         </p>
       </div>
 
@@ -301,7 +462,15 @@ export function TikzHub() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {pageItems.map(q => <QuestionCard key={q.id} q={q} />)}
+          {pageItems.map(q => (
+            <QuestionCard
+              key={q.id}
+              q={q}
+              expanded={expandedId === q.id}
+              onToggle={() => setExpandedId(prev => prev === q.id ? null : q.id)}
+              agentOnline={agentOnline}
+            />
+          ))}
         </div>
       )}
     </div>
