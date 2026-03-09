@@ -36,6 +36,7 @@ export default defineConfig(({mode}) => {
             'vendor-markdown': ['react-markdown', 'rehype-katex', 'remark-math'],
             'vendor-dompurify': ['dompurify'],
             'vendor-pdfjs': ['pdfjs-dist'],
+            'vendor-lucide': ['lucide-react'],
           },
         },
       },

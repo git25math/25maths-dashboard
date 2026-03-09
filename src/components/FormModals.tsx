@@ -1,20 +1,21 @@
-import { memo, Dispatch, SetStateAction } from 'react';
+import { memo, lazy, Suspense, Dispatch, SetStateAction } from 'react';
 import { Student, TeachingUnit, ClassProfile, TimetableEntry, WorkLog, SOP, Idea, Goal, SchoolEvent, Task, Project, ParentCommunication, ParentCommMethod, StudentWeakness } from '../types';
 import { useAppData } from '../hooks/useAppData';
-import { StudentForm } from './StudentForm';
-import { TeachingUnitForm } from './TeachingUnitForm';
-import { ClassForm } from './ClassForm';
-import { TimetableEntryForm } from './TimetableEntryForm';
-import { WorkLogForm } from './WorkLogForm';
-import { SOPForm } from './SOPForm';
-import { IdeaForm } from './IdeaForm';
-import { GoalForm } from './GoalForm';
-import { SchoolEventForm } from './SchoolEventForm';
-import { TaskForm } from './TaskForm';
-import { ProjectForm } from './ProjectForm';
-import { ParentCommForm } from './ParentCommForm';
-import { WeaknessForm } from './WeaknessForm';
-import { GenericForm } from './GenericForm';
+
+const StudentForm = lazy(() => import('./StudentForm').then(m => ({ default: m.StudentForm })));
+const TeachingUnitForm = lazy(() => import('./TeachingUnitForm').then(m => ({ default: m.TeachingUnitForm })));
+const ClassForm = lazy(() => import('./ClassForm').then(m => ({ default: m.ClassForm })));
+const TimetableEntryForm = lazy(() => import('./TimetableEntryForm').then(m => ({ default: m.TimetableEntryForm })));
+const WorkLogForm = lazy(() => import('./WorkLogForm').then(m => ({ default: m.WorkLogForm })));
+const SOPForm = lazy(() => import('./SOPForm').then(m => ({ default: m.SOPForm })));
+const IdeaForm = lazy(() => import('./IdeaForm').then(m => ({ default: m.IdeaForm })));
+const GoalForm = lazy(() => import('./GoalForm').then(m => ({ default: m.GoalForm })));
+const SchoolEventForm = lazy(() => import('./SchoolEventForm').then(m => ({ default: m.SchoolEventForm })));
+const TaskForm = lazy(() => import('./TaskForm').then(m => ({ default: m.TaskForm })));
+const ProjectForm = lazy(() => import('./ProjectForm').then(m => ({ default: m.ProjectForm })));
+const ParentCommForm = lazy(() => import('./ParentCommForm').then(m => ({ default: m.ParentCommForm })));
+const WeaknessForm = lazy(() => import('./WeaknessForm').then(m => ({ default: m.WeaknessForm })));
+const GenericForm = lazy(() => import('./GenericForm').then(m => ({ default: m.GenericForm })));
 
 export interface FormModalsState {
   isStudentFormOpen: boolean;
@@ -101,7 +102,7 @@ interface FormModalsProps {
 
 export const FormModals = memo(function FormModals({ state, setters, data }: FormModalsProps) {
   return (
-    <>
+    <Suspense fallback={null}>
       {state.isStudentFormOpen && (
         <StudentForm
           student={state.editingStudent}
@@ -276,6 +277,6 @@ export const FormModals = memo(function FormModals({ state, setters, data }: For
           placeholder={state.genericFormConfig.placeholder}
         />
       )}
-    </>
+    </Suspense>
   );
 });

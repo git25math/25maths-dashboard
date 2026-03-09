@@ -5,11 +5,12 @@ import { useAppData } from './hooks/useAppData';
 import { Sidebar } from './components/Sidebar';
 import { FormModals, FormModalsState, FormModalsSetters } from './components/FormModals';
 import { ViewRouter } from './components/ViewRouter';
-import { QuickCapture } from './components/QuickCapture';
-import { SyllabusModal } from './components/SyllabusModal';
 import { ToastContainer } from './components/ToastContainer';
 import { LoginGate, useAuth } from './components/LoginGate';
-import { GlobalSearch } from './components/GlobalSearch';
+
+const GlobalSearch = lazy(() => import('./components/GlobalSearch').then(m => ({ default: m.GlobalSearch })));
+const QuickCapture = lazy(() => import('./components/QuickCapture').then(m => ({ default: m.QuickCapture })));
+const SyllabusModal = lazy(() => import('./components/SyllabusModal').then(m => ({ default: m.SyllabusModal })));
 
 const CalendarView = lazy(() => import('./views/CalendarView').then(m => ({ default: m.CalendarView })));
 const SOPView = lazy(() => import('./views/SOPView').then(m => ({ default: m.SOPView })));
@@ -175,41 +176,45 @@ function AppContent() {
         </Suspense>
       </main>
 
-      <GlobalSearch
-        data={{
-          students: data.students,
-          teachingUnits: data.teachingUnits,
-          ideas: data.ideas,
-          sops: data.sops,
-          workLogs: data.workLogs,
-          goals: data.goals,
-          schoolEvents: data.schoolEvents,
-          meetings: data.meetings,
-          lessonRecords: data.lessonRecords,
-          classes: data.classes,
-          timetable: data.timetable,
-          tasks: data.tasks,
-          emailDigests: data.emailDigests,
-          projects: data.projects,
-        }}
-        onNavigate={navigateTo}
-      />
-      <QuickCapture onSave={data.quickCapture} />
+      <Suspense fallback={null}>
+        <GlobalSearch
+          data={{
+            students: data.students,
+            teachingUnits: data.teachingUnits,
+            ideas: data.ideas,
+            sops: data.sops,
+            workLogs: data.workLogs,
+            goals: data.goals,
+            schoolEvents: data.schoolEvents,
+            meetings: data.meetings,
+            lessonRecords: data.lessonRecords,
+            classes: data.classes,
+            timetable: data.timetable,
+            tasks: data.tasks,
+            emailDigests: data.emailDigests,
+            projects: data.projects,
+          }}
+          onNavigate={navigateTo}
+        />
+        <QuickCapture onSave={data.quickCapture} />
+        {isSyllabusModalOpen && (
+          <SyllabusModal
+            isOpen={isSyllabusModalOpen}
+            onClose={() => setIsSyllabusModalOpen(false)}
+            teachingUnits={data.teachingUnits}
+            onNavigateToUnit={(unitId) => {
+              setSelectedTeachingUnitId(unitId);
+              setActiveTab('teaching');
+            }}
+            onCreateUnit={(yearGroup, title) => {
+              setPendingNewUnitData({ year_group: yearGroup, title });
+              setEditingTeachingUnit(null);
+              setIsTeachingUnitFormOpen(true);
+            }}
+          />
+        )}
+      </Suspense>
       <ToastContainer toasts={data.toasts} />
-      <SyllabusModal
-        isOpen={isSyllabusModalOpen}
-        onClose={() => setIsSyllabusModalOpen(false)}
-        teachingUnits={data.teachingUnits}
-        onNavigateToUnit={(unitId) => {
-          setSelectedTeachingUnitId(unitId);
-          setActiveTab('teaching');
-        }}
-        onCreateUnit={(yearGroup, title) => {
-          setPendingNewUnitData({ year_group: yearGroup, title });
-          setEditingTeachingUnit(null);
-          setIsTeachingUnitFormOpen(true);
-        }}
-      />
 
       <FormModals state={formState} setters={formSetters} data={data} />
     </div>
