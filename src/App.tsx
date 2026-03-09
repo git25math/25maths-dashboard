@@ -27,6 +27,7 @@ const KahootHub = lazy(() => import('./views/kahoot/KahootHub').then(m => ({ def
 const PayhipHub = lazy(() => import('./views/payhip/PayhipHub').then(m => ({ default: m.PayhipHub })));
 const PaperHub = lazy(() => import('./views/papers/PaperHub').then(m => ({ default: m.PaperHub })));
 const CoverHub = lazy(() => import('./views/covers/CoverHub').then(m => ({ default: m.CoverHub })));
+const TikzHub = lazy(() => import('./views/tikz/TikzHub').then(m => ({ default: m.TikzHub })));
 const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ default: m.DashboardView })));
 const StudentsView = lazy(() => import('./views/StudentsView').then(m => ({ default: m.StudentsView })));
 const TeachingView = lazy(() => import('./views/TeachingView').then(m => ({ default: m.TeachingView })));
@@ -168,6 +169,7 @@ function AppContent() {
               PayhipHub={PayhipHub}
               PaperHub={PaperHub}
               CoverHub={CoverHub}
+              TikzHub={TikzHub}
             />
           </div>
         </Suspense>

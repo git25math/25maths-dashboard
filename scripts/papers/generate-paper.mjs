@@ -45,16 +45,17 @@ async function main() {
   console.log(`Wrote .tex to ${texPath}`);
 
   // Determine TEXINPUTS based on board (CIE vs Edexcel IGCSE)
+  // QPList format uses \examquestion{} which loads from PastPapers/ via \setexam
+  // So we need the full project tree (not just CommonAssets) in TEXINPUTS
   const NZH_ROOT = process.env.NZH_ROOT || resolve(PROJECT_ROOT, '../../NZH-MathPrep-Template');
-  // CIE 0580 styles live under CIE/IGCSE_v2/CommonAssets/
-  const CIE_ASSETS = resolve(PROJECT_ROOT, '../../CIE/IGCSE_v2/CommonAssets');
-  // Edexcel IGCSE styles live under Edexcel/IGCSE_v2/CommonAssets/
-  const EDX_ASSETS = resolve(PROJECT_ROOT, '../../Edexcel/IGCSE_v2/CommonAssets');
+  const CIE_ROOT = resolve(PROJECT_ROOT, '../../CIE/IGCSE_v2');
+  const EDX_ROOT = resolve(PROJECT_ROOT, '../../Edexcel/IGCSE_v2');
 
   const isCIE = texSource.includes('CIE-0580-Master-Style');
-  const assetsRoot = isCIE ? CIE_ASSETS : EDX_ASSETS;
+  const projectRoot = isCIE ? CIE_ROOT : EDX_ROOT;
 
-  const texinputs = `.:${assetsRoot}//:${NZH_ROOT}//:`;
+  // Recursive // search covers CommonAssets/, PastPapers/, etc.
+  const texinputs = `.:${projectRoot}//:${NZH_ROOT}//:`;
 
   console.log(`TEXINPUTS=${texinputs}`);
   console.log('Running xelatex (pass 1)...');

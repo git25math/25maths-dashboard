@@ -63,8 +63,13 @@ function isWithinRoot(targetPath, rootPath) {
   return normalizedTarget === normalizedRoot || normalizedTarget.startsWith(`${normalizedRoot}${sep}`);
 }
 
+// Exam board roots for serving original past paper PDFs
+const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..', '..');
+const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
+const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
+
 function isAllowedFilePath(targetPath) {
-  return [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot()].some(root => isWithinRoot(targetPath, root));
+  return [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT].some(root => isWithinRoot(targetPath, root));
 }
 
 function appendLog(job, message, stream = 'stdout') {
@@ -295,8 +300,8 @@ app.post('/jobs/kahoot-spreadsheet', (req, res) => {
 // --- Paper Generator ---
 app.post('/jobs/paper-generate', (req, res) => {
   const payload = req.body || {};
-  if (!payload.texSource) {
-    res.status(400).json({ error: 'Missing texSource' });
+  if (!payload.id || !payload.texSource) {
+    res.status(400).json({ error: 'Missing id or texSource' });
     return;
   }
 
@@ -311,8 +316,12 @@ app.post('/jobs/paper-generate', (req, res) => {
 // --- Cover Batch ---
 app.post('/jobs/cover-batch', (req, res) => {
   const payload = req.body || {};
-  if (!payload.topics || !payload.topics.length) {
-    res.status(400).json({ error: 'Missing topics' });
+  if (!payload.topics || !Array.isArray(payload.topics) || !payload.topics.length) {
+    res.status(400).json({ error: 'Missing or invalid topics array' });
+    return;
+  }
+  if (!payload.params || !payload.template) {
+    res.status(400).json({ error: 'Missing params or template' });
     return;
   }
 

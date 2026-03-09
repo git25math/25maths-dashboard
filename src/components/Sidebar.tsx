@@ -41,6 +41,7 @@ export const Sidebar = memo(function Sidebar({ activeTab, onNavigate, onLogout }
           {group.label ? (
             <button
               onClick={() => toggleGroup(group.key)}
+              aria-expanded={!isCollapsed}
               className="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 pt-4 pb-1 hover:text-slate-600 transition-colors"
             >
               {group.label}
@@ -86,8 +87,8 @@ export const Sidebar = memo(function Sidebar({ activeTab, onNavigate, onLogout }
           <span className="font-bold">{activeSidebarItem?.label || 'Dashboard'}</span>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={onLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600"><Menu size={24} /></button>
+          <button onClick={onLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" aria-label="Logout"><LogOut size={20} /></button>
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600" aria-label="Open navigation menu"><Menu size={24} /></button>
         </div>
       </div>
 
@@ -98,7 +99,7 @@ export const Sidebar = memo(function Sidebar({ activeTab, onNavigate, onLogout }
             <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="fixed inset-y-0 left-0 w-72 bg-white z-50 p-6 flex flex-col shadow-2xl lg:hidden">
               <div className="flex justify-between items-center mb-8 shrink-0">
                 <span className="font-bold text-xl">Menu</span>
-                <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
+                <button onClick={() => setIsSidebarOpen(false)} aria-label="Close navigation menu"><X size={24} /></button>
               </div>
               <nav className="flex-1 overflow-y-auto min-h-0">
                 {renderGroups()}

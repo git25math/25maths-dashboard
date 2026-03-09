@@ -41,16 +41,25 @@ export function CoverBatchModal({ isOpen, onClose, baseParams, template }: Cover
   }, [topicList, baseParams, template]);
 
   const handleDownloadAll = useCallback(() => {
+    let downloaded = 0;
     for (const { topic, svg } of results) {
-      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `cover-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.svg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      try {
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cover-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        downloaded++;
+      } catch {
+        // Skip failed items, continue downloading others
+      }
+    }
+    if (downloaded < results.length) {
+      alert(`Downloaded ${downloaded}/${results.length} covers. Some failed.`);
     }
   }, [results]);
 

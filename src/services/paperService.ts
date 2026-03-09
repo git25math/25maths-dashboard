@@ -38,7 +38,9 @@ export const paperService = {
   getSavedPapers(): SavedPaper[] {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch {
+    } catch (err) {
+      console.warn('[paperService] Corrupted saved papers data, resetting:', err);
+      localStorage.removeItem(STORAGE_KEY);
       return [];
     }
   },

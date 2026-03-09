@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useState, useEffect } from 'react';
 import type { CoverParams } from './types';
 
 interface CoverParamEditorProps {
@@ -14,10 +14,12 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
   const [invalid, setInvalid] = useState(false);
 
   // Keep draft in sync when value changes externally (e.g., undo/redo)
-  if (draft !== value && HEX_RE.test(value)) {
-    setDraft(value);
-    setInvalid(false);
-  }
+  useEffect(() => {
+    if (HEX_RE.test(value)) {
+      setDraft(value);
+      setInvalid(false);
+    }
+  }, [value]);
 
   const commit = () => {
     if (HEX_RE.test(draft)) {

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { CoverParams, CoverTemplate } from './types';
 
 function xmlEscape(s: string): string {
@@ -15,7 +16,7 @@ interface CoverSvgRendererProps {
   svgRef?: React.RefObject<SVGSVGElement | null>;
 }
 
-export function CoverSvgRenderer({ template, params, svgRef }: CoverSvgRendererProps) {
+export const CoverSvgRenderer = memo(function CoverSvgRenderer({ template, params, svgRef }: CoverSvgRendererProps) {
   const { width, height } = template;
   const p = params;
 
@@ -39,6 +40,8 @@ export function CoverSvgRenderer({ template, params, svgRef }: CoverSvgRendererP
       width="100%"
       height="100%"
       style={{ maxWidth: '100%', display: 'block' }}
+      role="img"
+      aria-label={`Cover preview: ${p.subtitle || 'Untitled'}`}
     >
       <defs>
         <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -211,4 +214,4 @@ export function CoverSvgRenderer({ template, params, svgRef }: CoverSvgRendererP
       </text>
     </svg>
   );
-}
+});

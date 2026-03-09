@@ -70,12 +70,12 @@ export function CoverAiSuggestions({ templateType, currentParams, onApply }: Cov
           <p className="text-sm font-medium text-slate-700 mb-2">{scheme.name}</p>
           <div className="flex gap-1">
             {[
-              scheme.params.primaryGradientStart,
-              scheme.params.primaryGradientEnd,
-              scheme.params.accentColor,
-              scheme.params.textColor,
-            ].filter(Boolean).map((c) => (
-              <div key={c} className="w-6 h-6 rounded-full border border-white shadow-sm" style={{ backgroundColor: c }} />
+              { key: 'gs', color: scheme.params.primaryGradientStart },
+              { key: 'ge', color: scheme.params.primaryGradientEnd },
+              { key: 'ac', color: scheme.params.accentColor },
+              { key: 'tx', color: scheme.params.textColor },
+            ].filter(entry => entry.color).map(entry => (
+              <div key={entry.key} className="w-6 h-6 rounded-full border border-white shadow-sm" style={{ backgroundColor: entry.color }} />
             ))}
           </div>
         </button>

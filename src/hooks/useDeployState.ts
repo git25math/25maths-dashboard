@@ -259,9 +259,9 @@ export function useDeployState({
     }
   }, [agentUrl]);
 
-  useEffect(() => {
-    void checkAgent();
-  }, [checkAgent]);
+  // Don't auto-ping on mount — avoids ERR_CONNECTION_REFUSED console noise
+  // when the local agent isn't running. Agent status is checked on-demand
+  // when the user clicks a deploy action or manually triggers a check.
 
   const applyJobResult = useCallback(async (job: LocalAgentJob) => {
     if (!onPersistItem || job.status !== 'completed') return;

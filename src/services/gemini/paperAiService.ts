@@ -31,8 +31,20 @@ Return ONLY the JSON array, no markdown fences.`;
 
     const raw = stripJsonFences(response.text ?? '[]');
     try {
-      return JSON.parse(raw);
-    } catch {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        console.warn('[paperAiService] Variants response is not an array:', raw.slice(0, 200));
+        return [];
+      }
+      // Validate each variant has required fields
+      return parsed.filter(
+        (v: unknown): v is { tex: string; marks: number } =>
+          typeof v === 'object' && v !== null &&
+          typeof (v as Record<string, unknown>).tex === 'string' &&
+          typeof (v as Record<string, unknown>).marks === 'number',
+      );
+    } catch (err) {
+      console.warn('[paperAiService] Failed to parse variants response:', err, raw.slice(0, 200));
       return [];
     }
   },
@@ -69,8 +81,20 @@ Return ONLY the JSON array, no markdown fences.`;
 
     const raw = stripJsonFences(response.text ?? '[]');
     try {
-      return JSON.parse(raw);
-    } catch {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        console.warn('[paperAiService] Cover scheme response is not an array:', raw.slice(0, 200));
+        return [];
+      }
+      // Validate each scheme has required fields
+      return parsed.filter(
+        (s: unknown): s is { name: string; params: Record<string, string> } =>
+          typeof s === 'object' && s !== null &&
+          typeof (s as Record<string, unknown>).name === 'string' &&
+          typeof (s as Record<string, unknown>).params === 'object',
+      );
+    } catch (err) {
+      console.warn('[paperAiService] Failed to parse cover scheme response:', err, raw.slice(0, 200));
       return [];
     }
   },

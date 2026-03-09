@@ -102,6 +102,9 @@ export const localAgentService = {
   },
 
   async startPaperGenerate(baseUrl: string, payload: { id: string; texSource: string }): Promise<LocalAgentJob> {
+    if (!payload.id || !payload.texSource) {
+      throw new Error('Paper generate requires both id and texSource');
+    }
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/paper-generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -111,6 +114,9 @@ export const localAgentService = {
   },
 
   async startCoverBatch(baseUrl: string, payload: { template: string; topics: string[]; params: Record<string, unknown> }): Promise<LocalAgentJob> {
+    if (!payload.template || !payload.topics?.length || !payload.params) {
+      throw new Error('Cover batch requires template, topics array, and params');
+    }
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/cover-batch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

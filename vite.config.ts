@@ -34,6 +34,8 @@ export default defineConfig(({mode}) => {
             'vendor-date': ['date-fns'],
             'vendor-katex': ['katex'],
             'vendor-markdown': ['react-markdown', 'rehype-katex', 'remark-math'],
+            'vendor-dompurify': ['dompurify'],
+            'vendor-pdfjs': ['pdfjs-dist'],
           },
         },
       },

@@ -1,4 +1,4 @@
-import type { PaperQuestion, PaperFocus } from '../types';
+import type { PaperQuestion, PaperFocus, PaperBoard, PaperTier } from '../types';
 
 interface AutoFillOptions {
   questions: PaperQuestion[];
@@ -6,20 +6,48 @@ interface AutoFillOptions {
   focus: PaperFocus;
   focusSections?: string[];
   maxPerSection?: number;
+  board?: PaperBoard;
+  tier?: PaperTier;
+}
+
+/** Check if a question belongs to the given tier based on its paper number. */
+function matchesTier(q: PaperQuestion, board: PaperBoard, tier: PaperTier): boolean {
+  // CIE: papers 1x/3x = Core, papers 2x/4x = Extended
+  if (board === 'cie') {
+    const m = q.src.match(/^0580\/(\d)/);
+    if (!m) return true; // can't determine → include
+    const firstDigit = Number(m[1]);
+    if (tier === 'core') return firstDigit === 1 || firstDigit === 3;
+    return firstDigit === 2 || firstDigit === 4; // extended
+  }
+  // Edexcel: papers xF = Foundation, xH = Higher
+  if (board === 'edx') {
+    const m = q.src.match(/^4MA1\/\d([FH])/);
+    if (!m) return true;
+    if (tier === 'foundation') return m[1] === 'F';
+    return m[1] === 'H'; // higher
+  }
+  return true;
 }
 
 /**
  * Auto-fill algorithm ported from Keywords ppStartMockExam.
  * Groups questions by section, applies focus weighting, then round-robin selects.
+ * Respects tier filtering and uses tight budget control (≤2m overshoot max).
  */
 export function autoFillQuestions(opts: AutoFillOptions): PaperQuestion[] {
-  const { questions, targetMarks, focus, focusSections = [], maxPerSection } = opts;
+  const { questions, targetMarks, focus, focusSections = [], maxPerSection, board, tier } = opts;
 
   if (!questions.length || targetMarks <= 0) return [];
 
+  // Filter by tier if specified
+  const eligible = (board && tier)
+    ? questions.filter(q => matchesTier(q, board, tier))
+    : questions;
+
   // Group by section
   const secQs: Record<string, PaperQuestion[]> = {};
-  for (const q of questions) {
+  for (const q of eligible) {
     if (!q.s || !q.marks) continue;
     if (!secQs[q.s]) secQs[q.s] = [];
     secQs[q.s].push(q);
@@ -68,6 +96,9 @@ export function autoFillQuestions(opts: AutoFillOptions): PaperQuestion[] {
   let totalMarksAccum = 0;
   const perSec: Record<string, number> = {};
 
+  // Budget tolerance: allow up to 2 marks overshoot total
+  const OVERSHOOT_TOLERANCE = 2;
+
   let round = 0;
   while (totalMarksAccum < targetMarks && round < 10) {
     let added = false;
@@ -81,22 +112,22 @@ export function autoFillQuestions(opts: AutoFillOptions): PaperQuestion[] {
       const candidates = rqs.filter(q => !selectedIds.has(q.id));
       if (!candidates.length) continue;
 
-      // Prefer candidates that fit within budget (±5); among those, pick
-      // the one closest to the remaining marks so packing is tight.
       const remaining = targetMarks - totalMarksAccum;
-      const fitting = candidates.filter(c => c.marks <= remaining + 5);
-      let pick: PaperQuestion;
-      if (fitting.length > 0) {
-        // Closest to remaining, with a small random jitter for variety
-        fitting.sort((a, b) => Math.abs(remaining - a.marks) - Math.abs(remaining - b.marks));
-        // Pick among top-3 closest to add variety
-        const topN = fitting.slice(0, Math.min(3, fitting.length));
-        pick = topN[Math.floor(Math.random() * topN.length)];
-      } else {
-        // All overshoot — take the smallest available
-        candidates.sort((a, b) => a.marks - b.marks);
-        pick = candidates[0];
-      }
+
+      // 1) Strict fit: questions that fit within remaining budget
+      const strict = candidates.filter(c => c.marks <= remaining);
+      // 2) Slight overshoot: allow up to OVERSHOOT_TOLERANCE marks over target
+      const loose = strict.length === 0
+        ? candidates.filter(c => c.marks <= remaining + OVERSHOOT_TOLERANCE)
+        : [];
+
+      const pool = strict.length > 0 ? strict : loose;
+      if (!pool.length) continue; // skip this section — no fit
+
+      // Pick the one closest to remaining marks, with top-3 jitter for variety
+      pool.sort((a, b) => Math.abs(remaining - a.marks) - Math.abs(remaining - b.marks));
+      const topN = pool.slice(0, Math.min(3, pool.length));
+      const pick = topN[Math.floor(Math.random() * topN.length)];
 
       selected.push(pick);
       selectedIds.add(pick.id);

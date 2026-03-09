@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { BOARD_OPTIONS, TIER_OPTIONS, type PaperBoard, type PaperConfig, type PaperFocus, type PaperTier } from './types';
 
 interface PaperConfigFormProps {
@@ -8,14 +9,16 @@ interface PaperConfigFormProps {
 
 export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormProps) {
   const tiers = TIER_OPTIONS[config.board];
+  const baseId = useId();
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         {/* Board */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Exam Board</label>
+          <label htmlFor={`${baseId}-board`} className="block text-sm font-medium text-slate-700 mb-1">Exam Board</label>
           <select
+            id={`${baseId}-board`}
             value={config.board}
             onChange={e => {
               const board = e.target.value as PaperBoard;
@@ -32,8 +35,9 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
 
         {/* Tier */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Tier</label>
+          <label htmlFor={`${baseId}-tier`} className="block text-sm font-medium text-slate-700 mb-1">Tier</label>
           <select
+            id={`${baseId}-tier`}
             value={config.tier}
             onChange={e => onChange({ tier: e.target.value as PaperTier })}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -47,8 +51,9 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
 
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Paper Title</label>
+        <label htmlFor={`${baseId}-title`} className="block text-sm font-medium text-slate-700 mb-1">Paper Title</label>
         <input
+          id={`${baseId}-title`}
           type="text"
           value={config.title}
           onChange={e => onChange({ title: e.target.value })}
@@ -59,11 +64,15 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
       <div className="grid grid-cols-3 gap-4">
         {/* Target Marks */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Target Marks</label>
+          <label htmlFor={`${baseId}-marks`} className="block text-sm font-medium text-slate-700 mb-1">Target Marks</label>
           <input
+            id={`${baseId}-marks`}
             type="number"
             value={config.targetMarks}
-            onChange={e => onChange({ targetMarks: Number(e.target.value) })}
+            onChange={e => {
+              const v = Number(e.target.value);
+              if (v >= 0 && v <= 200) onChange({ targetMarks: v });
+            }}
             min={10}
             max={200}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -72,11 +81,15 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
 
         {/* Time */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Time (min)</label>
+          <label htmlFor={`${baseId}-time`} className="block text-sm font-medium text-slate-700 mb-1">Time (min)</label>
           <input
+            id={`${baseId}-time`}
             type="number"
             value={config.timeMinutes}
-            onChange={e => onChange({ timeMinutes: Number(e.target.value) })}
+            onChange={e => {
+              const v = Number(e.target.value);
+              if (v >= 0 && v <= 300) onChange({ timeMinutes: v });
+            }}
             min={10}
             max={300}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -85,8 +98,9 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
 
         {/* Paper Number */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Paper No.</label>
+          <label htmlFor={`${baseId}-paperno`} className="block text-sm font-medium text-slate-700 mb-1">Paper No.</label>
           <input
+            id={`${baseId}-paperno`}
             type="text"
             value={config.paperNumber}
             onChange={e => onChange({ paperNumber: e.target.value })}
@@ -98,8 +112,9 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
       <div className="grid grid-cols-2 gap-4">
         {/* Exam Session */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Session</label>
+          <label htmlFor={`${baseId}-session`} className="block text-sm font-medium text-slate-700 mb-1">Session</label>
           <input
+            id={`${baseId}-session`}
             type="text"
             value={config.examSession}
             onChange={e => onChange({ examSession: e.target.value })}
@@ -109,8 +124,9 @@ export function PaperConfigForm({ config, onChange, sections }: PaperConfigFormP
 
         {/* Year */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Year</label>
+          <label htmlFor={`${baseId}-year`} className="block text-sm font-medium text-slate-700 mb-1">Year</label>
           <input
+            id={`${baseId}-year`}
             type="text"
             value={config.examYear}
             onChange={e => onChange({ examYear: e.target.value })}

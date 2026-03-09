@@ -14,7 +14,9 @@ export const coverService = {
   getDesigns(): CoverDesign[] {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    } catch {
+    } catch (err) {
+      console.warn('[coverService] Corrupted designs data, resetting:', err);
+      localStorage.removeItem(STORAGE_KEY);
       return [];
     }
   },

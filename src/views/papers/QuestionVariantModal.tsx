@@ -141,25 +141,28 @@ export function QuestionVariantModal({ question, isOpen, onClose, onUseVariant }
           )}
 
           {/* Variants */}
-          {variants.map((v, i) => (
-            <div key={i} className="p-4 border border-slate-200 rounded-xl">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-bold text-slate-400">Variant {i + 1} ({v.marks}m)</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onUseVariant(v);
-                    setUsedIdx(prev => new Set(prev).add(i));
-                  }}
-                  disabled={usedIdx.has(i)}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition disabled:opacity-50"
-                >
-                  {usedIdx.has(i) ? <><Check size={12} /> Used</> : <><Plus size={12} /> Use</>}
-                </button>
+          {variants.map((v, i) => {
+            const variantKey = `variant-${i}-${v.marks}-${v.tex.slice(0, 20)}`;
+            return (
+              <div key={variantKey} className="p-4 border border-slate-200 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-slate-400">Variant {i + 1} ({v.marks}m)</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUseVariant(v);
+                      setUsedIdx(prev => new Set(prev).add(i));
+                    }}
+                    disabled={usedIdx.has(i)}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition disabled:opacity-50"
+                  >
+                    {usedIdx.has(i) ? <><Check size={12} /> Used</> : <><Plus size={12} /> Use</>}
+                  </button>
+                </div>
+                <pre className="text-sm text-slate-700 font-mono whitespace-pre-wrap">{v.tex}</pre>
               </div>
-              <pre className="text-sm text-slate-700 font-mono whitespace-pre-wrap">{v.tex}</pre>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ import { PaperTexPreview } from './PaperTexPreview';
 import { QuestionVariantModal } from './QuestionVariantModal';
 import { paperService } from '../../services/paperService';
 import { autoFillQuestions } from './utils/autoFill';
-import { generatePaperTex } from './utils/texGenerator';
+import { generatePaperTex, parseExamRef } from './utils/texGenerator';
 
 const STEPS = ['Configure', 'Select Questions', 'Review & Reorder', 'Preview & Compile'] as const;
 
@@ -38,6 +38,7 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
   const [questionOverrides, setQuestionOverrides] = useState<Map<string, { tex: string; marks: number }>>(new Map());
   /** Question currently open in the variant modal (step 2) */
   const [variantModalQ, setVariantModalQ] = useState<PaperQuestion | null>(null);
+  const [saveError, setSaveError] = useState('');
 
   const paperId = useMemo(() => editPaper?.id || `paper-${Date.now()}`, [editPaper]);
 
@@ -55,6 +56,16 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
         setLoading(false);
       });
   }, [config.board]);
+
+  // Sync selectedIds when question bank changes (remove stale IDs)
+  useEffect(() => {
+    if (!allQuestions.length) return;
+    const validIds = new Set(allQuestions.map(q => q.id));
+    setSelectedIds(prev => {
+      const filtered = new Set([...prev].filter(id => validIds.has(id)));
+      return filtered.size === prev.size ? prev : filtered;
+    });
+  }, [allQuestions]);
 
   const sections = useMemo(() => paperService.extractSections(allQuestions), [allQuestions]);
 
@@ -94,9 +105,11 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
       targetMarks: config.targetMarks,
       focus: config.focus,
       focusSections: config.focusSections,
+      board: config.board,
+      tier: config.tier,
     });
     setSelectedIds(new Set(filled.map(q => q.id)));
-  }, [allQuestions, config.targetMarks, config.focus, config.focusSections]);
+  }, [allQuestions, config.targetMarks, config.focus, config.focusSections, config.board, config.tier]);
 
   const handleRemoveQuestion = useCallback((id: string) => {
     setSelectedIds(prev => {
@@ -144,13 +157,17 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
     };
     try {
       paperService.savePaper(paper);
+      setSaveError('');
       onSave(paper);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save paper (localStorage may be full)');
+      setSaveError(err instanceof Error ? err.message : 'Failed to save paper (localStorage may be full)');
     }
   }, [config, paperId, selectedIds, texSource, editPaper, onSave]);
 
-  const totalMarks = selectedQuestions.reduce((s, q) => s + q.marks, 0);
+  const totalMarks = selectedQuestions.reduce((s, q) => {
+    const override = questionOverrides.get(q.id);
+    return s + (override ? override.marks : q.marks);
+  }, 0);
   const marksDiff = totalMarks - config.targetMarks;
 
   return (
@@ -236,49 +253,67 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
             </div>
           )}
 
-          {/* Step 1: Select Questions */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="text-sm text-slate-600">
-                  {selectedIds.size} selected / {totalMarks} marks
-                  {marksDiff !== 0 && (
-                    <span className={marksDiff > 0 ? 'text-amber-600 ml-1' : 'text-blue-600 ml-1'}>
-                      ({marksDiff > 0 ? '+' : ''}{marksDiff} vs target {config.targetMarks})
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {selectedIds.size > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleClearSelection}
-                      className="px-3 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-slate-100 transition"
-                    >
-                      Clear All
-                    </button>
-                  )}
+          {/* Step 1: Select Questions — kept mounted to preserve filter state */}
+          <div className={step === 1 ? 'space-y-4' : 'hidden'}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="text-sm text-slate-600">
+                {selectedIds.size} selected / {totalMarks} marks
+                {marksDiff !== 0 && (
+                  <span className={marksDiff > 0 ? 'text-amber-600 ml-1' : 'text-blue-600 ml-1'}>
+                    ({marksDiff > 0 ? '+' : ''}{marksDiff} vs target {config.targetMarks})
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {selectedIds.size > 0 && (
                   <button
                     type="button"
-                    onClick={handleAutoFill}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition"
+                    onClick={handleClearSelection}
+                    className="px-3 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-slate-100 transition"
                   >
-                    <Wand2 size={16} /> Auto-Fill ({config.targetMarks}m)
+                    Clear All
                   </button>
-                </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleAutoFill}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition"
+                >
+                  <Wand2 size={16} /> Auto-Fill ({config.targetMarks}m)
+                </button>
               </div>
-              <QuestionBrowser
-                questions={allQuestions}
-                selectedIds={selectedIds}
-                onToggle={handleToggle}
-                onSelectMultiple={handleSelectMultiple}
-              />
             </div>
-          )}
+            <QuestionBrowser
+              questions={allQuestions}
+              selectedIds={selectedIds}
+              onToggle={handleToggle}
+              onSelectMultiple={handleSelectMultiple}
+              board={config.board}
+            />
+          </div>
 
           {/* Step 2: Review & Reorder */}
           {step === 2 && (
             <div className="space-y-4">
+              {/* Warning for unparseable questions */}
+              {(() => {
+                const unparseable = selectedQuestions.filter(q => !parseExamRef(q.src, config.board));
+                if (unparseable.length === 0) return null;
+                return (
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-medium">{unparseable.length} question(s) cannot be mapped to PastPapers</p>
+                        <p className="text-xs mt-1 text-amber-600">
+                          These will be listed as comments in the .tex file and need manual placement:
+                          {' '}{unparseable.map(q => q.src).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="flex items-center justify-between">
                 <div className="text-sm text-slate-600">
                   {selectedQuestions.length} questions / {totalMarks} marks / Sorted by difficulty
@@ -367,10 +402,17 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
                   Save Paper
                 </button>
               </div>
+              {saveError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0" />
+                  {saveError}
+                </div>
+              )}
               <PaperTexPreview
                 texSource={texSource}
                 onTexChange={setTexSource}
                 paperId={paperId}
+                board={config.board}
               />
             </div>
           )}

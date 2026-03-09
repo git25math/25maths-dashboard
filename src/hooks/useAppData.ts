@@ -1,8 +1,7 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
-import { KAHOOT_SEED_ITEMS } from '../constants-kahoot';
-import { MOCK_PAYHIP_ITEMS } from '../constants-payhip';
+import { useSeedData } from './useSeedData';
 import { TimetableEntry, Student, TeachingUnit, ClassProfile, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, EmailDigest, Project, KahootItem, PayhipItem } from '../types';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
@@ -61,14 +60,14 @@ const isCanonicalCoverUrl = (value?: string) => {
   return normalizeKahootLookupValue(value).startsWith('https://www.25maths.com/projects/kahoot-channel/');
 };
 
-const KAHOOT_SEED_LOOKUP = (() => {
+function buildKahootSeedLookup(seedItems: KahootItem[]) {
   const byId = new Map<string, KahootItem>();
   const byWebsiteLinkId = new Map<string, KahootItem>();
   const byChallengeUrl = new Map<string, KahootItem>();
   const byCompositeKey = new Map<string, KahootItem>();
   const byTitle = new Map<string, KahootItem>();
 
-  for (const item of KAHOOT_SEED_ITEMS) {
+  for (const item of seedItems) {
     byId.set(item.id, item);
 
     const websiteLinkId = normalizeKahootLookupValue(item.website_link_id);
@@ -85,23 +84,25 @@ const KAHOOT_SEED_LOOKUP = (() => {
   }
 
   return { byId, byWebsiteLinkId, byChallengeUrl, byCompositeKey, byTitle };
-})();
+}
 
-const matchKahootSeedItem = (item: KahootItem) => {
+type KahootSeedLookup = ReturnType<typeof buildKahootSeedLookup>;
+
+const matchKahootSeedItem = (item: KahootItem, lookup: KahootSeedLookup) => {
   return (
-    KAHOOT_SEED_LOOKUP.byId.get(item.id) ||
-    KAHOOT_SEED_LOOKUP.byWebsiteLinkId.get(normalizeKahootLookupValue(item.website_link_id)) ||
-    KAHOOT_SEED_LOOKUP.byChallengeUrl.get(normalizeKahootLookupValue(item.challenge_url)) ||
-    KAHOOT_SEED_LOOKUP.byCompositeKey.get(`${item.board}|${item.track}|${normalizeKahootLookupValue(item.topic_code)}`) ||
-    KAHOOT_SEED_LOOKUP.byTitle.get(normalizeKahootTitle(item.title))
+    lookup.byId.get(item.id) ||
+    lookup.byWebsiteLinkId.get(normalizeKahootLookupValue(item.website_link_id)) ||
+    lookup.byChallengeUrl.get(normalizeKahootLookupValue(item.challenge_url)) ||
+    lookup.byCompositeKey.get(`${item.board}|${item.track}|${normalizeKahootLookupValue(item.topic_code)}`) ||
+    lookup.byTitle.get(normalizeKahootTitle(item.title))
   );
 };
 
-const backfillKahootSeedFields = (items: KahootItem[]) => {
+const backfillKahootSeedFields = (items: KahootItem[], lookup: KahootSeedLookup) => {
   const changedItems: KahootItem[] = [];
 
   const mergedItems = items.map(item => {
-    const seed = matchKahootSeedItem(item);
+    const seed = matchKahootSeedItem(item, lookup);
     if (!seed) return item;
 
     const currentCreatorUrl = normalizeKahootLookupValue(item.creator_url);
@@ -141,15 +142,15 @@ const backfillKahootSeedFields = (items: KahootItem[]) => {
 
 const PAYHIP_PIPELINE_KEYS = ['matrix_ready', 'copy_ready', 'payhip_created', 'url_backfilled', 'qa_verified', 'site_synced'] as const;
 
-const PAYHIP_SEED_LOOKUP = (() => {
+function buildPayhipSeedLookup(seedItems: PayhipItem[]) {
   const byId = new Map<string, PayhipItem>();
-
-  for (const item of MOCK_PAYHIP_ITEMS) {
+  for (const item of seedItems) {
     byId.set(item.id, item);
   }
-
   return { byId };
-})();
+}
+
+type PayhipSeedLookup = ReturnType<typeof buildPayhipSeedLookup>;
 
 const hasSamePayhipPipeline = (left?: PayhipItem['pipeline'], right?: PayhipItem['pipeline']) => {
   if (!left || !right) return false;
@@ -161,11 +162,11 @@ const isPristinePayhipSeedItem = (item: PayhipItem) => {
   return item.created_at === item.updated_at && String(item.sync_source || '').startsWith('website:');
 };
 
-const backfillPayhipSeedFields = (items: PayhipItem[]) => {
+const backfillPayhipSeedFields = (items: PayhipItem[], lookup: PayhipSeedLookup) => {
   const changedItems: PayhipItem[] = [];
 
   const mergedItems = items.map(item => {
-    const seed = PAYHIP_SEED_LOOKUP.byId.get(item.id);
+    const seed = lookup.byId.get(item.id);
     if (!seed?.pipeline) return item;
 
     const shouldUpdatePipeline = !item.pipeline || (isPristinePayhipSeedItem(item) && !hasSamePayhipPipeline(item.pipeline, seed.pipeline));
@@ -184,6 +185,16 @@ const backfillPayhipSeedFields = (items: PayhipItem[]) => {
 
 export function useAppData() {
   const { toasts, toast } = useToast();
+  const seed = useSeedData();
+
+  const kahootSeedLookup = useMemo(
+    () => seed.loaded ? buildKahootSeedLookup(seed.kahootSeed) : null,
+    [seed.loaded, seed.kahootSeed],
+  );
+  const payhipSeedLookup = useMemo(
+    () => seed.loaded ? buildPayhipSeedLookup(seed.payhipSeed) : null,
+    [seed.loaded, seed.payhipSeed],
+  );
 
   const normalizeAndSortUnits = useCallback((units: TeachingUnit[]) => {
     return sortTeachingUnits(units.map(normalizeTeachingUnit));
@@ -205,18 +216,26 @@ export function useAppData() {
   const [hpAwardLogs, setHpAwardLogs] = useLocalStorage<HPAwardLog[]>('dashboard-hp-award-logs', []);
   const [emailDigests, setEmailDigests] = useLocalStorage<EmailDigest[]>('dashboard-email-digests', []);
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
-  const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', KAHOOT_SEED_ITEMS);
-  const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', MOCK_PAYHIP_ITEMS);
+  const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', []);
+  const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', []);
 
-  // Replace stale mock kahoot data with the full seed whenever an older cache is loaded.
+  // Populate from seed data once loaded (replaces stale or empty cache)
   useEffect(() => {
-    if (kahootItems.length >= KAHOOT_SEED_ITEMS.length) return;
-    setKahootItems(KAHOOT_SEED_ITEMS);
-  }, [kahootItems.length, setKahootItems]);
+    if (!seed.loaded) return;
+    if (kahootItems.length >= seed.kahootSeed.length) return;
+    setKahootItems(seed.kahootSeed);
+  }, [seed.loaded, seed.kahootSeed, kahootItems.length, setKahootItems]);
+
+  useEffect(() => {
+    if (!seed.loaded) return;
+    if (payhipItems.length >= seed.payhipSeed.length) return;
+    setPayhipItems(seed.payhipSeed);
+  }, [seed.loaded, seed.payhipSeed, payhipItems.length, setPayhipItems]);
 
   // Fill in canonical creator and cover links from the seed without disturbing other fields.
   useEffect(() => {
-    const { mergedItems, changedItems } = backfillKahootSeedFields(kahootItems);
+    if (!kahootSeedLookup) return;
+    const { mergedItems, changedItems } = backfillKahootSeedFields(kahootItems, kahootSeedLookup);
     if (changedItems.length === 0) return;
 
     setKahootItems(mergedItems);
@@ -224,11 +243,12 @@ export function useAppData() {
     if (isSupabaseConfigured) {
       void syncToSupabase('kahoot_items', changedItems);
     }
-  }, [kahootItems, setKahootItems]);
+  }, [kahootItems, setKahootItems, kahootSeedLookup]);
 
   // Reset untouched seed-derived Payhip pipeline flags so QA/site sync start from explicit operator actions.
   useEffect(() => {
-    const { mergedItems, changedItems } = backfillPayhipSeedFields(payhipItems);
+    if (!payhipSeedLookup) return;
+    const { mergedItems, changedItems } = backfillPayhipSeedFields(payhipItems, payhipSeedLookup);
     if (changedItems.length === 0) return;
 
     setPayhipItems(mergedItems);
@@ -236,7 +256,7 @@ export function useAppData() {
     if (isSupabaseConfigured) {
       void syncToSupabase('payhip_items', changedItems);
     }
-  }, [payhipItems, setPayhipItems]);
+  }, [payhipItems, setPayhipItems, payhipSeedLookup]);
 
   // --- Normalize localStorage data ---
   useEffect(() => {

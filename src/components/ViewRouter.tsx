@@ -45,6 +45,7 @@ interface ViewRouterProps {
   PayhipHub: React.ComponentType<any>;
   PaperHub: React.ComponentType<any>;
   CoverHub: React.ComponentType<any>;
+  TikzHub: React.ComponentType<any>;
 }
 
 export const ViewRouter = memo(function ViewRouter({
@@ -84,6 +85,7 @@ export const ViewRouter = memo(function ViewRouter({
   PayhipHub,
   PaperHub,
   CoverHub,
+  TikzHub,
 }: ViewRouterProps) {
   const {
     setGenericFormConfig, setWeaknessFormConfig, setParentCommFormConfig,
@@ -478,6 +480,8 @@ export const ViewRouter = memo(function ViewRouter({
       return <PaperHub />;
     case 'cover-design':
       return <CoverHub />;
+    case 'tikz-vault':
+      return <TikzHub />;
     case 'settings':
       return (
         <SettingsView
