@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye, FileDown, BookOpen, Filter } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
 import { ProjectMilestone, DevLogEntry, DevLogThread, MilestoneReview, MilestoneStatus, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES } from '../types/chronicle';
@@ -47,6 +47,7 @@ interface ProjectDetailViewProps {
   onDeleteProject: (id: string) => void;
   onUpdateProject: (id: string, updates: Partial<Project>) => void;
   onAddTaskForProject: (projectId: string) => void;
+  addTask: (data: Omit<Task, 'id' | 'created_at'>) => Promise<Task>;
   // Milestone actions
   addMilestone: (data: Omit<ProjectMilestone, 'id'>) => Promise<ProjectMilestone>;
   updateMilestone: (id: string, updates: Partial<ProjectMilestone>) => void;
@@ -77,6 +78,7 @@ export function ProjectDetailView({
   onDeleteProject,
   onUpdateProject,
   onAddTaskForProject,
+  addTask,
   addMilestone,
   updateMilestone,
   deleteMilestone,
@@ -96,9 +98,11 @@ export function ProjectDetailView({
   const [editingDevLog, setEditingDevLog] = useState<DevLogEntry | null>(null);
   const [showDevLogForm, setShowDevLogForm] = useState(false);
   const [tagFilter, setTagFilter] = useState<DevLogTag | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<DevLogStatus | 'all'>('all');
   const [threadFilter, setThreadFilter] = useState<string | 'all'>('all');
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
   const [readingLog, setReadingLog] = useState<DevLogEntry | null>(null);
+  const [showThreadNarrative, setShowThreadNarrative] = useState(false);
   const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
   const [showNewThreadForm, setShowNewThreadForm] = useState(false);
   const [newThreadName, setNewThreadName] = useState('');
@@ -121,9 +125,28 @@ export function ProjectDetailView({
   const projectDevlogs = useMemo(() => {
     let filtered = allProjectDevlogs;
     if (tagFilter !== 'all') filtered = filtered.filter(d => d.tags.includes(tagFilter));
+    if (statusFilter !== 'all') filtered = filtered.filter(d => (d.status || 'draft') === statusFilter);
     if (threadFilter !== 'all') filtered = filtered.filter(d => d.thread_id === threadFilter);
     return filtered;
-  }, [allProjectDevlogs, tagFilter, threadFilter]);
+  }, [allProjectDevlogs, tagFilter, statusFilter, threadFilter]);
+
+  // Incubation pipeline counts
+  const incubationCounts = useMemo(() => {
+    const counts = { draft: 0, incubating: 0, actionable: 0, archived: 0 };
+    for (const dl of allProjectDevlogs) {
+      const s = dl.status || 'draft';
+      if (s in counts) counts[s as keyof typeof counts]++;
+    }
+    return counts;
+  }, [allProjectDevlogs]);
+
+  // Thread narrative content (chronological order)
+  const threadNarrativeLogs = useMemo(() => {
+    if (threadFilter === 'all') return [];
+    return allProjectDevlogs
+      .filter(d => d.thread_id === threadFilter)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  }, [allProjectDevlogs, threadFilter]);
 
   // Progress
   const doneTasks = projectTasks.filter(t => t.status === 'done').length;
@@ -216,6 +239,35 @@ export function ProjectDetailView({
     setNewThreadName('');
     setShowNewThreadForm(false);
   };
+
+  const handleAddTaskForMilestone = useCallback((title: string, milestoneId: string) => {
+    addTask({
+      title,
+      status: 'next',
+      priority: 'medium',
+      project_id: project.id,
+      milestone_id: milestoneId,
+    });
+  }, [addTask, project.id]);
+
+  const exportThreadAsMarkdown = useCallback(() => {
+    if (threadFilter === 'all' || threadNarrativeLogs.length === 0) return;
+    const thread = projectThreads.find(t => t.id === threadFilter);
+    if (!thread) return;
+    const lines: string[] = [`# ${thread.name}\n`];
+    if (thread.description) lines.push(`${thread.description}\n`);
+    lines.push(`---\n`);
+    for (const dl of threadNarrativeLogs) {
+      const tagLabels = dl.tags.map(t => DEV_LOG_TAGS.find(dt => dt.key === t)?.label || t).join(', ');
+      lines.push(`## ${dl.title}`);
+      lines.push(`*${formatDate(dl.created_at)}* · ${tagLabels}\n`);
+      if (dl.content) lines.push(`${dl.content}\n`);
+      lines.push(`---\n`);
+    }
+    const text = lines.join('\n');
+    navigator.clipboard.writeText(text);
+    // Visual feedback via a brief alert-like approach — just use clipboard
+  }, [threadFilter, threadNarrativeLogs, projectThreads]);
 
   const otherProjects = allProjects.filter(p => p.id !== project.id);
 
@@ -335,6 +387,29 @@ export function ProjectDetailView({
               </div>
             ))}
           </div>
+
+          {/* Incubation Pipeline */}
+          {allProjectDevlogs.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 mb-3">Idea Pipeline</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { key: 'draft' as const, label: '草稿', color: 'border-slate-300', textColor: 'text-slate-600', bgColor: 'bg-slate-50' },
+                  { key: 'incubating' as const, label: '孵化中', color: 'border-amber-300', textColor: 'text-amber-700', bgColor: 'bg-amber-50' },
+                  { key: 'actionable' as const, label: '可执行', color: 'border-emerald-300', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
+                ]).map(col => (
+                  <button
+                    key={col.key}
+                    onClick={() => { setActiveTab('devlogs'); setStatusFilter(col.key); }}
+                    className={cn('glass-card p-4 text-center border-t-4 hover:shadow-md transition-shadow', col.color)}
+                  >
+                    <p className={cn('text-2xl font-bold', col.textColor)}>{incubationCounts[col.key]}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">{col.label}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Quick Capture */}
           <ChronicleQuickCapture projectId={project.id} onCapture={handleQuickCapture} />
@@ -463,6 +538,7 @@ export function ProjectDetailView({
                 onRequestReview={setReviewingMilestone}
                 onMoveUp={idx > 0 ? () => handleMoveMs(idx, -1) : undefined}
                 onMoveDown={idx < projectMilestones.length - 1 ? () => handleMoveMs(idx, 1) : undefined}
+                onAddTask={handleAddTaskForMilestone}
               />
             ))}
           </div>
@@ -534,6 +610,17 @@ export function ProjectDetailView({
             ))}
           </div>
 
+          {/* Status filter */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <Filter size={12} className="text-slate-400" />
+            <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>All Status</FilterChip>
+            {DEV_LOG_STATUSES.map(({ key, label }) => (
+              <FilterChip key={key} active={statusFilter === key} onClick={() => setStatusFilter(key)}>
+                {label} ({allProjectDevlogs.filter(d => (d.status || 'draft') === key).length})
+              </FilterChip>
+            ))}
+          </div>
+
           {/* Thread filter */}
           {projectThreads.length > 0 && (
             <div className="flex flex-wrap gap-2 items-center">
@@ -572,12 +659,28 @@ export function ProjectDetailView({
               </div>
             )}
             {projectThreads.length > 0 && threadFilter !== 'all' && (
-              <button
-                onClick={() => { if (confirm('Delete this thread? Logs will be unlinked.')) { deleteThread(threadFilter); setThreadFilter('all'); } }}
-                className="text-xs text-slate-300 hover:text-red-500 ml-auto transition-colors"
-              >
-                <Trash2 size={12} />
-              </button>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setShowThreadNarrative(true)}
+                  className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                  title="Read as narrative"
+                >
+                  <BookOpen size={12} /> Narrative
+                </button>
+                <button
+                  onClick={exportThreadAsMarkdown}
+                  className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                  title="Copy as Markdown"
+                >
+                  <FileDown size={12} /> Export
+                </button>
+                <button
+                  onClick={() => { if (confirm('Delete this thread? Logs will be unlinked.')) { deleteThread(threadFilter); setThreadFilter('all'); } }}
+                  className="text-xs text-slate-300 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             )}
           </div>
 
@@ -701,6 +804,53 @@ export function ProjectDetailView({
           onCancel={() => { setShowDevLogForm(false); setEditingDevLog(null); }}
         />
       )}
+
+      {/* Thread narrative modal */}
+      {showThreadNarrative && threadFilter !== 'all' && threadNarrativeLogs.length > 0 && (() => {
+        const thread = projectThreads.find(t => t.id === threadFilter);
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowThreadNarrative(false)}>
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">{thread?.name || 'Thread'}</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">{threadNarrativeLogs.length} entries · Chronological order</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={exportThreadAsMarkdown}
+                    className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                  >
+                    <FileDown size={12} /> Copy MD
+                  </button>
+                  <button onClick={() => setShowThreadNarrative(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm font-bold">
+                    Close
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 overflow-y-auto flex-1 space-y-8">
+                {threadNarrativeLogs.map((dl, idx) => (
+                  <div key={dl.id}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-bold text-slate-400">{idx + 1}.</span>
+                      <h4 className="font-bold text-slate-900">{dl.title}</h4>
+                      {dl.tags.map(t => {
+                        const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
+                        return tagCfg ? (
+                          <span key={t} className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span>
+                        ) : null;
+                      })}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mb-3">{formatDate(dl.created_at)}</p>
+                    {dl.content && <MarkdownRenderer content={dl.content} className="markdown-content text-slate-700" />}
+                    {idx < threadNarrativeLogs.length - 1 && <hr className="mt-6 border-slate-100" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Reading mode modal */}
       {readingLog && (

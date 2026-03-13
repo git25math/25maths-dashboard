@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Trash2, Edit3, Calendar, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Edit3, Calendar, CheckCircle2, Circle, Clock, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ProjectMilestone, MilestoneStatus, DevLogEntry, DEV_LOG_TAGS } from '../../types/chronicle';
 import { Task } from '../../types';
@@ -21,10 +21,13 @@ interface MilestoneCardProps {
   onRequestReview: (ms: ProjectMilestone) => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
+  onAddTask?: (title: string, milestoneId: string) => void;
 }
 
-export function MilestoneCard({ milestone, tasks, devlogs = [], onCycleStatus, onEdit, onDelete, onRequestReview, onMoveUp, onMoveDown }: MilestoneCardProps) {
+export function MilestoneCard({ milestone, tasks, devlogs = [], onCycleStatus, onEdit, onDelete, onRequestReview, onMoveUp, onMoveDown, onAddTask }: MilestoneCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showTaskInput, setShowTaskInput] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
   const cfg = STATUS_CONFIG[milestone.status];
   const Icon = cfg.icon;
 
@@ -105,9 +108,19 @@ export function MilestoneCard({ milestone, tasks, devlogs = [], onCycleStatus, o
 
       {expanded && (
         <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
-          {linkedTasks.length > 0 ? (
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Linked Tasks</p>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Linked Tasks ({linkedTasks.length})</p>
+              {onAddTask && !showTaskInput && (
+                <button
+                  onClick={() => setShowTaskInput(true)}
+                  className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-0.5 transition-colors"
+                >
+                  <Plus size={12} /> Add Task
+                </button>
+              )}
+            </div>
+            {linkedTasks.length > 0 ? (
               <div className="space-y-1">
                 {linkedTasks.map(t => (
                   <div key={t.id} className="flex items-center gap-2 text-sm">
@@ -116,10 +129,42 @@ export function MilestoneCard({ milestone, tasks, devlogs = [], onCycleStatus, o
                   </div>
                 ))}
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400">No linked tasks yet.</p>
-          )}
+            ) : !showTaskInput && (
+              <p className="text-sm text-slate-400">No linked tasks yet.</p>
+            )}
+            {showTaskInput && onAddTask && (
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  value={newTaskTitle}
+                  onChange={e => setNewTaskTitle(e.target.value)}
+                  placeholder="Task title..."
+                  className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  autoFocus
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && newTaskTitle.trim()) {
+                      onAddTask(newTaskTitle.trim(), milestone.id);
+                      setNewTaskTitle('');
+                    }
+                    if (e.key === 'Escape') { setShowTaskInput(false); setNewTaskTitle(''); }
+                  }}
+                />
+                <button
+                  onClick={() => { if (newTaskTitle.trim()) { onAddTask(newTaskTitle.trim(), milestone.id); setNewTaskTitle(''); } }}
+                  disabled={!newTaskTitle.trim()}
+                  className="text-xs font-bold text-indigo-600 disabled:opacity-50"
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => { setShowTaskInput(false); setNewTaskTitle(''); }}
+                  className="text-xs text-slate-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
 
           {linkedLogs.length > 0 && (
             <div>

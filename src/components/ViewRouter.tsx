@@ -487,6 +487,7 @@ export const ViewRouter = memo(function ViewRouter({
           onDeleteProject={data.deleteProject}
           onUpdateProject={(id, updates) => data.updateProject(id, updates)}
           onAddTaskForProject={(projectId) => { setTaskFormInitialProjectId(projectId); setEditingTask(null); setIsTaskFormOpen(true); }}
+          addTask={data.addTask}
           addMilestone={data.addMilestone}
           updateMilestone={data.updateMilestone}
           deleteMilestone={data.deleteMilestone}

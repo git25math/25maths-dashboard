@@ -26,7 +26,15 @@ export function DevLogEditor({ entry, projectId, milestones, tasks, threads = []
   const [threadId, setThreadId] = useState(entry?.thread_id || '');
 
   const toggleTag = (tag: DevLogTag) => {
-    setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+    setTags(prev => {
+      const next = prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag];
+      // Auto-fill template when adding a tag to a new log with empty content
+      if (!entry && !content.trim() && !prev.includes(tag)) {
+        const tagCfg = DEV_LOG_TAGS.find(t => t.key === tag);
+        if (tagCfg?.template) setContent(tagCfg.template);
+      }
+      return next;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
