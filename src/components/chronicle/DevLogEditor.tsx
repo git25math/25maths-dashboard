@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DevLogEntry, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES, DevLogThread } from '../../types/chronicle';
+import { DevLogEntry, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES, DevLogThread, CustomTemplate } from '../../types/chronicle';
 import { ProjectMilestone } from '../../types/chronicle';
 import { Task } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
@@ -12,14 +12,16 @@ interface DevLogEditorProps {
   milestones: ProjectMilestone[];
   tasks: Task[];
   threads?: DevLogThread[];
+  customTemplates?: CustomTemplate[];
+  initialTemplate?: CustomTemplate | null;
   onSave: (data: Omit<DevLogEntry, 'id'>) => void;
   onCancel: () => void;
 }
 
-export function DevLogEditor({ entry, projectId, milestones, tasks, threads = [], onSave, onCancel }: DevLogEditorProps) {
+export function DevLogEditor({ entry, projectId, milestones, tasks, threads = [], customTemplates = [], initialTemplate, onSave, onCancel }: DevLogEditorProps) {
   const [title, setTitle] = useState(entry?.title || '');
-  const [content, setContent] = useState(entry?.content || '');
-  const [tags, setTags] = useState<DevLogTag[]>(entry?.tags || ['thinking']);
+  const [content, setContent] = useState(entry?.content || initialTemplate?.content || '');
+  const [tags, setTags] = useState<DevLogTag[]>(entry?.tags || initialTemplate?.tags || ['thinking']);
   const [status, setStatus] = useState<DevLogStatus>(entry?.status || 'draft');
   const [milestoneId, setMilestoneId] = useState(entry?.milestone_id || '');
   const [taskId, setTaskId] = useState(entry?.task_id || '');
@@ -103,6 +105,25 @@ export function DevLogEditor({ entry, projectId, milestones, tasks, threads = []
               </div>
             </div>
           </div>
+
+          {/* Template picker (only for new entries) */}
+          {!entry && customTemplates.length > 0 && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Apply Template</label>
+              <div className="flex flex-wrap gap-2">
+                {customTemplates.map(tpl => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => { setContent(tpl.content); setTags(tpl.tags); }}
+                    className="text-xs text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 transition-all"
+                  >
+                    {tpl.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Status selector */}
           <div>

@@ -68,3 +68,12 @@ export interface DevLogEntry {
   created_at: string;
   updated_at?: string;
 }
+
+// Custom templates saved by user
+export interface CustomTemplate {
+  id: string;
+  name: string;
+  content: string;
+  tags: DevLogTag[];
+  created_at: string;
+}

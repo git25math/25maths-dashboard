@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye, FileDown, BookOpen, Filter, Search, Star, StarOff, ArrowUpDown, CheckSquare2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye, FileDown, BookOpen, Filter, Search, Star, StarOff, ArrowUpDown, CheckSquare2, BarChart3, FileText, Bookmark, Columns2, Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
-import { ProjectMilestone, DevLogEntry, DevLogThread, MilestoneReview, MilestoneStatus, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES } from '../types/chronicle';
+import { ProjectMilestone, DevLogEntry, DevLogThread, MilestoneReview, MilestoneStatus, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES, CustomTemplate } from '../types/chronicle';
 import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { MilestoneCard } from '../components/chronicle/MilestoneCard';
@@ -111,6 +111,12 @@ export function ProjectDetailView({
   const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
   const [batchMode, setBatchMode] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [milestonesViewMode, setMilestonesViewMode] = useState<'list' | 'timeline'>('list');
+  const [diffLogs, setDiffLogs] = useState<[DevLogEntry, DevLogEntry] | null>(null);
+  const [showWeeklyReport, setShowWeeklyReport] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>(() => {
+    try { return JSON.parse(localStorage.getItem('chronicle-custom-templates') || '[]'); } catch { return []; }
+  });
 
   // New milestone form state
   const [newMsTitle, setNewMsTitle] = useState('');
@@ -176,6 +182,71 @@ export function ProjectDetailView({
     const activeDays = new Set(allProjectDevlogs.map(d => d.created_at.slice(0, 10))).size;
     return { thisWeek: thisWeekLogs.length, totalWords, topTagLabel, activeDays };
   }, [allProjectDevlogs]);
+
+  // Tag heatmap: last 8 weeks distribution
+  const tagHeatmap = useMemo(() => {
+    const weeks: { label: string; counts: Record<string, number> }[] = [];
+    const now = new Date();
+    for (let w = 7; w >= 0; w--) {
+      const weekStart = new Date(now.getTime() - (w + 1) * 7 * 24 * 60 * 60 * 1000);
+      const weekEnd = new Date(now.getTime() - w * 7 * 24 * 60 * 60 * 1000);
+      const weekLabel = `${(weekStart.getMonth() + 1)}/${weekStart.getDate()}`;
+      const counts: Record<string, number> = {};
+      for (const dl of allProjectDevlogs) {
+        const d = new Date(dl.created_at);
+        if (d >= weekStart && d < weekEnd) {
+          for (const t of dl.tags) counts[t] = (counts[t] || 0) + 1;
+        }
+      }
+      weeks.push({ label: weekLabel, counts });
+    }
+    return weeks;
+  }, [allProjectDevlogs]);
+
+  // Weekly report data
+  const weeklyReport = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weekAgoStr = weekAgo.toISOString();
+    const newLogs = allProjectDevlogs.filter(d => d.created_at >= weekAgoStr);
+    const completedTasks = projectTasks.filter(t => t.status === 'done' && t.completed_at && t.completed_at >= weekAgoStr);
+    const msChanges = projectMilestones.filter(m => m.completed_at && m.completed_at >= weekAgoStr);
+    const logsByTag: Record<string, string[]> = {};
+    for (const dl of newLogs) {
+      for (const t of dl.tags) {
+        if (!logsByTag[t]) logsByTag[t] = [];
+        logsByTag[t].push(dl.title);
+      }
+    }
+    // Generate markdown
+    const lines: string[] = [];
+    lines.push(`# Weekly Report: ${project.name}`);
+    lines.push(`*${formatDate(weekAgo.toISOString())} — ${formatDate(now.toISOString())}*\n`);
+    lines.push(`## Summary`);
+    lines.push(`- **${newLogs.length}** dev logs written`);
+    lines.push(`- **${completedTasks.length}** tasks completed`);
+    lines.push(`- **${msChanges.length}** milestones completed\n`);
+    if (msChanges.length > 0) {
+      lines.push(`## Milestones Completed`);
+      for (const ms of msChanges) lines.push(`- ${ms.title}`);
+      lines.push('');
+    }
+    if (completedTasks.length > 0) {
+      lines.push(`## Tasks Completed`);
+      for (const t of completedTasks) lines.push(`- ${t.title}`);
+      lines.push('');
+    }
+    if (newLogs.length > 0) {
+      lines.push(`## Dev Log Highlights`);
+      for (const [tag, titles] of Object.entries(logsByTag)) {
+        const tagLabel = DEV_LOG_TAGS.find(t => t.key === tag)?.label || tag;
+        lines.push(`### ${tagLabel}`);
+        for (const title of titles) lines.push(`- ${title}`);
+      }
+      lines.push('');
+    }
+    return lines.join('\n');
+  }, [allProjectDevlogs, projectTasks, projectMilestones, project.name]);
 
   // Incubation pipeline counts
   const incubationCounts = useMemo(() => {
@@ -296,6 +367,61 @@ export function ProjectDetailView({
       milestone_id: milestoneId,
     });
   }, [addTask, project.id]);
+
+  // Save as custom template
+  const saveAsTemplate = useCallback((dl: DevLogEntry) => {
+    const name = prompt('Template name:', dl.title);
+    if (!name) return;
+    const tpl: CustomTemplate = {
+      id: `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name,
+      content: dl.content,
+      tags: dl.tags,
+      created_at: new Date().toISOString(),
+    };
+    const next = [...customTemplates, tpl];
+    setCustomTemplates(next);
+    localStorage.setItem('chronicle-custom-templates', JSON.stringify(next));
+  }, [customTemplates]);
+
+  const deleteTemplate = useCallback((id: string) => {
+    const next = customTemplates.filter(t => t.id !== id);
+    setCustomTemplates(next);
+    localStorage.setItem('chronicle-custom-templates', JSON.stringify(next));
+  }, [customTemplates]);
+
+  const applyTemplate = useCallback((tpl: CustomTemplate) => {
+    setEditingDevLog(null);
+    setShowDevLogForm(true);
+    // We'll pass template info via a ref trick — set a special state
+    setTemplateToApply(tpl);
+  }, []);
+
+  const [templateToApply, setTemplateToApply] = useState<CustomTemplate | null>(null);
+
+  // Transform [[log title]] references into markdown links for rendering
+  const processLogRefs = useCallback((content: string): string => {
+    return content.replace(/\[\[([^\]]+)\]\]/g, (match, title) => {
+      const found = allProjectDevlogs.find(d => d.title.toLowerCase() === title.trim().toLowerCase());
+      if (found) {
+        return `**🔗 ${title}**`;
+      }
+      return `*⚠️ ${title} (not found)*`;
+    });
+  }, [allProjectDevlogs]);
+
+  // Navigate to referenced log by expanding it
+  const navigateToLog = useCallback((title: string) => {
+    const found = allProjectDevlogs.find(d => d.title.toLowerCase() === title.trim().toLowerCase());
+    if (found) {
+      setActiveTab('devlogs');
+      setTagFilter('all');
+      setStatusFilter('all');
+      setThreadFilter('all');
+      setSearchQuery(found.title);
+      setExpandedLogs(prev => new Set([...prev, found.id]));
+    }
+  }, [allProjectDevlogs]);
 
   const exportThreadAsMarkdown = useCallback(() => {
     if (threadFilter === 'all' || threadNarrativeLogs.length === 0) return;
@@ -500,6 +626,57 @@ export function ProjectDetailView({
             </div>
           )}
 
+          {/* Tag Heatmap */}
+          {allProjectDevlogs.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <BarChart3 size={14} /> Tag Distribution (8 weeks)
+              </h3>
+              <div className="glass-card p-4 overflow-x-auto">
+                <div className="flex gap-1 min-w-fit">
+                  {tagHeatmap.map((week, wi) => {
+                    const total = Object.values(week.counts).reduce((s, v) => s + v, 0);
+                    return (
+                      <div key={wi} className="flex flex-col items-center gap-1 min-w-[48px]">
+                        {DEV_LOG_TAGS.map(tag => {
+                          const count = week.counts[tag.key] || 0;
+                          const opacity = count === 0 ? 0.05 : Math.min(0.2 + count * 0.2, 1);
+                          return (
+                            <div
+                              key={tag.key}
+                              className="w-8 h-4 rounded-sm"
+                              style={{
+                                backgroundColor: tag.color.includes('purple') ? '#a855f7' :
+                                  tag.color.includes('blue') ? '#3b82f6' :
+                                  tag.color.includes('cyan') ? '#06b6d4' :
+                                  tag.color.includes('amber') ? '#f59e0b' :
+                                  tag.color.includes('red') ? '#ef4444' :
+                                  tag.color.includes('emerald') ? '#10b981' :
+                                  tag.color.includes('indigo') ? '#6366f1' :
+                                  '#f97316',
+                                opacity,
+                              }}
+                              title={`${tag.label}: ${count} (${week.label})`}
+                            />
+                          );
+                        })}
+                        <span className="text-[9px] text-slate-400 mt-1">{week.label}</span>
+                        <span className="text-[9px] font-bold text-slate-500">{total || ''}</span>
+                      </div>
+                    );
+                  })}
+                  <div className="flex flex-col gap-1 ml-2 min-w-[48px]">
+                    {DEV_LOG_TAGS.map(tag => (
+                      <div key={tag.key} className="h-4 flex items-center">
+                        <span className="text-[8px] text-slate-400 whitespace-nowrap">{tag.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Incubation Pipeline */}
           {allProjectDevlogs.length > 0 && (
             <div>
@@ -523,8 +700,18 @@ export function ProjectDetailView({
             </div>
           )}
 
-          {/* Quick Capture */}
-          <ChronicleQuickCapture projectId={project.id} onCapture={handleQuickCapture} />
+          {/* Quick Capture + Weekly Report */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <ChronicleQuickCapture projectId={project.id} onCapture={handleQuickCapture} />
+            </div>
+            <button
+              onClick={() => setShowWeeklyReport(true)}
+              className="btn-secondary text-sm flex items-center gap-1.5 flex-shrink-0"
+            >
+              <FileText size={14} /> Weekly Report
+            </button>
+          </div>
 
           {/* Growth Timeline — Cross-milestone review panel */}
           {completedMilestonesWithReviews.length > 0 && (
@@ -594,7 +781,23 @@ export function ProjectDetailView({
       {activeTab === 'milestones' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-sm font-bold text-slate-700">Milestones ({totalMs})</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-sm font-bold text-slate-700">Milestones ({totalMs})</h3>
+              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+                <button
+                  onClick={() => setMilestonesViewMode('list')}
+                  className={cn('text-[10px] font-bold px-2 py-1 rounded-md transition-all', milestonesViewMode === 'list' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400')}
+                >
+                  List
+                </button>
+                <button
+                  onClick={() => setMilestonesViewMode('timeline')}
+                  className={cn('text-[10px] font-bold px-2 py-1 rounded-md transition-all', milestonesViewMode === 'timeline' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400')}
+                >
+                  Timeline
+                </button>
+              </div>
+            </div>
             <button onClick={() => setShowMilestoneForm(!showMilestoneForm)} className="btn-primary text-sm flex items-center gap-1">
               <Plus size={14} /> New Milestone
             </button>
@@ -631,31 +834,77 @@ export function ProjectDetailView({
             </div>
           )}
 
-          <div className="space-y-3">
-            {projectMilestones.map((ms, idx) => (
-              <MilestoneCard
-                key={ms.id}
-                milestone={ms}
-                tasks={projectTasks}
-                devlogs={allProjectDevlogs}
-                onCycleStatus={cycleMilestoneStatus}
-                onEdit={(m) => {
-                  setEditingMilestone(m);
-                  setNewMsTitle(m.title);
-                  setNewMsDesc(m.description || '');
-                  setNewMsDueDate(m.due_date || '');
-                  setShowMilestoneForm(false);
-                }}
-                onDelete={deleteMilestone}
-                onRequestReview={setReviewingMilestone}
-                onMoveUp={idx > 0 ? () => handleMoveMs(idx, -1) : undefined}
-                onMoveDown={idx < projectMilestones.length - 1 ? () => handleMoveMs(idx, 1) : undefined}
-                onAddTask={handleAddTaskForMilestone}
-              />
-            ))}
-          </div>
+          {milestonesViewMode === 'list' ? (
+            <div className="space-y-3">
+              {projectMilestones.map((ms, idx) => (
+                <MilestoneCard
+                  key={ms.id}
+                  milestone={ms}
+                  tasks={projectTasks}
+                  devlogs={allProjectDevlogs}
+                  onCycleStatus={cycleMilestoneStatus}
+                  onEdit={(m) => {
+                    setEditingMilestone(m);
+                    setNewMsTitle(m.title);
+                    setNewMsDesc(m.description || '');
+                    setNewMsDueDate(m.due_date || '');
+                    setShowMilestoneForm(false);
+                  }}
+                  onDelete={deleteMilestone}
+                  onRequestReview={setReviewingMilestone}
+                  onMoveUp={idx > 0 ? () => handleMoveMs(idx, -1) : undefined}
+                  onMoveDown={idx < projectMilestones.length - 1 ? () => handleMoveMs(idx, 1) : undefined}
+                  onAddTask={handleAddTaskForMilestone}
+                />
+              ))}
+            </div>
+          ) : (
+            /* Timeline view */
+            <div className="glass-card p-6 overflow-x-auto">
+              {projectMilestones.length > 0 ? (
+                <div className="relative min-w-fit">
+                  {/* Horizontal line */}
+                  <div className="absolute top-6 left-0 right-0 h-0.5 bg-slate-200" />
+                  <div className="flex gap-6">
+                    {projectMilestones.map((ms) => {
+                      const msTasksDone = projectTasks.filter(t => t.milestone_id === ms.id && t.status === 'done').length;
+                      const msTasksTotal = projectTasks.filter(t => t.milestone_id === ms.id).length;
+                      const statusColor = ms.status === 'completed' ? 'bg-emerald-500' : ms.status === 'in_progress' ? 'bg-blue-500' : 'bg-slate-300';
+                      return (
+                        <div key={ms.id} className="flex flex-col items-center min-w-[120px] max-w-[160px] relative">
+                          {/* Node */}
+                          <div className={cn('w-3 h-3 rounded-full border-2 border-white shadow-sm z-10', statusColor)} />
+                          {/* Content */}
+                          <div className="mt-3 text-center">
+                            <p className="text-xs font-bold text-slate-900 line-clamp-2">{ms.title}</p>
+                            {ms.due_date && (
+                              <p className="text-[9px] text-slate-400 mt-1 flex items-center justify-center gap-0.5">
+                                <Clock size={8} /> {formatDate(ms.due_date)}
+                              </p>
+                            )}
+                            {msTasksTotal > 0 && (
+                              <p className="text-[9px] text-slate-400">{msTasksDone}/{msTasksTotal} tasks</p>
+                            )}
+                            <span className={cn('text-[8px] font-bold uppercase px-1.5 py-0.5 rounded mt-1 inline-block',
+                              ms.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                              ms.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                              'bg-slate-100 text-slate-500'
+                            )}>
+                              {ms.status === 'completed' ? 'Done' : ms.status === 'in_progress' ? 'Active' : 'Pending'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center">No milestones to display on timeline.</p>
+              )}
+            </div>
+          )}
 
-          {projectMilestones.length === 0 && !showMilestoneForm && (
+          {projectMilestones.length === 0 && !showMilestoneForm && milestonesViewMode === 'list' && (
             <div className="glass-card p-12 text-center text-slate-400">
               No milestones yet. Break your project into phases.
             </div>
@@ -842,6 +1091,18 @@ export function ProjectDetailView({
                 >
                   <FileDown size={12} /> Export
                 </button>
+                {threadNarrativeLogs.length >= 2 && (
+                  <button
+                    onClick={() => {
+                      const sorted = [...threadNarrativeLogs].sort((a, b) => a.created_at.localeCompare(b.created_at));
+                      setDiffLogs([sorted[0], sorted[sorted.length - 1]]);
+                    }}
+                    className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                    title="Compare first & last logs"
+                  >
+                    <Columns2 size={12} /> Diff
+                  </button>
+                )}
                 <button
                   onClick={() => { if (confirm('Delete this thread? Logs will be unlinked.')) { deleteThread(threadFilter); setThreadFilter('all'); } }}
                   className="text-xs text-slate-300 hover:text-red-500 transition-colors"
@@ -851,6 +1112,30 @@ export function ProjectDetailView({
               </div>
             )}
           </div>
+
+          {/* Custom Templates */}
+          {customTemplates.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <Bookmark size={12} className="text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Templates:</span>
+              {customTemplates.map(tpl => (
+                <div key={tpl.id} className="flex items-center gap-1 group/tpl">
+                  <button
+                    onClick={() => applyTemplate(tpl)}
+                    className="text-xs text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-all"
+                  >
+                    {tpl.name}
+                  </button>
+                  <button
+                    onClick={() => deleteTemplate(tpl.id)}
+                    className="text-slate-200 hover:text-red-400 opacity-0 group-hover/tpl:opacity-100 transition-all"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Log entries */}
           <div className="space-y-3">
@@ -911,7 +1196,7 @@ export function ProjectDetailView({
                       {dl.content && (
                         <div className="mt-3">
                           <MarkdownRenderer
-                            content={dl.content}
+                            content={processLogRefs(dl.content)}
                             className={cn('text-sm text-slate-600', !isExpanded && hasLongContent && 'line-clamp-4')}
                           />
                           {hasLongContent && (
@@ -934,6 +1219,9 @@ export function ProjectDetailView({
                       )}
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all ml-2 flex-shrink-0">
+                      <button onClick={() => saveAsTemplate(dl)} className="text-slate-300 hover:text-amber-500 transition-colors" title="Save as template">
+                        <Bookmark size={14} />
+                      </button>
                       <button onClick={() => { setEditingDevLog(dl); setShowDevLogForm(true); }} className="text-slate-300 hover:text-indigo-500 transition-colors">
                         <Edit3 size={14} />
                       </button>
@@ -986,8 +1274,10 @@ export function ProjectDetailView({
           milestones={milestones}
           tasks={tasks}
           threads={projectThreads}
-          onSave={handleSaveDevLog}
-          onCancel={() => { setShowDevLogForm(false); setEditingDevLog(null); }}
+          customTemplates={customTemplates}
+          initialTemplate={templateToApply}
+          onSave={(data) => { handleSaveDevLog(data); setTemplateToApply(null); }}
+          onCancel={() => { setShowDevLogForm(false); setEditingDevLog(null); setTemplateToApply(null); }}
         />
       )}
 
@@ -1037,6 +1327,66 @@ export function ProjectDetailView({
           </div>
         );
       })()}
+
+      {/* Weekly Report modal */}
+      {showWeeklyReport && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowWeeklyReport(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Weekly Report</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Last 7 days summary</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { navigator.clipboard.writeText(weeklyReport); }}
+                  className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                >
+                  <FileDown size={12} /> Copy MD
+                </button>
+                <button onClick={() => setShowWeeklyReport(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm font-bold">
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <MarkdownRenderer content={weeklyReport} className="markdown-content text-slate-700" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Diff comparison modal */}
+      {diffLogs && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDiffLogs(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-slate-900">Log Comparison</h3>
+              <button onClick={() => setDiffLogs(null)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm font-bold">Close</button>
+            </div>
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 divide-x divide-slate-100">
+              {diffLogs.map((dl, i) => (
+                <div key={dl.id} className="p-6">
+                  <div className="mb-4">
+                    <h4 className="font-bold text-slate-900">{dl.title}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-slate-400">{formatDate(dl.created_at)}</span>
+                      {dl.tags.map(t => {
+                        const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
+                        return tagCfg ? (
+                          <span key={t} className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span>
+                        ) : null;
+                      })}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">{i === 0 ? 'Earlier' : 'Later'}</p>
+                  </div>
+                  <MarkdownRenderer content={dl.content} className="markdown-content text-sm text-slate-700" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reading mode modal */}
       {readingLog && (
