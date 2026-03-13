@@ -24,6 +24,7 @@ const SchoolEventsView = lazy(() => import('./views/SchoolEventsView').then(m =>
 const HousePointHistoryView = lazy(() => import('./views/HousePointHistoryView').then(m => ({ default: m.HousePointHistoryView })));
 const EmailDigestView = lazy(() => import('./views/EmailDigestView').then(m => ({ default: m.EmailDigestView })));
 const ProjectsView = lazy(() => import('./views/ProjectsView').then(m => ({ default: m.ProjectsView })));
+const ProjectDetailView = lazy(() => import('./views/ProjectDetailView').then(m => ({ default: m.ProjectDetailView })));
 const SettingsView = lazy(() => import('./views/SettingsView').then(m => ({ default: m.SettingsView })));
 const KahootHub = lazy(() => import('./views/kahoot/KahootHub').then(m => ({ default: m.KahootHub })));
 const PayhipHub = lazy(() => import('./views/payhip/PayhipHub').then(m => ({ default: m.PayhipHub })));
@@ -105,8 +106,11 @@ function AppContent() {
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskFormInitialProjectId, setTaskFormInitialProjectId] = useState('');
   const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const [parentCommFormConfig, setParentCommFormConfig] = useState<FormModalsState['parentCommFormConfig']>({ isOpen: false, title: '', onSave: () => {} });
   const [weaknessFormConfig, setWeaknessFormConfig] = useState<FormModalsState['weaknessFormConfig']>({ isOpen: false, title: '', onSave: () => {} });
@@ -134,7 +138,7 @@ function AppContent() {
     isIdeaFormOpen, editingIdea,
     isGoalFormOpen, editingGoal,
     isEventFormOpen, editingEvent,
-    isTaskFormOpen, editingTask,
+    isTaskFormOpen, editingTask, taskFormInitialProjectId,
     isProjectFormOpen, editingProject,
     parentCommFormConfig, weaknessFormConfig, genericFormConfig,
   };
@@ -150,6 +154,7 @@ function AppContent() {
     setIsGoalFormOpen, setEditingGoal,
     setIsEventFormOpen, setEditingEvent,
     setIsTaskFormOpen, setEditingTask,
+    setTaskFormInitialProjectId,
     setIsProjectFormOpen, setEditingProject,
     setParentCommFormConfig, setWeaknessFormConfig, setGenericFormConfig,
   };
@@ -194,6 +199,9 @@ function AppContent() {
               HousePointHistoryView={HousePointHistoryView}
               EmailDigestView={EmailDigestView}
               ProjectsView={ProjectsView}
+              ProjectDetailView={ProjectDetailView}
+              selectedProjectId={selectedProjectId}
+              setSelectedProjectId={setSelectedProjectId}
               SettingsView={SettingsView}
               KahootHub={KahootHub}
               PayhipHub={PayhipHub}

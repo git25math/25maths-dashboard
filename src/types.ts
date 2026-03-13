@@ -25,6 +25,7 @@ export interface Task {
   assignee?: string;
   due_date?: string;
   tags?: string[];
+  milestone_id?: string;
   created_at: string;
   completed_at?: string;
 }

@@ -40,6 +40,9 @@ interface ViewRouterProps {
   HousePointHistoryView: React.ComponentType<any>;
   EmailDigestView: React.ComponentType<any>;
   ProjectsView: React.ComponentType<any>;
+  ProjectDetailView: React.ComponentType<any>;
+  selectedProjectId: string | null;
+  setSelectedProjectId: (id: string | null) => void;
   SettingsView: React.ComponentType<any>;
   KahootHub: React.ComponentType<any>;
   PayhipHub: React.ComponentType<any>;
@@ -80,6 +83,9 @@ export const ViewRouter = memo(function ViewRouter({
   HousePointHistoryView,
   EmailDigestView,
   ProjectsView,
+  ProjectDetailView,
+  selectedProjectId,
+  setSelectedProjectId,
   SettingsView,
   KahootHub,
   PayhipHub,
@@ -95,6 +101,7 @@ export const ViewRouter = memo(function ViewRouter({
     setEditingGoal, setIsGoalFormOpen,
     setEditingEvent, setIsEventFormOpen,
     setEditingTask, setIsTaskFormOpen,
+    setTaskFormInitialProjectId,
     setEditingProject, setIsProjectFormOpen,
     setEditingWorkLog, setIsWorkLogFormOpen,
     setEditingSOP, setIsSOPFormOpen,
@@ -367,8 +374,8 @@ export const ViewRouter = memo(function ViewRouter({
         <TasksView
           tasks={data.tasks}
           projects={data.projects}
-          onAddTask={() => { setEditingTask(null); setIsTaskFormOpen(true); }}
-          onEditTask={(task) => { setEditingTask(task); setIsTaskFormOpen(true); }}
+          onAddTask={() => { setTaskFormInitialProjectId(''); setEditingTask(null); setIsTaskFormOpen(true); }}
+          onEditTask={(task) => { setTaskFormInitialProjectId(''); setEditingTask(task); setIsTaskFormOpen(true); }}
           onDeleteTask={data.deleteTask}
           onCycleStatus={data.cycleTaskStatus}
           onNavigate={navigateTo}
@@ -449,12 +456,44 @@ export const ViewRouter = memo(function ViewRouter({
         <ProjectsView
           projects={data.projects}
           tasks={data.tasks}
+          milestones={data.milestones}
+          devlogs={data.devlogs}
           onAddProject={() => { setEditingProject(null); setIsProjectFormOpen(true); }}
           onEditProject={(project) => { setEditingProject(project); setIsProjectFormOpen(true); }}
           onDeleteProject={data.deleteProject}
           onUpdateProject={(id, updates) => data.updateProject(id, updates)}
+          onAddTaskForProject={(projectId) => { setTaskFormInitialProjectId(projectId); setEditingTask(null); setIsTaskFormOpen(true); }}
+          onEditTask={(task) => { setTaskFormInitialProjectId(''); setEditingTask(task); setIsTaskFormOpen(true); }}
+          onNavigate={navigateTo}
+          onOpenProject={(id) => { setSelectedProjectId(id); navigateTo('project-detail'); }}
         />
       );
+    case 'project-detail': {
+      const project = data.projects.find(p => p.id === selectedProjectId);
+      if (!project) return <div className="glass-card p-12 text-center text-slate-400">Project not found.</div>;
+      return (
+        <ProjectDetailView
+          project={project}
+          tasks={data.tasks}
+          milestones={data.milestones}
+          devlogs={data.devlogs}
+          onBack={() => navigateTo('projects')}
+          onEditProject={(p) => { setEditingProject(p); setIsProjectFormOpen(true); }}
+          onDeleteProject={data.deleteProject}
+          onUpdateProject={(id, updates) => data.updateProject(id, updates)}
+          onAddTaskForProject={(projectId) => { setTaskFormInitialProjectId(projectId); setEditingTask(null); setIsTaskFormOpen(true); }}
+          addMilestone={data.addMilestone}
+          updateMilestone={data.updateMilestone}
+          deleteMilestone={data.deleteMilestone}
+          cycleMilestoneStatus={data.cycleMilestoneStatus}
+          saveMilestoneReview={data.saveMilestoneReview}
+          reorderMilestones={data.reorderMilestones}
+          addDevLog={data.addDevLog}
+          updateDevLog={data.updateDevLog}
+          deleteDevLog={data.deleteDevLog}
+        />
+      );
+    }
     case 'kahoot-upload':
       return (
         <KahootHub
@@ -501,6 +540,8 @@ export const ViewRouter = memo(function ViewRouter({
             hpAwardLogs: data.hpAwardLogs,
             emailDigests: data.emailDigests,
             projects: data.projects,
+            milestones: data.milestones,
+            devlogs: data.devlogs,
             kahootItems: data.kahootItems,
             payhipItems: data.payhipItems,
           }}

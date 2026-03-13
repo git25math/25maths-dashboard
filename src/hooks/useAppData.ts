@@ -1,8 +1,8 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
-import { MOCK_TIMETABLE, MOCK_STUDENTS, MOCK_IDEAS, MOCK_SOPS, MOCK_TEACHING_UNITS, MOCK_SCHOOL_EVENTS, MOCK_GOALS, MOCK_WORK_LOGS, MOCK_CLASSES, MOCK_LESSON_RECORDS } from '../constants';
 import { useSeedData } from './useSeedData';
 import { TimetableEntry, Student, TeachingUnit, ClassProfile, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, EmailDigest, Project, KahootItem, PayhipItem } from '../types';
+import { ProjectMilestone, DevLogEntry } from '../types/chronicle';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -18,6 +18,8 @@ import { taskService } from '../services/taskService';
 import { hpAwardService } from '../services/hpAwardService';
 import { emailDigestService } from '../services/emailDigestService';
 import { projectService } from '../services/projectService';
+import { milestoneService } from '../services/milestoneService';
+import { devlogService } from '../services/devlogService';
 import { kahootService } from '../services/kahootService';
 import { payhipService } from '../services/payhipService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
@@ -201,23 +203,43 @@ export function useAppData() {
   }, []);
 
   // --- State ---
-  const [timetable, setTimetable] = useLocalStorage<TimetableEntry[]>('dashboard-timetable', MOCK_TIMETABLE);
-  const [students, setStudents] = useLocalStorage<Student[]>('dashboard-students', MOCK_STUDENTS);
-  const [teachingUnits, setTeachingUnits] = useLocalStorage<TeachingUnit[]>('dashboard-teaching-units', MOCK_TEACHING_UNITS);
-  const [classes, setClasses] = useLocalStorage<ClassProfile[]>('dashboard-classes', MOCK_CLASSES);
-  const [ideas, setIdeas] = useLocalStorage<Idea[]>('dashboard-ideas', MOCK_IDEAS);
-  const [sops, setSops] = useLocalStorage<SOP[]>('dashboard-sops', MOCK_SOPS);
-  const [goals, setGoals] = useLocalStorage<Goal[]>('dashboard-goals', MOCK_GOALS);
-  const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', MOCK_SCHOOL_EVENTS);
-  const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', MOCK_WORK_LOGS);
+  const [timetable, setTimetable] = useLocalStorage<TimetableEntry[]>('dashboard-timetable', []);
+  const [students, setStudents] = useLocalStorage<Student[]>('dashboard-students', []);
+  const [teachingUnits, setTeachingUnits] = useLocalStorage<TeachingUnit[]>('dashboard-teaching-units', []);
+  const [classes, setClasses] = useLocalStorage<ClassProfile[]>('dashboard-classes', []);
+  const [ideas, setIdeas] = useLocalStorage<Idea[]>('dashboard-ideas', []);
+  const [sops, setSops] = useLocalStorage<SOP[]>('dashboard-sops', []);
+  const [goals, setGoals] = useLocalStorage<Goal[]>('dashboard-goals', []);
+  const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', []);
+  const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', []);
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
-  const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', MOCK_LESSON_RECORDS);
+  const [lessonRecords, setLessonRecords] = useLocalStorage<LessonRecord[]>('dashboard-lesson-records', []);
   const [tasks, setTasks] = useLocalStorage<Task[]>('dashboard-tasks', []);
   const [hpAwardLogs, setHpAwardLogs] = useLocalStorage<HPAwardLog[]>('dashboard-hp-award-logs', []);
   const [emailDigests, setEmailDigests] = useLocalStorage<EmailDigest[]>('dashboard-email-digests', []);
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
+  const [milestones, setMilestones] = useLocalStorage<ProjectMilestone[]>('dashboard-milestones', []);
+  const [devlogs, setDevlogs] = useLocalStorage<DevLogEntry[]>('dashboard-devlogs', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', []);
   const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', []);
+
+  // Lazy-seed mock data for first-time users (no localStorage, no Supabase)
+  useEffect(() => {
+    if (isSupabaseConfigured) return;
+    if (timetable.length > 0 || students.length > 0) return;
+    import('../constants-mock').then(mocks => {
+      setTimetable(prev => prev.length === 0 ? mocks.MOCK_TIMETABLE : prev);
+      setStudents(prev => prev.length === 0 ? mocks.MOCK_STUDENTS : prev);
+      setTeachingUnits(prev => prev.length === 0 ? normalizeAndSortUnits(mocks.MOCK_TEACHING_UNITS) : prev);
+      setClasses(prev => prev.length === 0 ? mocks.MOCK_CLASSES : prev);
+      setIdeas(prev => prev.length === 0 ? mocks.MOCK_IDEAS : prev);
+      setSops(prev => prev.length === 0 ? mocks.MOCK_SOPS : prev);
+      setGoals(prev => prev.length === 0 ? mocks.MOCK_GOALS : prev);
+      setSchoolEvents(prev => prev.length === 0 ? mocks.MOCK_SCHOOL_EVENTS : prev);
+      setWorkLogs(prev => prev.length === 0 ? mocks.MOCK_WORK_LOGS : prev);
+      setLessonRecords(prev => prev.length === 0 ? mocks.MOCK_LESSON_RECORDS : prev);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate from seed data once loaded (replaces stale or empty cache)
   useEffect(() => {
@@ -275,6 +297,7 @@ export function useAppData() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
+    let cancelled = false;
 
     // Fetch from Supabase; if empty, sync localStorage data up first.
     async function fetchOrSync<T extends { id: string }>(
@@ -285,6 +308,7 @@ export function useAppData() {
     ) {
       try {
         const remote = await fetchFn();
+        if (cancelled) return;
         if (remote.length > 0) {
           setter(remote);
         } else if (localData.length > 0) {
@@ -346,9 +370,13 @@ export function useAppData() {
         fetchOrSync(hpAwardService.getAll, setLogsAndCapture, hpAwardLogs, 'hp_award_logs'),
         fetchOrSync(emailDigestService.getAll, setEmailDigests, emailDigests, 'email_digests'),
         fetchOrSync(projectService.getAll, setProjects, projects, 'projects'),
+        fetchOrSync(milestoneService.getAll, setMilestones, milestones, 'milestones'),
+        fetchOrSync(devlogService.getAll, setDevlogs, devlogs, 'devlogs'),
         fetchOrSync(kahootService.getAll, setKahootItems, kahootItems, 'kahoot_items'),
         fetchOrSync(payhipService.getAll, setPayhipItems, payhipItems, 'payhip_items'),
       ]);
+
+      if (cancelled) return;
 
       // --- One-time backfill: create HPAwardLogs for existing data ---
       if (resolvedLogs.length === 0) {
@@ -406,6 +434,7 @@ export function useAppData() {
       }
     };
     fetchAll();
+    return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Sub-hooks ---
@@ -502,6 +531,15 @@ export function useAppData() {
     updateTask,
     deleteTask,
     cycleTaskStatus,
+    addMilestone,
+    updateMilestone,
+    deleteMilestone,
+    cycleMilestoneStatus,
+    saveMilestoneReview,
+    reorderMilestones,
+    addDevLog,
+    updateDevLog,
+    deleteDevLog,
   } = useProductivityActions({
     ideas,
     setIdeas,
@@ -521,6 +559,10 @@ export function useAppData() {
     setTasks,
     projects,
     setProjects,
+    milestones,
+    setMilestones,
+    devlogs,
+    setDevlogs,
     toast,
   });
 
@@ -581,6 +623,8 @@ export function useAppData() {
       hpAwardLogs: (v) => setHpAwardLogs(v as HPAwardLog[]),
       emailDigests: (v) => setEmailDigests(v as EmailDigest[]),
       projects: (v) => setProjects(v as Project[]),
+      milestones: (v) => setMilestones(v as ProjectMilestone[]),
+      devlogs: (v) => setDevlogs(v as DevLogEntry[]),
       kahootItems: (v) => setKahootItems(v as KahootItem[]),
       payhipItems: (v) => setPayhipItems(v as PayhipItem[]),
     };
@@ -599,7 +643,7 @@ export function useAppData() {
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, kahootItems, payhipItems,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, milestones, devlogs, kahootItems, payhipItems,
     toasts,
 
     // Student
@@ -642,6 +686,10 @@ export function useAppData() {
 
     // Projects
     addProject, updateProject, deleteProject,
+
+    // Chronicle (Milestones + DevLogs)
+    addMilestone, updateMilestone, deleteMilestone, cycleMilestoneStatus, saveMilestoneReview, reorderMilestones,
+    addDevLog, updateDevLog, deleteDevLog,
 
     // Kahoot Upload
     addKahoot, updateKahoot, deleteKahoot, duplicateKahoot,

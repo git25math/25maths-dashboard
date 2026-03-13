@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project, ToastApi } from '../../types';
+import { ProjectMilestone, DevLogEntry } from '../../types/chronicle';
 import { useIdeaActions } from './useIdeaActions';
 import { useSOPActions } from './useSOPActions';
 import { useWorkLogActions } from './useWorkLogActions';
@@ -9,6 +10,8 @@ import { useMeetingActions } from './useMeetingActions';
 import { useEmailDigestActions } from './useEmailDigestActions';
 import { useTaskActions } from './useTaskActions';
 import { useProjectActions } from './useProjectActions';
+import { useMilestoneActions } from './useMilestoneActions';
+import { useDevlogActions } from './useDevlogActions';
 
 interface UseProductivityActionsParams {
   ideas: Idea[];
@@ -29,6 +32,10 @@ interface UseProductivityActionsParams {
   setTasks: Dispatch<SetStateAction<Task[]>>;
   projects: Project[];
   setProjects: Dispatch<SetStateAction<Project[]>>;
+  milestones: ProjectMilestone[];
+  setMilestones: Dispatch<SetStateAction<ProjectMilestone[]>>;
+  devlogs: DevLogEntry[];
+  setDevlogs: Dispatch<SetStateAction<DevLogEntry[]>>;
   toast: ToastApi;
 }
 
@@ -51,6 +58,10 @@ export function useProductivityActions({
   setTasks,
   projects,
   setProjects,
+  milestones,
+  setMilestones,
+  devlogs,
+  setDevlogs,
   toast,
 }: UseProductivityActionsParams) {
   const ideaActions = useIdeaActions({ ideas, setIdeas, toast });
@@ -62,6 +73,8 @@ export function useProductivityActions({
   const emailDigestActions = useEmailDigestActions({ emailDigests, setEmailDigests, toast });
   const taskActions = useTaskActions({ tasks, setTasks, toast });
   const projectActions = useProjectActions({ projects, setProjects, toast });
+  const milestoneActions = useMilestoneActions({ milestones, setMilestones, toast });
+  const devlogActions = useDevlogActions({ devlogs, setDevlogs, toast });
 
   return {
     ...ideaActions,
@@ -73,5 +86,7 @@ export function useProductivityActions({
     ...emailDigestActions,
     ...taskActions,
     ...projectActions,
+    ...milestoneActions,
+    ...devlogActions,
   };
 }
