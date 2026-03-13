@@ -476,9 +476,12 @@ export const ViewRouter = memo(function ViewRouter({
       return (
         <ProjectDetailView
           project={project}
+          allProjects={data.projects}
+          onSwitchProject={(id) => { setSelectedProjectId(id); }}
           tasks={data.tasks}
           milestones={data.milestones}
           devlogs={data.devlogs}
+          threads={data.threads}
           onBack={() => navigateTo('projects')}
           onEditProject={(p) => { setEditingProject(p); setIsProjectFormOpen(true); }}
           onDeleteProject={data.deleteProject}
@@ -493,6 +496,9 @@ export const ViewRouter = memo(function ViewRouter({
           addDevLog={data.addDevLog}
           updateDevLog={data.updateDevLog}
           deleteDevLog={data.deleteDevLog}
+          addThread={data.addThread}
+          updateThread={data.updateThread}
+          deleteThread={data.deleteThread}
         />
       );
     }

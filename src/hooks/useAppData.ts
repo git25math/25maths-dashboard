@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { useSeedData } from './useSeedData';
 import { TimetableEntry, Student, TeachingUnit, ClassProfile, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, EmailDigest, Project, KahootItem, PayhipItem } from '../types';
-import { ProjectMilestone, DevLogEntry } from '../types/chronicle';
+import { ProjectMilestone, DevLogEntry, DevLogThread } from '../types/chronicle';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
 import { classService } from '../services/classService';
@@ -20,6 +20,7 @@ import { emailDigestService } from '../services/emailDigestService';
 import { projectService } from '../services/projectService';
 import { milestoneService } from '../services/milestoneService';
 import { devlogService } from '../services/devlogService';
+import { threadService } from '../services/threadService';
 import { kahootService } from '../services/kahootService';
 import { payhipService } from '../services/payhipService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
@@ -220,6 +221,7 @@ export function useAppData() {
   const [projects, setProjects] = useLocalStorage<Project[]>('dashboard-projects', []);
   const [milestones, setMilestones] = useLocalStorage<ProjectMilestone[]>('dashboard-milestones', []);
   const [devlogs, setDevlogs] = useLocalStorage<DevLogEntry[]>('dashboard-devlogs', []);
+  const [threads, setThreads] = useLocalStorage<DevLogThread[]>('dashboard-threads', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', []);
   const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', []);
 
@@ -372,6 +374,7 @@ export function useAppData() {
         fetchOrSync(projectService.getAll, setProjects, projects, 'projects'),
         fetchOrSync(milestoneService.getAll, setMilestones, milestones, 'milestones'),
         fetchOrSync(devlogService.getAll, setDevlogs, devlogs, 'devlogs'),
+        fetchOrSync(threadService.getAll, setThreads, threads, 'devlog_threads'),
         fetchOrSync(kahootService.getAll, setKahootItems, kahootItems, 'kahoot_items'),
         fetchOrSync(payhipService.getAll, setPayhipItems, payhipItems, 'payhip_items'),
       ]);
@@ -540,6 +543,9 @@ export function useAppData() {
     addDevLog,
     updateDevLog,
     deleteDevLog,
+    addThread,
+    updateThread,
+    deleteThread,
   } = useProductivityActions({
     ideas,
     setIdeas,
@@ -563,6 +569,8 @@ export function useAppData() {
     setMilestones,
     devlogs,
     setDevlogs,
+    threads,
+    setThreads,
     toast,
   });
 
@@ -625,6 +633,7 @@ export function useAppData() {
       projects: (v) => setProjects(v as Project[]),
       milestones: (v) => setMilestones(v as ProjectMilestone[]),
       devlogs: (v) => setDevlogs(v as DevLogEntry[]),
+      threads: (v) => setThreads(v as DevLogThread[]),
       kahootItems: (v) => setKahootItems(v as KahootItem[]),
       payhipItems: (v) => setPayhipItems(v as PayhipItem[]),
     };
@@ -643,7 +652,7 @@ export function useAppData() {
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, milestones, devlogs, kahootItems, payhipItems,
+    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, milestones, devlogs, threads, kahootItems, payhipItems,
     toasts,
 
     // Student
@@ -690,6 +699,7 @@ export function useAppData() {
     // Chronicle (Milestones + DevLogs)
     addMilestone, updateMilestone, deleteMilestone, cycleMilestoneStatus, saveMilestoneReview, reorderMilestones,
     addDevLog, updateDevLog, deleteDevLog,
+    addThread, updateThread, deleteThread,
 
     // Kahoot Upload
     addKahoot, updateKahoot, deleteKahoot, duplicateKahoot,

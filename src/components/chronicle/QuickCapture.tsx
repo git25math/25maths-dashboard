@@ -14,7 +14,7 @@ export function ChronicleQuickCapture({ projectId, onCapture }: QuickCaptureProp
     const lines = text.trim().split('\n');
     const title = lines[0].slice(0, 80);
     const content = lines.length > 1 ? text.trim() : '';
-    onCapture(title, content);
+    onCapture(title, content); // status defaults to 'draft' in handler
     setText('');
   };
 

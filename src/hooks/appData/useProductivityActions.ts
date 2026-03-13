@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project, ToastApi } from '../../types';
-import { ProjectMilestone, DevLogEntry } from '../../types/chronicle';
+import { ProjectMilestone, DevLogEntry, DevLogThread } from '../../types/chronicle';
 import { useIdeaActions } from './useIdeaActions';
 import { useSOPActions } from './useSOPActions';
 import { useWorkLogActions } from './useWorkLogActions';
@@ -12,6 +12,7 @@ import { useTaskActions } from './useTaskActions';
 import { useProjectActions } from './useProjectActions';
 import { useMilestoneActions } from './useMilestoneActions';
 import { useDevlogActions } from './useDevlogActions';
+import { useThreadActions } from './useThreadActions';
 
 interface UseProductivityActionsParams {
   ideas: Idea[];
@@ -36,6 +37,8 @@ interface UseProductivityActionsParams {
   setMilestones: Dispatch<SetStateAction<ProjectMilestone[]>>;
   devlogs: DevLogEntry[];
   setDevlogs: Dispatch<SetStateAction<DevLogEntry[]>>;
+  threads: DevLogThread[];
+  setThreads: Dispatch<SetStateAction<DevLogThread[]>>;
   toast: ToastApi;
 }
 
@@ -62,6 +65,8 @@ export function useProductivityActions({
   setMilestones,
   devlogs,
   setDevlogs,
+  threads,
+  setThreads,
   toast,
 }: UseProductivityActionsParams) {
   const ideaActions = useIdeaActions({ ideas, setIdeas, toast });
@@ -75,6 +80,7 @@ export function useProductivityActions({
   const projectActions = useProjectActions({ projects, setProjects, toast });
   const milestoneActions = useMilestoneActions({ milestones, setMilestones, toast });
   const devlogActions = useDevlogActions({ devlogs, setDevlogs, toast });
+  const threadActions = useThreadActions({ threads, setThreads, toast });
 
   return {
     ...ideaActions,
@@ -88,5 +94,6 @@ export function useProductivityActions({
     ...projectActions,
     ...milestoneActions,
     ...devlogActions,
+    ...threadActions,
   };
 }

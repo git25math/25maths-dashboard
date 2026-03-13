@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DevLogEntry, DevLogTag, DEV_LOG_TAGS } from '../../types/chronicle';
+import { DevLogEntry, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES, DevLogThread } from '../../types/chronicle';
 import { ProjectMilestone } from '../../types/chronicle';
 import { Task } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
@@ -11,16 +11,19 @@ interface DevLogEditorProps {
   projectId: string;
   milestones: ProjectMilestone[];
   tasks: Task[];
+  threads?: DevLogThread[];
   onSave: (data: Omit<DevLogEntry, 'id'>) => void;
   onCancel: () => void;
 }
 
-export function DevLogEditor({ entry, projectId, milestones, tasks, onSave, onCancel }: DevLogEditorProps) {
+export function DevLogEditor({ entry, projectId, milestones, tasks, threads = [], onSave, onCancel }: DevLogEditorProps) {
   const [title, setTitle] = useState(entry?.title || '');
   const [content, setContent] = useState(entry?.content || '');
   const [tags, setTags] = useState<DevLogTag[]>(entry?.tags || ['thinking']);
+  const [status, setStatus] = useState<DevLogStatus>(entry?.status || 'draft');
   const [milestoneId, setMilestoneId] = useState(entry?.milestone_id || '');
   const [taskId, setTaskId] = useState(entry?.task_id || '');
+  const [threadId, setThreadId] = useState(entry?.thread_id || '');
 
   const toggleTag = (tag: DevLogTag) => {
     setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -33,9 +36,11 @@ export function DevLogEditor({ entry, projectId, milestones, tasks, onSave, onCa
       project_id: projectId,
       milestone_id: milestoneId || undefined,
       task_id: taskId || undefined,
+      thread_id: threadId || undefined,
       title: title.trim(),
       content,
       tags,
+      status,
       created_at: entry?.created_at || new Date().toISOString(),
       updated_at: entry ? new Date().toISOString() : undefined,
     });
@@ -68,17 +73,41 @@ export function DevLogEditor({ entry, projectId, milestones, tasks, onSave, onCa
             />
           </div>
 
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-bold text-slate-700 mb-1">Tags</label>
+              <div className="flex flex-wrap gap-2">
+                {DEV_LOG_TAGS.map(({ key, label, color }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggleTag(key)}
+                    className={cn(
+                      'text-xs font-bold px-3 py-1 rounded-full transition-all border',
+                      tags.includes(key)
+                        ? `${color} border-current`
+                        : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Status selector */}
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Tags</label>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
             <div className="flex flex-wrap gap-2">
-              {DEV_LOG_TAGS.map(({ key, label, color }) => (
+              {DEV_LOG_STATUSES.map(({ key, label, color }) => (
                 <button
                   key={key}
                   type="button"
-                  onClick={() => toggleTag(key)}
+                  onClick={() => setStatus(key)}
                   className={cn(
                     'text-xs font-bold px-3 py-1 rounded-full transition-all border',
-                    tags.includes(key)
+                    status === key
                       ? `${color} border-current`
                       : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
                   )}
@@ -122,6 +151,23 @@ export function DevLogEditor({ entry, projectId, milestones, tasks, onSave, onCa
               </select>
             </div>
           </div>
+
+          {/* Thread selector */}
+          {threads.length > 0 && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Thread</label>
+              <select
+                value={threadId}
+                onChange={e => setThreadId(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              >
+                <option value="">No thread</option>
+                {threads.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </form>
 
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">

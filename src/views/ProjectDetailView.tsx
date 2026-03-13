@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch } from 'lucide-react';
+import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
-import { ProjectMilestone, DevLogEntry, MilestoneReview, MilestoneStatus, DevLogTag, DEV_LOG_TAGS } from '../types/chronicle';
+import { ProjectMilestone, DevLogEntry, DevLogThread, MilestoneReview, MilestoneStatus, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES } from '../types/chronicle';
 import { FilterChip } from '../components/FilterChip';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { MilestoneCard } from '../components/chronicle/MilestoneCard';
@@ -27,11 +27,21 @@ const STATUS_CONFIG: Record<Project['status'], { label: string; pillColor: strin
   completed: { label: 'Completed', pillColor: 'bg-slate-100 text-slate-600' },
 };
 
+const DEVLOG_STATUS_CYCLE: Record<DevLogStatus, DevLogStatus> = {
+  draft: 'incubating',
+  incubating: 'actionable',
+  actionable: 'archived',
+  archived: 'draft',
+};
+
 interface ProjectDetailViewProps {
   project: Project;
+  allProjects: Project[];
+  onSwitchProject: (id: string) => void;
   tasks: Task[];
   milestones: ProjectMilestone[];
   devlogs: DevLogEntry[];
+  threads: DevLogThread[];
   onBack: () => void;
   onEditProject: (project: Project) => void;
   onDeleteProject: (id: string) => void;
@@ -48,13 +58,20 @@ interface ProjectDetailViewProps {
   addDevLog: (data: Omit<DevLogEntry, 'id'>) => void;
   updateDevLog: (id: string, updates: Partial<DevLogEntry>) => void;
   deleteDevLog: (id: string) => void;
+  // Thread actions
+  addThread: (data: Omit<DevLogThread, 'id'>) => Promise<DevLogThread>;
+  updateThread: (id: string, updates: Partial<DevLogThread>) => void;
+  deleteThread: (id: string) => void;
 }
 
 export function ProjectDetailView({
   project,
+  allProjects,
+  onSwitchProject,
   tasks,
   milestones,
   devlogs,
+  threads,
   onBack,
   onEditProject,
   onDeleteProject,
@@ -69,6 +86,8 @@ export function ProjectDetailView({
   addDevLog,
   updateDevLog,
   deleteDevLog,
+  addThread,
+  deleteThread,
 }: ProjectDetailViewProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [reviewingMilestone, setReviewingMilestone] = useState<ProjectMilestone | null>(null);
@@ -77,6 +96,12 @@ export function ProjectDetailView({
   const [editingDevLog, setEditingDevLog] = useState<DevLogEntry | null>(null);
   const [showDevLogForm, setShowDevLogForm] = useState(false);
   const [tagFilter, setTagFilter] = useState<DevLogTag | 'all'>('all');
+  const [threadFilter, setThreadFilter] = useState<string | 'all'>('all');
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const [readingLog, setReadingLog] = useState<DevLogEntry | null>(null);
+  const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
+  const [showNewThreadForm, setShowNewThreadForm] = useState(false);
+  const [newThreadName, setNewThreadName] = useState('');
 
   // New milestone form state
   const [newMsTitle, setNewMsTitle] = useState('');
@@ -88,11 +113,17 @@ export function ProjectDetailView({
     milestones.filter(m => m.project_id === project.id).sort((a, b) => a.order - b.order),
     [milestones, project.id]
   );
+  const projectThreads = useMemo(() =>
+    threads.filter(t => t.project_id === project.id),
+    [threads, project.id]
+  );
+  const allProjectDevlogs = useMemo(() => devlogs.filter(d => d.project_id === project.id), [devlogs, project.id]);
   const projectDevlogs = useMemo(() => {
-    const filtered = devlogs.filter(d => d.project_id === project.id);
-    if (tagFilter !== 'all') return filtered.filter(d => d.tags.includes(tagFilter));
+    let filtered = allProjectDevlogs;
+    if (tagFilter !== 'all') filtered = filtered.filter(d => d.tags.includes(tagFilter));
+    if (threadFilter !== 'all') filtered = filtered.filter(d => d.thread_id === threadFilter);
     return filtered;
-  }, [devlogs, project.id, tagFilter]);
+  }, [allProjectDevlogs, tagFilter, threadFilter]);
 
   // Progress
   const doneTasks = projectTasks.filter(t => t.status === 'done').length;
@@ -104,6 +135,14 @@ export function ProjectDetailView({
     : totalTasks > 0
       ? Math.round((doneTasks / totalTasks) * 100)
       : 0;
+
+  // Growth Timeline: completed milestones with reviews
+  const completedMilestonesWithReviews = useMemo(() =>
+    projectMilestones
+      .filter(m => m.status === 'completed' && m.review)
+      .sort((a, b) => (a.completed_at || '').localeCompare(b.completed_at || '')),
+    [projectMilestones]
+  );
 
   const cfg = STATUS_CONFIG[project.status];
 
@@ -130,6 +169,7 @@ export function ProjectDetailView({
       title,
       content,
       tags: ['thinking'],
+      status: 'draft',
       created_at: new Date().toISOString(),
     });
   }, [addDevLog, project.id]);
@@ -152,6 +192,33 @@ export function ProjectDetailView({
     reorderMilestones(project.id, ids);
   };
 
+  const toggleLogExpand = (id: string) => {
+    setExpandedLogs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const cycleDevLogStatus = (dl: DevLogEntry) => {
+    const nextStatus = DEVLOG_STATUS_CYCLE[dl.status || 'draft'];
+    updateDevLog(dl.id, { status: nextStatus });
+  };
+
+  const handleCreateThread = async () => {
+    if (!newThreadName.trim()) return;
+    await addThread({
+      project_id: project.id,
+      name: newThreadName.trim(),
+      created_at: new Date().toISOString(),
+    });
+    setNewThreadName('');
+    setShowNewThreadForm(false);
+  };
+
+  const otherProjects = allProjects.filter(p => p.id !== project.id);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -162,7 +229,33 @@ export function ProjectDetailView({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-            <h2 className="text-2xl font-bold text-slate-900">{project.name}</h2>
+            {/* Project quick switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProjectSwitcher(!showProjectSwitcher)}
+                className="flex items-center gap-1.5 text-2xl font-bold text-slate-900 hover:text-indigo-600 transition-colors"
+              >
+                {project.name}
+                {otherProjects.length > 0 && <ChevronDown size={16} className="text-slate-400" />}
+              </button>
+              {showProjectSwitcher && otherProjects.length > 0 && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-lg border border-slate-200 z-20 py-1 max-h-64 overflow-y-auto">
+                  {otherProjects.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => { onSwitchProject(p.id); setShowProjectSwitcher(false); }}
+                      className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                      <span className="text-sm font-medium text-slate-700 truncate">{p.name}</span>
+                      <span className={cn('text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ml-auto', STATUS_CONFIG[p.status].pillColor)}>
+                        {STATUS_CONFIG[p.status].label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <span className={cn('text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded', cfg.pillColor)}>{cfg.label}</span>
           </div>
           <div className="flex items-center gap-3 mt-2 text-sm text-slate-500">
@@ -212,8 +305,8 @@ export function ProjectDetailView({
             )}
           >
             {tab.label}
-            {tab.id === 'devlogs' && projectDevlogs.length > 0 && (
-              <span className="ml-1.5 text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{devlogs.filter(d => d.project_id === project.id).length}</span>
+            {tab.id === 'devlogs' && allProjectDevlogs.length > 0 && (
+              <span className="ml-1.5 text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{allProjectDevlogs.length}</span>
             )}
           </button>
         ))}
@@ -233,11 +326,11 @@ export function ProjectDetailView({
             {[
               { label: 'Milestones', value: `${completedMs}/${totalMs}`, color: 'text-blue-600' },
               { label: 'Tasks', value: `${doneTasks}/${totalTasks}`, color: 'text-emerald-600' },
-              { label: 'Dev Logs', value: String(devlogs.filter(d => d.project_id === project.id).length), color: 'text-violet-600' },
+              { label: 'Dev Logs', value: String(allProjectDevlogs.length), color: 'text-violet-600' },
               { label: 'Progress', value: `${progress}%`, color: 'text-indigo-600' },
             ].map(stat => (
               <div key={stat.label} className="glass-card p-4 text-center">
-                <p className="text-2xl font-bold tracking-tight" style={{ color: undefined }}><span className={stat.color}>{stat.value}</span></p>
+                <p className="text-2xl font-bold tracking-tight"><span className={stat.color}>{stat.value}</span></p>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">{stat.label}</p>
               </div>
             ))}
@@ -246,25 +339,65 @@ export function ProjectDetailView({
           {/* Quick Capture */}
           <ChronicleQuickCapture projectId={project.id} onCapture={handleQuickCapture} />
 
+          {/* Growth Timeline — Cross-milestone review panel */}
+          {completedMilestonesWithReviews.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 mb-3">Growth Timeline</h3>
+              <div className="space-y-3">
+                {completedMilestonesWithReviews.map(ms => (
+                  <div key={ms.id} className="glass-card p-5 border-l-4 border-emerald-500">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-sm text-slate-900">{ms.title}</span>
+                      <span className="text-[10px] text-slate-400">{ms.completed_at ? formatDate(ms.completed_at) : ''}</span>
+                      {ms.review?.time_spent && (
+                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{ms.review.time_spent}</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-emerald-600 mb-1">What was done</p>
+                        <p className="text-slate-600">{ms.review!.what_done}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">What was learned</p>
+                        <p className="text-slate-600">{ms.review!.what_learned}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-amber-600 mb-1">What to improve</p>
+                        <p className="text-slate-600">{ms.review!.what_improve}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Recent logs */}
-          {devlogs.filter(d => d.project_id === project.id).length > 0 && (
+          {allProjectDevlogs.length > 0 && (
             <div>
               <h3 className="text-sm font-bold text-slate-700 mb-3">Recent Dev Logs</h3>
               <div className="space-y-2">
-                {devlogs.filter(d => d.project_id === project.id).slice(0, 3).map(dl => (
-                  <div key={dl.id} className="glass-card p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('devlogs')}>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-slate-900">{dl.title}</span>
-                      {dl.tags.map(t => {
-                        const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
-                        return tagCfg ? (
-                          <span key={t} className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span>
-                        ) : null;
-                      })}
+                {allProjectDevlogs.slice(0, 3).map(dl => {
+                  const statusCfg = DEV_LOG_STATUSES.find(s => s.key === (dl.status || 'draft'));
+                  return (
+                    <div key={dl.id} className="glass-card p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('devlogs')}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900">{dl.title}</span>
+                        {statusCfg && (
+                          <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', statusCfg.color)}>{statusCfg.label}</span>
+                        )}
+                        {dl.tags.map(t => {
+                          const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
+                          return tagCfg ? (
+                            <span key={t} className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span>
+                          ) : null;
+                        })}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">{formatDate(dl.created_at)}</p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">{formatDate(dl.created_at)}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -317,7 +450,7 @@ export function ProjectDetailView({
                 key={ms.id}
                 milestone={ms}
                 tasks={projectTasks}
-                devlogs={devlogs.filter(d => d.project_id === project.id)}
+                devlogs={allProjectDevlogs}
                 onCycleStatus={cycleMilestoneStatus}
                 onEdit={(m) => {
                   setEditingMilestone(m);
@@ -401,17 +534,78 @@ export function ProjectDetailView({
             ))}
           </div>
 
+          {/* Thread filter */}
+          {projectThreads.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <Link2 size={12} className="text-slate-400" />
+              <FilterChip active={threadFilter === 'all'} onClick={() => setThreadFilter('all')}>All Threads</FilterChip>
+              {projectThreads.map(thr => {
+                const count = allProjectDevlogs.filter(d => d.thread_id === thr.id).length;
+                return (
+                  <FilterChip key={thr.id} active={threadFilter === thr.id} onClick={() => setThreadFilter(thr.id)}>
+                    {thr.name} ({count})
+                  </FilterChip>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Thread management */}
+          <div className="flex items-center gap-2">
+            {!showNewThreadForm ? (
+              <button onClick={() => setShowNewThreadForm(true)} className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors">
+                <Plus size={12} /> New Thread
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newThreadName}
+                  onChange={e => setNewThreadName(e.target.value)}
+                  placeholder="Thread name (e.g., FLM Architecture Evolution)"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm w-72"
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter') handleCreateThread(); if (e.key === 'Escape') setShowNewThreadForm(false); }}
+                />
+                <button onClick={handleCreateThread} disabled={!newThreadName.trim()} className="text-xs text-indigo-600 font-bold disabled:opacity-50">Create</button>
+                <button onClick={() => { setShowNewThreadForm(false); setNewThreadName(''); }} className="text-xs text-slate-400">Cancel</button>
+              </div>
+            )}
+            {projectThreads.length > 0 && threadFilter !== 'all' && (
+              <button
+                onClick={() => { if (confirm('Delete this thread? Logs will be unlinked.')) { deleteThread(threadFilter); setThreadFilter('all'); } }}
+                className="text-xs text-slate-300 hover:text-red-500 ml-auto transition-colors"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
+
           {/* Log entries */}
           <div className="space-y-3">
             {projectDevlogs.map(dl => {
               const linkedMs = milestones.find(m => m.id === dl.milestone_id);
               const linkedTask = tasks.find(t => t.id === dl.task_id);
+              const linkedThread = threads.find(t => t.id === dl.thread_id);
+              const isExpanded = expandedLogs.has(dl.id);
+              const statusCfg = DEV_LOG_STATUSES.find(s => s.key === (dl.status || 'draft'));
+              const hasLongContent = dl.content && dl.content.length > 200;
               return (
                 <div key={dl.id} className="glass-card p-5 group hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="font-bold text-slate-900">{dl.title}</h4>
+                        {/* Status pill (click to cycle) */}
+                        {statusCfg && (
+                          <button
+                            onClick={() => cycleDevLogStatus(dl)}
+                            className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-80', statusCfg.color)}
+                            title={`Click to cycle status (current: ${statusCfg.label})`}
+                          >
+                            {statusCfg.label}
+                          </button>
+                        )}
                         {dl.tags.map(t => {
                           const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
                           return tagCfg ? (
@@ -423,10 +617,30 @@ export function ProjectDetailView({
                         {formatDate(dl.created_at)}
                         {linkedMs && <span className="ml-2">→ {linkedMs.title}</span>}
                         {linkedTask && <span className="ml-2">→ {linkedTask.title}</span>}
+                        {linkedThread && <span className="ml-2 text-indigo-400">#{linkedThread.name}</span>}
                       </p>
                       {dl.content && (
                         <div className="mt-3">
-                          <MarkdownRenderer content={dl.content} className="text-sm text-slate-600 line-clamp-4" />
+                          <MarkdownRenderer
+                            content={dl.content}
+                            className={cn('text-sm text-slate-600', !isExpanded && hasLongContent && 'line-clamp-4')}
+                          />
+                          {hasLongContent && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <button
+                                onClick={() => toggleLogExpand(dl.id)}
+                                className="text-xs text-indigo-500 hover:text-indigo-700 font-bold flex items-center gap-1 transition-colors"
+                              >
+                                {isExpanded ? <><ChevronUp size={12} /> Collapse</> : <><ChevronDown size={12} /> Read more</>}
+                              </button>
+                              <button
+                                onClick={() => setReadingLog(dl)}
+                                className="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1 transition-colors"
+                              >
+                                <Eye size={12} /> Reading mode
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -446,7 +660,7 @@ export function ProjectDetailView({
 
           {projectDevlogs.length === 0 && (
             <div className="glass-card p-12 text-center text-slate-400">
-              {tagFilter === 'all' ? 'No dev logs yet. Start recording your thinking.' : 'No logs with this tag.'}
+              {tagFilter === 'all' && threadFilter === 'all' ? 'No dev logs yet. Start recording your thinking.' : 'No logs matching filters.'}
             </div>
           )}
 
@@ -482,9 +696,38 @@ export function ProjectDetailView({
           projectId={project.id}
           milestones={milestones}
           tasks={tasks}
+          threads={projectThreads}
           onSave={handleSaveDevLog}
           onCancel={() => { setShowDevLogForm(false); setEditingDevLog(null); }}
         />
+      )}
+
+      {/* Reading mode modal */}
+      {readingLog && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setReadingLog(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">{readingLog.title}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-slate-400">{formatDate(readingLog.created_at)}</span>
+                  {readingLog.tags.map(t => {
+                    const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
+                    return tagCfg ? (
+                      <span key={t} className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+              <button onClick={() => setReadingLog(null)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm font-bold">
+                Close
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <MarkdownRenderer content={readingLog.content} className="markdown-content text-slate-700" />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
