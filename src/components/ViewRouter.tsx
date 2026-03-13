@@ -180,6 +180,8 @@ export const ViewRouter = memo(function ViewRouter({
           ideas={data.ideas}
           tasks={data.tasks}
           projects={data.projects}
+          milestones={data.milestones}
+          devlogs={data.devlogs}
           students={data.students}
           onNavigate={navigateTo}
         />

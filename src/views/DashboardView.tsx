@@ -3,6 +3,7 @@ import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Ligh
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea, Task, EventTimeMode, Project, Student } from '../types';
+import { ProjectMilestone, DevLogEntry } from '../types/chronicle';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
@@ -50,6 +51,8 @@ interface DashboardViewProps {
   ideas: Idea[];
   tasks: Task[];
   projects: Project[];
+  milestones: ProjectMilestone[];
+  devlogs: DevLogEntry[];
   students: Student[];
   onNavigate: (tab: string) => void;
 }
@@ -75,6 +78,8 @@ export const DashboardView = ({
   ideas,
   tasks,
   projects,
+  milestones,
+  devlogs,
   students,
   onNavigate,
 }: DashboardViewProps) => {
@@ -371,6 +376,16 @@ export const DashboardView = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeProjects.map(project => {
               const taskCount = tasks.filter(t => t.project_id === project.id && t.status !== 'done').length;
+              const projectMs = milestones.filter(m => m.project_id === project.id);
+              const completedMs = projectMs.filter(m => m.status === 'completed').length;
+              const totalMs = projectMs.length;
+              const projectLogs = devlogs.filter(d => d.project_id === project.id);
+              const latestLog = projectLogs.sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+              const doneTasks = tasks.filter(t => t.project_id === project.id && t.status === 'done').length;
+              const totalTasks = tasks.filter(t => t.project_id === project.id).length;
+              const progress = totalMs > 0
+                ? Math.round((completedMs / totalMs) * 100)
+                : totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
               return (
                 <button
                   key={project.id}
@@ -380,10 +395,19 @@ export const DashboardView = ({
                   <div className="w-1 flex-shrink-0" style={{ backgroundColor: project.color }} />
                   <div className="p-4 flex-1 min-w-0">
                     <h4 className="font-bold text-sm text-slate-900 truncate">{project.name}</h4>
-                    <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-400">
-                      <Rocket size={10} className="text-purple-500" />
-                      <span className="font-bold">{taskCount} active task{taskCount !== 1 ? 's' : ''}</span>
+                    <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400">
+                      <span className="font-bold">{taskCount} active</span>
+                      {totalMs > 0 && <span className="font-bold">{completedMs}/{totalMs} ms</span>}
+                      {projectLogs.length > 0 && <span className="font-bold">{projectLogs.length} logs</span>}
                     </div>
+                    {(totalMs > 0 || totalTasks > 0) && (
+                      <div className="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-500" style={{ width: `${progress}%` }} />
+                      </div>
+                    )}
+                    {latestLog && (
+                      <p className="text-[10px] text-slate-400 mt-1.5 truncate">Latest: {latestLog.title}</p>
+                    )}
                   </div>
                 </button>
               );

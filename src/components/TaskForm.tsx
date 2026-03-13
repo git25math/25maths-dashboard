@@ -1,12 +1,15 @@
 import React, { memo, useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Task, TaskStatus, TaskPriority, Project } from '../types';
+import { ProjectMilestone } from '../types/chronicle';
 import { cn } from '../lib/utils';
 import { RichTextEditor } from './RichTextEditor';
 
 interface TaskFormProps {
   task: Task | null;
   projects?: Project[];
+  milestones?: ProjectMilestone[];
+  initialProjectId?: string;
   onSave: (data: Omit<Task, 'id' | 'created_at'>) => void;
   onCancel: () => void;
 }
@@ -25,7 +28,7 @@ const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] 
   { value: 'low', label: 'Low', color: 'bg-blue-100 text-blue-700 border-blue-200' },
 ];
 
-export const TaskForm = memo(function TaskForm({ task, projects, onSave, onCancel }: TaskFormProps) {
+export const TaskForm = memo(function TaskForm({ task, projects, milestones, initialProjectId, onSave, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'inbox');
@@ -33,13 +36,20 @@ export const TaskForm = memo(function TaskForm({ task, projects, onSave, onCance
   const [assignee, setAssignee] = useState(task?.assignee || '');
   const [dueDate, setDueDate] = useState(task?.due_date || '');
   const [tagsInput, setTagsInput] = useState(task?.tags?.join(', ') || '');
-  const [projectId, setProjectId] = useState(task?.project_id || '');
+  const [projectId, setProjectId] = useState(task?.project_id || initialProjectId || '');
+  const [milestoneId, setMilestoneId] = useState(task?.milestone_id || '');
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
   }, [onCancel]);
+
+  useEffect(() => {
+    // For "New Task" flow, allow caller to preselect a project.
+    if (task) return;
+    setProjectId(initialProjectId || '');
+  }, [initialProjectId, task]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +61,7 @@ export const TaskForm = memo(function TaskForm({ task, projects, onSave, onCance
       status,
       priority,
       project_id: projectId || undefined,
+      milestone_id: milestoneId || undefined,
       assignee: assignee || undefined,
       due_date: dueDate || undefined,
       tags: tags.length > 0 ? tags : undefined,
@@ -140,12 +151,37 @@ export const TaskForm = memo(function TaskForm({ task, projects, onSave, onCance
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-white"
               >
                 <option value="">No project</option>
-                {projects.filter(p => p.status === 'active').map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.status === 'active' ? '' : p.status === 'paused' ? '[Paused] ' : '[Completed] '}
+                    {p.name}
+                  </option>
                 ))}
               </select>
             </div>
           )}
+
+          {/* Milestone (filtered by selected project) */}
+          {milestones && projectId && (() => {
+            const projectMs = milestones.filter(m => m.project_id === projectId);
+            return projectMs.length > 0 ? (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Milestone</label>
+                <select
+                  value={milestoneId}
+                  onChange={e => setMilestoneId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-white"
+                >
+                  <option value="">No milestone</option>
+                  {projectMs.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.status === 'completed' ? '[Done] ' : m.status === 'in_progress' ? '[WIP] ' : ''}{m.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null;
+          })()}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">

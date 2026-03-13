@@ -317,6 +317,7 @@ export function ProjectDetailView({
                 key={ms.id}
                 milestone={ms}
                 tasks={projectTasks}
+                devlogs={devlogs.filter(d => d.project_id === project.id)}
                 onCycleStatus={cycleMilestoneStatus}
                 onEdit={(m) => {
                   setEditingMilestone(m);

@@ -71,11 +71,16 @@ export function ActivityTimeline({ milestones, tasks, devlogs, projectId }: Acti
 
     for (const dl of devlogs.filter(d => d.project_id === projectId)) {
       const tagLabels = dl.tags.map(t => DEV_LOG_TAGS.find(dt => dt.key === t)?.label || t).join(', ');
+      const linkedMs = dl.milestone_id ? milestones.find(m => m.id === dl.milestone_id) : null;
+      const linkedTask = dl.task_id ? tasks.find(t => t.id === dl.task_id) : null;
+      const contextParts = [tagLabels];
+      if (linkedMs) contextParts.push(`-> ${linkedMs.title}`);
+      if (linkedTask) contextParts.push(`-> ${linkedTask.title}`);
       items.push({
         id: `dl-${dl.id}`,
         type: 'devlog',
         title: dl.title,
-        subtitle: tagLabels,
+        subtitle: contextParts.join(' '),
         timestamp: dl.created_at,
         color: 'text-violet-500',
         icon: dl.tags.includes('thinking') || dl.tags.includes('reflection') ? PenLine : FileText,

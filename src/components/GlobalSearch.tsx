@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, memo } from 'react';
-import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, Mail, FileText, Settings, GraduationCap, Rocket } from 'lucide-react';
+import { Search, X, Users, Calendar, BookOpen, Lightbulb, CheckSquare, Clock, Target, CalendarDays, Mic, Mail, FileText, Settings, GraduationCap, Rocket, Flag, PenLine } from 'lucide-react';
 import { Student, TeachingUnit, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, ClassProfile, TimetableEntry, Task, EmailDigest, EventTimeMode, Project } from '../types';
+import { ProjectMilestone, DevLogEntry } from '../types/chronicle';
 
 interface GlobalSearchProps {
   data: {
@@ -18,6 +19,8 @@ interface GlobalSearchProps {
     tasks: Task[];
     emailDigests: EmailDigest[];
     projects: Project[];
+    milestones: ProjectMilestone[];
+    devlogs: DevLogEntry[];
   };
   onNavigate: (tabKey: string) => void;
 }
@@ -45,6 +48,8 @@ const ENTITY_CONFIG = [
   { key: 'tasks', tabKey: 'tasks', label: 'Tasks', icon: CheckSquare },
   { key: 'emailDigests', tabKey: 'email-digest', label: 'Email Digests', icon: Mail },
   { key: 'projects', tabKey: 'projects', label: 'Projects', icon: Rocket },
+  { key: 'milestones', tabKey: 'projects', label: 'Milestones', icon: Flag },
+  { key: 'devlogs', tabKey: 'projects', label: 'Dev Logs', icon: PenLine },
 ] as const;
 
 function getSearchableText(item: Record<string, unknown>, entityKey: string): string {
@@ -105,6 +110,14 @@ function getSearchableText(item: Record<string, unknown>, entityKey: string): st
       const p = item as unknown as Project;
       return [p.name, p.description].filter(Boolean).join(' ');
     }
+    case 'milestones': {
+      const m = item as unknown as ProjectMilestone;
+      return [m.title, m.description].filter(Boolean).join(' ');
+    }
+    case 'devlogs': {
+      const d = item as unknown as DevLogEntry;
+      return [d.title, d.content, ...(d.tags || [])].filter(Boolean).join(' ');
+    }
     default:
       return '';
   }
@@ -126,6 +139,8 @@ function getDisplayTitle(item: Record<string, unknown>, entityKey: string): stri
     case 'tasks': return (item as unknown as Task).title;
     case 'emailDigests': return (item as unknown as EmailDigest).subject;
     case 'projects': return (item as unknown as Project).name;
+    case 'milestones': return (item as unknown as ProjectMilestone).title;
+    case 'devlogs': return (item as unknown as DevLogEntry).title;
     default: return '';
   }
 }
@@ -161,6 +176,8 @@ function getDisplaySubtitle(item: Record<string, unknown>, entityKey: string): s
     case 'tasks': return (item as unknown as Task).status;
     case 'emailDigests': return new Date((item as unknown as EmailDigest).created_at).toLocaleDateString();
     case 'projects': return (item as unknown as Project).status;
+    case 'milestones': return (item as unknown as ProjectMilestone).status;
+    case 'devlogs': return (item as unknown as DevLogEntry).tags?.join(', ');
     default: return undefined;
   }
 }
@@ -185,7 +202,8 @@ export const GlobalSearch = memo(function GlobalSearch({ data, onNavigate }: Glo
   useEffect(() => {
     if (isOpen) {
       setQuery('');
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

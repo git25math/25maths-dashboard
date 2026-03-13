@@ -40,6 +40,7 @@ export interface FormModalsState {
   editingEvent: SchoolEvent | null;
   isTaskFormOpen: boolean;
   editingTask: Task | null;
+  taskFormInitialProjectId: string;
   isProjectFormOpen: boolean;
   editingProject: Project | null;
   parentCommFormConfig: {
@@ -87,6 +88,7 @@ export interface FormModalsSetters {
   setEditingEvent: (v: SchoolEvent | null) => void;
   setIsTaskFormOpen: (v: boolean) => void;
   setEditingTask: (v: Task | null) => void;
+  setTaskFormInitialProjectId: (v: string) => void;
   setIsProjectFormOpen: (v: boolean) => void;
   setEditingProject: (v: Project | null) => void;
   setParentCommFormConfig: Dispatch<SetStateAction<FormModalsState['parentCommFormConfig']>>;
@@ -224,6 +226,8 @@ export const FormModals = memo(function FormModals({ state, setters, data }: For
         <TaskForm
           task={state.editingTask}
           projects={data.projects}
+          milestones={data.milestones}
+          initialProjectId={state.taskFormInitialProjectId || undefined}
           onSave={(d) => {
             if (state.editingTask) {
               data.updateTask(state.editingTask.id, d);
@@ -232,8 +236,9 @@ export const FormModals = memo(function FormModals({ state, setters, data }: For
             }
             setters.setIsTaskFormOpen(false);
             setters.setEditingTask(null);
+            setters.setTaskFormInitialProjectId('');
           }}
-          onCancel={() => { setters.setIsTaskFormOpen(false); setters.setEditingTask(null); }}
+          onCancel={() => { setters.setIsTaskFormOpen(false); setters.setEditingTask(null); setters.setTaskFormInitialProjectId(''); }}
         />
       )}
       {state.isProjectFormOpen && (

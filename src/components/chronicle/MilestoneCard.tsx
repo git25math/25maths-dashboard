@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Trash2, Edit3, Calendar, CheckCircle2, Circle, Clock } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { ProjectMilestone, MilestoneStatus } from '../../types/chronicle';
+import { ProjectMilestone, MilestoneStatus, DevLogEntry, DEV_LOG_TAGS } from '../../types/chronicle';
 import { Task } from '../../types';
 import { formatDate } from '../../lib/utils';
 
@@ -14,6 +14,7 @@ const STATUS_CONFIG: Record<MilestoneStatus, { label: string; icon: typeof Circl
 interface MilestoneCardProps {
   milestone: ProjectMilestone;
   tasks: Task[];
+  devlogs?: DevLogEntry[];
   onCycleStatus: (id: string) => Promise<MilestoneStatus | undefined>;
   onEdit: (ms: ProjectMilestone) => void;
   onDelete: (id: string) => void;
@@ -22,12 +23,13 @@ interface MilestoneCardProps {
   onMoveDown?: () => void;
 }
 
-export function MilestoneCard({ milestone, tasks, onCycleStatus, onEdit, onDelete, onRequestReview, onMoveUp, onMoveDown }: MilestoneCardProps) {
+export function MilestoneCard({ milestone, tasks, devlogs = [], onCycleStatus, onEdit, onDelete, onRequestReview, onMoveUp, onMoveDown }: MilestoneCardProps) {
   const [expanded, setExpanded] = useState(false);
   const cfg = STATUS_CONFIG[milestone.status];
   const Icon = cfg.icon;
 
   const linkedTasks = tasks.filter(t => t.milestone_id === milestone.id);
+  const linkedLogs = devlogs.filter(d => d.milestone_id === milestone.id);
   const doneTasks = linkedTasks.filter(t => t.status === 'done').length;
   const totalTasks = linkedTasks.length;
   const percent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
@@ -117,6 +119,24 @@ export function MilestoneCard({ milestone, tasks, onCycleStatus, onEdit, onDelet
             </div>
           ) : (
             <p className="text-sm text-slate-400">No linked tasks yet.</p>
+          )}
+
+          {linkedLogs.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Linked Dev Logs</p>
+              <div className="space-y-1">
+                {linkedLogs.map(dl => (
+                  <div key={dl.id} className="flex items-center gap-2 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-violet-400" />
+                    <span className="text-slate-700">{dl.title}</span>
+                    {dl.tags.slice(0, 2).map(t => {
+                      const tagCfg = DEV_LOG_TAGS.find(dt => dt.key === t);
+                      return tagCfg ? <span key={t} className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded-full', tagCfg.color)}>{tagCfg.label}</span> : null;
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {milestone.review && (

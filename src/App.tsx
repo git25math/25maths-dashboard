@@ -231,6 +231,8 @@ function AppContent() {
             tasks: data.tasks,
             emailDigests: data.emailDigests,
             projects: data.projects,
+            milestones: data.milestones,
+            devlogs: data.devlogs,
           }}
           onNavigate={navigateTo}
         />
