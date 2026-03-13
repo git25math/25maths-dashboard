@@ -64,6 +64,7 @@ export interface DevLogEntry {
   content: string;
   tags: DevLogTag[];
   status: DevLogStatus;
+  starred?: boolean;
   created_at: string;
   updated_at?: string;
 }

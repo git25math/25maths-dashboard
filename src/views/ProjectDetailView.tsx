@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye, FileDown, BookOpen, Filter } from 'lucide-react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { ArrowLeft, Plus, Edit3, Trash2, ExternalLink, GitBranch, ChevronDown, ChevronUp, Link2, Eye, FileDown, BookOpen, Filter, Search, Star, StarOff, ArrowUpDown, CheckSquare2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Project, Task } from '../types';
 import { ProjectMilestone, DevLogEntry, DevLogThread, MilestoneReview, MilestoneStatus, DevLogTag, DevLogStatus, DEV_LOG_TAGS, DEV_LOG_STATUSES } from '../types/chronicle';
@@ -106,6 +106,11 @@ export function ProjectDetailView({
   const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
   const [showNewThreadForm, setShowNewThreadForm] = useState(false);
   const [newThreadName, setNewThreadName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<'date' | 'status' | 'starred'>('date');
+  const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
+  const [batchMode, setBatchMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // New milestone form state
   const [newMsTitle, setNewMsTitle] = useState('');
@@ -127,8 +132,50 @@ export function ProjectDetailView({
     if (tagFilter !== 'all') filtered = filtered.filter(d => d.tags.includes(tagFilter));
     if (statusFilter !== 'all') filtered = filtered.filter(d => (d.status || 'draft') === statusFilter);
     if (threadFilter !== 'all') filtered = filtered.filter(d => d.thread_id === threadFilter);
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(d =>
+        d.title.toLowerCase().includes(q) || d.content.toLowerCase().includes(q)
+      );
+    }
+    // Sort
+    const STATUS_ORDER: Record<string, number> = { draft: 0, incubating: 1, actionable: 2, archived: 3 };
+    if (sortMode === 'starred') {
+      filtered = [...filtered].sort((a, b) => {
+        if (a.starred && !b.starred) return -1;
+        if (!a.starred && b.starred) return 1;
+        return b.created_at.localeCompare(a.created_at);
+      });
+    } else if (sortMode === 'status') {
+      filtered = [...filtered].sort((a, b) => {
+        const sa = STATUS_ORDER[a.status || 'draft'] ?? 0;
+        const sb = STATUS_ORDER[b.status || 'draft'] ?? 0;
+        return sa !== sb ? sa - sb : b.created_at.localeCompare(a.created_at);
+      });
+    }
+    // default 'date' is already reverse chronological from allProjectDevlogs
     return filtered;
-  }, [allProjectDevlogs, tagFilter, statusFilter, threadFilter]);
+  }, [allProjectDevlogs, tagFilter, statusFilter, threadFilter, searchQuery, sortMode]);
+
+  // Thinking velocity stats
+  const thinkingStats = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weekAgoStr = weekAgo.toISOString();
+    const thisWeekLogs = allProjectDevlogs.filter(d => d.created_at >= weekAgoStr);
+    const totalWords = allProjectDevlogs.reduce((sum, d) => sum + (d.content ? d.content.split(/\s+/).length : 0), 0);
+    // Most active tag
+    const tagCounts: Record<string, number> = {};
+    for (const d of allProjectDevlogs) {
+      for (const t of d.tags) tagCounts[t] = (tagCounts[t] || 0) + 1;
+    }
+    const topTag = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0];
+    const topTagLabel = topTag ? DEV_LOG_TAGS.find(t => t.key === topTag[0])?.label || topTag[0] : '-';
+    // Active days (unique dates)
+    const activeDays = new Set(allProjectDevlogs.map(d => d.created_at.slice(0, 10))).size;
+    return { thisWeek: thisWeekLogs.length, totalWords, topTagLabel, activeDays };
+  }, [allProjectDevlogs]);
 
   // Incubation pipeline counts
   const incubationCounts = useMemo(() => {
@@ -269,6 +316,46 @@ export function ProjectDetailView({
     // Visual feedback via a brief alert-like approach — just use clipboard
   }, [threadFilter, threadNarrativeLogs, projectThreads]);
 
+  const toggleStarred = useCallback((dl: DevLogEntry) => {
+    updateDevLog(dl.id, { starred: !dl.starred });
+  }, [updateDevLog]);
+
+  const toggleSelectLog = (id: string) => {
+    setSelectedLogIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const batchChangeStatus = useCallback((newStatus: DevLogStatus) => {
+    for (const id of selectedLogIds) {
+      updateDevLog(id, { status: newStatus });
+    }
+    setSelectedLogIds(new Set());
+    setBatchMode(false);
+  }, [selectedLogIds, updateDevLog]);
+
+  // Keyboard shortcuts for devlogs tab
+  useEffect(() => {
+    if (activeTab !== 'devlogs') return;
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setEditingDevLog(null);
+        setShowDevLogForm(true);
+      }
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [activeTab]);
+
   const otherProjects = allProjects.filter(p => p.id !== project.id);
 
   return (
@@ -387,6 +474,31 @@ export function ProjectDetailView({
               </div>
             ))}
           </div>
+
+          {/* Thinking Velocity */}
+          {allProjectDevlogs.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 mb-3">Thinking Velocity</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="glass-card p-3 text-center">
+                  <p className="text-xl font-bold text-violet-600">{thinkingStats.thisWeek}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">This Week</p>
+                </div>
+                <div className="glass-card p-3 text-center">
+                  <p className="text-xl font-bold text-slate-700">{thinkingStats.totalWords.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Words</p>
+                </div>
+                <div className="glass-card p-3 text-center">
+                  <p className="text-xl font-bold text-indigo-600">{thinkingStats.topTagLabel}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Top Tag</p>
+                </div>
+                <div className="glass-card p-3 text-center">
+                  <p className="text-xl font-bold text-emerald-600">{thinkingStats.activeDays}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Days</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Incubation Pipeline */}
           {allProjectDevlogs.length > 0 && (
@@ -597,10 +709,66 @@ export function ProjectDetailView({
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-700">Dev Logs</h3>
-            <button onClick={() => { setEditingDevLog(null); setShowDevLogForm(true); }} className="btn-primary text-sm flex items-center gap-1">
-              <Plus size={14} /> New Log
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setBatchMode(!batchMode); setSelectedLogIds(new Set()); }}
+                className={cn('text-xs flex items-center gap-1 transition-colors', batchMode ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600')}
+              >
+                <CheckSquare2 size={14} /> {batchMode ? 'Cancel' : 'Batch'}
+              </button>
+              <button onClick={() => { setEditingDevLog(null); setShowDevLogForm(true); }} className="btn-primary text-sm flex items-center gap-1">
+                <Plus size={14} /> New Log <kbd className="hidden sm:inline ml-1 text-[9px] opacity-60">N</kbd>
+              </button>
+            </div>
           </div>
+
+          {/* Search + Sort */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search logs... (press /)"
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ArrowUpDown size={12} className="text-slate-400" />
+              {(['date', 'status', 'starred'] as const).map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => setSortMode(mode)}
+                  className={cn(
+                    'text-[10px] font-bold px-2 py-1 rounded-lg transition-all',
+                    sortMode === mode ? 'bg-indigo-100 text-indigo-700' : 'text-slate-400 hover:text-slate-600'
+                  )}
+                >
+                  {mode === 'date' ? 'Date' : mode === 'status' ? 'Status' : 'Starred'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Batch operation bar */}
+          {batchMode && selectedLogIds.size > 0 && (
+            <div className="glass-card p-3 flex items-center gap-3 border-2 border-indigo-200">
+              <span className="text-xs font-bold text-indigo-600">{selectedLogIds.size} selected</span>
+              <span className="text-xs text-slate-400">Move to:</span>
+              {DEV_LOG_STATUSES.map(({ key, label, color }) => (
+                <button
+                  key={key}
+                  onClick={() => batchChangeStatus(key)}
+                  className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-80', color)}
+                >
+                  {label}
+                </button>
+              ))}
+              <button onClick={() => setSelectedLogIds(new Set())} className="text-xs text-slate-400 ml-auto">Clear</button>
+            </div>
+          )}
 
           {/* Tag filter */}
           <div className="flex flex-wrap gap-2">
@@ -693,11 +861,29 @@ export function ProjectDetailView({
               const isExpanded = expandedLogs.has(dl.id);
               const statusCfg = DEV_LOG_STATUSES.find(s => s.key === (dl.status || 'draft'));
               const hasLongContent = dl.content && dl.content.length > 200;
+              const isSelected = selectedLogIds.has(dl.id);
               return (
-                <div key={dl.id} className="glass-card p-5 group hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between">
+                <div key={dl.id} className={cn('glass-card p-5 group hover:shadow-md transition-shadow', isSelected && 'ring-2 ring-indigo-300')}>
+                  <div className="flex items-start gap-2">
+                    {/* Batch checkbox */}
+                    {batchMode && (
+                      <button onClick={() => toggleSelectLog(dl.id)} className="mt-1 flex-shrink-0">
+                        <div className={cn('w-4 h-4 rounded border-2 flex items-center justify-center transition-all',
+                          isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300'
+                        )}>
+                          {isSelected && <span className="text-white text-[8px] font-bold">✓</span>}
+                        </div>
+                      </button>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {/* Star button */}
+                        <button
+                          onClick={() => toggleStarred(dl)}
+                          className={cn('transition-colors flex-shrink-0', dl.starred ? 'text-amber-400' : 'text-slate-200 hover:text-amber-300')}
+                        >
+                          {dl.starred ? <Star size={14} /> : <StarOff size={14} />}
+                        </button>
                         <h4 className="font-bold text-slate-900">{dl.title}</h4>
                         {/* Status pill (click to cycle) */}
                         {statusCfg && (
