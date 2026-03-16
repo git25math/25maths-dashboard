@@ -36,6 +36,7 @@ interface ViewRouterProps {
   MeetingsView: React.ComponentType<any>;
   LessonRecordsView: React.ComponentType<any>;
   GoalsView: React.ComponentType<any>;
+  BookmarksView: React.ComponentType<any>;
   SchoolEventsView: React.ComponentType<any>;
   HousePointHistoryView: React.ComponentType<any>;
   EmailDigestView: React.ComponentType<any>;
@@ -49,6 +50,7 @@ interface ViewRouterProps {
   PaperHub: React.ComponentType<any>;
   CoverHub: React.ComponentType<any>;
   TikzHub: React.ComponentType<any>;
+  VideoHub: React.ComponentType<any>;
 }
 
 export const ViewRouter = memo(function ViewRouter({
@@ -79,6 +81,7 @@ export const ViewRouter = memo(function ViewRouter({
   MeetingsView,
   LessonRecordsView,
   GoalsView,
+  BookmarksView,
   SchoolEventsView,
   HousePointHistoryView,
   EmailDigestView,
@@ -92,6 +95,7 @@ export const ViewRouter = memo(function ViewRouter({
   PaperHub,
   CoverHub,
   TikzHub,
+  VideoHub,
 }: ViewRouterProps) {
   const {
     setGenericFormConfig, setWeaknessFormConfig, setParentCommFormConfig,
@@ -99,6 +103,7 @@ export const ViewRouter = memo(function ViewRouter({
     setEditingClass, setIsClassFormOpen,
     setEditingTeachingUnit, setIsTeachingUnitFormOpen, setPendingNewUnitData,
     setEditingGoal, setIsGoalFormOpen,
+    setEditingBookmark, setIsBookmarkFormOpen,
     setEditingEvent, setIsEventFormOpen,
     setEditingTask, setIsTaskFormOpen,
     setTaskFormInitialProjectId,
@@ -175,6 +180,7 @@ export const ViewRouter = memo(function ViewRouter({
           classes={data.classes}
           teachingUnits={data.teachingUnits}
           goals={data.goals}
+          bookmarks={data.bookmarks}
           schoolEvents={data.schoolEvents}
           workLogs={data.workLogs}
           ideas={data.ideas}
@@ -444,6 +450,17 @@ export const ViewRouter = memo(function ViewRouter({
           onUpdateGoal={(id, updates) => data.updateGoal(id, updates)}
         />
       );
+    case 'bookmarks':
+      return (
+        <BookmarksView
+          bookmarks={data.bookmarks}
+          onAdd={() => { setEditingBookmark(null); setIsBookmarkFormOpen(true); }}
+          onEdit={(bookmark: any) => { setEditingBookmark(bookmark); setIsBookmarkFormOpen(true); }}
+          onDelete={data.deleteBookmark}
+          onTogglePin={data.toggleBookmarkPin}
+          onNavigate={navigateTo}
+        />
+      );
     case 'events':
       return (
         <SchoolEventsView
@@ -530,6 +547,18 @@ export const ViewRouter = memo(function ViewRouter({
       return <CoverHub />;
     case 'tikz-vault':
       return <TikzHub />;
+    case 'video-hub':
+      return (
+        <VideoHub
+          videoScripts={data.videoScripts}
+          setVideoScripts={data.setVideoScripts}
+          onUpdateVideoScript={data.updateVideoScript}
+          onDeleteVideoScript={data.deleteVideoScript}
+          onTogglePipeline={data.toggleVideoPipeline}
+          onBulkPipeline={data.bulkSetVideoPipeline}
+          toast={data.toast}
+        />
+      );
     case 'settings':
       return (
         <SettingsView
@@ -541,6 +570,7 @@ export const ViewRouter = memo(function ViewRouter({
             ideas: data.ideas,
             sops: data.sops,
             goals: data.goals,
+            bookmarks: data.bookmarks,
             schoolEvents: data.schoolEvents,
             workLogs: data.workLogs,
             meetings: data.meetings,
@@ -553,6 +583,7 @@ export const ViewRouter = memo(function ViewRouter({
             devlogs: data.devlogs,
             kahootItems: data.kahootItems,
             payhipItems: data.payhipItems,
+            videoScripts: data.videoScripts,
           }}
           onImport={data.bulkImport}
         />

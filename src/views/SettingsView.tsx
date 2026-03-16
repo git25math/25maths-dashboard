@@ -1,14 +1,15 @@
 import { useState, useRef } from 'react';
-import { Settings, User, Lock, Database, Info, Download, Upload, Trash2, ExternalLink } from 'lucide-react';
+import { Settings, User, Lock, Database, Info, Download, Upload, Trash2, ExternalLink, Wifi } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../components/LoginGate';
+import { getAgentUrl, setAgentUrl } from '../services/mveAgentService';
 
 interface SettingsViewProps {
   data: Record<string, unknown>;
   onImport?: (data: Record<string, unknown>) => void;
 }
 
-const KNOWN_KEYS = ['students', 'teachingUnits', 'classes', 'timetable', 'ideas', 'sops', 'goals', 'schoolEvents', 'workLogs', 'meetings', 'lessonRecords', 'tasks', 'hpAwardLogs', 'emailDigests', 'projects', 'kahootItems', 'payhipItems'];
+const KNOWN_KEYS = ['students', 'teachingUnits', 'classes', 'timetable', 'ideas', 'sops', 'goals', 'bookmarks', 'schoolEvents', 'workLogs', 'meetings', 'lessonRecords', 'tasks', 'hpAwardLogs', 'emailDigests', 'projects', 'kahootItems', 'payhipItems', 'videoScripts'];
 
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -24,6 +25,10 @@ export const SettingsView = ({ data, onImport }: SettingsViewProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Agent URL state
+  const [agentUrl, setAgentUrlState] = useState(getAgentUrl());
+  const [agentUrlSaved, setAgentUrlSaved] = useState(false);
 
   // Import state
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +93,12 @@ export const SettingsView = ({ data, onImport }: SettingsViewProps) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        const parsed = JSON.parse(ev.target?.result as string);
+        const raw = ev.target?.result;
+        if (typeof raw !== 'string') {
+          setImportError('Failed to read file content.');
+          return;
+        }
+        const parsed = JSON.parse(raw);
         if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
           setImportError('Invalid format: expected a JSON object.');
           return;
@@ -102,6 +112,9 @@ export const SettingsView = ({ data, onImport }: SettingsViewProps) => {
       } catch {
         setImportError('Invalid JSON file.');
       }
+    };
+    reader.onerror = () => {
+      setImportError('Failed to read file. Please try again.');
     };
     reader.readAsText(file);
     // Reset input so the same file can be re-selected
@@ -255,6 +268,32 @@ export const SettingsView = ({ data, onImport }: SettingsViewProps) => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* MVE Agent */}
+        <div className="glass-card p-6 space-y-4">
+          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+            <Wifi size={18} className="text-indigo-600" /> MVE Agent
+          </h3>
+          <div className="space-y-3">
+            <p className="text-[10px] text-slate-400">Local agent URL for Video Hub integration. Default: http://localhost:9700</p>
+            <input
+              type="text"
+              value={agentUrl}
+              onChange={e => { setAgentUrlState(e.target.value); setAgentUrlSaved(false); }}
+              placeholder="http://localhost:9700"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm font-mono"
+            />
+            {agentUrlSaved && (
+              <p className="text-xs font-medium text-emerald-600">Agent URL saved.</p>
+            )}
+            <button
+              onClick={() => { setAgentUrl(agentUrl); setAgentUrlSaved(true); }}
+              className="w-full py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors"
+            >
+              Save Agent URL
+            </button>
           </div>
         </div>
 

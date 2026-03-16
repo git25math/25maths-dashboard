@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { useSeedData } from './useSeedData';
-import { TimetableEntry, Student, TeachingUnit, ClassProfile, Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, EmailDigest, Project, KahootItem, PayhipItem } from '../types';
+import { TimetableEntry, Student, TeachingUnit, ClassProfile, Idea, SOP, WorkLog, Goal, Bookmark, SchoolEvent, MeetingRecord, LessonRecord, HPAwardLog, Task, EmailDigest, Project, KahootItem, PayhipItem, VideoScript } from '../types';
 import { ProjectMilestone, DevLogEntry, DevLogThread } from '../types/chronicle';
 import { studentService } from '../services/studentService';
 import { teachingService } from '../services/teachingService';
@@ -10,6 +10,7 @@ import { ideaService } from '../services/ideaService';
 import { sopService } from '../services/sopService';
 import { workLogService } from '../services/workLogService';
 import { goalService } from '../services/goalService';
+import { bookmarkService } from '../services/bookmarkService';
 import { schoolEventService } from '../services/schoolEventService';
 import { timetableService } from '../services/timetableService';
 import { meetingService } from '../services/meetingService';
@@ -23,11 +24,13 @@ import { devlogService } from '../services/devlogService';
 import { threadService } from '../services/threadService';
 import { kahootService } from '../services/kahootService';
 import { payhipService } from '../services/payhipService';
+import { videoService } from '../services/videoService';
 import { isSupabaseConfigured, syncToSupabase } from '../lib/supabase';
 import { normalizeTeachingUnit } from '../lib/teachingAdapter';
 import { sortTeachingUnits } from '../lib/teachingUnitOrder';
 import { useKahootActions } from './appData/useKahootActions';
 import { usePayhipActions } from './appData/usePayhipActions';
+import { useVideoActions } from './appData/useVideoActions';
 import { useProductivityActions } from './appData/useProductivityActions';
 import { useStudentActions } from './appData/useStudentActions';
 import { useTeachingActions } from './appData/useTeachingActions';
@@ -211,6 +214,7 @@ export function useAppData() {
   const [ideas, setIdeas] = useLocalStorage<Idea[]>('dashboard-ideas', []);
   const [sops, setSops] = useLocalStorage<SOP[]>('dashboard-sops', []);
   const [goals, setGoals] = useLocalStorage<Goal[]>('dashboard-goals', []);
+  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('dashboard-bookmarks', []);
   const [schoolEvents, setSchoolEvents] = useLocalStorage<SchoolEvent[]>('dashboard-school-events', []);
   const [workLogs, setWorkLogs] = useLocalStorage<WorkLog[]>('dashboard-work-logs', []);
   const [meetings, setMeetings] = useLocalStorage<MeetingRecord[]>('dashboard-meetings', []);
@@ -224,6 +228,7 @@ export function useAppData() {
   const [threads, setThreads] = useLocalStorage<DevLogThread[]>('dashboard-threads', []);
   const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', []);
   const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', []);
+  const [videoScripts, setVideoScripts] = useLocalStorage<VideoScript[]>('dashboard-video-scripts', []);
 
   // Lazy-seed mock data for first-time users (no localStorage, no Supabase)
   useEffect(() => {
@@ -364,6 +369,7 @@ export function useAppData() {
         fetchOrSync(sopService.getAll, setSops, sops, 'sops'),
         fetchOrSync(workLogService.getAll, setWorkLogs, workLogs, 'work_logs'),
         fetchOrSync(goalService.getAll, setGoals, goals, 'goals'),
+        fetchOrSync(bookmarkService.getAll, setBookmarks, bookmarks, 'bookmarks'),
         fetchOrSync(schoolEventService.getAll, setSchoolEvents, schoolEvents, 'school_events'),
         fetchOrSync(timetableService.getAll, setTimetable, timetable, 'timetable_entries'),
         fetchOrSync(meetingService.getAll, setMeetings, meetings, 'meeting_records'),
@@ -377,6 +383,7 @@ export function useAppData() {
         fetchOrSync(threadService.getAll, setThreads, threads, 'devlog_threads'),
         fetchOrSync(kahootService.getAll, setKahootItems, kahootItems, 'kahoot_items'),
         fetchOrSync(payhipService.getAll, setPayhipItems, payhipItems, 'payhip_items'),
+        fetchOrSync(videoService.getAll, setVideoScripts, videoScripts, 'video_scripts'),
       ]);
 
       if (cancelled) return;
@@ -521,6 +528,10 @@ export function useAppData() {
     addGoal,
     updateGoal,
     deleteGoal,
+    addBookmark,
+    updateBookmark,
+    deleteBookmark,
+    toggleBookmarkPin,
     addSchoolEvent,
     updateSchoolEvent,
     deleteSchoolEvent,
@@ -555,6 +566,8 @@ export function useAppData() {
     setWorkLogs,
     goals,
     setGoals,
+    bookmarks,
+    setBookmarks,
     schoolEvents,
     setSchoolEvents,
     meetings,
@@ -586,6 +599,17 @@ export function useAppData() {
   } = useKahootActions({
     kahootItems,
     setKahootItems,
+    toast,
+  });
+
+  const {
+    updateVideoScript,
+    deleteVideoScript,
+    toggleVideoPipeline,
+    bulkSetVideoPipeline,
+  } = useVideoActions({
+    videoScripts,
+    setVideoScripts,
     toast,
   });
 
@@ -623,6 +647,7 @@ export function useAppData() {
       ideas: (v) => setIdeas(v as Idea[]),
       sops: (v) => setSops(v as SOP[]),
       goals: (v) => setGoals(v as Goal[]),
+      bookmarks: (v) => setBookmarks(v as Bookmark[]),
       schoolEvents: (v) => setSchoolEvents(v as SchoolEvent[]),
       workLogs: (v) => setWorkLogs(v as WorkLog[]),
       meetings: (v) => setMeetings(v as MeetingRecord[]),
@@ -636,6 +661,7 @@ export function useAppData() {
       threads: (v) => setThreads(v as DevLogThread[]),
       kahootItems: (v) => setKahootItems(v as KahootItem[]),
       payhipItems: (v) => setPayhipItems(v as PayhipItem[]),
+      videoScripts: (v) => setVideoScripts(v as VideoScript[]),
     };
     let count = 0;
     for (const [key, setter] of Object.entries(keyMap)) {
@@ -647,12 +673,12 @@ export function useAppData() {
     if (count > 0) {
       toast.success(`Imported ${count} data categor${count === 1 ? 'y' : 'ies'} successfully`);
     }
-  }, [normalizeAndSortUnits, setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, setKahootItems, setPayhipItems, toast]);
+  }, [normalizeAndSortUnits, setStudents, setTeachingUnits, setClasses, setTimetable, setIdeas, setSops, setGoals, setBookmarks, setSchoolEvents, setWorkLogs, setMeetings, setLessonRecords, setTasks, setHpAwardLogs, setEmailDigests, setProjects, setKahootItems, setPayhipItems, setVideoScripts, toast]);
 
   return {
     // State
     timetable, students, teachingUnits, classes,
-    ideas, sops, goals, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, milestones, devlogs, threads, kahootItems, payhipItems,
+    ideas, sops, goals, bookmarks, schoolEvents, workLogs, meetings, lessonRecords, tasks, hpAwardLogs, emailDigests, projects, milestones, devlogs, threads, kahootItems, payhipItems, videoScripts,
     toasts,
 
     // Student
@@ -677,6 +703,9 @@ export function useAppData() {
 
     // Goals
     addGoal, updateGoal, deleteGoal,
+
+    // Bookmarks
+    addBookmark, updateBookmark, deleteBookmark, toggleBookmarkPin,
 
     // School Events
     addSchoolEvent, updateSchoolEvent, deleteSchoolEvent,
@@ -707,6 +736,10 @@ export function useAppData() {
 
     // Payhip Upload
     updatePayhip, setPayhipStatus, togglePayhipPipelineStage, bulkSetPayhipPipeline,
+
+    // Video Hub
+    setVideoScripts,
+    updateVideoScript, deleteVideoScript, toggleVideoPipeline, bulkSetVideoPipeline,
 
     // Tasks (GTD)
     addTask, updateTask, deleteTask, cycleTaskStatus,
