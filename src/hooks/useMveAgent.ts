@@ -8,7 +8,9 @@ import { mveAgent, AgentJob, AgentStatus } from '../services/mveAgentService';
 import { ToastApi } from '../types';
 
 const PING_INTERVAL = 5_000;
-const SSE_RECONNECT_DELAY = 3_000;
+const SSE_RECONNECT_BASE = 3_000;
+const SSE_RECONNECT_MAX = 30_000;
+const JOB_REFRESH_DEBOUNCE = 500;
 
 export function useMveAgent(
   videoScripts: VideoScript[],
@@ -19,97 +21,133 @@ export function useMveAgent(
   const [status, setStatus] = useState<AgentStatus | null>(null);
   const [jobs, setJobs] = useState<AgentJob[]>([]);
   const [syncing, setSyncing] = useState(false);
+
   const sseRef = useRef<EventSource | null>(null);
   const sseReconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sseReconnectAttempts = useRef(0);
   const hasAutoSynced = useRef(false);
-  const prevConnected = useRef(false);
+  const connectedRef = useRef(false);
+  const mountedRef = useRef(true);
+  const jobRefreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
+
+  // Track mounted state
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   // Ping agent periodically
   useEffect(() => {
-    let mounted = true;
-
     const check = async () => {
       const ok = await mveAgent.ping();
-      if (mounted) {
-        setConnected(ok);
-        if (ok) {
-          try {
-            const s = await mveAgent.getStatus();
-            setStatus(s);
-          } catch {
-            // status fetch failed, keep connected true from ping
-          }
-        } else {
-          setStatus(null);
+      if (!mountedRef.current) return;
+      connectedRef.current = ok;
+      setConnected(ok);
+      if (ok) {
+        try {
+          const s = await mveAgent.getStatus();
+          if (mountedRef.current) setStatus(s);
+        } catch {
+          // keep connected true from ping
         }
+      } else {
+        setStatus(null);
       }
     };
 
     check();
     const timer = setInterval(check, PING_INTERVAL);
-    return () => { mounted = false; clearInterval(timer); };
+    return () => clearInterval(timer);
   }, []);
 
   // Auto-sync on first connection
   useEffect(() => {
-    if (connected && !prevConnected.current && !hasAutoSynced.current) {
+    if (connected && !hasAutoSynced.current) {
       hasAutoSynced.current = true;
-      // Delay slightly to let UI render the connected state first
-      setTimeout(() => syncFromAgentInternal('cie'), 500);
+      const t = setTimeout(() => {
+        if (mountedRef.current && connectedRef.current) {
+          syncFromAgentInternal('cie');
+        }
+      }, 500);
+      return () => clearTimeout(t);
     }
-    prevConnected.current = connected;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected]);
 
-  // SSE connection with auto-reconnect
+  // Debounced job refresh
+  const refreshJobs = useCallback(() => {
+    if (jobRefreshTimer.current) clearTimeout(jobRefreshTimer.current);
+    jobRefreshTimer.current = setTimeout(() => {
+      mveAgent.getJobs().then(j => {
+        if (mountedRef.current) setJobs(j);
+      }).catch(() => {});
+    }, JOB_REFRESH_DEBOUNCE);
+  }, []);
+
+  // SSE connection — only reconnect on connected transitions, not every ping
   useEffect(() => {
     if (!connected) {
-      if (sseRef.current) {
-        sseRef.current.close();
-        sseRef.current = null;
-      }
-      if (sseReconnectTimer.current) {
-        clearTimeout(sseReconnectTimer.current);
-        sseReconnectTimer.current = null;
-      }
+      closeSse();
       return;
     }
-
-    const connectSSE = () => {
-      const es = mveAgent.connectSSE((event) => {
-        const jobId = (event as Record<string, unknown>).job_id as string | undefined;
-        if (!jobId) return;
-
-        if (event.type === 'job_completed' || event.type === 'job_failed' || event.type === 'job_cancelled') {
-          mveAgent.getJobs().then(setJobs).catch(() => {});
-          if (event.type === 'job_completed') {
-            toast.success('Job completed');
-          } else if (event.type === 'job_failed') {
-            toast.error(`Job failed: ${(event as Record<string, unknown>).error || 'unknown'}`);
-          }
-        } else if (event.type === 'job_started' || event.type === 'job_created') {
-          mveAgent.getJobs().then(setJobs).catch(() => {});
-        }
-      });
-
-      // Auto-reconnect on error
-      es.onerror = () => {
-        es.close();
-        sseRef.current = null;
-        sseReconnectTimer.current = setTimeout(() => {
-          if (connected) connectSSE();
-        }, SSE_RECONNECT_DELAY);
-      };
-
-      sseRef.current = es;
-    };
 
     connectSSE();
 
     // Initial jobs fetch
-    mveAgent.getJobs().then(setJobs).catch(() => {});
+    mveAgent.getJobs().then(j => {
+      if (mountedRef.current) setJobs(j);
+    }).catch(() => {});
 
-    return () => {
+    return () => closeSse();
+
+    function connectSSE() {
+      closeSse();
+      sseReconnectAttempts.current = 0;
+
+      const es = mveAgent.connectSSE((event) => {
+        if (!mountedRef.current) return;
+        const ev = event as Record<string, unknown>;
+        const jobId = ev.job_id as string | undefined;
+        if (!jobId) return;
+
+        if (event.type === 'job_completed' || event.type === 'job_failed' || event.type === 'job_cancelled') {
+          refreshJobs();
+          if (event.type === 'job_completed') {
+            toastRef.current.success('Job completed');
+          } else if (event.type === 'job_failed') {
+            toastRef.current.error(`Job failed: ${ev.error || 'unknown'}`);
+          }
+        } else if (event.type === 'job_started' || event.type === 'job_created') {
+          refreshJobs();
+        }
+        // job_log events are intentionally NOT triggering a full refresh
+      });
+
+      es.onerror = () => {
+        es.close();
+        sseRef.current = null;
+        // Exponential backoff with jitter
+        const attempt = sseReconnectAttempts.current++;
+        const delay = Math.min(SSE_RECONNECT_BASE * Math.pow(1.5, attempt), SSE_RECONNECT_MAX);
+        const jitter = delay * 0.2 * Math.random();
+        sseReconnectTimer.current = setTimeout(() => {
+          if (mountedRef.current && connectedRef.current) {
+            connectSSE();
+          }
+        }, delay + jitter);
+      };
+
+      // Reset backoff on successful open
+      es.onopen = () => {
+        sseReconnectAttempts.current = 0;
+      };
+
+      sseRef.current = es;
+    }
+
+    function closeSse() {
       if (sseRef.current) {
         sseRef.current.close();
         sseRef.current = null;
@@ -118,9 +156,9 @@ export function useMveAgent(
         clearTimeout(sseReconnectTimer.current);
         sseReconnectTimer.current = null;
       }
-    };
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, toast]);
+  }, [connected]);
 
   // Core sync implementation
   const syncFromAgentInternal = useCallback(async (board: string) => {
@@ -158,53 +196,57 @@ export function useMveAgent(
         return merged;
       });
 
-      toast.success(`Synced ${agentScripts.length} scripts from agent`);
+      toastRef.current.success(`Synced ${agentScripts.length} scripts from agent`);
     } catch (err) {
-      toast.error(`Sync failed: ${err instanceof Error ? err.message : 'unknown'}`);
+      toastRef.current.error(`Sync failed: ${err instanceof Error ? err.message : 'unknown'}`);
     } finally {
-      setSyncing(false);
+      if (mountedRef.current) setSyncing(false);
     }
-  }, [setVideoScripts, toast]);
+  }, [setVideoScripts]);
 
   // Public sync (checks connection)
   const syncFromAgent = useCallback(async (board = 'cie') => {
-    if (!connected) return;
+    if (!connectedRef.current) return;
     await syncFromAgentInternal(board);
-  }, [connected, syncFromAgentInternal]);
+  }, [syncFromAgentInternal]);
 
-  // Submit jobs
+  // Submit jobs — all check connection first
   const submitRender = useCallback(async (scriptId: string, quality = '1080p', lang = 'en', board = 'cie') => {
+    if (!connectedRef.current) throw new Error('Agent not connected');
     const { job_id } = await mveAgent.submitJob('render', { script_id: scriptId, quality, lang, board });
-    toast.success(`Render job started: ${job_id}`);
-    mveAgent.getJobs().then(setJobs).catch(() => {});
+    toastRef.current.success(`Render job started: ${job_id}`);
+    refreshJobs();
     return job_id;
-  }, [toast]);
+  }, [refreshJobs]);
 
   const submitValidate = useCallback(async (path?: string) => {
+    if (!connectedRef.current) throw new Error('Agent not connected');
     const { job_id } = await mveAgent.submitJob('validate', { path });
-    toast.success(`Validate job started: ${job_id}`);
-    mveAgent.getJobs().then(setJobs).catch(() => {});
+    toastRef.current.success(`Validate job started: ${job_id}`);
+    refreshJobs();
     return job_id;
-  }, [toast]);
+  }, [refreshJobs]);
 
   const submitCover = useCallback(async (scriptId: string, board = 'cie') => {
+    if (!connectedRef.current) throw new Error('Agent not connected');
     const { job_id } = await mveAgent.submitJob('cover', { script_id: scriptId, board });
-    toast.success(`Cover job started: ${job_id}`);
-    mveAgent.getJobs().then(setJobs).catch(() => {});
+    toastRef.current.success(`Cover job started: ${job_id}`);
+    refreshJobs();
     return job_id;
-  }, [toast]);
+  }, [refreshJobs]);
 
   const submitPublishMeta = useCallback(async (scriptId: string, board = 'cie') => {
+    if (!connectedRef.current) throw new Error('Agent not connected');
     const { job_id } = await mveAgent.submitJob('publish-meta', { script_id: scriptId, board });
-    toast.success(`Metadata job started: ${job_id}`);
-    mveAgent.getJobs().then(setJobs).catch(() => {});
+    toastRef.current.success(`Metadata job started: ${job_id}`);
+    refreshJobs();
     return job_id;
-  }, [toast]);
+  }, [refreshJobs]);
 
   const cancelJob = useCallback(async (jobId: string) => {
     await mveAgent.cancelJob(jobId);
-    mveAgent.getJobs().then(setJobs).catch(() => {});
-  }, []);
+    refreshJobs();
+  }, [refreshJobs]);
 
   return {
     connected,
