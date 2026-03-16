@@ -80,6 +80,14 @@ export interface OutputInfo {
   cover_path: string | null;
 }
 
+export type AgentSSEEvent =
+  | { type: 'job_created'; job_id: string; job_type: string }
+  | { type: 'job_started'; job_id: string }
+  | { type: 'job_completed'; job_id: string }
+  | { type: 'job_failed'; job_id: string; error: string }
+  | { type: 'job_cancelled'; job_id: string }
+  | { type: 'job_log'; job_id: string; line: string };
+
 // ── Service ──────────────────────────────────────────────
 
 export const mveAgent = {
@@ -152,7 +160,7 @@ export const mveAgent = {
     await fetchWithTimeout(`${getBaseUrl()}/api/jobs/${jobId}`, { method: 'DELETE' });
   },
 
-  connectSSE(onEvent: (event: { type: string; [key: string]: unknown }) => void): EventSource {
+  connectSSE(onEvent: (event: AgentSSEEvent) => void): EventSource {
     const es = new EventSource(`${getBaseUrl()}/api/events`);
 
     const handler = (e: MessageEvent) => {

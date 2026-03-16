@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, ChevronUp, Circle, Copy, ExternalLink, Play, FileCheck, Image, FileText, Trash2, Video, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDetailSheetKeyboard } from '../../hooks/useDetailSheetKeyboard';
@@ -92,9 +92,8 @@ function AgentActions({ item, agent }: { item: VideoScript; agent?: AgentHook })
   const [renderLang, setRenderLang] = useState('en');
   const [submitting, setSubmitting] = useState<string | null>(null);
 
-  if (!agent?.connected) return null;
-
-  const handleAction = async (action: string) => {
+  const handleAction = useCallback(async (action: string) => {
+    if (!agent?.connected) return;
     setSubmitting(action);
     try {
       switch (action) {
@@ -102,7 +101,7 @@ function AgentActions({ item, agent }: { item: VideoScript; agent?: AgentHook })
           await agent.submitRender(item.id, renderQuality, renderLang, item.board);
           break;
         case 'validate':
-          await agent.submitValidate(`scripts/knowledge/${item.board.slice(0, 3)}/${item.id.replace(/\./g, '_')}.yaml`);
+          await agent.submitValidate(`scripts/knowledge/${item.board}/${item.id.replace(/\./g, '_')}.yaml`);
           break;
         case 'cover':
           await agent.submitCover(item.id, item.board);
@@ -116,7 +115,9 @@ function AgentActions({ item, agent }: { item: VideoScript; agent?: AgentHook })
     } finally {
       setSubmitting(null);
     }
-  };
+  }, [agent, item.id, item.board, renderQuality, renderLang]);
+
+  if (!agent?.connected) return null;
 
   return (
     <section>

@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { VideoScript } from '../types/video';
-import { mveAgent, AgentJob, AgentStatus } from '../services/mveAgentService';
+import { mveAgent, AgentJob, AgentStatus, AgentSSEEvent } from '../services/mveAgentService';
 import { ToastApi } from '../types';
 
 const PING_INTERVAL = 5_000;
@@ -106,23 +106,25 @@ export function useMveAgent(
       closeSse();
       sseReconnectAttempts.current = 0;
 
-      const es = mveAgent.connectSSE((event) => {
+      const es = mveAgent.connectSSE((event: AgentSSEEvent) => {
         if (!mountedRef.current) return;
-        const ev = event as Record<string, unknown>;
-        const jobId = ev.job_id as string | undefined;
-        if (!jobId) return;
 
-        if (event.type === 'job_completed' || event.type === 'job_failed' || event.type === 'job_cancelled') {
-          refreshJobs();
-          if (event.type === 'job_completed') {
+        switch (event.type) {
+          case 'job_completed':
+            refreshJobs();
             toastRef.current.success('Job completed');
-          } else if (event.type === 'job_failed') {
-            toastRef.current.error(`Job failed: ${ev.error || 'unknown'}`);
-          }
-        } else if (event.type === 'job_started' || event.type === 'job_created') {
-          refreshJobs();
+            break;
+          case 'job_failed':
+            refreshJobs();
+            toastRef.current.error(`Job failed: ${event.error || 'unknown'}`);
+            break;
+          case 'job_cancelled':
+          case 'job_started':
+          case 'job_created':
+            refreshJobs();
+            break;
+          // job_log: intentionally no full refresh
         }
-        // job_log events are intentionally NOT triggering a full refresh
       });
 
       es.onerror = () => {
