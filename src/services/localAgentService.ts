@@ -48,6 +48,31 @@ export interface LocalAgentJob {
 
 const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, '');
 
+const DEFAULT_TIMEOUT = 30_000;
+
+async function fetchWithTimeout(
+  url: string,
+  init?: RequestInit & { timeout?: number },
+): Promise<Response> {
+  const { timeout = DEFAULT_TIMEOUT, ...fetchInit } = init || {};
+  const controller = new AbortController();
+  if (fetchInit.signal) {
+    // Forward external abort to our controller
+    fetchInit.signal.addEventListener('abort', () => controller.abort(fetchInit.signal!.reason));
+  }
+  const timer = setTimeout(() => controller.abort('Request timed out'), timeout);
+  try {
+    return await fetch(url, { ...fetchInit, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after ${timeout}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorText = await response.text();
@@ -67,37 +92,34 @@ export const localAgentService = {
   },
 
   async ping(baseUrl: string): Promise<{ ok: boolean; service: string; time: string; website_root?: string }> {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/health`);
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/health`, { timeout: 5_000 });
     return parseJson(response);
   },
 
   async startKahootUpload(baseUrl: string, item: KahootItem, dryRun = false, options?: KahootDeployOptions): Promise<LocalAgentJob> {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-upload`, {
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-upload`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ item, dry_run: dryRun, options }),
     });
-
     return parseJson(response);
   },
 
   async startKahootArtifacts(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-artifacts`, {
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-artifacts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ item, options }),
     });
-
     return parseJson(response);
   },
 
   async startKahootSpreadsheet(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-spreadsheet`, {
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-spreadsheet`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ item, options }),
     });
-
     return parseJson(response);
   },
 
@@ -105,7 +127,7 @@ export const localAgentService = {
     if (!payload.id || !payload.texSource) {
       throw new Error('Paper generate requires both id and texSource');
     }
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/paper-generate`, {
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/paper-generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -117,7 +139,7 @@ export const localAgentService = {
     if (!payload.template || !payload.topics?.length || !payload.params) {
       throw new Error('Cover batch requires template, topics array, and params');
     }
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/cover-batch`, {
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/cover-batch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -126,7 +148,7 @@ export const localAgentService = {
   },
 
   async getJob(baseUrl: string, jobId: string): Promise<LocalAgentJob> {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/jobs/${jobId}`);
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/${jobId}`);
     return parseJson(response);
   },
 };

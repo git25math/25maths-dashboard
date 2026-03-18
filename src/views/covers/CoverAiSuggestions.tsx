@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import type { CoverParams, CoverTemplateType } from './types';
 import { geminiService } from '../../services/geminiService';
@@ -18,17 +18,20 @@ export function CoverAiSuggestions({ templateType, currentParams, onApply }: Cov
   const [loading, setLoading] = useState(false);
   const [schemes, setSchemes] = useState<ColorScheme[]>([]);
   const [error, setError] = useState('');
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   const handleSuggest = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const results = await geminiService.suggestCoverScheme(templateType, currentParams.subtitle, currentParams.boardBadge);
-      setSchemes(results);
+      if (mountedRef.current) setSchemes(results);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate suggestions');
+      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Failed to generate suggestions');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, [templateType, currentParams.subtitle, currentParams.boardBadge]);
 

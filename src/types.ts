@@ -1,3 +1,5 @@
+export { type VideoScript, type VideoPipeline, type VideoPipelineStage, type VideoBoard, type VideoTier, type VideoLang, type VideoAct, type VideoActType, VIDEO_PIPELINE_STAGES, DEFAULT_VIDEO_PIPELINE } from './types/video';
+
 export type Role = 'teacher' | 'tutor' | 'entrepreneur';
 
 export interface ToastApi {
@@ -342,6 +344,21 @@ export interface Goal {
   status: 'in-progress' | 'completed' | 'on-hold';
   deadline?: string;
   image_url?: string;
+}
+
+export type BookmarkType = 'external' | 'internal';
+
+export interface Bookmark {
+  id: string;
+  title: string;
+  url: string;
+  type: BookmarkType;
+  internal_tab?: string;
+  category?: string;
+  icon?: string;
+  pinned?: boolean;
+  sort_order?: number;
+  created_at: string;
 }
 
 export interface VocabularyItem {

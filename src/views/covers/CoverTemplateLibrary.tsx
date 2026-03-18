@@ -12,6 +12,7 @@ export function CoverTemplateLibrary({ onSelect }: CoverTemplateLibraryProps) {
           key={t.type}
           type="button"
           onClick={() => onSelect(t)}
+          aria-label={`${t.label} template (${t.width}x${t.height})`}
           className="group text-left rounded-2xl border border-slate-200 p-4 hover:border-indigo-300 hover:shadow-md transition"
         >
           {/* Aspect ratio preview */}

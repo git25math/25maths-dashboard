@@ -1,5 +1,5 @@
 import { AISummary, SmartTaskPreview } from '../../types';
-import { getClient, stripJsonFences, SmartTasksInput, EmailDigestResult, ActionPlanInput } from './shared';
+import { getClient, safeJsonParse, SmartTasksInput, EmailDigestResult, ActionPlanInput } from './shared';
 
 export const meetingAiService = {
   async transcribeAudio(audioBlob: Blob): Promise<string> {
@@ -66,9 +66,7 @@ ${transcript}`,
       ],
     });
 
-    const text = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(text);
-    return JSON.parse(jsonStr) as AISummary;
+    return safeJsonParse<AISummary>(response.text ?? '', 'meeting summary');
   },
 
   async generateSmartTasks(input: SmartTasksInput): Promise<SmartTaskPreview[]> {
@@ -117,9 +115,7 @@ ${contextBlock}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as SmartTaskPreview[];
+    return safeJsonParse<SmartTaskPreview[]>(response.text ?? '', 'smart tasks');
   },
 
   async generateActionPlan(input: ActionPlanInput): Promise<string> {
@@ -211,8 +207,6 @@ ${emailContent}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as EmailDigestResult;
+    return safeJsonParse<EmailDigestResult>(response.text ?? '', 'email digest');
   },
 };

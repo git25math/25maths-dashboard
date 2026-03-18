@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Plus, Trash2, Calendar, Layers, Undo2, Redo2 } from 'lucide-react';
 import type { CoverDesign, CoverParams, CoverTemplate } from './types';
 import { COVER_TEMPLATES, DEFAULT_PARAMS } from './types';
@@ -12,7 +12,10 @@ type HubView = 'library' | 'templates' | 'editor';
 
 export function CoverHub() {
   const [view, setView] = useState<HubView>('library');
-  const [designs, setDesigns] = useState<CoverDesign[]>(() => coverService.getDesigns());
+  const [designs, setDesigns] = useState<CoverDesign[]>(() => {
+    try { return coverService.getDesigns(); }
+    catch { return []; }
+  });
   const [activeTemplate, setActiveTemplate] = useState<CoverTemplate | null>(null);
   const [activeParams, setActiveParams] = useState<CoverParams>(DEFAULT_PARAMS);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,8 +26,14 @@ export function CoverHub() {
   // Undo/redo history for param edits (max 30 snapshots)
   const historyRef = useRef<CoverParams[]>([]);
   const historyIdxRef = useRef(-1);
-  const canUndo = useMemo(() => historyIdxRef.current > 0, [activeParams]);
-  const canRedo = useMemo(() => historyIdxRef.current < historyRef.current.length - 1, [activeParams]);
+  // Track undo/redo availability as state (updated by pushHistory/handleUndo/handleRedo)
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const syncUndoRedo = useCallback(() => {
+    setCanUndo(historyIdxRef.current > 0);
+    setCanRedo(historyIdxRef.current < historyRef.current.length - 1);
+  }, []);
 
   useEffect(() => () => {
     if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
@@ -37,7 +46,8 @@ export function CoverHub() {
   const resetHistory = useCallback((initialParams: CoverParams) => {
     historyRef.current = [initialParams];
     historyIdxRef.current = 0;
-  }, []);
+    syncUndoRedo();
+  }, [syncUndoRedo]);
 
   const handleSelectTemplate = useCallback((template: CoverTemplate) => {
     const params = { ...template.defaultParams };
@@ -78,13 +88,16 @@ export function CoverHub() {
   const pushHistory = useCallback((params: CoverParams) => {
     const history = historyRef.current;
     const idx = historyIdxRef.current;
+    // Dedup: skip if identical to current history entry
+    if (idx >= 0 && JSON.stringify(history[idx]) === JSON.stringify(params)) return;
     // Truncate forward history on new change
     const newHistory = history.slice(0, idx + 1);
     newHistory.push(params);
     if (newHistory.length > 30) newHistory.shift();
     historyRef.current = newHistory;
     historyIdxRef.current = newHistory.length - 1;
-  }, []);
+    syncUndoRedo();
+  }, [syncUndoRedo]);
 
   const handleParamChange = useCallback((updates: Partial<CoverParams>) => {
     setActiveParams(prev => {
@@ -99,14 +112,16 @@ export function CoverHub() {
     if (idx <= 0) return;
     historyIdxRef.current = idx - 1;
     setActiveParams(historyRef.current[historyIdxRef.current]);
-  }, []);
+    syncUndoRedo();
+  }, [syncUndoRedo]);
 
   const handleRedo = useCallback(() => {
     const idx = historyIdxRef.current;
     if (idx >= historyRef.current.length - 1) return;
     historyIdxRef.current = idx + 1;
     setActiveParams(historyRef.current[historyIdxRef.current]);
-  }, []);
+    syncUndoRedo();
+  }, [syncUndoRedo]);
 
   // Ctrl+Z / Ctrl+Y keyboard shortcuts for undo/redo (editor only)
   useEffect(() => {

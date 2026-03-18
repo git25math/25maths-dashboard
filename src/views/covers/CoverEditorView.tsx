@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Download, Image, ArrowLeft, Check } from 'lucide-react';
+import { Download, Image, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import type { CoverParams, CoverTemplate } from './types';
 import { CoverSvgRenderer } from './CoverSvgRenderer';
 import { CoverParamEditor } from './CoverParamEditor';
@@ -16,6 +16,7 @@ interface CoverEditorViewProps {
 export function CoverEditorView({ template, params, onChange, onBack, onSave }: CoverEditorViewProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const exportTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (exportTimerRef.current) clearTimeout(exportTimerRef.current); }, []);
@@ -38,15 +39,18 @@ export function CoverEditorView({ template, params, onChange, onBack, onSave }: 
   }, [template.type, showExportFeedback]);
 
   const handleExportPng = useCallback(async (scale: number) => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || exporting) return;
+    setExporting(true);
     try {
       const filename = `cover-${template.type}-${scale}x-${Date.now()}`;
       await exportPng(svgRef.current, filename, scale);
       showExportFeedback(`PNG ${scale}x exported`);
     } catch (err) {
       showExportFeedback(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setExporting(false);
     }
-  }, [template.type, showExportFeedback]);
+  }, [template.type, showExportFeedback, exporting]);
 
   return (
     <div className="space-y-6">
@@ -70,28 +74,32 @@ export function CoverEditorView({ template, params, onChange, onBack, onSave }: 
           <button
             type="button"
             onClick={handleExportSvg}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+            disabled={exporting}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition disabled:opacity-50"
           >
             <Download size={14} /> SVG
           </button>
           <button
             type="button"
             onClick={() => handleExportPng(1)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+            disabled={exporting}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition disabled:opacity-50"
           >
             <Image size={14} /> 1x
           </button>
           <button
             type="button"
             onClick={() => handleExportPng(2)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium"
+            disabled={exporting}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium disabled:opacity-50"
           >
-            <Image size={14} /> 2x
+            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Image size={14} />} 2x
           </button>
           <button
             type="button"
             onClick={() => handleExportPng(3)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+            disabled={exporting}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition disabled:opacity-50"
           >
             <Image size={14} /> 3x
           </button>

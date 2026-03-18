@@ -1,5 +1,5 @@
 import { memo, lazy, Suspense, Dispatch, SetStateAction } from 'react';
-import { Student, TeachingUnit, ClassProfile, TimetableEntry, WorkLog, SOP, Idea, Goal, SchoolEvent, Task, Project, ParentCommunication, ParentCommMethod, StudentWeakness } from '../types';
+import { Student, TeachingUnit, ClassProfile, TimetableEntry, WorkLog, SOP, Idea, Goal, Bookmark, SchoolEvent, Task, Project, ParentCommunication, ParentCommMethod, StudentWeakness } from '../types';
 import { useAppData } from '../hooks/useAppData';
 
 const StudentForm = lazy(() => import('./StudentForm').then(m => ({ default: m.StudentForm })));
@@ -16,6 +16,7 @@ const ProjectForm = lazy(() => import('./ProjectForm').then(m => ({ default: m.P
 const ParentCommForm = lazy(() => import('./ParentCommForm').then(m => ({ default: m.ParentCommForm })));
 const WeaknessForm = lazy(() => import('./WeaknessForm').then(m => ({ default: m.WeaknessForm })));
 const GenericForm = lazy(() => import('./GenericForm').then(m => ({ default: m.GenericForm })));
+const BookmarkForm = lazy(() => import('./BookmarkForm').then(m => ({ default: m.BookmarkForm })));
 
 export interface FormModalsState {
   isStudentFormOpen: boolean;
@@ -36,6 +37,8 @@ export interface FormModalsState {
   editingIdea: Idea | null;
   isGoalFormOpen: boolean;
   editingGoal: Goal | null;
+  isBookmarkFormOpen: boolean;
+  editingBookmark: Bookmark | null;
   isEventFormOpen: boolean;
   editingEvent: SchoolEvent | null;
   isTaskFormOpen: boolean;
@@ -84,6 +87,8 @@ export interface FormModalsSetters {
   setEditingIdea: (v: Idea | null) => void;
   setIsGoalFormOpen: (v: boolean) => void;
   setEditingGoal: (v: Goal | null) => void;
+  setIsBookmarkFormOpen: (v: boolean) => void;
+  setEditingBookmark: (v: Bookmark | null) => void;
   setIsEventFormOpen: (v: boolean) => void;
   setEditingEvent: (v: SchoolEvent | null) => void;
   setIsTaskFormOpen: (v: boolean) => void;
@@ -205,6 +210,22 @@ export const FormModals = memo(function FormModals({ state, setters, data }: For
             setters.setEditingGoal(null);
           }}
           onCancel={() => { setters.setIsGoalFormOpen(false); setters.setEditingGoal(null); }}
+        />
+      )}
+      {state.isBookmarkFormOpen && (
+        <BookmarkForm
+          bookmark={state.editingBookmark}
+          existingCategories={Array.from(new Set((data.bookmarks || []).map((b: any) => b.category).filter(Boolean)))}
+          onSave={(d) => {
+            if (state.editingBookmark) {
+              data.updateBookmark(state.editingBookmark.id, d);
+            } else {
+              data.addBookmark(d);
+            }
+            setters.setIsBookmarkFormOpen(false);
+            setters.setEditingBookmark(null);
+          }}
+          onCancel={() => { setters.setIsBookmarkFormOpen(false); setters.setEditingBookmark(null); }}
         />
       )}
       {state.isEventFormOpen && (

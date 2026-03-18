@@ -110,6 +110,19 @@ export const PdfPageViewer = memo(function PdfPageViewer({
     setPageNum(initialPage);
   }, [src, initialPage]);
 
+  // Track container width for responsive reflow
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const w = entries[0]?.contentRect?.width;
+      if (w && w > 0) setContainerWidth(w);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Render current page
   useEffect(() => {
     if (!pdfDoc || !canvasRef.current || !containerRef.current) return;
@@ -162,7 +175,7 @@ export const PdfPageViewer = memo(function PdfPageViewer({
 
     renderPage();
     return () => { cancelled = true; };
-  }, [pdfDoc, pageNum, zoom, scaleProp]);
+  }, [pdfDoc, pageNum, zoom, scaleProp, containerWidth]);
 
   // Keyboard navigation: left/right arrows for pages, +/- for zoom
   useEffect(() => {

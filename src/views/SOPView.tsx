@@ -42,8 +42,8 @@ export const SOPView = ({ sops, onAddSOP, onDeleteSOP, onEditSOP, onConsolidate 
       const selected = sops.filter(s => selectedIds.has(s.id));
       const result = await geminiService.consolidateSOPs(selected);
       setConsolidatePreview(result);
-    } catch {
-      // silent
+    } catch (err) {
+      console.warn('AI consolidation failed:', err);
     } finally {
       setIsConsolidating(false);
     }

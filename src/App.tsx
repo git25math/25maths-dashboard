@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense, Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
+import { Student, StudentWeakness, ParentCommunication, ParentCommMethod, TeachingUnit, ClassProfile, TimetableEntry, Idea, SOP, WorkLog, MeetingRecord, Goal, Bookmark, SchoolEvent, LessonRecord, Task, EmailDigest, Project } from './types';
 import { useAppData } from './hooks/useAppData';
 import { Sidebar } from './components/Sidebar';
 import { FormModals, FormModalsState, FormModalsSetters } from './components/FormModals';
@@ -20,6 +20,7 @@ const IdeasView = lazy(() => import('./views/IdeasView').then(m => ({ default: m
 const MeetingsView = lazy(() => import('./views/MeetingsView').then(m => ({ default: m.MeetingsView })));
 const LessonRecordsView = lazy(() => import('./views/LessonRecordsView').then(m => ({ default: m.LessonRecordsView })));
 const GoalsView = lazy(() => import('./views/GoalsView').then(m => ({ default: m.GoalsView })));
+const BookmarksView = lazy(() => import('./views/BookmarksView').then(m => ({ default: m.BookmarksView })));
 const SchoolEventsView = lazy(() => import('./views/SchoolEventsView').then(m => ({ default: m.SchoolEventsView })));
 const HousePointHistoryView = lazy(() => import('./views/HousePointHistoryView').then(m => ({ default: m.HousePointHistoryView })));
 const EmailDigestView = lazy(() => import('./views/EmailDigestView').then(m => ({ default: m.EmailDigestView })));
@@ -31,6 +32,7 @@ const PayhipHub = lazy(() => import('./views/payhip/PayhipHub').then(m => ({ def
 const PaperHub = lazy(() => import('./views/papers/PaperHub').then(m => ({ default: m.PaperHub })));
 const CoverHub = lazy(() => import('./views/covers/CoverHub').then(m => ({ default: m.CoverHub })));
 const TikzHub = lazy(() => import('./views/tikz/TikzHub').then(m => ({ default: m.TikzHub })));
+const VideoHub = lazy(() => import('./views/video/VideoHub').then(m => ({ default: m.VideoHub })));
 const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ default: m.DashboardView })));
 const StudentsView = lazy(() => import('./views/StudentsView').then(m => ({ default: m.StudentsView })));
 const TeachingView = lazy(() => import('./views/TeachingView').then(m => ({ default: m.TeachingView })));
@@ -102,6 +104,8 @@ function AppContent() {
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
   const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isBookmarkFormOpen, setIsBookmarkFormOpen] = useState(false);
+  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [isEventFormOpen, setIsEventFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
@@ -137,6 +141,7 @@ function AppContent() {
     isSOPFormOpen, editingSOP,
     isIdeaFormOpen, editingIdea,
     isGoalFormOpen, editingGoal,
+    isBookmarkFormOpen, editingBookmark,
     isEventFormOpen, editingEvent,
     isTaskFormOpen, editingTask, taskFormInitialProjectId,
     isProjectFormOpen, editingProject,
@@ -152,6 +157,7 @@ function AppContent() {
     setIsSOPFormOpen, setEditingSOP,
     setIsIdeaFormOpen, setEditingIdea,
     setIsGoalFormOpen, setEditingGoal,
+    setIsBookmarkFormOpen, setEditingBookmark,
     setIsEventFormOpen, setEditingEvent,
     setIsTaskFormOpen, setEditingTask,
     setTaskFormInitialProjectId,
@@ -195,6 +201,7 @@ function AppContent() {
               MeetingsView={MeetingsView}
               LessonRecordsView={LessonRecordsView}
               GoalsView={GoalsView}
+              BookmarksView={BookmarksView}
               SchoolEventsView={SchoolEventsView}
               HousePointHistoryView={HousePointHistoryView}
               EmailDigestView={EmailDigestView}
@@ -208,6 +215,7 @@ function AppContent() {
               PaperHub={PaperHub}
               CoverHub={CoverHub}
               TikzHub={TikzHub}
+              VideoHub={VideoHub}
             />
           </div>
           </ViewErrorBoundary>

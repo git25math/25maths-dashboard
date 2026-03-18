@@ -16,8 +16,17 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
       if (localStorage.getItem(key) !== serialized) {
         localStorage.setItem(key, serialized);
       }
-    } catch {
-      console.error(`Failed to save ${key} to localStorage`);
+    } catch (err) {
+      console.error(`Failed to save ${key} to localStorage:`, err);
+      // Attempt to free space by removing the key itself if quota exceeded
+      if (err instanceof DOMException && err.name === 'QuotaExceededError') {
+        try {
+          localStorage.removeItem(key);
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+          // Storage is truly full — state is in memory but won't persist
+        }
+      }
     }
   }, [key, value]);
 

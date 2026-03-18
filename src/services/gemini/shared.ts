@@ -9,6 +9,16 @@ export const getClient = () => {
 
 export const stripJsonFences = (raw: string) => raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
 
+/** Safely parse JSON from AI response. Throws descriptive error on failure. */
+export function safeJsonParse<T>(raw: string, label: string): T {
+  const jsonStr = stripJsonFences(raw.trim());
+  try {
+    return JSON.parse(jsonStr) as T;
+  } catch {
+    throw new Error(`AI returned invalid JSON for ${label}. Response starts with: "${jsonStr.slice(0, 100)}..."`);
+  }
+}
+
 export const formatVocabulary = (items?: VocabularyItem[]) => {
   const cleaned = (items || [])
     .filter(item => item.english.trim() || item.chinese.trim())

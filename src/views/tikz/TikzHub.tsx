@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, Image, FileText, Filter, X, Eye, Code, ChevronDown } from 'lucide-react';
 import { tikzService, type TikzCatalogIndex, type TikzQuestion, type TikzYearSummary } from '../../services/tikzService';
 import { localAgentService } from '../../services/localAgentService';
+import { tikzStageService, STAGE_OPTIONS, STAGE_LABELS, type TikzStages } from '../../services/tikzStageService';
 
 const PAGE_SIZE = 40;
 const AGENT_BASE = 'http://127.0.0.1:4318';
@@ -66,17 +67,25 @@ function QuestionDetail({ q, agentOnline }: { q: TikzQuestion; agentOnline: bool
     ? localAgentService.getFileUrl(AGENT_BASE, questionFilePath(q, 'OriginalPDF/OriginalPDF.pdf'))
     : null;
 
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Abort in-flight fetch on unmount
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
+
   const loadTex = useCallback(() => {
     if (texContent !== null || texLoading) return;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setTexLoading(true);
     const url = localAgentService.getFileUrl(AGENT_BASE, questionFilePath(q, 'QuestionStatement.tex'));
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
       })
-      .then(text => { setTexContent(text); setTexLoading(false); })
-      .catch(err => { setTexError(err.message); setTexLoading(false); });
+      .then(text => { if (!controller.signal.aborted) { setTexContent(text); setTexLoading(false); } })
+      .catch(err => { if (!controller.signal.aborted) { setTexError(err instanceof Error ? err.message : 'Failed'); setTexLoading(false); } });
   }, [q, texContent, texLoading]);
 
   const handleShowTex = () => {
@@ -178,8 +187,39 @@ function QuestionDetail({ q, agentOnline }: { q: TikzQuestion; agentOnline: bool
   );
 }
 
-function QuestionCard({ q, expanded, onToggle, agentOnline }: { q: TikzQuestion; expanded: boolean; onToggle: () => void; agentOnline: boolean }) {
+function StagePills({ questionId, stages, onUpdate }: { questionId: string; stages: TikzStages; onUpdate: (s: TikzStages) => void }) {
+  const handleCycle = (field: keyof TikzStages, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = tikzStageService.cycle(questionId, field);
+    onUpdate({ ...stages, [field]: next });
+  };
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-2">
+      {(Object.keys(STAGE_OPTIONS) as (keyof TikzStages)[]).map(field => {
+        const value = stages[field];
+        const opts = STAGE_OPTIONS[field];
+        const opt = opts.find(o => o.value === value) || opts[0];
+        return (
+          <button
+            key={field}
+            type="button"
+            onClick={(e) => handleCycle(field, e)}
+            className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer select-none transition-colors hover:opacity-80 ${opt.color}`}
+            title={`${STAGE_LABELS[field]}: ${opt.label} (click to cycle)`}
+          >
+            <span className="text-[9px] opacity-70">{STAGE_LABELS[field]}</span>
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function QuestionCard({ q, expanded, onToggle, agentOnline, onStageChange }: { q: TikzQuestion; expanded: boolean; onToggle: () => void; agentOnline: boolean; onStageChange?: () => void }) {
   const figCount = q.figures.length;
+  const [stages, setStages] = useState<TikzStages>(() => tikzStageService.get(q.id));
   return (
     <div className={`bg-white rounded-xl border transition-shadow ${expanded ? 'border-indigo-300 shadow-md col-span-full' : 'border-slate-200 hover:shadow-md'}`}>
       <button onClick={onToggle} className="w-full text-left p-4">
@@ -207,6 +247,8 @@ function QuestionCard({ q, expanded, onToggle, agentOnline }: { q: TikzQuestion;
           )}
           {q.has_question_pdf && <span className="flex items-center gap-1"><FileText size={12} /> PDF</span>}
         </div>
+
+        <StagePills questionId={q.id} stages={stages} onUpdate={(s) => { setStages(s); onStageChange?.(); }} />
 
         {q.review_note && (
           <p className="mt-2 text-[11px] text-amber-600 bg-amber-50 rounded px-2 py-1">{q.review_note}</p>
@@ -238,23 +280,28 @@ export function TikzHub() {
   const [topicFilter, setTopicFilter] = useState('');
   const [sessionFilter, setSessionFilter] = useState('');
   const [hasFigures, setHasFigures] = useState(false);
+  const [stageFilter, setStageFilter] = useState('');
   const [page, setPage] = useState(0);
+  const [stageVersion, setStageVersion] = useState(0);
 
   // Check local agent connectivity
   useEffect(() => {
+    let cancelled = false;
     localAgentService.ping(AGENT_BASE)
-      .then(() => setAgentOnline(true))
-      .catch(() => setAgentOnline(false));
+      .then(() => { if (!cancelled) setAgentOnline(true); })
+      .catch(() => { if (!cancelled) setAgentOnline(false); });
+    return () => { cancelled = true; };
   }, []);
 
   // Load index on mount
   useEffect(() => {
+    let cancelled = false;
     tikzService.loadIndex()
       .then(idx => {
-        setIndex(idx);
-        setLoading(false);
+        if (!cancelled) { setIndex(idx); setLoading(false); }
       })
-      .catch(err => { setError(err.message); setLoading(false); });
+      .catch(err => { if (!cancelled) { setError(err.message); setLoading(false); } });
+    return () => { cancelled = true; };
   }, []);
 
   // Auto-select latest year
@@ -268,11 +315,13 @@ export function TikzHub() {
   // Load year data
   useEffect(() => {
     if (!selectedYear) return;
+    let cancelled = false;
     setYearLoading(true);
     setExpandedId(null);
     tikzService.loadYear(selectedYear)
-      .then(qs => { setQuestions(qs); setYearLoading(false); })
-      .catch(err => { setError(err.message); setYearLoading(false); });
+      .then(qs => { if (!cancelled) { setQuestions(qs); setYearLoading(false); } })
+      .catch(err => { if (!cancelled) { setError(err.message); setYearLoading(false); } });
+    return () => { cancelled = true; };
   }, [selectedYear]);
 
   // Debounce search
@@ -282,7 +331,7 @@ export function TikzHub() {
   }, [search]);
 
   // Reset page on filter change
-  useEffect(() => { setPage(0); }, [debouncedSearch, topicFilter, sessionFilter, hasFigures, selectedYear]);
+  useEffect(() => { setPage(0); }, [debouncedSearch, topicFilter, sessionFilter, hasFigures, stageFilter, selectedYear]);
 
   const filtered = useMemo(() => {
     let result = questions;
@@ -297,8 +346,13 @@ export function TikzHub() {
     if (topicFilter) result = result.filter(item => item.topics.includes(topicFilter));
     if (sessionFilter) result = result.filter(item => item.source.session === sessionFilter);
     if (hasFigures) result = result.filter(item => item.figures.length > 0);
+    if (stageFilter) {
+      const [field, value] = stageFilter.split(':') as [keyof TikzStages, string];
+      result = result.filter(item => tikzStageService.get(item.id)[field] === value);
+    }
     return result;
-  }, [questions, debouncedSearch, topicFilter, sessionFilter, hasFigures]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions, debouncedSearch, topicFilter, sessionFilter, hasFigures, stageFilter, stageVersion]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -320,9 +374,10 @@ export function TikzHub() {
     setTopicFilter('');
     setSessionFilter('');
     setHasFigures(false);
+    setStageFilter('');
   }, []);
 
-  const hasFilters = search || topicFilter || sessionFilter || hasFigures;
+  const hasFilters = search || topicFilter || sessionFilter || hasFigures || stageFilter;
 
   if (loading) {
     return (
@@ -373,6 +428,11 @@ export function TikzHub() {
         <span className="text-[11px] font-medium bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full">
           TikZ drafted: {summary.tikz_status['stage2-drafted'] ?? 0}
         </span>
+        {tikzStageService.countTracked() > 0 && (
+          <span className="text-[11px] font-medium bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full">
+            Tracked: {tikzStageService.countTracked()}
+          </span>
+        )}
       </div>
 
       {/* Year selector */}
@@ -411,6 +471,21 @@ export function TikzHub() {
         >
           <option value="">All Sessions</option>
           {allSessions.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+
+        <select
+          value={stageFilter}
+          onChange={e => setStageFilter(e.target.value)}
+          className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white"
+        >
+          <option value="">All Stages</option>
+          {(Object.keys(STAGE_OPTIONS) as (keyof TikzStages)[]).map(field =>
+            STAGE_OPTIONS[field].map(opt => (
+              <option key={`${field}:${opt.value}`} value={`${field}:${opt.value}`}>
+                {STAGE_LABELS[field]}: {opt.label}
+              </option>
+            ))
+          )}
         </select>
 
         <label className="flex items-center gap-1.5 text-sm text-slate-600 cursor-pointer">
@@ -469,6 +544,7 @@ export function TikzHub() {
               expanded={expandedId === q.id}
               onToggle={() => setExpandedId(prev => prev === q.id ? null : q.id)}
               agentOnline={agentOnline}
+              onStageChange={() => setStageVersion(v => v + 1)}
             />
           ))}
         </div>

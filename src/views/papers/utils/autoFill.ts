@@ -96,8 +96,8 @@ export function autoFillQuestions(opts: AutoFillOptions): PaperQuestion[] {
   let totalMarksAccum = 0;
   const perSec: Record<string, number> = {};
 
-  // Budget tolerance: allow up to 2 marks overshoot total
-  const OVERSHOOT_TOLERANCE = 2;
+  // Budget tolerance: 2% of target marks, min 1, max 5
+  const OVERSHOOT_TOLERANCE = Math.max(1, Math.min(5, Math.ceil(targetMarks * 0.02)));
 
   let round = 0;
   while (totalMarksAccum < targetMarks && round < 10) {

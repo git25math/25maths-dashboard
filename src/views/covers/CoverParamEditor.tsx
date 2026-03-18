@@ -1,4 +1,4 @@
-import { useId, useState, useEffect } from 'react';
+import { useId, useState, useEffect, useRef, useCallback } from 'react';
 import type { CoverParams } from './types';
 
 interface CoverParamEditorProps {
@@ -12,6 +12,10 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
   const id = useId();
   const [draft, setDraft] = useState(value);
   const [invalid, setInvalid] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   // Keep draft in sync when value changes externally (e.g., undo/redo)
   useEffect(() => {
@@ -31,6 +35,14 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
     }
   };
 
+  // Debounce color picker changes to avoid flooding history with intermediate states
+  const handlePickerChange = useCallback((hex: string) => {
+    setDraft(hex);
+    setInvalid(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => onChange(hex), 150);
+  }, [onChange]);
+
   return (
     <div className="flex items-center gap-2">
       <label htmlFor={id} className="sr-only">{label} color picker</label>
@@ -38,7 +50,7 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
         id={id}
         type="color"
         value={HEX_RE.test(draft) ? draft : value}
-        onChange={e => { setDraft(e.target.value); onChange(e.target.value); setInvalid(false); }}
+        onChange={e => handlePickerChange(e.target.value)}
         className="w-8 h-8 rounded border border-slate-300 cursor-pointer"
       />
       <div className="flex-1">

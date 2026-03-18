@@ -149,6 +149,7 @@ export function PaperTexPreview({ texSource, onTexChange, paperId, board = 'cie'
         if (cancelRef.current) return;
 
         const status = await localAgentService.getJob(AGENT_BASE_URL, job.id);
+        if (cancelRef.current) return;
         if (status.status === 'completed') {
           if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
           setCompileStatus('done');

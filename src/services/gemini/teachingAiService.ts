@@ -1,7 +1,7 @@
 import { TypicalExample } from '../../types';
 import {
   getClient,
-  stripJsonFences,
+  safeJsonParse,
   formatTypicalExamples,
   buildUnitContextBlock,
   buildObjectiveContextBlock,
@@ -134,9 +134,7 @@ ${buildUnitContextBlock(context)}`;
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as TypicalExample[];
+    return safeJsonParse<TypicalExample[]>(response.text ?? '', 'unit typical examples');
   },
 
   async generateUnitTeachingSummary(context: UnitPlanningContext): Promise<string> {
@@ -221,8 +219,6 @@ ${buildObjectiveContextBlock(context)}`;
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as TypicalExample[];
+    return safeJsonParse<TypicalExample[]>(response.text ?? '', 'objective typical examples');
   },
 };

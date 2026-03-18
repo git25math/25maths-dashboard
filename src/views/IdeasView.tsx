@@ -66,8 +66,8 @@ export const IdeasView = ({ ideas, onAddIdea, onDeleteIdea, onEditIdea, onToggle
       const selected = ideas.filter(i => selectedIds.has(i.id));
       const result = await geminiService.consolidateIdeas(selected);
       setConsolidatePreview(result);
-    } catch {
-      // If AI fails, silently stop loading
+    } catch (err) {
+      console.warn('AI consolidation failed:', err);
     } finally {
       setIsConsolidating(false);
     }

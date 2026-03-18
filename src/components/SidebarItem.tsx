@@ -4,6 +4,7 @@ import { LucideIcon } from 'lucide-react';
 export const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: LucideIcon, label: string, active: boolean, onClick: () => void }) => (
   <button
     onClick={onClick}
+    aria-current={active ? 'page' : undefined}
     className={cn(
       "group relative flex items-center gap-3 w-full px-4 py-2.5 rounded-xl transition-all duration-200",
       active

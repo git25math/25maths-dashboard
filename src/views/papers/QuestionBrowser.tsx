@@ -38,12 +38,16 @@ function renderMath(tex: string): string {
 
   // KaTeX output + DOMPurify defense-in-depth: restrict to KaTeX-safe tags
   const result = DOMPurify.sanitize(rendered, {
-    ADD_TAGS: ['annotation', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'munder', 'mover', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd', 'mtext', 'mspace', 'menclose'],
+    ADD_TAGS: ['mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'munder', 'mover', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd', 'mtext', 'mspace', 'menclose'],
     ADD_ATTR: ['aria-hidden', 'mathvariant', 'encoding'],
+    ALLOW_DATA_ATTR: false,
   });
 
-  // Cap cache size to prevent unbounded growth
-  if (mathCache.size > 500) mathCache.clear();
+  // LRU-style eviction: remove oldest entries when cache is full
+  if (mathCache.size >= 500) {
+    const firstKey = mathCache.keys().next().value;
+    if (firstKey !== undefined) mathCache.delete(firstKey);
+  }
   mathCache.set(tex, result);
 
   return result;

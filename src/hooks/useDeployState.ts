@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_DEPLOY_OPTIONS, DEPLOY_OPTIONS_KEY, KahootDeployOptions, LocalAgentJob, localAgentService } from '../services/localAgentService';
 import { KahootItem } from '../types';
 
@@ -350,21 +350,35 @@ export function useDeployState({
     if (job.type === 'kahoot-upload') setUploadJob(job);
   }, []);
 
-  // Poll running jobs
-  useEffect(() => {
-    const runningJobs = [artifactsJob, spreadsheetJob, uploadJob].filter(j => isRunningJob(j)) as LocalAgentJob[];
-    if (runningJobs.length === 0) return;
+  // Poll running jobs — use refs for callbacks to keep dependency list stable
+  const applyJobResultRef = useRef(applyJobResult);
+  applyJobResultRef.current = applyJobResult;
+  const syncAuditEntryRef = useRef(syncAuditEntry);
+  syncAuditEntryRef.current = syncAuditEntry;
+  const updateJobByTypeRef = useRef(updateJobByType);
+  updateJobByTypeRef.current = updateJobByType;
+  const itemIdRef = useRef(item.id);
+  itemIdRef.current = item.id;
 
+  const hasRunning = [artifactsJob, spreadsheetJob, uploadJob].some(j => isRunningJob(j));
+
+  useEffect(() => {
+    if (!hasRunning) return;
+
+    let cancelled = false;
     const timer = window.setInterval(async () => {
-      for (const job of runningJobs) {
+      const jobs = [artifactsJob, spreadsheetJob, uploadJob].filter(j => isRunningJob(j)) as LocalAgentJob[];
+      for (const job of jobs) {
+        if (cancelled) return;
         try {
           const next = await localAgentService.getJob(agentUrl, job.id);
+          if (cancelled) return;
           const jobItemId = String(next.meta?.item_id || '');
-          if (jobItemId && jobItemId !== item.id) continue;
-          updateJobByType(next);
-          syncAuditEntry(next);
+          if (jobItemId && jobItemId !== itemIdRef.current) continue;
+          updateJobByTypeRef.current(next);
+          syncAuditEntryRef.current(next);
           if (next.status === 'completed') {
-            await applyJobResult(next);
+            await applyJobResultRef.current(next);
           }
         } catch {
           // Keep polling remaining jobs
@@ -372,8 +386,8 @@ export function useDeployState({
       }
     }, 1500);
 
-    return () => clearInterval(timer);
-  }, [agentUrl, applyJobResult, artifactsJob, item.id, spreadsheetJob, syncAuditEntry, updateJobByType, uploadJob]);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [agentUrl, hasRunning, artifactsJob, spreadsheetJob, uploadJob]);
 
   const busy = useMemo(
     () => Boolean(startingAction) || [artifactsJob, spreadsheetJob, uploadJob].some(j => isRunningJob(j)),

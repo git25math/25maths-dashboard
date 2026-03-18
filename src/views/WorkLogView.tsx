@@ -50,8 +50,8 @@ export const WorkLogView = ({ workLogs, onAddLog, onDeleteLog, onEditLog, onCons
       const selected = workLogs.filter(l => selectedIds.has(l.id));
       const result = await geminiService.consolidateWorkLogs(selected);
       setConsolidatePreview(result);
-    } catch {
-      // silent
+    } catch (err) {
+      console.warn('AI consolidation failed:', err);
     } finally {
       setIsConsolidating(false);
     }

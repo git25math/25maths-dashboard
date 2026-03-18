@@ -61,7 +61,7 @@ export const CoverSvgRenderer = memo(function CoverSvgRenderer({ template, param
 
       {/* Decorative circles */}
       {p.showDecoCircles && (
-        <>
+        <g aria-hidden="true">
           <circle
             cx={width * 0.82} cy={height * 0.18}
             r={circleR} fill={p.accentColor} opacity={0.25}
@@ -70,12 +70,13 @@ export const CoverSvgRenderer = memo(function CoverSvgRenderer({ template, param
             cx={width * 0.15} cy={height * 0.78}
             r={circleR * 0.8} fill={p.textColor} opacity={0.1}
           />
-        </>
+        </g>
       )}
 
       {/* Wavy shape */}
       {p.showWavyShape && (
         <path
+          aria-hidden="true"
           d={`M0,${height * 0.6} C${width * 0.3},${height * 0.55} ${width * 0.7},${height * 0.65} ${width},${height * 0.6} L${width},${height} L0,${height} Z`}
           fill={p.textColor}
           opacity={0.04}

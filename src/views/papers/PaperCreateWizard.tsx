@@ -40,21 +40,21 @@ export function PaperCreateWizard({ onBack, onSave, editPaper }: PaperCreateWiza
   const [variantModalQ, setVariantModalQ] = useState<PaperQuestion | null>(null);
   const [saveError, setSaveError] = useState('');
 
-  const paperId = useMemo(() => editPaper?.id || `paper-${Date.now()}`, [editPaper]);
+  const [paperId] = useState(() => editPaper?.id || `paper-${Date.now()}`);
 
-  // Load questions when board changes
+  // Load questions when board changes (with cancellation on unmount / board change)
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setLoadError('');
     paperService.loadQuestions(config.board)
       .then(data => {
-        setAllQuestions(data.questions);
-        setLoading(false);
+        if (!cancelled) { setAllQuestions(data.questions); setLoading(false); }
       })
       .catch(err => {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load questions');
-        setLoading(false);
+        if (!cancelled) { setLoadError(err instanceof Error ? err.message : 'Failed to load questions'); setLoading(false); }
       });
+    return () => { cancelled = true; };
   }, [config.board]);
 
   // Sync selectedIds when question bank changes (remove stale IDs)

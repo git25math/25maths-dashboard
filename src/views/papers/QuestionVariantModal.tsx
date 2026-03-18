@@ -51,7 +51,16 @@ export function QuestionVariantModal({ question, isOpen, onClose, onUseVariant }
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Abort in-flight request on unmount
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
+
   const handleGenerate = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError('');
     setVariants([]);
@@ -65,15 +74,17 @@ export function QuestionVariantModal({ question, isOpen, onClose, onUseVariant }
         difficulty: question.d,
         count,
       });
+      if (controller.signal.aborted) return;
       if (!results.length) {
         setError('No variants returned. Try again or adjust the count.');
       } else {
         setVariants(results);
       }
     } catch (err) {
+      if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : 'Failed to generate variants');
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [question, count]);
 

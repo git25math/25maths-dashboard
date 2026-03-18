@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb, CheckSquare, Inbox, Rocket } from 'lucide-react';
+import { Plus, Clock, Users, Calendar, BookOpen, ExternalLink, AlertCircle, Lightbulb, CheckSquare, Inbox, Rocket, Bookmark as BookmarkIcon, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
-import { TimetableEntry, ClassProfile, TeachingUnit, Goal, SchoolEvent, WorkLog, Idea, Task, EventTimeMode, Project, Student } from '../types';
+import { TimetableEntry, ClassProfile, TeachingUnit, Goal, Bookmark, SchoolEvent, WorkLog, Idea, Task, EventTimeMode, Project, Student } from '../types';
 import { ProjectMilestone, DevLogEntry } from '../types/chronicle';
 import { MarkdownRenderer } from '../components/RichTextEditor';
 import { USER_CONFIG } from '../shared/constants';
@@ -46,6 +46,7 @@ interface DashboardViewProps {
   classes: ClassProfile[];
   teachingUnits: TeachingUnit[];
   goals: Goal[];
+  bookmarks?: Bookmark[];
   schoolEvents: SchoolEvent[];
   workLogs: WorkLog[];
   ideas: Idea[];
@@ -73,6 +74,7 @@ export const DashboardView = ({
   classes,
   teachingUnits,
   goals,
+  bookmarks = [],
   schoolEvents,
   workLogs,
   ideas,
@@ -87,6 +89,10 @@ export const DashboardView = ({
   const pendingComms = useMemo(() => students.reduce((sum, s) => sum + (s.parent_communications?.filter(c => c.status === 'pending').length || 0), 0), [students]);
 
   const activeGoals = useMemo(() => goals.filter(g => g.status === 'in-progress').slice(0, 2), [goals]);
+  const pinnedBookmarks = useMemo(() =>
+    bookmarks.filter(b => b.pinned).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    [bookmarks]
+  );
 
   const activeProjects = useMemo(() => projects.filter(p => p.status === 'active'), [projects]);
 
@@ -462,7 +468,7 @@ export const DashboardView = ({
           </div>
 
           {/* Recent Updates */}
-          <div className="lg:col-span-2 glass-card p-6 space-y-4">
+          <div className={cn("glass-card p-6 space-y-4", pinnedBookmarks.length > 0 ? "lg:col-span-1" : "lg:col-span-2")}>
             <div className="flex justify-between items-center">
               <h4 className="font-bold text-slate-900">Recent Updates</h4>
               <button onClick={() => onNavigate('worklogs')} className="text-indigo-600 text-xs font-bold hover:underline">View History</button>
@@ -498,6 +504,39 @@ export const DashboardView = ({
                 ))}
             </div>
           </div>
+
+          {/* Quick Links (Pinned Bookmarks) */}
+          {pinnedBookmarks.length > 0 && (
+            <div className="lg:col-span-1 glass-card p-6 space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  <BookmarkIcon size={16} className="text-amber-500" />
+                  Quick Links
+                </h4>
+                <button onClick={() => onNavigate('bookmarks')} className="text-indigo-600 text-xs font-bold hover:underline">Manage</button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {pinnedBookmarks.map(bm => (
+                  <button
+                    key={bm.id}
+                    onClick={() => {
+                      if (bm.type === 'external' && bm.url) {
+                        window.open(bm.url, '_blank');
+                      } else if (bm.type === 'internal' && bm.internal_tab) {
+                        onNavigate(bm.internal_tab);
+                      }
+                    }}
+                    className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors text-left flex items-center gap-2 min-w-0"
+                  >
+                    {bm.icon && <span className="text-sm flex-shrink-0">{bm.icon}</span>}
+                    <span className="text-xs font-bold text-slate-700 truncate">{bm.title}</span>
+                    {bm.type === 'external' && <ExternalLink size={10} className="text-slate-400 flex-shrink-0" />}
+                    {bm.type === 'internal' && <ArrowRight size={10} className="text-slate-400 flex-shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

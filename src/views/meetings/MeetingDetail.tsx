@@ -62,12 +62,13 @@ export function MeetingDetail({ meeting, onBack, onUpdate, onAddTask, tasks, onC
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
+      // Always clear existing timer first to prevent duplicates
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
       if (isPaused) {
         mediaRecorderRef.current.resume();
         timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
       } else {
         mediaRecorderRef.current.pause();
-        if (timerRef.current) clearInterval(timerRef.current);
       }
       setIsPaused(!isPaused);
     }

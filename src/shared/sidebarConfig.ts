@@ -20,6 +20,8 @@ import {
   Newspaper,
   Palette,
   Shapes,
+  Bookmark as BookmarkIcon,
+  Video,
 } from 'lucide-react';
 
 export const SIDEBAR_GROUPS = [
@@ -43,6 +45,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'events', icon: CalendarDays, label: 'School Events', group: 'tutor' },
   { key: 'email-digest', icon: Mail, label: 'Email Digest', group: 'tutor' },
   { key: 'projects', icon: Rocket, label: 'Projects', group: 'projects' },
+  { key: 'video-hub', icon: Video, label: 'Video Hub', group: 'projects' },
   { key: 'kahoot-upload', icon: Gamepad2, label: 'Kahoot Hub', group: 'publishing' },
   { key: 'payhip-upload', icon: Store, label: 'Payhip Hub', group: 'publishing' },
   { key: 'paper-gen', icon: Newspaper, label: 'Paper Generator', group: 'publishing' },
@@ -52,6 +55,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'worklogs', icon: Clock, label: 'Work Logs', group: 'productivity' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool', group: 'productivity' },
   { key: 'goals', icon: Target, label: 'Goals', group: 'productivity' },
+  { key: 'bookmarks', icon: BookmarkIcon, label: 'Bookmarks', group: 'productivity' },
   { key: 'sop', icon: BookText, label: 'SOP Library', group: 'reference' },
   { key: 'settings', icon: Settings, label: 'Settings', group: 'reference' },
 ] as const;

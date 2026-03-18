@@ -38,6 +38,13 @@ export const requireSupabase = () => {
 /** Bulk-upsert localStorage data to Supabase (one-time migration). */
 export async function syncToSupabase<T extends { id: string }>(table: string, localData: T[]): Promise<void> {
   if (!supabase || localData.length === 0) return;
-  const { error } = await supabase.from(table).upsert(localData, { onConflict: 'id', ignoreDuplicates: false });
-  if (error) console.warn(`syncToSupabase(${table}):`, error.message);
+  try {
+    const result = await Promise.race([
+      supabase.from(table).upsert(localData, { onConflict: 'id', ignoreDuplicates: false }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10_000)),
+    ]);
+    if (result.error) console.warn(`syncToSupabase(${table}):`, result.error.message);
+  } catch (err) {
+    console.warn(`syncToSupabase(${table}): ${err instanceof Error ? err.message : 'unknown error'}`);
+  }
 }

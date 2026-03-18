@@ -49,6 +49,11 @@ export function TipTapEditor({
   const linkInputRef = useRef<HTMLInputElement>(null);
   const [docText, setDocText] = useState('');
 
+  // Clear debounce timer on unmount to prevent stale updates
+  useEffect(() => () => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
+
   const flush = useCallback(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);

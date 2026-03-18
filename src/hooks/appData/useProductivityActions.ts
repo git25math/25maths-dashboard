@@ -1,10 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Idea, SOP, WorkLog, Goal, SchoolEvent, MeetingRecord, Task, EmailDigest, Project, ToastApi } from '../../types';
+import { Idea, SOP, WorkLog, Goal, Bookmark, SchoolEvent, MeetingRecord, Task, EmailDigest, Project, ToastApi } from '../../types';
 import { ProjectMilestone, DevLogEntry, DevLogThread } from '../../types/chronicle';
 import { useIdeaActions } from './useIdeaActions';
 import { useSOPActions } from './useSOPActions';
 import { useWorkLogActions } from './useWorkLogActions';
 import { useGoalActions } from './useGoalActions';
+import { useBookmarkActions } from './useBookmarkActions';
 import { useSchoolEventActions } from './useSchoolEventActions';
 import { useMeetingActions } from './useMeetingActions';
 import { useEmailDigestActions } from './useEmailDigestActions';
@@ -23,6 +24,8 @@ interface UseProductivityActionsParams {
   setWorkLogs: Dispatch<SetStateAction<WorkLog[]>>;
   goals: Goal[];
   setGoals: Dispatch<SetStateAction<Goal[]>>;
+  bookmarks: Bookmark[];
+  setBookmarks: Dispatch<SetStateAction<Bookmark[]>>;
   schoolEvents: SchoolEvent[];
   setSchoolEvents: Dispatch<SetStateAction<SchoolEvent[]>>;
   meetings: MeetingRecord[];
@@ -51,6 +54,8 @@ export function useProductivityActions({
   setWorkLogs,
   goals,
   setGoals,
+  bookmarks,
+  setBookmarks,
   schoolEvents,
   setSchoolEvents,
   meetings,
@@ -73,6 +78,7 @@ export function useProductivityActions({
   const sopActions = useSOPActions({ sops, setSops, toast });
   const workLogActions = useWorkLogActions({ workLogs, setWorkLogs, toast });
   const goalActions = useGoalActions({ goals, setGoals, toast });
+  const bookmarkActions = useBookmarkActions({ bookmarks, setBookmarks, toast });
   const schoolEventActions = useSchoolEventActions({ schoolEvents, setSchoolEvents, setTasks, toast });
   const meetingActions = useMeetingActions({ setMeetings, toast });
   const emailDigestActions = useEmailDigestActions({ emailDigests, setEmailDigests, toast });
@@ -87,6 +93,7 @@ export function useProductivityActions({
     ...sopActions,
     ...workLogActions,
     ...goalActions,
+    ...bookmarkActions,
     ...schoolEventActions,
     ...meetingActions,
     ...emailDigestActions,

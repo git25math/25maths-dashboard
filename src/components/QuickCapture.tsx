@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useRef, useEffect } from 'react';
 import { Plus, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -15,6 +15,8 @@ export const QuickCapture = memo(function QuickCapture({ onSave }: QuickCaptureP
   const [category, setCategory] = useState<'work' | 'student' | 'startup' | 'task'>('work');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +32,13 @@ export const QuickCapture = memo(function QuickCapture({ onSave }: QuickCaptureP
     setAiLoading(true);
     try {
       const result = await geminiService.suggestCategorization(text);
+      if (!mountedRef.current) return;
       setCategory(result.ideaCategory);
       setAiSuggestion(result.ideaCategory);
     } catch {
       // Silent fail
     } finally {
-      setAiLoading(false);
+      if (mountedRef.current) setAiLoading(false);
     }
   };
 

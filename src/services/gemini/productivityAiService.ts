@@ -1,5 +1,5 @@
 import { Idea, WorkLog, SOP } from '../../types';
-import { getClient, stripJsonFences, CategorizationResult, ConsolidatedIdea, ConsolidatedWorkLog, ConsolidatedSOP } from './shared';
+import { getClient, safeJsonParse, CategorizationResult, ConsolidatedIdea, ConsolidatedWorkLog, ConsolidatedSOP } from './shared';
 
 export const productivityAiService = {
   async suggestCategorization(text: string): Promise<CategorizationResult> {
@@ -31,9 +31,7 @@ ${text}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as CategorizationResult;
+    return safeJsonParse<CategorizationResult>(response.text ?? '', 'categorization');
   },
 
   async consolidateIdeas(ideas: Pick<Idea, 'title' | 'content' | 'category' | 'priority'>[]): Promise<ConsolidatedIdea> {
@@ -71,9 +69,7 @@ ${ideasText}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as ConsolidatedIdea;
+    return safeJsonParse<ConsolidatedIdea>(response.text ?? '', 'consolidated ideas');
   },
 
   async consolidateWorkLogs(logs: Pick<WorkLog, 'content' | 'category' | 'tags' | 'timestamp'>[]): Promise<ConsolidatedWorkLog> {
@@ -110,9 +106,7 @@ ${logsText}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as ConsolidatedWorkLog;
+    return safeJsonParse<ConsolidatedWorkLog>(response.text ?? '', 'consolidated work logs');
   },
 
   async consolidateSOPs(sops: Pick<SOP, 'title' | 'content' | 'category'>[]): Promise<ConsolidatedSOP> {
@@ -149,8 +143,6 @@ ${sopsText}`,
       }],
     });
 
-    const raw = (response.text ?? '').trim();
-    const jsonStr = stripJsonFences(raw);
-    return JSON.parse(jsonStr) as ConsolidatedSOP;
+    return safeJsonParse<ConsolidatedSOP>(response.text ?? '', 'consolidated SOPs');
   },
 };

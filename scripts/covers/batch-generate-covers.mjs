@@ -106,21 +106,29 @@ async function main() {
   mkdirSync(outDir, { recursive: true });
 
   const files = [];
+  const errors = [];
   for (const topic of topics) {
-    const coverParams = { ...params, subtitle: topic };
-    const svg = buildSvg(size.w, size.h, coverParams);
-    const filename = `cover-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.svg`;
-    const filePath = resolve(outDir, filename);
-    writeFileSync(filePath, svg);
-    files.push(filePath);
-    console.log(`Generated: ${filename}`);
+    try {
+      const coverParams = { ...params, subtitle: topic };
+      const svg = buildSvg(size.w, size.h, coverParams);
+      const filename = `cover-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.svg`;
+      const filePath = resolve(outDir, filename);
+      writeFileSync(filePath, svg);
+      files.push(filePath);
+      console.log(`Generated: ${filename}`);
+    } catch (err) {
+      const msg = `Failed to generate cover for "${topic}": ${err.message}`;
+      errors.push(msg);
+      console.error(msg);
+    }
   }
 
   const result = {
-    success: true,
+    success: errors.length === 0,
     output_dir: outDir,
     files,
     count: files.length,
+    errors: errors.length > 0 ? errors : undefined,
   };
 
   writeFileSync(resultPath, JSON.stringify(result, null, 2));

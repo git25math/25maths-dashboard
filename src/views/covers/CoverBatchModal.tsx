@@ -41,23 +41,27 @@ export function CoverBatchModal({ isOpen, onClose, baseParams, template }: Cover
   }, [topicList, baseParams, template]);
 
   const handleDownloadAll = useCallback(() => {
+    if (!confirm(`Download ${results.length} SVG file(s)?`)) return;
+    const urlsToRevoke: string[] = [];
     let downloaded = 0;
     for (const { topic, svg } of results) {
       try {
         const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(blob);
+        urlsToRevoke.push(url);
         const a = document.createElement('a');
         a.href = url;
         a.download = `cover-${topic.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.svg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
         downloaded++;
       } catch {
         // Skip failed items, continue downloading others
       }
     }
+    // Delay revocation to let browser start all downloads
+    setTimeout(() => urlsToRevoke.forEach(u => URL.revokeObjectURL(u)), 3000);
     if (downloaded < results.length) {
       alert(`Downloaded ${downloaded}/${results.length} covers. Some failed.`);
     }
@@ -88,10 +92,11 @@ export function CoverBatchModal({ isOpen, onClose, baseParams, template }: Cover
               value={topics}
               onChange={e => setTopics(e.target.value)}
               rows={6}
+              aria-describedby="batch-topics-help"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
             />
           </div>
-          <p className="text-xs text-slate-500">
+          <p id="batch-topics-help" className="text-xs text-slate-500">
             Uses template: {template.label} ({template.width}x{template.height}).
             Each topic replaces the main title.
           </p>
