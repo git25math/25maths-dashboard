@@ -70,6 +70,7 @@ const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..');
 const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
 const FIGURES_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-figures');
+const PDF_SINGLEQUESTIONS_RAW_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-pdf-singlequestions-raw');
 const FIGURES_TRASH_ROOT = resolve(FIGURES_ROOT, '_trash');
 const WRITE_ENABLED = String(process.env.LOCAL_AGENT_WRITE_ENABLED || '').trim() === '1';
 
@@ -92,6 +93,15 @@ function ensureWriteAllowed(req, res) {
   const origin = req.headers.origin;
   if (!isAllowedWriteOrigin(origin)) {
     res.status(403).json({ error: 'Origin not allowed for write actions' });
+    return false;
+  }
+  return true;
+}
+
+function ensureTrustedOrigin(req, res) {
+  const origin = req.headers.origin;
+  if (!isAllowedWriteOrigin(origin)) {
+    res.status(403).json({ error: 'Origin not allowed' });
     return false;
   }
   return true;
@@ -120,6 +130,17 @@ function isAllowedFilePath(targetPath) {
   } catch {
     return false; // Can't resolve = can't serve
   }
+}
+
+function isAllowedRevealPath(targetPath) {
+  // Keep reveal scoped to known data roots to avoid opening arbitrary paths.
+  const allowedRoots = [FIGURES_ROOT, PDF_SINGLEQUESTIONS_RAW_ROOT];
+  return allowedRoots.some(root => isWithinRoot(targetPath, root));
+}
+
+function isAllowedRevealRealPath(realPath) {
+  const allowedRoots = [FIGURES_ROOT, PDF_SINGLEQUESTIONS_RAW_ROOT];
+  return allowedRoots.some(root => isWithinRoot(realPath, root));
 }
 
 function appendLog(job, message, stream = 'stdout') {
@@ -627,6 +648,65 @@ app.post('/figures/crop', async (req, res) => {
   }
 
   res.json({ ok: true, path: realTarget, backup: backupPath, width, height });
+});
+
+app.post('/figures/reveal', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
+
+  const rawPath = String(req.body?.path || '').trim();
+  if (!rawPath) {
+    res.status(400).json({ error: 'Missing path' });
+    return;
+  }
+
+  const targetPath = resolve(rawPath);
+  if (!isAllowedRevealPath(targetPath)) {
+    res.status(403).json({ error: 'Path is outside allowed reveal roots' });
+    return;
+  }
+
+  let realTarget;
+  try {
+    realTarget = realpathSync(targetPath);
+  } catch {
+    res.status(404).json({ error: 'Path not found' });
+    return;
+  }
+  if (!isAllowedRevealRealPath(realTarget)) {
+    res.status(403).json({ error: 'Resolved path is outside allowed reveal roots' });
+    return;
+  }
+
+  let stats;
+  try {
+    stats = statSync(realTarget);
+  } catch {
+    res.status(404).json({ error: 'Path not found' });
+    return;
+  }
+
+  let command = '';
+  let args = [];
+  if (process.platform === 'darwin') {
+    command = 'open';
+    args = stats.isFile() ? ['-R', realTarget] : [realTarget];
+  } else if (process.platform === 'win32') {
+    command = 'explorer.exe';
+    args = stats.isFile() ? [`/select,${realTarget}`] : [realTarget];
+  } else {
+    command = 'xdg-open';
+    args = [stats.isFile() ? dirname(realTarget) : realTarget];
+  }
+
+  try {
+    const child = spawn(command, args, { detached: true, stdio: 'ignore' });
+    child.unref();
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to open path' });
+    return;
+  }
+
+  res.json({ ok: true, path: realTarget });
 });
 
 app.get('/files', (req, res) => {

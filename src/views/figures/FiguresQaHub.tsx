@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Crop, Eye, RefreshCw, RotateCcw, Search, Server, ServerOff, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Crop, FileText, FolderOpen, RefreshCw, RotateCcw, Search, Server, ServerOff, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { FilterChip } from '../../components/FilterChip';
 import { localAgentService } from '../../services/localAgentService';
 import { figureReviewService, type FigureReviewStatus } from '../../services/figureReviewService';
+import { buildPdfSingleQuestionsRawDir, DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT } from '../../services/pdfSingleQuestionsService';
 import {
   DEFAULT_AGENT_BASE_URL,
   DEFAULT_FIGURES_ROOT,
@@ -116,6 +117,7 @@ function FigureDetailModal({
   figure,
   imageSrc,
   localPath,
+  canReveal,
   canWrite,
   cropBusy,
   reviewStatus,
@@ -124,6 +126,8 @@ function FigureDetailModal({
   onSetStatus,
   onSetNote,
   onClear,
+  onRevealLocal,
+  onRevealPdfRaw,
   onTrash,
   onCrop,
   onCopy,
@@ -132,6 +136,7 @@ function FigureDetailModal({
   figure: FigureAsset | null;
   imageSrc: string;
   localPath: string;
+  canReveal: boolean;
   canWrite: boolean;
   cropBusy: boolean;
   reviewStatus: ReviewFilter;
@@ -140,6 +145,8 @@ function FigureDetailModal({
   onSetStatus: (status: FigureReviewStatus) => void;
   onSetNote: (note: string) => void;
   onClear: () => void;
+  onRevealLocal: () => void;
+  onRevealPdfRaw: () => void;
   onTrash: () => void;
   onCrop: (crop: { x: number; y: number; width: number; height: number }) => Promise<void>;
   onCopy: (value: string, label: string) => void;
@@ -441,10 +448,31 @@ function FigureDetailModal({
                   <div className="space-y-2">
                     <button
                       type="button"
-                      onClick={() => window.open(imageSrc, '_blank', 'noopener,noreferrer')}
-                      className="w-full px-4 py-2 rounded-2xl bg-slate-900 text-white text-sm font-black hover:bg-slate-800"
+                      onClick={onRevealLocal}
+                      disabled={!canReveal}
+                      className={cn(
+                        "w-full px-4 py-2 rounded-2xl text-sm font-black border transition disabled:opacity-40",
+                        canReveal
+                          ? "bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
+                          : "bg-white text-slate-400 border-slate-200"
+                      )}
+                      title={canReveal ? 'Reveal the local PNG in Finder' : 'Requires local agent online'}
                     >
-                      <Eye size={16} className="inline mr-2" /> Open Image
+                      <FolderOpen size={16} className="inline mr-2" /> Open Figure Folder
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onRevealPdfRaw}
+                      disabled={!canReveal}
+                      className={cn(
+                        "w-full px-4 py-2 rounded-2xl text-sm font-black border transition disabled:opacity-40",
+                        canReveal
+                          ? "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                          : "bg-white text-slate-400 border-slate-200"
+                      )}
+                      title={canReveal ? 'Open the PDF single-question raw folder for this paper' : 'Requires local agent online'}
+                    >
+                      <FileText size={16} className="inline mr-2" /> Open PDF Raw Folder
                     </button>
                     <button
                       type="button"
@@ -800,6 +828,35 @@ export function FiguresQaHub() {
     }
   }, [agentBaseUrl, canWrite, selectedFigure]);
 
+  const revealLocalSelected = useCallback(async () => {
+    if (!selectedFigure) return;
+    if (!agentOnline) {
+      setError('Local agent offline. Start it with `npm run agent:local` (recommend using `npm run dev` locally).');
+      return;
+    }
+    try {
+      await localAgentService.revealFigure(agentBaseUrl, { path: selectedFigure.localPath });
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open figure in Finder');
+    }
+  }, [agentBaseUrl, agentOnline, selectedFigure]);
+
+  const revealPdfRawSelected = useCallback(async () => {
+    if (!selectedFigure) return;
+    if (!agentOnline) {
+      setError('Local agent offline. Start it with `npm run agent:local` (recommend using `npm run dev` locally).');
+      return;
+    }
+    const rawDir = buildPdfSingleQuestionsRawDir(DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT, selectedFigure.paperKey);
+    try {
+      await localAgentService.revealFigure(agentBaseUrl, { path: rawDir });
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open PDF raw folder');
+    }
+  }, [agentBaseUrl, agentOnline, selectedFigure]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
@@ -847,6 +904,7 @@ export function FiguresQaHub() {
               <ol className="list-decimal ml-4 space-y-1">
                 <li>本地质检推荐用 <span className="font-mono">Source=local/auto</span> + <span className="font-mono">Index=scan</span>。</li>
                 <li>点击缩略图打开大图，标记 <span className="font-mono">OK/Issue/Reshoot</span>，备注会自动保存（localStorage）。</li>
+                <li>大图右侧可直接打开本地截图文件夹，以及对应试卷的 <span className="font-mono">PDF raw</span> 单题文件夹（用于重截）。</li>
                 <li>需要重截清单：点 <span className="font-mono">Copy Reshoot List</span> 复制。</li>
               </ol>
             </div>
@@ -1217,6 +1275,7 @@ export function FiguresQaHub() {
         figure={selectedFigure}
         imageSrc={selectedFigure ? imgUrlFor(selectedFigure) : ''}
         localPath={selectedFigure?.localPath || ''}
+        canReveal={agentOnline}
         canWrite={canWrite}
         cropBusy={cropBusy}
         reviewStatus={selectedReviewStatus}
@@ -1225,6 +1284,8 @@ export function FiguresQaHub() {
         onSetStatus={(status) => selectedFigure && setStatus(selectedFigure.id, status)}
         onSetNote={(note) => selectedFigure && setNote(selectedFigure.id, note)}
         onClear={() => selectedFigure && clearReview(selectedFigure.id)}
+        onRevealLocal={() => void revealLocalSelected()}
+        onRevealPdfRaw={() => void revealPdfRawSelected()}
         onTrash={trashSelected}
         onCrop={cropSelected}
         onCopy={handleCopy}

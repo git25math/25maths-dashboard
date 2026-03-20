@@ -161,6 +161,19 @@ export const localAgentService = {
     return parseJson(response);
   },
 
+  async revealFigure(baseUrl: string, payload: { path: string }): Promise<{ ok: boolean; path: string }> {
+    if (!payload.path) {
+      throw new Error('revealFigure requires path');
+    }
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/reveal`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      timeout: 10_000,
+    });
+    return parseJson(response);
+  },
+
   async startKahootUpload(baseUrl: string, item: KahootItem, dryRun = false, options?: KahootDeployOptions): Promise<LocalAgentJob> {
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-upload`, {
       method: 'POST',
