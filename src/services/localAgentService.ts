@@ -46,6 +46,24 @@ export interface LocalAgentJob {
   pid?: number | null;
 }
 
+export interface LocalAgentFigureScanItem {
+  paperKey: string;      // e.g. `2018March/Paper12`
+  questionKey: string;   // e.g. `Q07`
+  filename: string;
+  width?: number;
+  height?: number;
+  size_bytes?: number;
+  mtime_ms?: number;
+}
+
+export interface LocalAgentFigureScanResponse {
+  ok: boolean;
+  root: string;
+  count: number;
+  truncated?: boolean;
+  items: LocalAgentFigureScanItem[];
+}
+
 const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, '');
 
 const DEFAULT_TIMEOUT = 30_000;
@@ -91,8 +109,32 @@ export const localAgentService = {
     return url.toString();
   },
 
-  async ping(baseUrl: string): Promise<{ ok: boolean; service: string; time: string; website_root?: string }> {
+  async ping(baseUrl: string): Promise<{ ok: boolean; service: string; time: string; website_root?: string; figures_root?: string; write_enabled?: boolean }> {
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/health`, { timeout: 5_000 });
+    return parseJson(response);
+  },
+
+  async scanFigures(baseUrl: string, payload: { root: string; limit?: number }): Promise<LocalAgentFigureScanResponse> {
+    if (!payload.root) {
+      throw new Error('scanFigures requires root');
+    }
+    const url = new URL(`${normalizeBaseUrl(baseUrl)}/figures/scan`);
+    url.searchParams.set('root', payload.root);
+    if (payload.limit) url.searchParams.set('limit', String(payload.limit));
+    const response = await fetchWithTimeout(url.toString(), { timeout: 60_000 });
+    return parseJson(response);
+  },
+
+  async trashFigure(baseUrl: string, payload: { path: string }): Promise<{ ok: boolean; from: string; to: string }> {
+    if (!payload.path) {
+      throw new Error('trashFigure requires path');
+    }
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/trash`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      timeout: 30_000,
+    });
     return parseJson(response);
   },
 

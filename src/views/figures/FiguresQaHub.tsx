@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Eye, RefreshCw, RotateCcw, Search, Server, ServerOff, X } from 'lucide-react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Eye, RefreshCw, RotateCcw, Search, Server, ServerOff, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { FilterChip } from '../../components/FilterChip';
@@ -10,12 +10,14 @@ import {
   DEFAULT_FIGURES_ROOT,
   DEFAULT_REMOTE_BASE_URL,
   FigureAsset,
+  scanFigureAssetsLocal,
   flattenFigureMap,
   loadFigureMapLocal,
   loadFigureMapRemote,
 } from '../../services/figuresService';
 
 type SourceMode = 'auto' | 'local' | 'remote';
+type IndexMode = 'scan' | 'map';
 type ReviewFilter = 'all' | 'unreviewed' | FigureReviewStatus;
 
 const PAGE_SIZE_OPTIONS = [50, 100] as const;
@@ -56,8 +58,7 @@ function sortQuestionKey(a: string, b: string): number {
 function getQualityFlags(fig: FigureAsset) {
   const w = fig.meta.width;
   const h = fig.meta.height;
-  const page = fig.meta.page;
-  const missingMeta = !(typeof w === 'number' && typeof h === 'number' && typeof page === 'number');
+  const missingMeta = !(typeof w === 'number' && typeof h === 'number');
   const tooSmall = typeof w === 'number' && typeof h === 'number' && (w < 220 || h < 120);
   const weirdAspect = typeof w === 'number' && typeof h === 'number' && (w / h > 10 || h / w > 10);
   return { missingMeta, tooSmall, weirdAspect, suspicious: missingMeta || tooSmall || weirdAspect };
@@ -115,24 +116,28 @@ function FigureDetailModal({
   figure,
   imageSrc,
   localPath,
+  canWrite,
   reviewStatus,
   reviewNote,
   onClose,
   onSetStatus,
   onSetNote,
   onClear,
+  onTrash,
   onCopy,
 }: {
   open: boolean;
   figure: FigureAsset | null;
   imageSrc: string;
   localPath: string;
+  canWrite: boolean;
   reviewStatus: ReviewFilter;
   reviewNote: string;
   onClose: () => void;
   onSetStatus: (status: FigureReviewStatus) => void;
   onSetNote: (note: string) => void;
   onClear: () => void;
+  onTrash: () => void;
   onCopy: (value: string, label: string) => void;
 }) {
   const noteRef = useRef<HTMLTextAreaElement | null>(null);
@@ -252,6 +257,20 @@ function FigureDetailModal({
                     >
                       <Clipboard size={16} className="inline mr-2" /> Copy Local Path
                     </button>
+                    <button
+                      type="button"
+                      onClick={onTrash}
+                      disabled={!canWrite}
+                      className={cn(
+                        "w-full px-4 py-2 rounded-2xl text-sm font-black border transition disabled:opacity-40",
+                        canWrite
+                          ? "bg-rose-600 text-white border-rose-600 hover:bg-rose-700"
+                          : "bg-white text-slate-400 border-slate-200"
+                      )}
+                      title={canWrite ? 'Move the local file to _trash' : 'Requires local source + agent write enabled'}
+                    >
+                      <Trash2 size={16} className="inline mr-2" /> Move to Trash
+                    </button>
                   </div>
                 </div>
               </div>
@@ -265,7 +284,10 @@ function FigureDetailModal({
 
 export function FiguresQaHub() {
   const [agentOnline, setAgentOnline] = useState(false);
+  const [agentWriteEnabled, setAgentWriteEnabled] = useState(false);
   const [sourceMode, setSourceMode] = useState<SourceMode>('auto');
+  const [indexMode, setIndexMode] = useState<IndexMode>('scan');
+  const [autoScan, setAutoScan] = useState(false);
   const [agentBaseUrl, setAgentBaseUrl] = useState(DEFAULT_AGENT_BASE_URL);
   const [figuresRoot, setFiguresRoot] = useState(DEFAULT_FIGURES_ROOT);
   const [remoteBaseUrl, setRemoteBaseUrl] = useState(DEFAULT_REMOTE_BASE_URL);
@@ -275,12 +297,22 @@ export function FiguresQaHub() {
     return sourceMode;
   }, [agentOnline, sourceMode]);
 
+  // Scan index only makes sense for local filesystem.
+  useEffect(() => {
+    if (effectiveSource !== 'local' && indexMode === 'scan') {
+      setIndexMode('map');
+      setAutoScan(false);
+    }
+  }, [effectiveSource, indexMode]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [assets, setAssets] = useState<FigureAsset[]>([]);
+  const [scanRefreshKey, setScanRefreshKey] = useState(0);
 
   // UI filters
-  const [sessionFilter, setSessionFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+  const [seasonFilter, setSeasonFilter] = useState('');
   const [paperFilter, setPaperFilter] = useState('');
   const [questionFilter, setQuestionFilter] = useState('');
   const [showSuspiciousOnly, setShowSuspiciousOnly] = useState(false);
@@ -307,8 +339,16 @@ export function FiguresQaHub() {
   useEffect(() => {
     let cancelled = false;
     localAgentService.ping(agentBaseUrl)
-      .then(() => { if (!cancelled) setAgentOnline(true); })
-      .catch(() => { if (!cancelled) setAgentOnline(false); });
+      .then((info) => {
+        if (cancelled) return;
+        setAgentOnline(true);
+        setAgentWriteEnabled(Boolean(info.write_enabled));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAgentOnline(false);
+        setAgentWriteEnabled(false);
+      });
     return () => { cancelled = true; };
   }, [agentBaseUrl]);
 
@@ -321,7 +361,17 @@ export function FiguresQaHub() {
   // Reset paging when filters change
   useEffect(() => {
     setPage(0);
-  }, [sessionFilter, paperFilter, questionFilter, showSuspiciousOnly, reviewFilter, debouncedSearch, pageSize, effectiveSource]);
+  }, [yearFilter, seasonFilter, paperFilter, questionFilter, showSuspiciousOnly, reviewFilter, debouncedSearch, pageSize, effectiveSource, indexMode]);
+
+  // Auto-rescan local folder (scan mode only)
+  useEffect(() => {
+    if (!autoScan) return;
+    if (effectiveSource !== 'local') return;
+    if (!agentOnline) return;
+    if (indexMode !== 'scan') return;
+    const timer = setInterval(() => setScanRefreshKey(v => v + 1), 10_000);
+    return () => clearInterval(timer);
+  }, [agentOnline, autoScan, effectiveSource, indexMode]);
 
   // Load figure map
   useEffect(() => {
@@ -332,10 +382,17 @@ export function FiguresQaHub() {
 
     const load = async () => {
       try {
-        const map = effectiveSource === 'local'
-          ? await loadFigureMapLocal(agentBaseUrl, figuresRoot)
-          : await loadFigureMapRemote(remoteBaseUrl);
-        const flat = flattenFigureMap(map, figuresRoot, remoteBaseUrl);
+        const flat = await (async () => {
+          if (effectiveSource === 'local') {
+            if (indexMode === 'scan') {
+              return scanFigureAssetsLocal(agentBaseUrl, figuresRoot, remoteBaseUrl);
+            }
+            const map = await loadFigureMapLocal(agentBaseUrl, figuresRoot);
+            return flattenFigureMap(map, figuresRoot, remoteBaseUrl);
+          }
+          const map = await loadFigureMapRemote(remoteBaseUrl);
+          return flattenFigureMap(map, figuresRoot, remoteBaseUrl);
+        })();
         if (!cancelled) {
           setAssets(flat);
           setLoading(false);
@@ -349,7 +406,7 @@ export function FiguresQaHub() {
             if (!cancelled) {
               setAssets(flat);
               setLoading(false);
-              setError('Local map load failed; showing remote figure-map.json. Start local agent to review local files.');
+              setError('Local load failed; showing remote figure-map.json. Start local agent to review local files.');
             }
             return;
           } catch {
@@ -365,36 +422,69 @@ export function FiguresQaHub() {
 
     void load();
     return () => { cancelled = true; };
-  }, [agentBaseUrl, effectiveSource, figuresRoot, remoteBaseUrl]);
+  }, [agentBaseUrl, effectiveSource, figuresRoot, indexMode, remoteBaseUrl, scanRefreshKey]);
 
-  const sessions = useMemo(() => {
-    const s = new Set<string>();
-    for (const a of assets) s.add(a.session);
-    return Array.from(s).sort(sortSessions);
+  const years = useMemo(() => {
+    const set = new Set<number>();
+    for (const a of assets) {
+      const parsed = parseSession(a.session);
+      if (!parsed) continue;
+      set.add(parsed.year);
+    }
+    return Array.from(set).sort((a, b) => a - b);
   }, [assets]);
+
+  const seasons = useMemo(() => {
+    const set = new Set<string>();
+    for (const a of assets) {
+      const parsed = parseSession(a.session);
+      if (!parsed) continue;
+      if (yearFilter && parsed.year !== Number(yearFilter)) continue;
+      set.add(parsed.season);
+    }
+    return Array.from(set).sort((a, b) => (SESSION_SEASON_ORDER[a] ?? 99) - (SESSION_SEASON_ORDER[b] ?? 99) || a.localeCompare(b));
+  }, [assets, yearFilter]);
+
+  // If the year changes and the current season doesn't exist, clear it.
+  useEffect(() => {
+    if (!seasonFilter) return;
+    if (seasons.includes(seasonFilter)) return;
+    setSeasonFilter('');
+  }, [seasonFilter, seasons]);
 
   const papers = useMemo(() => {
     const s = new Set<string>();
     for (const a of assets) {
-      if (sessionFilter && a.session !== sessionFilter) continue;
+      const parsed = parseSession(a.session);
+      if (yearFilter && parsed?.year !== Number(yearFilter)) continue;
+      if (seasonFilter && parsed?.season !== seasonFilter) continue;
       s.add(a.paper);
     }
     return Array.from(s).sort(sortPaper);
-  }, [assets, sessionFilter]);
+  }, [assets, yearFilter, seasonFilter]);
 
   const questions = useMemo(() => {
     const s = new Set<string>();
     for (const a of assets) {
-      if (sessionFilter && a.session !== sessionFilter) continue;
+      const parsed = parseSession(a.session);
+      if (yearFilter && parsed?.year !== Number(yearFilter)) continue;
+      if (seasonFilter && parsed?.season !== seasonFilter) continue;
       if (paperFilter && a.paper !== paperFilter) continue;
       s.add(a.questionKey);
     }
     return Array.from(s).sort(sortQuestionKey);
-  }, [assets, paperFilter, sessionFilter]);
+  }, [assets, paperFilter, yearFilter, seasonFilter]);
 
   const filtered = useMemo(() => {
     let list = assets;
-    if (sessionFilter) list = list.filter(a => a.session === sessionFilter);
+    if (yearFilter || seasonFilter) {
+      list = list.filter(a => {
+        const parsed = parseSession(a.session);
+        if (yearFilter && parsed?.year !== Number(yearFilter)) return false;
+        if (seasonFilter && parsed?.season !== seasonFilter) return false;
+        return true;
+      });
+    }
     if (paperFilter) list = list.filter(a => a.paper === paperFilter);
     if (questionFilter) list = list.filter(a => a.questionKey === questionFilter);
     if (debouncedSearch) {
@@ -416,7 +506,7 @@ export function FiguresQaHub() {
       }
     }
     return list;
-  }, [assets, debouncedSearch, paperFilter, questionFilter, reviewFilter, reviews, sessionFilter, showSuspiciousOnly]);
+  }, [assets, debouncedSearch, paperFilter, questionFilter, reviewFilter, reviews, yearFilter, seasonFilter, showSuspiciousOnly]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / pageSize)), [filtered.length, pageSize]);
   const currentPage = Math.min(page, totalPages - 1);
@@ -475,6 +565,26 @@ export function FiguresQaHub() {
     void handleCopy(text, 'Reshoot list');
   }, [handleCopy, reviews]);
 
+  const canWrite = effectiveSource === 'local' && agentOnline && agentWriteEnabled;
+
+  const trashSelected = useCallback(async () => {
+    if (!selectedFigure) return;
+    if (!canWrite) {
+      setError('Write actions disabled. Start local agent with LOCAL_AGENT_WRITE_ENABLED=1');
+      return;
+    }
+    const ok = window.confirm(`Move local file to _trash?\n\n${selectedFigure.localPath}`);
+    if (!ok) return;
+    try {
+      await localAgentService.trashFigure(agentBaseUrl, { path: selectedFigure.localPath });
+      setStatus(selectedFigure.id, 'reshoot');
+      setSelectedId(null);
+      setScanRefreshKey(v => v + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to trash file');
+    }
+  }, [agentBaseUrl, canWrite, selectedFigure, setStatus]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -494,7 +604,11 @@ export function FiguresQaHub() {
           </span>
           <button
             type="button"
-            onClick={() => { localAgentService.ping(agentBaseUrl).then(() => setAgentOnline(true)).catch(() => setAgentOnline(false)); }}
+            onClick={() => {
+              localAgentService.ping(agentBaseUrl)
+                .then((info) => { setAgentOnline(true); setAgentWriteEnabled(Boolean(info.write_enabled)); })
+                .catch(() => { setAgentOnline(false); setAgentWriteEnabled(false); });
+            }}
             className="btn-secondary text-sm flex items-center gap-2"
             title="Recheck local agent"
           >
@@ -505,16 +619,47 @@ export function FiguresQaHub() {
 
       <div className="glass-card p-5 space-y-4">
         <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-black text-slate-700">Source</span>
-            {(['auto', 'local', 'remote'] as const).map(m => (
-              <FilterChip key={m} active={sourceMode === m} onClick={() => setSourceMode(m)}>
-                {m}
-              </FilterChip>
-            ))}
-            <span className="text-[10px] text-slate-400 ml-2">
-              effective: <span className="font-mono">{effectiveSource}</span>
-            </span>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-slate-700">Source</span>
+              {(['auto', 'local', 'remote'] as const).map(m => (
+                <FilterChip key={m} active={sourceMode === m} onClick={() => setSourceMode(m)}>
+                  {m}
+                </FilterChip>
+              ))}
+              <span className="text-[10px] text-slate-400 ml-2">
+                effective: <span className="font-mono">{effectiveSource}</span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-slate-700">Index</span>
+              {(['scan', 'map'] as const).map(m => (
+                <FilterChip
+                  key={m}
+                  active={indexMode === m}
+                  onClick={() => setIndexMode(m)}
+                  className={effectiveSource !== 'local' && m === 'scan' ? 'opacity-50 pointer-events-none' : undefined}
+                >
+                  {m}
+                </FilterChip>
+              ))}
+              {effectiveSource === 'local' && indexMode === 'scan' && (
+                <>
+                  <FilterChip active={autoScan} onClick={() => setAutoScan(v => !v)} tone="teal">
+                    Auto scan
+                  </FilterChip>
+                  <button
+                    type="button"
+                    onClick={() => setScanRefreshKey(v => v + 1)}
+                    className="btn-secondary text-sm flex items-center gap-2"
+                    title="Rescan local folder"
+                  >
+                    <RefreshCw size={16} /> Rescan
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -564,7 +709,7 @@ export function FiguresQaHub() {
       </div>
 
       <div className="glass-card p-5 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 items-end">
           <div className="lg:col-span-2 space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Search</label>
             <div className="relative">
@@ -579,14 +724,26 @@ export function FiguresQaHub() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Session</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Year</label>
             <select
-              value={sessionFilter}
-              onChange={(e) => { setSessionFilter(e.target.value); setPaperFilter(''); setQuestionFilter(''); }}
+              value={yearFilter}
+              onChange={(e) => { setYearFilter(e.target.value); setPaperFilter(''); setQuestionFilter(''); }}
               className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-sm bg-white"
             >
               <option value="">All</option>
-              {sessions.map(s => <option key={s} value={s}>{s}</option>)}
+              {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Season</label>
+            <select
+              value={seasonFilter}
+              onChange={(e) => { setSeasonFilter(e.target.value); setPaperFilter(''); setQuestionFilter(''); }}
+              className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-sm bg-white"
+            >
+              <option value="">All</option>
+              {seasons.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
@@ -799,12 +956,14 @@ export function FiguresQaHub() {
         figure={selectedFigure}
         imageSrc={selectedFigure ? imgUrlFor(selectedFigure) : ''}
         localPath={selectedFigure?.localPath || ''}
+        canWrite={canWrite}
         reviewStatus={selectedReviewStatus}
         reviewNote={selectedReviewNote}
         onClose={() => setSelectedId(null)}
         onSetStatus={(status) => selectedFigure && setStatus(selectedFigure.id, status)}
         onSetNote={(note) => selectedFigure && setNote(selectedFigure.id, note)}
         onClear={() => selectedFigure && clearReview(selectedFigure.id)}
+        onTrash={trashSelected}
         onCopy={handleCopy}
       />
     </div>

@@ -87,3 +87,44 @@ export async function loadFigureMapLocal(agentBaseUrl: string, figuresRoot: stri
   const fileUrl = localAgentService.getFileUrl(agentBaseUrl, `${figuresRoot.replace(/\/$/, '')}/figure-map.json`);
   return fetchJSON<FigureMap>(fileUrl);
 }
+
+export function buildAssetsFromScanItems(
+  items: Array<{ paperKey: string; questionKey: string; filename: string; width?: number; height?: number }>,
+  figuresRoot: string,
+  remoteBaseUrl: string,
+): FigureAsset[] {
+  const assets: FigureAsset[] = [];
+  for (const item of items) {
+    const paperKey = item.paperKey;
+    const [session, paper] = paperKey.split('/');
+    if (!session || !paper) continue;
+    const questionKey = item.questionKey;
+    const filename = item.filename;
+    if (!questionKey || !filename) continue;
+
+    const id = `${paperKey}/${questionKey}/${filename}`;
+    const remoteUrl = buildRemoteFigureUrl(remoteBaseUrl, paperKey, questionKey, filename);
+    const localPath = buildLocalFigurePath(figuresRoot, paperKey, questionKey, filename);
+    assets.push({
+      id,
+      session,
+      paper,
+      paperKey,
+      questionKey,
+      filename,
+      remoteUrl,
+      localPath,
+      meta: {
+        filename,
+        width: item.width,
+        height: item.height,
+      },
+    });
+  }
+  return assets;
+}
+
+export async function scanFigureAssetsLocal(agentBaseUrl: string, figuresRoot: string, remoteBaseUrl: string): Promise<FigureAsset[]> {
+  const resp = await localAgentService.scanFigures(agentBaseUrl, { root: figuresRoot.replace(/\/$/, ''), limit: 50_000 });
+  return buildAssetsFromScanItems(resp.items, figuresRoot, remoteBaseUrl);
+}

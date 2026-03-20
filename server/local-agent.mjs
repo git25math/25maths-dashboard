@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import express from 'express';
-import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync, realpathSync } from 'fs';
-import { basename, dirname, resolve, sep } from 'path';
+import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync, realpathSync, readdirSync, openSync, readSync, closeSync, renameSync } from 'fs';
+import { basename, dirname, resolve, sep, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 
@@ -70,6 +70,32 @@ const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..');
 const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
 const FIGURES_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-figures');
+const FIGURES_TRASH_ROOT = resolve(FIGURES_ROOT, '_trash');
+const WRITE_ENABLED = String(process.env.LOCAL_AGENT_WRITE_ENABLED || '').trim() === '1';
+
+function isAllowedWriteOrigin(origin) {
+  if (!origin) return false;
+  try {
+    const u = new URL(origin);
+    const host = u.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === 'git25math.github.io';
+  } catch {
+    return false;
+  }
+}
+
+function ensureWriteAllowed(req, res) {
+  if (!WRITE_ENABLED) {
+    res.status(403).json({ error: 'Write actions disabled. Start agent with LOCAL_AGENT_WRITE_ENABLED=1' });
+    return false;
+  }
+  const origin = req.headers.origin;
+  if (!isAllowedWriteOrigin(origin)) {
+    res.status(403).json({ error: 'Origin not allowed for write actions' });
+    return false;
+  }
+  return true;
+}
 
 function isAllowedFilePath(targetPath) {
   const allowedRoots = [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT, FIGURES_ROOT];
@@ -237,8 +263,229 @@ app.get('/health', (_req, res) => {
     project_root: PROJECT_ROOT,
     runtime_dir: RUNTIME_DIR,
     website_root: getWebsiteRoot(),
+    figures_root: FIGURES_ROOT,
+    write_enabled: WRITE_ENABLED,
     time: nowIso(),
   });
+});
+
+function readPngSize(filePath) {
+  // Read only the PNG signature + IHDR header (24 bytes total).
+  // https://www.w3.org/TR/PNG/#5PNG-file-signature
+  const header = Buffer.alloc(24);
+  let fd;
+  try {
+    fd = openSync(filePath, 'r');
+    const n = readSync(fd, header, 0, 24, 0);
+    if (n < 24) return null;
+  } catch {
+    return null;
+  } finally {
+    try { if (fd) closeSync(fd); } catch { /* ignore */ }
+  }
+
+  const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  for (let i = 0; i < sig.length; i++) {
+    if (header[i] !== sig[i]) return null;
+  }
+  const type = header.slice(12, 16).toString('ascii');
+  if (type !== 'IHDR') return null;
+  const width = header.readUInt32BE(16);
+  const height = header.readUInt32BE(20);
+  if (!Number.isFinite(width) || !Number.isFinite(height)) return null;
+  return { width, height };
+}
+
+app.get('/figures/scan', (req, res) => {
+  const rawRoot = String(req.query.root || FIGURES_ROOT).trim();
+  if (!rawRoot) {
+    res.status(400).json({ error: 'Missing root' });
+    return;
+  }
+
+  const rootPath = resolve(rawRoot);
+  if (!isAllowedFilePath(rootPath) || !isWithinRoot(rootPath, FIGURES_ROOT)) {
+    res.status(403).json({ error: 'Root is outside allowed figures directory' });
+    return;
+  }
+
+  let stats;
+  try {
+    stats = statSync(rootPath);
+  } catch {
+    res.status(404).json({ error: 'Root not found' });
+    return;
+  }
+  if (!stats.isDirectory()) {
+    res.status(400).json({ error: 'Root must be a directory' });
+    return;
+  }
+
+  const limit = Math.max(1, Math.min(50_000, Number(req.query.limit || 10_000) || 10_000));
+  const sessionFilter = String(req.query.session || '').trim();
+  const yearFilter = String(req.query.year || '').trim();
+  const seasonFilter = String(req.query.season || '').trim();
+  const paperFilter = String(req.query.paper || '').trim();
+  const questionFilter = String(req.query.question || '').trim();
+
+  const items = [];
+  let truncated = false;
+
+  const sessions = readdirSync(rootPath, { withFileTypes: true })
+    .filter(d => d.isDirectory() && !d.name.startsWith('.'))
+    .map(d => d.name);
+
+  for (const session of sessions) {
+    if (sessionFilter && session !== sessionFilter) continue;
+    if (yearFilter && session.slice(0, 4) !== yearFilter) continue;
+    if (seasonFilter && session.slice(4) !== seasonFilter) continue;
+
+    const sessionPath = resolve(rootPath, session);
+    let papers;
+    try {
+      papers = readdirSync(sessionPath, { withFileTypes: true })
+        .filter(d => d.isDirectory() && !d.name.startsWith('.'))
+        .map(d => d.name);
+    } catch {
+      continue;
+    }
+
+    for (const paper of papers) {
+      if (paperFilter && paper !== paperFilter) continue;
+
+      const paperPath = resolve(sessionPath, paper);
+      let questions;
+      try {
+        questions = readdirSync(paperPath, { withFileTypes: true })
+          .filter(d => d.isDirectory() && !d.name.startsWith('.'))
+          .map(d => d.name);
+      } catch {
+        continue;
+      }
+
+      for (const questionKey of questions) {
+        if (questionFilter && questionKey !== questionFilter) continue;
+
+        const questionPath = resolve(paperPath, questionKey);
+        let files;
+        try {
+          files = readdirSync(questionPath, { withFileTypes: true })
+            .filter(d => d.isFile())
+            .map(d => d.name);
+        } catch {
+          continue;
+        }
+
+        for (const filename of files) {
+          if (!filename.toLowerCase().endsWith('.png')) continue;
+
+          const absPath = resolve(questionPath, filename);
+          let fileStats;
+          try {
+            fileStats = statSync(absPath);
+          } catch {
+            continue;
+          }
+
+          const dims = readPngSize(absPath);
+          items.push({
+            paperKey: `${session}/${paper}`,
+            questionKey,
+            filename,
+            width: dims?.width,
+            height: dims?.height,
+            size_bytes: fileStats.size,
+            mtime_ms: Math.trunc(fileStats.mtimeMs),
+          });
+
+          if (items.length >= limit) {
+            truncated = true;
+            break;
+          }
+        }
+
+        if (truncated) break;
+      }
+
+      if (truncated) break;
+    }
+
+    if (truncated) break;
+  }
+
+  res.json({
+    ok: true,
+    root: rootPath,
+    count: items.length,
+    truncated,
+    items,
+  });
+});
+
+app.post('/figures/trash', (req, res) => {
+  if (!ensureWriteAllowed(req, res)) return;
+
+  const rawPath = String(req.body?.path || '').trim();
+  if (!rawPath) {
+    res.status(400).json({ error: 'Missing path' });
+    return;
+  }
+
+  const targetPath = resolve(rawPath);
+  if (!isAllowedFilePath(targetPath) || !isWithinRoot(targetPath, FIGURES_ROOT)) {
+    res.status(403).json({ error: 'Path is outside allowed figures directory' });
+    return;
+  }
+
+  let realTarget;
+  try {
+    realTarget = realpathSync(targetPath);
+  } catch {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+  if (!isWithinRoot(realTarget, FIGURES_ROOT)) {
+    res.status(403).json({ error: 'Resolved path is outside figures directory' });
+    return;
+  }
+
+  let fileStats;
+  try {
+    fileStats = statSync(realTarget);
+  } catch {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+  if (!fileStats.isFile()) {
+    res.status(400).json({ error: 'Only files can be trashed' });
+    return;
+  }
+
+  const rel = relative(FIGURES_ROOT, realTarget);
+  if (!rel || rel.startsWith('..')) {
+    res.status(403).json({ error: 'Invalid target path' });
+    return;
+  }
+
+  let destPath = resolve(FIGURES_TRASH_ROOT, rel);
+  mkdirSync(dirname(destPath), { recursive: true });
+  if (existsSync(destPath)) {
+    const dot = destPath.lastIndexOf('.');
+    if (dot !== -1) {
+      destPath = `${destPath.slice(0, dot)}.${Date.now()}${destPath.slice(dot)}`;
+    } else {
+      destPath = `${destPath}.${Date.now()}`;
+    }
+  }
+
+  try {
+    renameSync(realTarget, destPath);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to trash file' });
+    return;
+  }
+
+  res.json({ ok: true, from: realTarget, to: destPath });
 });
 
 app.get('/files', (req, res) => {
