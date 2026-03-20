@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Eye, RefreshCw, RotateCcw, Search, Server, ServerOff, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Crop, Eye, RefreshCw, RotateCcw, Search, Server, ServerOff, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { FilterChip } from '../../components/FilterChip';
@@ -117,6 +117,7 @@ function FigureDetailModal({
   imageSrc,
   localPath,
   canWrite,
+  cropBusy,
   reviewStatus,
   reviewNote,
   onClose,
@@ -124,6 +125,7 @@ function FigureDetailModal({
   onSetNote,
   onClear,
   onTrash,
+  onCrop,
   onCopy,
 }: {
   open: boolean;
@@ -131,6 +133,7 @@ function FigureDetailModal({
   imageSrc: string;
   localPath: string;
   canWrite: boolean;
+  cropBusy: boolean;
   reviewStatus: ReviewFilter;
   reviewNote: string;
   onClose: () => void;
@@ -138,9 +141,15 @@ function FigureDetailModal({
   onSetNote: (note: string) => void;
   onClear: () => void;
   onTrash: () => void;
+  onCrop: (crop: { x: number; y: number; width: number; height: number }) => Promise<void>;
   onCopy: (value: string, label: string) => void;
 }) {
   const noteRef = useRef<HTMLTextAreaElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  const dragRef = useRef<{ startX: number; startY: number; rect: DOMRect; pointerId: number } | null>(null);
+  const [cropMode, setCropMode] = useState(false);
+  const [cropBox, setCropBox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -148,6 +157,92 @@ function FigureDetailModal({
       return () => clearTimeout(t);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setCropMode(false);
+      setCropBox(null);
+      dragRef.current = null;
+    }
+  }, [figure?.id, open]);
+
+  const handleCropPointerDown = useCallback((e: any) => {
+    if (!cropMode) return;
+    const img = imgRef.current;
+    if (!img) return;
+    const rect = img.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+    dragRef.current = { startX: x, startY: y, rect, pointerId: e.pointerId };
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    setCropBox({ x, y, width: 0, height: 0 });
+  }, [cropMode]);
+
+  const handleCropPointerMove = useCallback((e: any) => {
+    const s = dragRef.current;
+    if (!s) return;
+    const rect = s.rect;
+    const cx = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const cy = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+    const left = Math.min(s.startX, cx);
+    const top = Math.min(s.startY, cy);
+    const width = Math.abs(cx - s.startX);
+    const height = Math.abs(cy - s.startY);
+    setCropBox({ x: left, y: top, width, height });
+  }, []);
+
+  const handleCropPointerUp = useCallback((e: any) => {
+    const s = dragRef.current;
+    if (!s) return;
+    dragRef.current = null;
+    try { e.currentTarget.releasePointerCapture(s.pointerId); } catch { /* ignore */ }
+    const rect = s.rect;
+    const cx = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const cy = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+    const left = Math.min(s.startX, cx);
+    const top = Math.min(s.startY, cy);
+    const width = Math.abs(cx - s.startX);
+    const height = Math.abs(cy - s.startY);
+    if (width < 8 || height < 8) {
+      setCropBox(null);
+      return;
+    }
+    setCropBox({ x: left, y: top, width, height });
+  }, []);
+
+  const handleApplyCrop = useCallback(async () => {
+    if (!canWrite) return;
+    if (!cropBox) return;
+    const img = imgRef.current;
+    if (!img) return;
+
+    const rect = img.getBoundingClientRect();
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (!nw || !nh || !rect.width || !rect.height) return;
+
+    const sx = nw / rect.width;
+    const sy = nh / rect.height;
+    const x = Math.max(0, Math.min(nw - 1, Math.round(cropBox.x * sx)));
+    const y = Math.max(0, Math.min(nh - 1, Math.round(cropBox.y * sy)));
+    const width = Math.max(1, Math.min(nw - x, Math.round(cropBox.width * sx)));
+    const height = Math.max(1, Math.min(nh - y, Math.round(cropBox.height * sy)));
+
+    const ok = window.confirm(
+      `Crop and overwrite original?\n\n${figure?.filename}\n\nx=${x}, y=${y}, w=${width}, h=${height}\n\nA backup will be saved under _trash.`,
+    );
+    if (!ok) return;
+
+    try {
+      await onCrop({ x, y, width, height });
+      setCropBox(null);
+      setCropMode(false);
+    } catch {
+      // Parent will surface error state.
+    }
+  }, [canWrite, cropBox, figure?.filename, onCrop]);
 
   return (
     <AnimatePresence initial={false}>
@@ -180,7 +275,41 @@ function FigureDetailModal({
 
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 flex-1 overflow-hidden">
                 <div className="lg:col-span-3 bg-slate-950 flex items-center justify-center p-3 overflow-auto">
-                  <img src={imageSrc} alt={figure.filename} className="max-h-[78vh] max-w-full object-contain bg-white rounded-xl" />
+                  <div className="relative">
+                    <img
+                      ref={imgRef}
+                      src={imageSrc}
+                      alt={figure.filename}
+                      className="max-h-[78vh] max-w-full object-contain bg-white rounded-xl"
+                    />
+                    <div
+                      className={cn(
+                        "absolute inset-0 rounded-xl",
+                        cropMode ? "cursor-crosshair" : "pointer-events-none",
+                      )}
+                      onPointerDown={handleCropPointerDown}
+                      onPointerMove={handleCropPointerMove}
+                      onPointerUp={handleCropPointerUp}
+                      onPointerCancel={handleCropPointerUp}
+                    >
+                      {cropMode && (
+                        <div className="absolute top-2 left-2 text-[10px] font-black px-2 py-1 rounded-full bg-indigo-600 text-white shadow">
+                          Crop: drag to select
+                        </div>
+                      )}
+                      {cropBox && (
+                        <div
+                          className="absolute border-2 border-indigo-400 bg-indigo-400/10"
+                          style={{
+                            left: `${cropBox.x}px`,
+                            top: `${cropBox.y}px`,
+                            width: `${cropBox.width}px`,
+                            height: `${cropBox.height}px`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="lg:col-span-2 p-4 sm:p-6 overflow-y-auto space-y-4">
                   <div className="flex flex-wrap gap-2">
@@ -218,6 +347,21 @@ function FigureDetailModal({
                     >
                       Clear
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCropMode(v => !v);
+                        setCropBox(null);
+                        dragRef.current = null;
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-xl text-xs font-black border-2 transition-all",
+                        cropMode ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                      )}
+                      title="Toggle crop mode"
+                    >
+                      <Crop size={14} className="inline mr-1" /> Crop
+                    </button>
                   </div>
 
                   <div className="space-y-1.5">
@@ -240,6 +384,58 @@ function FigureDetailModal({
                     <p className="text-xs text-slate-600">Question: <span className="font-mono">{figure.questionKey}</span></p>
                     <p className="text-xs text-slate-600">Page: <span className="font-mono">{figure.meta.page ?? '—'}</span></p>
                     <p className="text-xs text-slate-600">Size: <span className="font-mono">{figure.meta.width ?? '—'}×{figure.meta.height ?? '—'}</span></p>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Crop</p>
+                      <span className={cn(
+                        "text-[10px] font-black px-2 py-1 rounded-full border",
+                        canWrite ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-white text-slate-400 border-slate-200"
+                      )}>
+                        {canWrite ? 'write enabled' : 'read-only'}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-600">
+                      {cropMode ? 'Drag on the image to choose a crop area.' : 'Enable crop mode, then drag on the image.'}
+                    </p>
+
+                    {cropBox ? (
+                      <p className="text-xs text-slate-600 font-mono">
+                        selection: {Math.round(cropBox.width)}×{Math.round(cropBox.height)} (display px)
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400">No selection.</p>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleApplyCrop()}
+                        disabled={!canWrite || !cropBox || cropBusy}
+                        className={cn(
+                          "flex-1 px-3 py-2 rounded-2xl text-sm font-black border transition disabled:opacity-40",
+                          canWrite ? "bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700" : "bg-white text-slate-400 border-slate-200"
+                        )}
+                        title={canWrite ? 'Crop and overwrite the original (backup in _trash)' : 'Requires local source + agent write enabled'}
+                      >
+                        {cropBusy ? <RefreshCw size={16} className="inline mr-2 animate-spin" /> : <Crop size={16} className="inline mr-2" />}
+                        Apply Crop (Overwrite)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCropBox(null)}
+                        disabled={!cropBox || cropBusy}
+                        className="px-3 py-2 rounded-2xl text-sm font-black border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40"
+                      >
+                        Reset
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] text-slate-400">
+                      Cropping overwrites the original file. The agent will save a backup under <code className="bg-slate-100 px-1 rounded">_trash</code>.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -309,6 +505,7 @@ export function FiguresQaHub() {
   const [error, setError] = useState('');
   const [assets, setAssets] = useState<FigureAsset[]>([]);
   const [scanRefreshKey, setScanRefreshKey] = useState(0);
+  const [cropBusy, setCropBusy] = useState(false);
 
   // UI filters
   const [yearFilter, setYearFilter] = useState('');
@@ -522,13 +719,13 @@ export function FiguresQaHub() {
 
   const imgUrlFor = useCallback((a: FigureAsset) => {
     const preferLocal = effectiveSource === 'local' && agentOnline;
-    if (preferLocal) return localAgentService.getFileUrl(agentBaseUrl, a.localPath);
+    if (preferLocal) return `${localAgentService.getFileUrl(agentBaseUrl, a.localPath)}&v=${scanRefreshKey}`;
     return a.remoteUrl;
-  }, [agentBaseUrl, agentOnline, effectiveSource]);
+  }, [agentBaseUrl, agentOnline, effectiveSource, scanRefreshKey]);
 
   const localImgUrlFor = useCallback((a: FigureAsset) => {
-    return localAgentService.getFileUrl(agentBaseUrl, a.localPath);
-  }, [agentBaseUrl]);
+    return `${localAgentService.getFileUrl(agentBaseUrl, a.localPath)}&v=${scanRefreshKey}`;
+  }, [agentBaseUrl, scanRefreshKey]);
 
   const handleCopy = useCallback(async (value: string, label: string) => {
     try {
@@ -584,6 +781,24 @@ export function FiguresQaHub() {
       setError(err instanceof Error ? err.message : 'Failed to trash file');
     }
   }, [agentBaseUrl, canWrite, selectedFigure, setStatus]);
+
+  const cropSelected = useCallback(async (crop: { x: number; y: number; width: number; height: number }) => {
+    if (!selectedFigure) return;
+    if (!canWrite) {
+      setError('Write actions disabled. Start local agent with LOCAL_AGENT_WRITE_ENABLED=1');
+      return;
+    }
+    setCropBusy(true);
+    try {
+      await localAgentService.cropFigure(agentBaseUrl, { path: selectedFigure.localPath, crop });
+      setError('');
+      setScanRefreshKey(v => v + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to crop file');
+    } finally {
+      setCropBusy(false);
+    }
+  }, [agentBaseUrl, canWrite, selectedFigure]);
 
   return (
     <div className="space-y-6">
@@ -957,6 +1172,7 @@ export function FiguresQaHub() {
         imageSrc={selectedFigure ? imgUrlFor(selectedFigure) : ''}
         localPath={selectedFigure?.localPath || ''}
         canWrite={canWrite}
+        cropBusy={cropBusy}
         reviewStatus={selectedReviewStatus}
         reviewNote={selectedReviewNote}
         onClose={() => setSelectedId(null)}
@@ -964,6 +1180,7 @@ export function FiguresQaHub() {
         onSetNote={(note) => selectedFigure && setNote(selectedFigure.id, note)}
         onClear={() => selectedFigure && clearReview(selectedFigure.id)}
         onTrash={trashSelected}
+        onCrop={cropSelected}
         onCopy={handleCopy}
       />
     </div>

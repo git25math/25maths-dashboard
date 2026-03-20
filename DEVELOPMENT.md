@@ -1107,17 +1107,18 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - Grid: 50/100 per page，lazy-load 图片
   - Detail modal: 大图预览，OK/Issue/Reshoot + 备注（localStorage 持久化）
   - Export: Copy Reshoot List（复制 `reshoot` 项 id 列表）
-  - Write: Move to Trash（需要本地 agent 且 `LOCAL_AGENT_WRITE_ENABLED=1`）
+  - Write: Move to Trash / Crop Overwrite（需要本地 agent 且 `LOCAL_AGENT_WRITE_ENABLED=1`）
 - **数据源**:
   - 读取 `figure-map.json` 并 flatten 成 `FigureAsset` 列表
   - local: 通过 `local-agent /files` 从 `/Users/zhuxingzhe/Project/ExamBoard/25maths-cie0580-figures` 读取
   - remote: `https://git25math.github.io/25maths-cie0580-figures`
 - **基础设施**:
   - local-agent: 允许 `25maths-cie0580-figures` 作为可读 root
-  - local-agent: 新增 `/figures/scan`（扫描本地 PNG 列表）+ `/figures/trash`（移动到 `_trash/`）
+  - local-agent: 新增 `/figures/scan`（扫描本地 PNG 列表）+ `/figures/trash`（移动到 `_trash/`）+ `/figures/crop`（裁剪覆盖，自动备份到 `_trash/`）
+  - local-agent: 裁剪实现使用 `pngjs`（纯 JS）
   - tsconfig: 排除本仓库内未跟踪的 `25maths-games-legends/`，避免污染 Dashboard 的类型检查
 - **新增文件（3）**: `src/views/figures/FiguresQaHub.tsx`, `src/services/figuresService.ts`, `src/services/figureReviewService.ts`
-- **修改文件（5）**: `src/shared/sidebarConfig.ts`, `src/App.tsx`, `src/components/ViewRouter.tsx`, `server/local-agent.mjs`, `tsconfig.json`
+- **修改文件（9）**: `src/shared/sidebarConfig.ts`, `src/App.tsx`, `src/components/ViewRouter.tsx`, `server/local-agent.mjs`, `src/services/localAgentService.ts`, `package.json`, `package-lock.json`, `tsconfig.json`, `DEVELOPMENT.md`
 
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)

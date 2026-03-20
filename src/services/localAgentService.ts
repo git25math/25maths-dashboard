@@ -64,6 +64,13 @@ export interface LocalAgentFigureScanResponse {
   items: LocalAgentFigureScanItem[];
 }
 
+export interface LocalAgentFigureCropSpec {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, '');
 
 const DEFAULT_TIMEOUT = 30_000;
@@ -134,6 +141,22 @@ export const localAgentService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       timeout: 30_000,
+    });
+    return parseJson(response);
+  },
+
+  async cropFigure(
+    baseUrl: string,
+    payload: { path: string; crop: LocalAgentFigureCropSpec },
+  ): Promise<{ ok: boolean; path: string; backup: string; width: number; height: number }> {
+    if (!payload.path || !payload.crop) {
+      throw new Error('cropFigure requires path + crop');
+    }
+    const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/crop`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      timeout: 60_000,
     });
     return parseJson(response);
   },

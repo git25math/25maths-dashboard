@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import express from 'express';
-import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync, realpathSync, readdirSync, openSync, readSync, closeSync, renameSync } from 'fs';
+import { mkdirSync, existsSync, readFileSync, statSync, writeFileSync, realpathSync, readdirSync, openSync, readSync, closeSync, renameSync, copyFileSync, unlinkSync } from 'fs';
 import { basename, dirname, resolve, sep, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -95,6 +95,18 @@ function ensureWriteAllowed(req, res) {
     return false;
   }
   return true;
+}
+
+function insertBeforeExt(filePath, insert) {
+  const dot = filePath.lastIndexOf('.');
+  if (dot === -1) return `${filePath}${insert}`;
+  return `${filePath.slice(0, dot)}${insert}${filePath.slice(dot)}`;
+}
+
+function toInt(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  return Math.trunc(n);
 }
 
 function isAllowedFilePath(targetPath) {
@@ -486,6 +498,135 @@ app.post('/figures/trash', (req, res) => {
   }
 
   res.json({ ok: true, from: realTarget, to: destPath });
+});
+
+app.post('/figures/crop', async (req, res) => {
+  if (!ensureWriteAllowed(req, res)) return;
+
+  const rawPath = String(req.body?.path || '').trim();
+  const crop = req.body?.crop || {};
+  if (!rawPath) {
+    res.status(400).json({ error: 'Missing path' });
+    return;
+  }
+
+  const x = toInt(crop.x);
+  const y = toInt(crop.y);
+  const width = toInt(crop.width);
+  const height = toInt(crop.height);
+  if (x === null || y === null || width === null || height === null) {
+    res.status(400).json({ error: 'Invalid crop values' });
+    return;
+  }
+  if (width <= 0 || height <= 0) {
+    res.status(400).json({ error: 'Crop width/height must be > 0' });
+    return;
+  }
+
+  const targetPath = resolve(rawPath);
+  if (!isAllowedFilePath(targetPath) || !isWithinRoot(targetPath, FIGURES_ROOT)) {
+    res.status(403).json({ error: 'Path is outside allowed figures directory' });
+    return;
+  }
+
+  let realTarget;
+  try {
+    realTarget = realpathSync(targetPath);
+  } catch {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+  if (!isWithinRoot(realTarget, FIGURES_ROOT)) {
+    res.status(403).json({ error: 'Resolved path is outside figures directory' });
+    return;
+  }
+
+  const rel = relative(FIGURES_ROOT, realTarget);
+  if (!rel || rel.startsWith('..')) {
+    res.status(403).json({ error: 'Invalid target path' });
+    return;
+  }
+  if (rel === '_trash' || rel.startsWith(`_trash${sep}`)) {
+    res.status(400).json({ error: 'Refusing to crop files under _trash' });
+    return;
+  }
+
+  let fileStats;
+  try {
+    fileStats = statSync(realTarget);
+  } catch {
+    res.status(404).json({ error: 'File not found' });
+    return;
+  }
+  if (!fileStats.isFile()) {
+    res.status(400).json({ error: 'Only files can be cropped' });
+    return;
+  }
+  if (!realTarget.toLowerCase().endsWith('.png')) {
+    res.status(400).json({ error: 'Only PNG files are supported' });
+    return;
+  }
+
+  const dims = readPngSize(realTarget);
+  if (!dims) {
+    res.status(400).json({ error: 'Unable to read PNG size' });
+    return;
+  }
+  if (x < 0 || y < 0 || x + width > dims.width || y + height > dims.height) {
+    res.status(400).json({ error: `Crop out of bounds (image ${dims.width}x${dims.height})` });
+    return;
+  }
+
+  const timestamp = Date.now();
+  const baseBackupPath = resolve(FIGURES_TRASH_ROOT, rel);
+  const backupPath = insertBeforeExt(baseBackupPath, `.orig-${timestamp}`);
+  mkdirSync(dirname(backupPath), { recursive: true });
+
+  try {
+    copyFileSync(realTarget, backupPath);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to create backup' });
+    return;
+  }
+
+  let pngjs;
+  try {
+    pngjs = await import('pngjs');
+  } catch {
+    res.status(500).json({ error: 'pngjs dependency missing (npm i pngjs)' });
+    return;
+  }
+
+  const PNG = pngjs.PNG || pngjs.default?.PNG;
+  if (!PNG) {
+    res.status(500).json({ error: 'pngjs PNG export not found' });
+    return;
+  }
+
+  const originalBuf = readFileSync(realTarget);
+  let src;
+  try {
+    src = PNG.sync.read(originalBuf);
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Failed to decode PNG' });
+    return;
+  }
+
+  const out = new PNG({ width, height });
+  PNG.bitblt(src, out, x, y, width, height, 0, 0);
+  const outBuf = PNG.sync.write(out);
+
+  const tmpPath = resolve(dirname(realTarget), `.tmp-crop-${basename(realTarget)}-${timestamp}`);
+  try {
+    writeFileSync(tmpPath, outBuf);
+    renameSync(tmpPath, realTarget);
+  } catch (err) {
+    try { if (existsSync(tmpPath)) unlinkSync(tmpPath); } catch { /* ignore */ }
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to write cropped file' });
+    return;
+  }
+
+  res.json({ ok: true, path: realTarget, backup: backupPath, width, height });
 });
 
 app.get('/files', (req, res) => {
