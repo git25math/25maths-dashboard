@@ -69,9 +69,10 @@ function isWithinRoot(targetPath, rootPath) {
 const EXAM_BOARD_ROOT = resolve(PROJECT_ROOT, '..');
 const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
+const FIGURES_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-figures');
 
 function isAllowedFilePath(targetPath) {
-  const allowedRoots = [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT];
+  const allowedRoots = [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT, FIGURES_ROOT];
   // Check resolved path first
   if (!allowedRoots.some(root => isWithinRoot(targetPath, root))) return false;
   // Also check real path (resolve symlinks) to prevent symlink escape

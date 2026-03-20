@@ -20,6 +20,7 @@ import {
   Newspaper,
   Palette,
   Shapes,
+  Images,
   Bookmark as BookmarkIcon,
   Video,
 } from 'lucide-react';
@@ -51,6 +52,7 @@ export const SIDEBAR_ITEMS = [
   { key: 'paper-gen', icon: Newspaper, label: 'Paper Generator', group: 'publishing' },
   { key: 'cover-design', icon: Palette, label: 'Cover Designer', group: 'publishing' },
   { key: 'tikz-vault', icon: Shapes, label: 'TikzVault', group: 'publishing' },
+  { key: 'figures-qa', icon: Images, label: 'Figures QA', group: 'publishing' },
   { key: 'tasks', icon: CheckSquare, label: 'GTD Tasks', group: 'productivity' },
   { key: 'worklogs', icon: Clock, label: 'Work Logs', group: 'productivity' },
   { key: 'ideas', icon: Lightbulb, label: 'Idea Pool', group: 'productivity' },

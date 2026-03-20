@@ -50,6 +50,7 @@ interface ViewRouterProps {
   PaperHub: React.ComponentType<any>;
   CoverHub: React.ComponentType<any>;
   TikzHub: React.ComponentType<any>;
+  FiguresQaHub: React.ComponentType<any>;
   VideoHub: React.ComponentType<any>;
 }
 
@@ -95,6 +96,7 @@ export const ViewRouter = memo(function ViewRouter({
   PaperHub,
   CoverHub,
   TikzHub,
+  FiguresQaHub,
   VideoHub,
 }: ViewRouterProps) {
   const {
@@ -547,6 +549,8 @@ export const ViewRouter = memo(function ViewRouter({
       return <CoverHub />;
     case 'tikz-vault':
       return <TikzHub />;
+    case 'figures-qa':
+      return <FiguresQaHub />;
     case 'video-hub':
       return (
         <VideoHub

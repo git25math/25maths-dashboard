@@ -1096,6 +1096,25 @@ students, student_status_records, student_requests, teaching_units, classes, ide
   - `geminiService` 1,021→30 行门面 + 5 个领域服务（student / meeting / teaching / productivity / paper）
 - **产出统计**: 204 个源文件，31,622 行代码（不含数据常量），TypeScript 0 error
 
+### Phase 30i — Figures QA Image Preview 截图质检预览 (2026-03-20) ✅
+
+- **目标**: 在 Dashboard 中批量预览/质检 CIE 0580 题目截图（50/100/页），快速标注问题并导出重截清单
+- **新视图**: `Figures QA`（Publishing 组）
+  - Source: auto/local/remote（本地 agent 在线优先 local；失败自动回退 remote）
+  - Filters: Session/Paper/Question + 搜索 + suspicious only + review status
+  - Grid: 50/100 per page，lazy-load 图片
+  - Detail modal: 大图预览，OK/Issue/Reshoot + 备注（localStorage 持久化）
+  - Export: Copy Reshoot List（复制 `reshoot` 项 id 列表）
+- **数据源**:
+  - 读取 `figure-map.json` 并 flatten 成 `FigureAsset` 列表
+  - local: 通过 `local-agent /files` 从 `/Users/zhuxingzhe/Project/ExamBoard/25maths-cie0580-figures` 读取
+  - remote: `https://git25math.github.io/25maths-cie0580-figures`
+- **基础设施**:
+  - local-agent: 允许 `25maths-cie0580-figures` 作为可读 root
+  - tsconfig: 排除本仓库内未跟踪的 `25maths-games-legends/`，避免污染 Dashboard 的类型检查
+- **新增文件（3）**: `src/views/figures/FiguresQaHub.tsx`, `src/services/figuresService.ts`, `src/services/figureReviewService.ts`
+- **修改文件（5）**: `src/shared/sidebarConfig.ts`, `src/App.tsx`, `src/components/ViewRouter.tsx`, `server/local-agent.mjs`, `tsconfig.json`
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
