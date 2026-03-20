@@ -802,33 +802,79 @@ export function FiguresQaHub() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900">Figures QA</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Review paper screenshots in bulk (50/100 per page), mark issues, and export reshoot list.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+        <div className="lg:col-span-2">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Figures QA</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Scan and review paper screenshots in bulk (50/100 per page). Mark issues, export reshoots, and optionally crop/cleanup local files.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className={cn(
+                "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-xl border flex items-center gap-1",
+                agentOnline ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"
+              )}>
+                {agentOnline ? <Server size={12} /> : <ServerOff size={12} />}
+                Agent {agentOnline ? 'online' : 'offline'}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  localAgentService.ping(agentBaseUrl)
+                    .then((info) => { setAgentOnline(true); setAgentWriteEnabled(Boolean(info.write_enabled)); })
+                    .catch(() => { setAgentOnline(false); setAgentWriteEnabled(false); });
+                }}
+                className="btn-secondary text-sm flex items-center gap-2"
+                title="Recheck local agent"
+              >
+                <RefreshCw size={16} /> Recheck
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={cn(
-            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-xl border flex items-center gap-1",
-            agentOnline ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"
-          )}>
-            {agentOnline ? <Server size={12} /> : <ServerOff size={12} />}
-            Agent {agentOnline ? 'online' : 'offline'}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              localAgentService.ping(agentBaseUrl)
-                .then((info) => { setAgentOnline(true); setAgentWriteEnabled(Boolean(info.write_enabled)); })
-                .catch(() => { setAgentOnline(false); setAgentWriteEnabled(false); });
-            }}
-            className="btn-secondary text-sm flex items-center gap-2"
-            title="Recheck local agent"
-          >
-            <RefreshCw size={16} /> Recheck
-          </button>
+
+        <div className="glass-card p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-black text-slate-900">使用说明</p>
+            <span className="text-[10px] font-mono text-slate-400">QA</span>
+          </div>
+
+          <div className="text-xs text-slate-600 space-y-3">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Quick Start</p>
+              <ol className="list-decimal ml-4 space-y-1">
+                <li>本地质检推荐用 <span className="font-mono">Source=local/auto</span> + <span className="font-mono">Index=scan</span>。</li>
+                <li>点击缩略图打开大图，标记 <span className="font-mono">OK/Issue/Reshoot</span>，备注会自动保存（localStorage）。</li>
+                <li>需要重截清单：点 <span className="font-mono">Copy Reshoot List</span> 复制。</li>
+              </ol>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Local Agent</p>
+              <p>
+                只读（预览/扫描）：<code className="bg-slate-100 px-1 rounded">npm run agent:local</code>
+              </p>
+              <p>
+                写入（Trash/Crop 覆盖）：<code className="bg-slate-100 px-1 rounded">LOCAL_AGENT_WRITE_ENABLED=1 npm run agent:local</code>
+              </p>
+              <p className="text-[10px] text-slate-400">
+                备注：若你从线上 HTTPS 页面无法连接本地 agent，请在本地 <span className="font-mono">npm run dev</span> 使用。
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Crop Overwrite</p>
+              <ol className="list-decimal ml-4 space-y-1">
+                <li>大图里点 <span className="font-mono">Crop</span>，在图上拖拽框选。</li>
+                <li>点 <span className="font-mono">Apply Crop (Overwrite)</span> 覆盖原图。</li>
+              </ol>
+              <p className="text-[10px] text-slate-400">
+                安全：覆盖前会自动备份到 figures 目录下的 <code className="bg-slate-100 px-1 rounded">_trash/</code>。
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
