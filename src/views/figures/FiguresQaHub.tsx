@@ -22,7 +22,12 @@ type IndexMode = 'scan' | 'map';
 type ReviewFilter = 'all' | 'unreviewed' | FigureReviewStatus;
 
 const PAGE_SIZE_OPTIONS = [50, 100] as const;
-const SESSION_SEASON_ORDER: Record<string, number> = { March: 1, MayJune: 2, OctNov: 3, Specimen: 4 };
+const SESSION_SEASON_ORDER: Record<string, number> = {
+  // CIE 0580
+  March: 1, MayJune: 2, OctNov: 3, Specimen: 4,
+  // Edexcel 4MA1
+  SP: 0, Jan: 1, June: 2, Nov: 3,
+};
 
 function parseSession(session: string): { year: number; season: string } | null {
   if (session.length < 5) return null;
@@ -150,6 +155,10 @@ function FigureDetailModal({
   onTrash: () => void;
   onCrop: (crop: { x: number; y: number; width: number; height: number }) => Promise<void>;
   onCopy: (value: string, label: string) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }) {
   const noteRef = useRef<HTMLTextAreaElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -172,6 +181,19 @@ function FigureDetailModal({
       dragRef.current = null;
     }
   }, [figure?.id, open]);
+
+  // Keyboard navigation: Arrow Left/Right to prev/next
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      // Don't intercept when typing in textarea
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+      if (e.key === 'ArrowLeft' && hasPrev && onPrev) { e.preventDefault(); onPrev(); }
+      if (e.key === 'ArrowRight' && hasNext && onNext) { e.preventDefault(); onNext(); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, hasPrev, hasNext, onPrev, onNext]);
 
   const handleCropPointerDown = useCallback((e: any) => {
     if (!cropMode) return;
@@ -271,13 +293,33 @@ function FigureDetailModal({
           >
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Figure QA</p>
                   <h2 className="text-lg font-black text-slate-900 truncate">{figure.id}</h2>
                 </div>
-                <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
-                  <X size={20} className="text-slate-500" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={onPrev}
+                    disabled={!hasPrev}
+                    className="p-2 hover:bg-slate-200 rounded-full transition-colors disabled:opacity-30"
+                    title="Previous (←)"
+                  >
+                    <ChevronLeft size={20} className="text-slate-500" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onNext}
+                    disabled={!hasNext}
+                    className="p-2 hover:bg-slate-200 rounded-full transition-colors disabled:opacity-30"
+                    title="Next (→)"
+                  >
+                    <ChevronRight size={20} className="text-slate-500" />
+                  </button>
+                  <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors ml-2">
+                    <X size={20} className="text-slate-500" />
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 flex-1 overflow-hidden">
@@ -571,6 +613,13 @@ export function FiguresQaHub({
   const selectedReview = useMemo(() => (selectedId ? reviews[selectedId] || null : null), [reviews, selectedId]);
   const selectedReviewStatus: ReviewFilter = selectedReview?.status || 'unreviewed';
   const selectedReviewNote = selectedReview?.note || '';
+
+  // Navigation within filtered list
+  const selectedIdx = useMemo(() => (selectedId ? filtered.findIndex(a => a.id === selectedId) : -1), [filtered, selectedId]);
+  const hasPrev = selectedIdx > 0;
+  const hasNext = selectedIdx >= 0 && selectedIdx < filtered.length - 1;
+  const goToPrev = useCallback(() => { if (hasPrev) setSelectedId(filtered[selectedIdx - 1].id); }, [filtered, hasPrev, selectedIdx]);
+  const goToNext = useCallback(() => { if (hasNext) setSelectedId(filtered[selectedIdx + 1].id); }, [filtered, hasNext, selectedIdx]);
 
   // Check local agent connectivity
   useEffect(() => {
@@ -1131,6 +1180,22 @@ export function FiguresQaHub({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => {
+                const unreviewed = filtered.filter(a => !reviews[a.id]);
+                if (unreviewed.length === 0) return;
+                const ok = window.confirm(`Mark ${unreviewed.length} unreviewed figures on this page/filter as OK?`);
+                if (!ok) return;
+                for (const a of unreviewed) reviewService.setStatus(a.id, 'ok');
+                setReviewVersion(v => v + 1);
+              }}
+              className="btn-secondary text-sm flex items-center gap-2"
+              title="Mark all unreviewed in current filter as OK"
+              disabled={filtered.every(a => !!reviews[a.id])}
+            >
+              <Check size={16} /> Batch OK
+            </button>
+            <button
+              type="button"
               onClick={exportReshootList}
               className="btn-secondary text-sm flex items-center gap-2"
               title="Copy ids of reshoot items"
@@ -1142,9 +1207,22 @@ export function FiguresQaHub({
         </div>
 
         <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>
-            Showing <span className="font-black text-slate-700">{pageItems.length}</span> of <span className="font-black text-slate-700">{filtered.length}</span>
-          </span>
+          <div className="flex items-center gap-4">
+            <span>
+              Showing <span className="font-black text-slate-700">{pageItems.length}</span> of <span className="font-black text-slate-700">{filtered.length}</span>
+              {filtered.length !== assets.length && <span className="text-slate-400"> (total {assets.length})</span>}
+            </span>
+            {(() => {
+              const reviewed = filtered.filter(a => !!reviews[a.id]).length;
+              const pct = filtered.length > 0 ? Math.round(reviewed / filtered.length * 100) : 0;
+              return (
+                <span className="text-slate-400">
+                  QA: <span className={cn("font-black", pct === 100 ? "text-emerald-600" : pct > 50 ? "text-amber-600" : "text-slate-500")}>{reviewed}/{filtered.length}</span>
+                  <span className="ml-1">({pct}%)</span>
+                </span>
+              );
+            })()}
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -1301,6 +1379,10 @@ export function FiguresQaHub({
         onTrash={trashSelected}
         onCrop={cropSelected}
         onCopy={handleCopy}
+        onPrev={goToPrev}
+        onNext={goToNext}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
       />
     </div>
   );
