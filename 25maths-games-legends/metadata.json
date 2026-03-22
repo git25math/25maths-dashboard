@@ -1,0 +1,5 @@
+{
+  "name": "三国算 MathQuest",
+  "description": "Three Kingdoms themed math learning game with ExamHub integration, RAG difficulty system, and Supabase backend.",
+  "requestFramePermissions": []
+}

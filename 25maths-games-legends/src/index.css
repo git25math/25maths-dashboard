@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=ZCOOL+KuaiLe&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "ZCOOL KuaiLe", sans-serif;
+  --color-parchment: #f4e4bc;
+  --color-parchment-dark: #e8d5a7;
+  --color-ink: #3d2b1f;
+  --color-ink-light: #5c4033;
+  --color-gold: #b8860b;
+  --color-gold-light: #daa520;
+}
+
+body {
+  @apply font-sans antialiased;
+}
+
+h1, h2, h3 {
+  @apply font-display;
+}
+
+/* KaTeX overflow protection for mobile */
+.katex-html {
+  overflow-wrap: break-word;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
+@keyframes avatar-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}

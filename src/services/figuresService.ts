@@ -30,6 +30,9 @@ export const DEFAULT_AGENT_BASE_URL = 'http://127.0.0.1:4318';
 export const DEFAULT_FIGURES_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-cie0580-figures';
 export const DEFAULT_REMOTE_BASE_URL = 'https://git25math.github.io/25maths-cie0580-figures';
 
+export const EDX4MA1_FIGURES_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-edx4ma1-figures';
+export const EDX4MA1_REMOTE_BASE_URL = 'https://git25math.github.io/25maths-edx4ma1-figures';
+
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url}: HTTP ${res.status}`);

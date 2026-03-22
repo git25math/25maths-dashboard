@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { FilterChip } from '../../components/FilterChip';
 import { localAgentService } from '../../services/localAgentService';
-import { figureReviewService, type FigureReviewStatus } from '../../services/figureReviewService';
+import { figureReviewService, type FigureReviewStatus, type FigureReviewServiceInstance } from '../../services/figureReviewService';
 import { buildPdfSingleQuestionsRawDir, DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT } from '../../services/pdfSingleQuestionsService';
 import {
   DEFAULT_AGENT_BASE_URL,
@@ -506,15 +506,27 @@ function FigureDetailModal({
   );
 }
 
-export function FiguresQaHub() {
+export interface FiguresQaHubProps {
+  title?: string;
+  initialFiguresRoot?: string;
+  initialRemoteBaseUrl?: string;
+  reviewService?: FigureReviewServiceInstance;
+}
+
+export function FiguresQaHub({
+  title = 'Figures QA',
+  initialFiguresRoot = DEFAULT_FIGURES_ROOT,
+  initialRemoteBaseUrl = DEFAULT_REMOTE_BASE_URL,
+  reviewService = figureReviewService,
+}: FiguresQaHubProps = {}) {
   const [agentOnline, setAgentOnline] = useState(false);
   const [agentWriteEnabled, setAgentWriteEnabled] = useState(false);
   const [sourceMode, setSourceMode] = useState<SourceMode>('auto');
   const [indexMode, setIndexMode] = useState<IndexMode>('scan');
   const [autoScan, setAutoScan] = useState(false);
   const [agentBaseUrl, setAgentBaseUrl] = useState(DEFAULT_AGENT_BASE_URL);
-  const [figuresRoot, setFiguresRoot] = useState(DEFAULT_FIGURES_ROOT);
-  const [remoteBaseUrl, setRemoteBaseUrl] = useState(DEFAULT_REMOTE_BASE_URL);
+  const [figuresRoot, setFiguresRoot] = useState(initialFiguresRoot);
+  const [remoteBaseUrl, setRemoteBaseUrl] = useState(initialRemoteBaseUrl);
 
   const effectiveSource: Exclude<SourceMode, 'auto'> = useMemo(() => {
     if (sourceMode === 'auto') return agentOnline ? 'local' : 'remote';
@@ -549,7 +561,7 @@ export function FiguresQaHub() {
   const [page, setPage] = useState(0);
 
   const [reviewVersion, setReviewVersion] = useState(0);
-  const reviews = useMemo(() => figureReviewService.getAll(), [reviewVersion]);
+  const reviews = useMemo(() => reviewService.getAll(), [reviewVersion, reviewService]);
 
   const [resolvedSourceById, setResolvedSourceById] = useState<Record<string, 'local' | 'remote' | 'error'>>({});
 
@@ -768,19 +780,19 @@ export function FiguresQaHub() {
   }, []);
 
   const setStatus = useCallback((id: string, status: FigureReviewStatus) => {
-    figureReviewService.setStatus(id, status);
+    reviewService.setStatus(id, status);
     setReviewVersion(v => v + 1);
-  }, []);
+  }, [reviewService]);
 
   const setNote = useCallback((id: string, note: string) => {
-    figureReviewService.setNote(id, note);
+    reviewService.setNote(id, note);
     setReviewVersion(v => v + 1);
-  }, []);
+  }, [reviewService]);
 
   const clearReview = useCallback((id: string) => {
-    figureReviewService.clear(id);
+    reviewService.clear(id);
     setReviewVersion(v => v + 1);
-  }, []);
+  }, [reviewService]);
 
   const exportReshootList = useCallback(() => {
     const reshootIds = Object.entries(reviews)
@@ -863,7 +875,7 @@ export function FiguresQaHub() {
         <div className="lg:col-span-2">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-black text-slate-900">Figures QA</h2>
+              <h2 className="text-2xl font-black text-slate-900">{title}</h2>
               <p className="text-sm text-slate-500 mt-1">
                 Scan and review paper screenshots in bulk (50/100 per page). Mark issues, export reshoots, and optionally crop/cleanup local files.
               </p>
