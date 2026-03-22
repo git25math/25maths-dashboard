@@ -131,3 +131,29 @@ export async function scanFigureAssetsLocal(agentBaseUrl: string, figuresRoot: s
   const resp = await localAgentService.scanFigures(agentBaseUrl, { root: figuresRoot.replace(/\/$/, ''), limit: 50_000 });
   return buildAssetsFromScanItems(resp.items, figuresRoot, remoteBaseUrl);
 }
+
+// ── QA Report ──
+
+export interface QaFigureResult {
+  pass: boolean;
+  issues: string[];
+  detail?: string;
+  confidence?: number;
+  checked_at?: string;
+}
+
+export interface QaReport {
+  version: string;
+  stats: { total: number; passed: number; failed: number; pending?: number };
+  figures: Record<string, QaFigureResult>;
+}
+
+export async function loadQaReportRemote(remoteBaseUrl: string): Promise<QaReport | null> {
+  const url = `${remoteBaseUrl.replace(/\/$/, '')}/qa-report.json`;
+  try { return await fetchJSON<QaReport>(url); } catch { return null; }
+}
+
+export async function loadQaReportLocal(agentBaseUrl: string, figuresRoot: string): Promise<QaReport | null> {
+  const fileUrl = localAgentService.getFileUrl(agentBaseUrl, `${figuresRoot.replace(/\/$/, '')}/qa-report.json`);
+  try { return await fetchJSON<QaReport>(fileUrl); } catch { return null; }
+}

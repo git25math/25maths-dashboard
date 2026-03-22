@@ -15,6 +15,9 @@ import {
   flattenFigureMap,
   loadFigureMapLocal,
   loadFigureMapRemote,
+  loadQaReportRemote,
+  loadQaReportLocal,
+  type QaReport,
 } from '../../services/figuresService';
 
 type SourceMode = 'auto' | 'local' | 'remote';
@@ -61,13 +64,17 @@ function sortQuestionKey(a: string, b: string): number {
   return na - nb || a.localeCompare(b);
 }
 
-function getQualityFlags(fig: FigureAsset) {
+function getQualityFlags(fig: FigureAsset, qaReport?: QaReport | null) {
   const w = fig.meta.width;
   const h = fig.meta.height;
   const missingMeta = !(typeof w === 'number' && typeof h === 'number');
   const tooSmall = typeof w === 'number' && typeof h === 'number' && (w < 220 || h < 120);
   const weirdAspect = typeof w === 'number' && typeof h === 'number' && (w / h > 10 || h / w > 10);
-  return { missingMeta, tooSmall, weirdAspect, suspicious: missingMeta || tooSmall || weirdAspect };
+  const qaResult = qaReport?.figures?.[fig.id];
+  const qaFail = qaResult ? !qaResult.pass : false;
+  const qaIssues = qaResult?.issues ?? [];
+  const qaDetail = qaResult?.detail ?? '';
+  return { missingMeta, tooSmall, weirdAspect, qaFail, qaIssues, qaDetail, suspicious: missingMeta || tooSmall || weirdAspect || qaFail };
 }
 
 function FigureThumb({
@@ -159,6 +166,8 @@ function FigureDetailModal({
   onNext?: () => void;
   hasPrev?: boolean;
   hasNext?: boolean;
+  qaIssues?: string[];
+  qaDetail?: string;
 }) {
   const noteRef = useRef<HTMLTextAreaElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -438,6 +447,20 @@ function FigureDetailModal({
                     <p className="text-[10px] text-slate-400">备注会自动保存到本地 localStorage。</p>
                   </div>
 
+                  {qaIssues && qaIssues.length > 0 && (
+                    <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-red-500">AI Quality Check Failed</p>
+                      <div className="flex flex-wrap gap-1">
+                        {qaIssues.map(issue => (
+                          <span key={issue} className="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">
+                            {issue}
+                          </span>
+                        ))}
+                      </div>
+                      {qaDetail && <p className="text-xs text-red-700 mt-1">{qaDetail}</p>}
+                    </div>
+                  )}
+
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Meta</p>
                     <p className="text-xs text-slate-700 font-mono break-all">{figure.filename}</p>
@@ -600,6 +623,7 @@ export function FiguresQaHub({
   const [assets, setAssets] = useState<FigureAsset[]>([]);
   const [scanRefreshKey, setScanRefreshKey] = useState(0);
   const [cropBusy, setCropBusy] = useState(false);
+  const [qaReport, setQaReport] = useState<QaReport | null>(null);
 
   // UI filters
   const [yearFilter, setYearFilter] = useState('');
@@ -722,6 +746,18 @@ export function FiguresQaHub({
     return () => { cancelled = true; };
   }, [agentBaseUrl, effectiveSource, figuresRoot, indexMode, remoteBaseUrl, scanRefreshKey]);
 
+  // Load QA report (best-effort, non-blocking)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const report = effectiveSource === 'local' && agentOnline
+        ? await loadQaReportLocal(agentBaseUrl, figuresRoot)
+        : await loadQaReportRemote(remoteBaseUrl);
+      if (!cancelled) setQaReport(report);
+    })();
+    return () => { cancelled = true; };
+  }, [agentBaseUrl, agentOnline, effectiveSource, figuresRoot, remoteBaseUrl]);
+
   const years = useMemo(() => {
     const set = new Set<number>();
     for (const a of assets) {
@@ -794,7 +830,7 @@ export function FiguresQaHub({
       );
     }
     if (showSuspiciousOnly) {
-      list = list.filter(a => getQualityFlags(a).suspicious);
+      list = list.filter(a => getQualityFlags(a, qaReport).suspicious);
     }
     if (reviewFilter !== 'all') {
       if (reviewFilter === 'unreviewed') {
@@ -804,7 +840,7 @@ export function FiguresQaHub({
       }
     }
     return list;
-  }, [assets, debouncedSearch, paperFilter, questionFilter, reviewFilter, reviews, yearFilter, seasonFilter, showSuspiciousOnly]);
+  }, [assets, debouncedSearch, paperFilter, questionFilter, qaReport, reviewFilter, reviews, yearFilter, seasonFilter, showSuspiciousOnly]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / pageSize)), [filtered.length, pageSize]);
   const currentPage = Math.min(page, totalPages - 1);
@@ -1178,7 +1214,7 @@ export function FiguresQaHub({
         <div className="flex flex-wrap gap-2 items-center justify-between">
           <div className="flex flex-wrap gap-2 items-center">
             <FilterChip active={showSuspiciousOnly} onClick={() => setShowSuspiciousOnly(v => !v)}>
-              Suspicious only
+              {qaReport ? 'AI + Suspicious' : 'Suspicious only'}
             </FilterChip>
             <div className="flex flex-wrap gap-2 items-center">
               {(['all', 'unreviewed', 'ok', 'issue', 'reshoot'] as const).map(k => (
@@ -1275,7 +1311,7 @@ export function FiguresQaHub({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
           {pageItems.map(fig => {
             const review = reviews[fig.id] || null;
-            const flags = getQualityFlags(fig);
+            const flags = getQualityFlags(fig, qaReport);
             const preferLocal = effectiveSource === 'local' && agentOnline;
             const resolved = resolvedSourceById[fig.id];
             const localMissing = preferLocal && resolved === 'remote';
@@ -1290,6 +1326,7 @@ export function FiguresQaHub({
                   review?.status === 'reshoot' ? "border-rose-300" :
                   review?.status === 'issue' ? "border-amber-300" :
                   review?.status === 'ok' ? "border-emerald-300" :
+                  flags.qaFail ? "border-red-400 border-2" :
                   flags.suspicious ? "border-amber-200" : "border-slate-200",
                 )}
               >
@@ -1303,7 +1340,12 @@ export function FiguresQaHub({
                   )}>
                     {review?.status || '—'}
                   </span>
-                  {flags.suspicious && (
+                  {flags.qaFail && (
+                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-300" title={flags.qaIssues.join(', ')}>
+                      AI
+                    </span>
+                  )}
+                  {!flags.qaFail && flags.suspicious && (
                     <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
                       !
                     </span>
@@ -1395,6 +1437,8 @@ export function FiguresQaHub({
         onNext={goToNext}
         hasPrev={hasPrev}
         hasNext={hasNext}
+        qaIssues={selectedFigure ? (qaReport?.figures?.[selectedFigure.id]?.issues ?? []) : []}
+        qaDetail={selectedFigure ? (qaReport?.figures?.[selectedFigure.id]?.detail ?? '') : ''}
       />
     </div>
   );
