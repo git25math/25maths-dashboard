@@ -182,18 +182,30 @@ function FigureDetailModal({
     }
   }, [figure?.id, open]);
 
-  // Keyboard navigation: Arrow Left/Right to prev/next
+  // Keyboard shortcuts: ←/→ nav, 1=OK, 2=Issue, 3=Reshoot, 0=Clear
+  // Space/Enter = OK + next (speed QA)
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      // Don't intercept when typing in textarea
       if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
-      if (e.key === 'ArrowLeft' && hasPrev && onPrev) { e.preventDefault(); onPrev(); }
-      if (e.key === 'ArrowRight' && hasNext && onNext) { e.preventDefault(); onNext(); }
+      switch (e.key) {
+        case 'ArrowLeft': if (hasPrev && onPrev) { e.preventDefault(); onPrev(); } break;
+        case 'ArrowRight': if (hasNext && onNext) { e.preventDefault(); onNext(); } break;
+        case '1': e.preventDefault(); onSetStatus('ok'); break;
+        case '2': e.preventDefault(); onSetStatus('issue'); break;
+        case '3': e.preventDefault(); onSetStatus('reshoot'); break;
+        case '0': e.preventDefault(); onClear(); break;
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          onSetStatus('ok');
+          if (hasNext && onNext) setTimeout(onNext, 80);
+          break;
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, hasPrev, hasNext, onPrev, onNext]);
+  }, [open, hasPrev, hasNext, onPrev, onNext, onSetStatus, onClear]);
 
   const handleCropPointerDown = useCallback((e: any) => {
     if (!cropMode) return;
@@ -294,8 +306,8 @@ function FigureDetailModal({
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden max-h-[90vh] flex flex-col">
               <div className="px-4 sm:px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Figure QA</p>
                   <h2 className="text-lg font-black text-slate-900 truncate">{figure.id}</h2>
+                  <p className="text-[10px] text-slate-400 font-mono">Space=OK+Next &middot; 1=OK 2=Issue 3=Reshoot 0=Clear &middot; ←→ Nav</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
