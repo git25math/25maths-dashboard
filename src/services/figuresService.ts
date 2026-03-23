@@ -33,6 +33,10 @@ export const DEFAULT_REMOTE_BASE_URL = 'https://git25math.github.io/25maths-cie0
 export const EDX4MA1_FIGURES_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-edx4ma1-figures';
 export const EDX4MA1_REMOTE_BASE_URL = 'https://git25math.github.io/25maths-edx4ma1-figures';
 
+// PDF source roots for "Open PDF" feature
+export const CIE_PDF_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-cie0580-pdf-officialfiles';
+export const EDX4MA1_PDF_ROOT = '/Users/zhuxingzhe/Project/ExamBoard/25maths-edx4ma1-pdf-officialfiles';
+
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url}: HTTP ${res.status}`);

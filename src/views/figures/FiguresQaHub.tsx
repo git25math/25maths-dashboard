@@ -602,7 +602,7 @@ function FigureDetailModal({
                       )}
                       title={canReveal ? 'Open the PDF single-question raw folder for this paper' : 'Requires local agent online'}
                     >
-                      <FileText size={16} className="inline mr-2" /> Open PDF Raw Folder
+                      <FileText size={16} className="inline mr-2" /> Open PDF Folder
                     </button>
                     <button
                       type="button"
@@ -641,6 +641,7 @@ export interface FiguresQaHubProps {
   initialFiguresRoot?: string;
   initialRemoteBaseUrl?: string;
   reviewService?: FigureReviewServiceInstance;
+  pdfRoot?: string;
 }
 
 export function FiguresQaHub({
@@ -648,6 +649,7 @@ export function FiguresQaHub({
   initialFiguresRoot = DEFAULT_FIGURES_ROOT,
   initialRemoteBaseUrl = DEFAULT_REMOTE_BASE_URL,
   reviewService = figureReviewService,
+  pdfRoot,
 }: FiguresQaHubProps = {}) {
   const [agentOnline, setAgentOnline] = useState(false);
   const [agentWriteEnabled, setAgentWriteEnabled] = useState(false);
@@ -1010,14 +1012,17 @@ export function FiguresQaHub({
       setError('Local agent offline. Start it with `npm run agent:local` (recommend using `npm run dev` locally).');
       return;
     }
-    const rawDir = buildPdfSingleQuestionsRawDir(DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT, selectedFigure.paperKey);
+    // Use pdfRoot if provided (e.g., Edexcel), otherwise fall back to CIE single-question folder
+    const targetDir = pdfRoot
+      ? `${pdfRoot.replace(/\/$/, '')}/${selectedFigure.paperKey}`
+      : buildPdfSingleQuestionsRawDir(DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT, selectedFigure.paperKey);
     try {
-      await localAgentService.revealFigure(agentBaseUrl, { path: rawDir });
+      await localAgentService.revealFigure(agentBaseUrl, { path: targetDir });
       setError('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to open PDF raw folder');
+      setError(err instanceof Error ? err.message : 'Failed to open PDF folder');
     }
-  }, [agentBaseUrl, agentOnline, selectedFigure]);
+  }, [agentBaseUrl, agentOnline, pdfRoot, selectedFigure]);
 
   return (
     <div className="space-y-6">
