@@ -448,7 +448,7 @@ function FigureDetailModal({
                   </div>
 
                   {qaIssues && qaIssues.length > 0 && (
-                    <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 space-y-1">
+                    <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 space-y-2">
                       <p className="text-[10px] font-black uppercase tracking-widest text-red-500">AI Quality Check Failed</p>
                       <div className="flex flex-wrap gap-1">
                         {qaIssues.map(issue => (
@@ -458,6 +458,59 @@ function FigureDetailModal({
                         ))}
                       </div>
                       {qaDetail && <p className="text-xs text-red-700 mt-1">{qaDetail}</p>}
+
+                      {canWrite && (qaIssues.includes('text_leak') || qaIssues.includes('marks_leak')) && (
+                        <div className="pt-2 space-y-1.5">
+                          <p className="text-[10px] font-black text-red-500">Quick Trim</p>
+                          <div className="flex flex-wrap gap-1">
+                            {qaIssues.includes('text_leak') && (
+                              <>
+                                {[5, 10, 15].map(pct => (
+                                  <button
+                                    key={`top-${pct}`}
+                                    type="button"
+                                    disabled={cropBusy}
+                                    onClick={() => {
+                                      const img = imgRef.current;
+                                      if (!img) return;
+                                      const nw = img.naturalWidth;
+                                      const nh = img.naturalHeight;
+                                      const trimH = Math.round(nh * pct / 100);
+                                      void onCrop({ x: 0, y: trimH, width: nw, height: nh - trimH });
+                                    }}
+                                    className="px-2 py-1 rounded-lg bg-red-600 text-white text-[10px] font-black hover:bg-red-700 disabled:opacity-40"
+                                  >
+                                    Top -{pct}%
+                                  </button>
+                                ))}
+                              </>
+                            )}
+                            {(qaIssues.includes('marks_leak') || qaIssues.includes('text_leak')) && (
+                              <>
+                                {[5, 10, 15].map(pct => (
+                                  <button
+                                    key={`bot-${pct}`}
+                                    type="button"
+                                    disabled={cropBusy}
+                                    onClick={() => {
+                                      const img = imgRef.current;
+                                      if (!img) return;
+                                      const nw = img.naturalWidth;
+                                      const nh = img.naturalHeight;
+                                      const trimH = Math.round(nh * pct / 100);
+                                      void onCrop({ x: 0, y: 0, width: nw, height: nh - trimH });
+                                    }}
+                                    className="px-2 py-1 rounded-lg bg-amber-600 text-white text-[10px] font-black hover:bg-amber-700 disabled:opacity-40"
+                                  >
+                                    Bot -{pct}%
+                                  </button>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-red-400">点击后直接裁切覆盖原图（有备份），然后按 Space 标 OK + 跳下张</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
