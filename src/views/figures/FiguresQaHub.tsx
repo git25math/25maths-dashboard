@@ -143,6 +143,12 @@ function FigureDetailModal({
   onTrash,
   onCrop,
   onCopy,
+  onPrev,
+  onNext,
+  hasPrev = false,
+  hasNext = false,
+  qaIssues = [],
+  qaDetail = '',
 }: {
   open: boolean;
   figure: FigureAsset | null;
@@ -705,13 +711,6 @@ export function FiguresQaHub({
   const selectedReviewStatus: ReviewFilter = selectedReview?.status || 'unreviewed';
   const selectedReviewNote = selectedReview?.note || '';
 
-  // Navigation within filtered list
-  const selectedIdx = useMemo(() => (selectedId ? filtered.findIndex(a => a.id === selectedId) : -1), [filtered, selectedId]);
-  const hasPrev = selectedIdx > 0;
-  const hasNext = selectedIdx >= 0 && selectedIdx < filtered.length - 1;
-  const goToPrev = useCallback(() => { if (hasPrev) setSelectedId(filtered[selectedIdx - 1].id); }, [filtered, hasPrev, selectedIdx]);
-  const goToNext = useCallback(() => { if (hasNext) setSelectedId(filtered[selectedIdx + 1].id); }, [filtered, hasNext, selectedIdx]);
-
   // Check local agent connectivity
   useEffect(() => {
     let cancelled = false;
@@ -896,6 +895,13 @@ export function FiguresQaHub({
     }
     return list;
   }, [assets, debouncedSearch, paperFilter, questionFilter, qaReport, reviewFilter, reviews, yearFilter, seasonFilter, showSuspiciousOnly]);
+
+  // Navigation within filtered list
+  const selectedIdx = useMemo(() => (selectedId ? filtered.findIndex(a => a.id === selectedId) : -1), [filtered, selectedId]);
+  const hasPrev = selectedIdx > 0;
+  const hasNext = selectedIdx >= 0 && selectedIdx < filtered.length - 1;
+  const goToPrev = useCallback(() => { if (hasPrev) setSelectedId(filtered[selectedIdx - 1].id); }, [filtered, hasPrev, selectedIdx]);
+  const goToNext = useCallback(() => { if (hasNext) setSelectedId(filtered[selectedIdx + 1].id); }, [filtered, hasNext, selectedIdx]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / pageSize)), [filtered.length, pageSize]);
   const currentPage = Math.min(page, totalPages - 1);
