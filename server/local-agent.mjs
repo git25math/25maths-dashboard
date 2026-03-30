@@ -19,17 +19,6 @@ function getWebsiteRoot() {
   return process.env.KAHOOT_WEBSITE_ROOT || resolve(PROJECT_ROOT, '..', '25maths-website');
 }
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
-    return;
-  }
-  next();
-});
-
 const jobs = new Map();
 const MAX_CONCURRENT_JOBS = 3;
 const JOB_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
@@ -71,6 +60,7 @@ const CIE_ROOT = resolve(EXAM_BOARD_ROOT, 'CIE', 'IGCSE_v2');
 const EDX_ROOT = resolve(EXAM_BOARD_ROOT, 'Edexcel', 'IGCSE_v2');
 const FIGURES_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-figures');
 const PDF_SINGLEQUESTIONS_RAW_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-pdf-singlequestions-raw');
+const SCRIPTS_OUTPUT_ROOT = resolve(PROJECT_ROOT, 'scripts', 'output');
 const FIGURES_TRASH_ROOT = resolve(FIGURES_ROOT, '_trash');
 const WRITE_ENABLED = String(process.env.LOCAL_AGENT_WRITE_ENABLED || '').trim() === '1';
 
@@ -84,6 +74,24 @@ function isAllowedWriteOrigin(origin) {
     return false;
   }
 }
+
+app.use((req, res, next) => {
+  // CORS: only allow known trusted origins. This prevents any random website from
+  // reading local agent responses (e.g., /files, /jobs/*) from the browser.
+  const origin = req.headers.origin;
+  if (origin && isAllowedWriteOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Local-Agent-Token');
+  }
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
 
 function ensureWriteAllowed(req, res) {
   if (!WRITE_ENABLED) {
@@ -120,7 +128,9 @@ function toInt(value) {
 }
 
 function isAllowedFilePath(targetPath) {
-  const allowedRoots = [PROJECT_ROOT, RUNTIME_DIR, getWebsiteRoot(), CIE_ROOT, EDX_ROOT, FIGURES_ROOT];
+  // /files is used to open/export artifacts. Keep the allowlist tight: avoid serving
+  // the whole repo root so secrets like .env.local can't be exposed.
+  const allowedRoots = [RUNTIME_DIR, SCRIPTS_OUTPUT_ROOT, getWebsiteRoot(), CIE_ROOT, EDX_ROOT, FIGURES_ROOT];
   // Check resolved path first
   if (!allowedRoots.some(root => isWithinRoot(targetPath, root))) return false;
   // Also check real path (resolve symlinks) to prevent symlink escape
@@ -777,6 +787,7 @@ function tryLaunchJob(res, fn) {
 }
 
 app.post('/jobs/kahoot-upload', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
   const payload = req.body || {};
   if (!payload.item || !payload.item.title) {
     res.status(400).json({ error: 'Missing item payload' });
@@ -786,6 +797,7 @@ app.post('/jobs/kahoot-upload', (req, res) => {
 });
 
 app.post('/jobs/kahoot-artifacts', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
   const payload = req.body || {};
   if (!payload.item || !payload.item.title) {
     res.status(400).json({ error: 'Missing item payload' });
@@ -795,6 +807,7 @@ app.post('/jobs/kahoot-artifacts', (req, res) => {
 });
 
 app.post('/jobs/kahoot-spreadsheet', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
   const payload = req.body || {};
   if (!payload.item || !payload.item.title) {
     res.status(400).json({ error: 'Missing item payload' });
@@ -805,6 +818,7 @@ app.post('/jobs/kahoot-spreadsheet', (req, res) => {
 
 // --- Paper Generator ---
 app.post('/jobs/paper-generate', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
   const payload = req.body || {};
   if (!payload.id || !payload.texSource) {
     res.status(400).json({ error: 'Missing id or texSource' });
@@ -819,6 +833,7 @@ app.post('/jobs/paper-generate', (req, res) => {
 
 // --- Cover Batch ---
 app.post('/jobs/cover-batch', (req, res) => {
+  if (!ensureTrustedOrigin(req, res)) return;
   const payload = req.body || {};
   if (!payload.topics || !Array.isArray(payload.topics) || !payload.topics.length) {
     res.status(400).json({ error: 'Missing or invalid topics array' });
