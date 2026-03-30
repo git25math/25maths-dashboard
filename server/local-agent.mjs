@@ -63,13 +63,23 @@ const PDF_SINGLEQUESTIONS_RAW_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-p
 const SCRIPTS_OUTPUT_ROOT = resolve(PROJECT_ROOT, 'scripts', 'output');
 const FIGURES_TRASH_ROOT = resolve(FIGURES_ROOT, '_trash');
 const WRITE_ENABLED = String(process.env.LOCAL_AGENT_WRITE_ENABLED || '').trim() === '1';
+const EXTRA_ALLOWED_HOSTS = String(process.env.LOCAL_AGENT_ALLOWED_HOSTS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
 function isAllowedWriteOrigin(origin) {
   if (!origin) return false;
   try {
     const u = new URL(origin);
     const host = u.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === 'git25math.github.io';
+    return (
+      host === 'localhost'
+      || host === '127.0.0.1'
+      || host === '::1'
+      || host === 'git25math.github.io'
+      || EXTRA_ALLOWED_HOSTS.includes(host)
+    );
   } catch {
     return false;
   }
