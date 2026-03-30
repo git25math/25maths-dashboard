@@ -1,5 +1,7 @@
 /** Local review annotations for figure screenshot QA, persisted in localStorage */
 
+import { createDebouncedLocalStorageJsonWriter } from '../lib/debouncedLocalStorage';
+
 export type FigureReviewStatus = 'ok' | 'issue' | 'reshoot';
 
 export interface FigureReview {
@@ -16,30 +18,38 @@ function nowIso() {
 
 function createReviewService(storageKey: string) {
   let cache: ReviewMap | null = null;
+  const writer = createDebouncedLocalStorageJsonWriter<ReviewMap>(storageKey, {
+    debounceMs: 250,
+    idleTimeoutMs: 2000,
+    pruneOnQuotaExceeded: (next) => {
+      const keys = Object.keys(next);
+      const keep = keys.slice(-500);
+      const pruned: ReviewMap = {};
+      for (const k of keep) pruned[k] = next[k];
+      return pruned;
+    },
+    onPruned: (pruned) => {
+      cache = pruned;
+    },
+  });
 
   function load(): ReviewMap {
     if (cache) return cache;
     try {
       const raw = localStorage.getItem(storageKey);
       cache = raw ? JSON.parse(raw) : {};
+      writer.setLastWritten(raw);
     } catch {
       cache = {};
+      writer.setLastWritten(null);
+      try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
     }
     return cache!;
   }
 
   function save(next: ReviewMap) {
     cache = next;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch {
-      const keys = Object.keys(next);
-      const keep = keys.slice(-500);
-      const pruned: ReviewMap = {};
-      for (const k of keep) pruned[k] = next[k];
-      cache = pruned;
-      try { localStorage.setItem(storageKey, JSON.stringify(pruned)); } catch { /* give up */ }
-    }
+    writer.schedule(next);
   }
 
   return {
@@ -99,4 +109,3 @@ export const figureReviewService = createReviewService('cie0580-figure-reviews')
 export const figureReviewService4MA1 = createReviewService('edx4ma1-figure-reviews');
 
 export { createReviewService };
-

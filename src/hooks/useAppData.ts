@@ -209,7 +209,11 @@ export function useAppData() {
   // --- State ---
   const [timetable, setTimetable] = useLocalStorage<TimetableEntry[]>('dashboard-timetable', []);
   const [students, setStudents] = useLocalStorage<Student[]>('dashboard-students', []);
-  const [teachingUnits, setTeachingUnits] = useLocalStorage<TeachingUnit[]>('dashboard-teaching-units', []);
+  const [teachingUnits, setTeachingUnits] = useLocalStorage<TeachingUnit[]>(
+    'dashboard-teaching-units',
+    [],
+    { debounceMs: 1500, idleTimeoutMs: 5000 },
+  );
   const [classes, setClasses] = useLocalStorage<ClassProfile[]>('dashboard-classes', []);
   const [ideas, setIdeas] = useLocalStorage<Idea[]>('dashboard-ideas', []);
   const [sops, setSops] = useLocalStorage<SOP[]>('dashboard-sops', []);
@@ -226,9 +230,21 @@ export function useAppData() {
   const [milestones, setMilestones] = useLocalStorage<ProjectMilestone[]>('dashboard-milestones', []);
   const [devlogs, setDevlogs] = useLocalStorage<DevLogEntry[]>('dashboard-devlogs', []);
   const [threads, setThreads] = useLocalStorage<DevLogThread[]>('dashboard-threads', []);
-  const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>('dashboard-kahoot-items', []);
-  const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>('dashboard-payhip-items', []);
-  const [videoScripts, setVideoScripts] = useLocalStorage<VideoScript[]>('dashboard-video-scripts', []);
+  const [kahootItems, setKahootItems] = useLocalStorage<KahootItem[]>(
+    'dashboard-kahoot-items',
+    [],
+    { debounceMs: 1500, idleTimeoutMs: 5000 },
+  );
+  const [payhipItems, setPayhipItems] = useLocalStorage<PayhipItem[]>(
+    'dashboard-payhip-items',
+    [],
+    { debounceMs: 1500, idleTimeoutMs: 5000 },
+  );
+  const [videoScripts, setVideoScripts] = useLocalStorage<VideoScript[]>(
+    'dashboard-video-scripts',
+    [],
+    { debounceMs: 1500, idleTimeoutMs: 5000 },
+  );
 
   // Lazy-seed mock data for first-time users (no localStorage, no Supabase)
   useEffect(() => {

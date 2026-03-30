@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+export interface UseLocalStorageOptions {
+  debounceMs?: number;
+  idleTimeoutMs?: number;
+}
+
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T,
+  options: UseLocalStorageOptions = {},
+): [T, React.Dispatch<React.SetStateAction<T>>] {
   const lastWrittenRef = useRef<string | null>(null);
   const hydratedFromStorageRef = useRef(false);
   const didMountRef = useRef(false);
   const writeTimerRef = useRef<number | null>(null);
   const idleHandleRef = useRef<number | null>(null);
+  const optionsRef = useRef({ debounceMs: 500, idleTimeoutMs: 2000 });
+  optionsRef.current = {
+    debounceMs: options.debounceMs ?? 500,
+    idleTimeoutMs: options.idleTimeoutMs ?? 2000,
+  };
 
   const [value, setValue] = useState<T>(() => {
     try {
@@ -47,9 +61,17 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
   const writeNow = () => {
     const currentKey = keyRef.current;
     const currentValue = valueRef.current;
+    let serialized: string;
     try {
-      const serialized = JSON.stringify(currentValue);
-      if (serialized === lastWrittenRef.current) return;
+      serialized = JSON.stringify(currentValue);
+    } catch (err) {
+      console.error(`Failed to serialize ${currentKey} for localStorage:`, err);
+      return;
+    }
+
+    if (serialized === lastWrittenRef.current) return;
+
+    try {
       localStorage.setItem(currentKey, serialized);
       lastWrittenRef.current = serialized;
     } catch (err) {
@@ -57,7 +79,6 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
       if (isQuotaExceeded(err)) {
         try {
           localStorage.removeItem(currentKey);
-          const serialized = JSON.stringify(currentValue);
           localStorage.setItem(currentKey, serialized);
           lastWrittenRef.current = serialized;
         } catch {
@@ -69,8 +90,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
 
   const scheduleWrite = () => {
     cancelScheduled();
-    const DEBOUNCE_MS = 500;
-    const IDLE_TIMEOUT_MS = 2000;
+    const { debounceMs, idleTimeoutMs } = optionsRef.current;
 
     writeTimerRef.current = window.setTimeout(() => {
       writeTimerRef.current = null;
@@ -79,11 +99,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
         idleHandleRef.current = requestIdle(() => {
           idleHandleRef.current = null;
           writeNow();
-        }, { timeout: IDLE_TIMEOUT_MS });
+        }, { timeout: idleTimeoutMs });
         return;
       }
       writeNow();
-    }, DEBOUNCE_MS);
+    }, debounceMs);
   };
 
   useEffect(() => {

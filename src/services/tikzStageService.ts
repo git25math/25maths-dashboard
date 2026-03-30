@@ -1,5 +1,7 @@
 /** Pipeline stage tracking for TikzVault questions, persisted in localStorage */
 
+import { createDebouncedLocalStorageJsonWriter } from '../lib/debouncedLocalStorage';
+
 export type ContentTranscription = 'not_transcribed' | 'transcribed';
 export type ContentProofreading = 'not_done' | 'done';
 export type ImageStatus = 'placeholder' | 'screenshot';
@@ -60,33 +62,38 @@ const STORAGE_KEY = 'tikzvault-stages';
 type StageMap = Record<string, Partial<TikzStages>>;
 
 let cache: StageMap | null = null;
+const writer = createDebouncedLocalStorageJsonWriter<StageMap>(STORAGE_KEY, {
+  debounceMs: 400,
+  idleTimeoutMs: 2000,
+  pruneOnQuotaExceeded: (data) => {
+    const keys = Object.keys(data);
+    const keep = keys.slice(-50);
+    const pruned: StageMap = {};
+    for (const k of keep) pruned[k] = data[k];
+    return pruned;
+  },
+  onPruned: (pruned) => {
+    cache = pruned;
+  },
+});
 
 function load(): StageMap {
   if (cache) return cache;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     cache = raw ? JSON.parse(raw) : {};
+    writer.setLastWritten(raw);
   } catch {
     cache = {};
+    writer.setLastWritten(null);
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
   return cache!;
 }
 
 function save(data: StageMap) {
   cache = data;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // Storage quota exceeded — prune oldest entries to make space
-    const keys = Object.keys(data);
-    if (keys.length > 50) {
-      const keep = keys.slice(-50);
-      const pruned: StageMap = {};
-      for (const k of keep) pruned[k] = data[k];
-      cache = pruned;
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pruned)); } catch { /* give up */ }
-    }
-  }
+  writer.schedule(data);
 }
 
 export const tikzStageService = {

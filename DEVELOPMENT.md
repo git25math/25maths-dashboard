@@ -1120,6 +1120,20 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - **新增文件（3）**: `src/views/figures/FiguresQaHub.tsx`, `src/services/figuresService.ts`, `src/services/figureReviewService.ts`
 - **修改文件（9）**: `src/shared/sidebarConfig.ts`, `src/App.tsx`, `src/components/ViewRouter.tsx`, `server/local-agent.mjs`, `src/services/localAgentService.ts`, `package.json`, `package-lock.json`, `tsconfig.json`, `DEVELOPMENT.md`
 
+### Hotfix — localStorage 写入性能优化 (2026-03-30) ✅
+
+- **目标**: 降低大 JSON 写入 localStorage 的主线程阻塞与写入频率，减少 QuotaExceeded 触发概率
+- `useLocalStorage`:
+  - 支持 `{ debounceMs, idleTimeoutMs }`（默认保持原行为）
+  - stringify 复用（避免 QuotaExceeded 分支重复 stringify）
+  - 大 key（`teachingUnits/kahootItems/payhipItems/videoScripts`）提升 debounce 与 idle timeout，减少频繁写入
+- `figureReviewService` / `tikzStageService`:
+  - 写入改为 debounce + requestIdleCallback（批量标注更顺滑）
+  - 全局 flush：`pagehide/beforeunload/visibilitychange(hidden)` 自动落盘
+  - QuotaExceeded 自动 prune（保留最近记录）
+- **新增文件（1）**: `src/lib/debouncedLocalStorage.ts`
+- **验证**: `npm run lint` + `npm run build`
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)
