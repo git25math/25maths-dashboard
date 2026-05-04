@@ -63,6 +63,7 @@ const PDF_SINGLEQUESTIONS_RAW_ROOT = resolve(EXAM_BOARD_ROOT, '25maths-cie0580-p
 const SCRIPTS_OUTPUT_ROOT = resolve(PROJECT_ROOT, 'scripts', 'output');
 const FIGURES_TRASH_ROOT = resolve(FIGURES_ROOT, '_trash');
 const WRITE_ENABLED = String(process.env.LOCAL_AGENT_WRITE_ENABLED || '').trim() === '1';
+const AGENT_TOKEN = String(process.env.LOCAL_AGENT_TOKEN || '').trim();
 const EXTRA_ALLOWED_HOSTS = String(process.env.LOCAL_AGENT_ALLOWED_HOSTS || '')
   .split(',')
   .map(s => s.trim())
@@ -83,6 +84,16 @@ function isAllowedWriteOrigin(origin) {
   } catch {
     return false;
   }
+}
+
+function ensureAgentToken(req, res) {
+  if (!AGENT_TOKEN) return true;
+  const token = String(req.headers['x-local-agent-token'] || '').trim();
+  if (token !== AGENT_TOKEN) {
+    res.status(403).json({ error: 'Invalid local agent token' });
+    return false;
+  }
+  return true;
 }
 
 app.use((req, res, next) => {
@@ -113,6 +124,7 @@ function ensureWriteAllowed(req, res) {
     res.status(403).json({ error: 'Origin not allowed for write actions' });
     return false;
   }
+  if (!ensureAgentToken(req, res)) return false;
   return true;
 }
 
@@ -122,6 +134,7 @@ function ensureTrustedOrigin(req, res) {
     res.status(403).json({ error: 'Origin not allowed' });
     return false;
   }
+  if (!ensureAgentToken(req, res)) return false;
   return true;
 }
 

@@ -1134,6 +1134,17 @@ students, student_status_records, student_requests, teaching_units, classes, ide
 - **新增文件（1）**: `src/lib/debouncedLocalStorage.ts`
 - **验证**: `npm run lint` + `npm run build`
 
+### Hotfix — Local Agent Token (2026-05-04) ✅
+
+- **目标**: 在 Local Agent 的 allowlist CORS/Origin 基础上补齐 Token 校验，降低本机 agent 被误用/被 XSS 侧向触发的风险
+- local-agent:
+  - 新增 `LOCAL_AGENT_TOKEN`（请求头 `X-Local-Agent-Token`）可选校验
+  - `ensureTrustedOrigin` / `ensureWriteAllowed` 统一启用 token gate（仅当环境变量配置了 token 时才强制）
+- Dashboard:
+  - Kahoot Settings / Figures QA 增加 Token 输入框（保存到 localStorage）
+  - `localAgentService` 在所有写入类 POST 请求自动附带 `X-Local-Agent-Token`（若已配置）
+- **验证**: `npm run lint` + `npm run build`
+
 ### Phase 31 — Analytics & Reports (Next)
 - [ ] Student progress analytics with charts (Recharts)
 - [ ] Teaching unit completion tracking per class (LO-based)

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DEFAULT_DEPLOY_OPTIONS, DEPLOY_OPTIONS_KEY, KahootDeployOptions, localAgentService } from '../../services/localAgentService';
+import { DEFAULT_DEPLOY_OPTIONS, DEPLOY_OPTIONS_KEY, KahootDeployOptions, LOCAL_AGENT_TOKEN_KEY, localAgentService } from '../../services/localAgentService';
 const AGENT_URL_KEY = 'kahoot-agent-url';
 
 type AgentStatus = 'idle' | 'checking' | 'online' | 'offline';
@@ -12,6 +12,7 @@ interface KahootSettingsProps {
 
 export function KahootSettings({ onOpenGuide }: KahootSettingsProps) {
   const [agentUrl, setAgentUrl] = useState(() => localStorage.getItem(AGENT_URL_KEY) || 'http://127.0.0.1:4318');
+  const [agentToken, setAgentToken] = useState(() => localStorage.getItem(LOCAL_AGENT_TOKEN_KEY) || '');
   const [agentStatus, setAgentStatus] = useState<AgentStatus>('idle');
   const [agentInfo, setAgentInfo] = useState('');
   const [options, setOptions] = useState<KahootDeployOptions>(() => {
@@ -22,6 +23,14 @@ export function KahootSettings({ onOpenGuide }: KahootSettingsProps) {
   });
 
   useEffect(() => { localStorage.setItem(AGENT_URL_KEY, agentUrl); }, [agentUrl]);
+  useEffect(() => {
+    const trimmed = agentToken.trim();
+    if (!trimmed) {
+      localStorage.removeItem(LOCAL_AGENT_TOKEN_KEY);
+      return;
+    }
+    localStorage.setItem(LOCAL_AGENT_TOKEN_KEY, trimmed);
+  }, [agentToken]);
   useEffect(() => { localStorage.setItem(DEPLOY_OPTIONS_KEY, JSON.stringify(options)); }, [options]);
 
   const checkAgent = useCallback(async () => {
@@ -60,6 +69,19 @@ export function KahootSettings({ onOpenGuide }: KahootSettingsProps) {
             <RefreshCcw size={14} /> Check
           </button>
         </div>
+
+        <label className="block space-y-2">
+          <span className="text-xs text-slate-400">Agent Token (optional)</span>
+          <input
+            value={agentToken}
+            onChange={e => setAgentToken(e.target.value)}
+            placeholder="Set if LOCAL_AGENT_TOKEN is enabled"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+          />
+          <span className="text-[10px] text-slate-400">
+            If you start the agent with <code className="font-mono">LOCAL_AGENT_TOKEN=...</code>, requests must include the same token.
+          </span>
+        </label>
 
         <div className="flex items-center gap-2">
           <div className={cn(

@@ -75,6 +75,24 @@ const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, '');
 
 const DEFAULT_TIMEOUT = 30_000;
 
+export const LOCAL_AGENT_TOKEN_KEY = 'local-agent-token';
+
+function getLocalAgentToken(): string {
+  try {
+    if (typeof localStorage === 'undefined') return '';
+    return String(localStorage.getItem(LOCAL_AGENT_TOKEN_KEY) || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function jsonHeaders(): Headers {
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const token = getLocalAgentToken();
+  if (token) headers.set('X-Local-Agent-Token', token);
+  return headers;
+}
+
 async function fetchWithTimeout(
   url: string,
   init?: RequestInit & { timeout?: number },
@@ -138,7 +156,7 @@ export const localAgentService = {
     }
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/trash`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
       timeout: 30_000,
     });
@@ -154,7 +172,7 @@ export const localAgentService = {
     }
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/crop`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
       timeout: 60_000,
     });
@@ -167,7 +185,7 @@ export const localAgentService = {
     }
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/figures/reveal`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
       timeout: 10_000,
     });
@@ -177,7 +195,7 @@ export const localAgentService = {
   async startKahootUpload(baseUrl: string, item: KahootItem, dryRun = false, options?: KahootDeployOptions): Promise<LocalAgentJob> {
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-upload`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify({ item, dry_run: dryRun, options }),
     });
     return parseJson(response);
@@ -186,7 +204,7 @@ export const localAgentService = {
   async startKahootArtifacts(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-artifacts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify({ item, options }),
     });
     return parseJson(response);
@@ -195,7 +213,7 @@ export const localAgentService = {
   async startKahootSpreadsheet(baseUrl: string, item: KahootItem, options?: KahootDeployOptions): Promise<LocalAgentJob> {
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/kahoot-spreadsheet`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify({ item, options }),
     });
     return parseJson(response);
@@ -207,7 +225,7 @@ export const localAgentService = {
     }
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/paper-generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
     });
     return parseJson(response);
@@ -219,7 +237,7 @@ export const localAgentService = {
     }
     const response = await fetchWithTimeout(`${normalizeBaseUrl(baseUrl)}/jobs/cover-batch`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
     });
     return parseJson(response);

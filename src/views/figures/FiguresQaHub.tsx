@@ -3,7 +3,7 @@ import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clipboard, Crop, FileT
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { FilterChip } from '../../components/FilterChip';
-import { localAgentService } from '../../services/localAgentService';
+import { LOCAL_AGENT_TOKEN_KEY, localAgentService } from '../../services/localAgentService';
 import { figureReviewService, type FigureReviewStatus, type FigureReviewServiceInstance } from '../../services/figureReviewService';
 import { buildPdfSingleQuestionsRawDir, DEFAULT_PDF_SINGLEQUESTIONS_RAW_ROOT } from '../../services/pdfSingleQuestionsService';
 import {
@@ -663,8 +663,18 @@ export function FiguresQaHub({
   const [indexMode, setIndexMode] = useState<IndexMode>('scan');
   const [autoScan, setAutoScan] = useState(false);
   const [agentBaseUrl, setAgentBaseUrl] = useState(DEFAULT_AGENT_BASE_URL);
+  const [agentToken, setAgentToken] = useState(() => localStorage.getItem(LOCAL_AGENT_TOKEN_KEY) || '');
   const [figuresRoot, setFiguresRoot] = useState(initialFiguresRoot);
   const [remoteBaseUrl, setRemoteBaseUrl] = useState(initialRemoteBaseUrl);
+
+  useEffect(() => {
+    const trimmed = agentToken.trim();
+    if (!trimmed) {
+      localStorage.removeItem(LOCAL_AGENT_TOKEN_KEY);
+      return;
+    }
+    localStorage.setItem(LOCAL_AGENT_TOKEN_KEY, trimmed);
+  }, [agentToken]);
 
   const effectiveSource: Exclude<SourceMode, 'auto'> = useMemo(() => {
     if (sourceMode === 'auto') return agentOnline ? 'local' : 'remote';
@@ -1087,13 +1097,16 @@ export function FiguresQaHub({
               <p>
                 只读（预览/扫描）：<code className="bg-slate-100 px-1 rounded">npm run agent:local</code>
               </p>
-              <p>
-                写入（Trash/Crop 覆盖）：<code className="bg-slate-100 px-1 rounded">LOCAL_AGENT_WRITE_ENABLED=1 npm run agent:local</code>
-              </p>
-              <p className="text-[10px] text-slate-400">
-                备注：若你从线上 HTTPS 页面无法连接本地 agent，请在本地 <span className="font-mono">npm run dev</span> 使用。
-              </p>
-            </div>
+	              <p>
+	                写入（Trash/Crop 覆盖）：<code className="bg-slate-100 px-1 rounded">LOCAL_AGENT_WRITE_ENABLED=1 npm run agent:local</code>
+	              </p>
+	              <p>
+	                安全（可选）：<code className="bg-slate-100 px-1 rounded">LOCAL_AGENT_TOKEN=your_token npm run agent:local</code>，并在页面中填写同样的 Token。
+	              </p>
+	              <p className="text-[10px] text-slate-400">
+	                备注：若你从线上 HTTPS 页面无法连接本地 agent，请在本地 <span className="font-mono">npm run dev</span> 使用。
+	              </p>
+	            </div>
 
             <div className="space-y-1.5">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Crop Overwrite</p>
@@ -1162,14 +1175,29 @@ export function FiguresQaHub({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Local Agent Base URL</label>
-            <input
-              value={agentBaseUrl}
-              onChange={(e) => setAgentBaseUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-sm"
-              placeholder="http://127.0.0.1:4318"
-            />
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Local Agent Base URL</label>
+              <input
+                value={agentBaseUrl}
+                onChange={(e) => setAgentBaseUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-sm"
+                placeholder="http://127.0.0.1:4318"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Local Agent Token (optional)</label>
+              <input
+                value={agentToken}
+                onChange={(e) => setAgentToken(e.target.value)}
+                className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-sm"
+                placeholder="Set if LOCAL_AGENT_TOKEN is enabled"
+              />
+              <p className="text-[10px] text-slate-400">
+                If enabled, start agent with <code className="bg-slate-100 px-1 rounded">LOCAL_AGENT_TOKEN=...</code>.
+              </p>
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Figures Root (Local)</label>
